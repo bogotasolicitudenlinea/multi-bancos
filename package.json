@@ -1,0 +1,15 @@
+{
+  "name": "multi-bancos",
+  "version": "1.0.0",
+  "description": "Bot unificado para 9 bancos",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  },
+  "author": "Placas Bogota",
+  "license": "MIT"
+}

