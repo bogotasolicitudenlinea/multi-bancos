@@ -45,7 +45,7 @@ module.exports = {
         canalId: '1557128857738412062',
         ruta: 'popular'
     },
-    cajaSocial: {
+    'caja-social': {
         nombre: '🏦 Banco Caja Social',
         color: 0x0033A0,
         canalId: '1557128884791541791',
