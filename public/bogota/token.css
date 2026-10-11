@@ -1,0 +1,390 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: white;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #0051BB;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.abandon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #0051BB;
+    padding: 0;
+}
+
+.nav-center h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.login-section {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: white;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+
+.token-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.token-icon {
+    margin-bottom: 1.5rem;
+}
+
+.bank-logo {
+    width: 48px;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+h3 {
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.info-icon {
+    color: #0051BB;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.token-content p {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
+.token-input-container {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.token-input,
+.token-digit {
+    width: 40px;
+    height: 48px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    background: white;
+}
+
+.token-input:focus,
+.token-digit:focus {
+    outline: none;
+    border-color: #0051BB;
+    box-shadow: 0 0 0 2px rgba(0,81,187,0.2);
+}
+
+.verify-btn {
+    background-color: #0051BB;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+.verify-btn:hover:not(:disabled) {
+    background-color: #003d8f;
+}
+
+.verify-btn:disabled {
+    background-color: #E5E5E5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.98);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-logo {
+    width: 180px;
+    height: auto;
+    margin-bottom: 2.5rem;
+    animation: fadeInOut 2s infinite;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0051BB;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 1.5rem 0;
+}
+
+.loading-screen p {
+    color: #333;
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    font-weight: 500;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    background-color: #FFF2F2;
+    border: 1px solid #FFCDD2;
+    border-left: 4px solid #D32F2F;
+    color: #D32F2F;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem auto;
+    max-width: 600px;
+    text-align: center;
+    display: none;
+    animation: slideInDown 0.3s ease-out;
+}
+
+.error-message p {
+    margin: 0;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+   =============================== */
+
+@media (max-width: 768px) {
+    .header {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-center h1 {
+        font-size: 1rem;
+    }
+
+    .back-btn,
+    .abandon-btn {
+        font-size: 0.9rem;
+        padding: 0.25rem;
+    }
+
+    .login-section {
+        padding: 1.5rem 1rem;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .token-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .bank-logo {
+        width: 40px;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    .token-content p {
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .token-input-container {
+        gap: 0.4rem;
+    }
+
+    .token-input,
+    .token-digit {
+        width: 35px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+
+    .verify-btn {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .nav-center h1 {
+        font-size: 0.9rem;
+    }
+
+    .back-btn,
+    .abandon-btn {
+        font-size: 0.85rem;
+    }
+
+    .login-section {
+        max-width: 100%;
+        padding: 1rem 0.75rem;
+        margin: 1rem auto;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+    }
+
+    .token-container {
+        padding: 1.25rem 0.75rem;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+
+    .bank-logo {
+        width: 36px;
+        margin-bottom: 0.75rem;
+    }
+
+    h3 {
+        font-size: 1rem;
+    }
+
+    .token-content p {
+        font-size: 0.8rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .token-input-container {
+        gap: 0.3rem;
+    }
+
+    .token-input,
+    .token-digit {
+        width: 32px;
+        height: 40px;
+        font-size: 1rem;
+        border-width: 1px;
+    }
+
+    .verify-btn {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    .error-message {
+        margin: 0.75rem auto;
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .token-input,
+    .token-digit {
+        width: 28px;
+        height: 38px;
+        font-size: 0.95rem;
+    }
+
+    .token-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .verify-btn {
+        width: 100%;
+        padding: 0.6rem 1rem;
+    }
+}
+
+/* ===============================
+   ACCESIBILIDAD
+   =============================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .error-message,
+    .loading-logo,
+    .spinner {
+        animation: none !important;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    /* Aquí podrías agregar un modo oscuro si lo deseas */
+}

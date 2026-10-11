@@ -1,0 +1,729 @@
+/* ============================================
+   DAVIVIENDA - LOGIN PERSONA NATURAL
+   Replicado del diseño original + botones con imagen real
+   ============================================ */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --dav-red: #E30613;
+    --dav-red-dark: #B00510;
+    --dav-white: #ffffff;
+    --dav-black: #000000;
+    --dav-text-dark: #2c2a29;
+    --dav-text-gray: #666;
+    --font: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+html, body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    font-family: var(--font);
+    background-color: #f0f0f0;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+}
+
+body.bodyPersonas {
+    background-image: url('img/background-personas.jpg');
+    background-position: center center;
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.dav-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.dav-header {
+    width: 100%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.dav-header-logo-wrap {
+    background: var(--dav-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+}
+
+.dav-logo {
+    height: 30px;
+    width: auto;
+    display: block;
+}
+
+.dav-header-info {
+    background: #ffffff;
+    text-align: center;
+    font-size: 12px;
+    color: #666666;
+    line-height: 1.5;
+    font-weight: 400;
+    padding: 8px 16px;
+}
+
+.dav-header-info strong {
+    color: #2c2a29;
+    font-weight: 700;
+}
+
+/* ============================================
+   SECCIÓN CENTRAL
+   ============================================ */
+.dav-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.dav-contenedorTabla {
+    text-align: center;
+    max-width: 640px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.dav-h1 {
+    font-size: 26px;
+    font-weight: 300;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 2px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+.dav-h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+/* ============================================
+   TARJETA DEL FORMULARIO
+   ============================================ */
+.dav-form-card {
+    background: rgba(255, 255, 255, 0.45);
+    border: 4px solid #E7E5E6;
+    border-radius: 30px;
+    padding: 22px 20px 26px 20px;
+    max-width: 340px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dav-form-titulo {
+    font-size: 15px;
+    font-weight: 700;
+    color: #000000;
+    line-height: 1.3;
+    margin-bottom: 18px;
+    text-align: center;
+    font-family: var(--font);
+}
+
+.dav-field {
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+.dav-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 5px;
+    text-align: center;
+    font-family: var(--font);
+}
+
+/* ============================================
+   SELECT E INPUT
+   ============================================ */
+.dav-select {
+    width: 220px;
+    height: 36px;
+    padding: 0 10px;
+    background: #ffffff;
+    border: 1px solid #CFCFCF;
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: var(--font);
+    color: #000000;
+    outline: none;
+    cursor: pointer;
+    text-indent: 4px;
+}
+
+.dav-select:focus {
+    border-color: #ed1c27;
+    box-shadow: 0 0 0 2px rgba(237, 28, 39, 0.15);
+}
+
+.dav-input {
+    width: 220px;
+    height: 36px;
+    padding: 0 10px;
+    background: #ffffff;
+    border: 1px solid #CFCFCF;
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: var(--font);
+    color: #000000;
+    text-align: center;
+    outline: none;
+    text-indent: 6px;
+}
+
+.dav-input::placeholder {
+    color: #999;
+}
+
+.dav-input:focus {
+    border-color: #ed1c27;
+    box-shadow: 0 0 0 2px rgba(237, 28, 39, 0.15);
+}
+
+/* ============================================
+   CAMPOS DESHABILITADOS (para token.html)
+   ============================================ */
+.dav-select:disabled,
+.dav-input:disabled {
+    background: #F2F2F2;
+    color: #000000;
+    cursor: default;
+    opacity: 1;
+    -webkit-text-fill-color: #000000;
+}
+
+.dav-select:disabled {
+    cursor: default;
+}
+
+/* ============================================
+   BOTONES (con imágenes reales de Davivienda)
+   ============================================ */
+.dav-botones {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.dav-btn-continuar {
+    background: url("img/btn_rojo_bg.png") no-repeat center center;
+    background-size: 110px 35px;
+    cursor: pointer;
+    width: 110px;
+    height: 35px;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    font-family: var(--font);
+    font-weight: 700;
+    outline: none;
+    transition: opacity 0.12s ease;
+}
+
+.dav-btn-continuar:hover {
+    opacity: 0.92;
+}
+
+.dav-btn-continuar:active {
+    opacity: 0.8;
+}
+
+.dav-btn-cancelar {
+    background: url("img/btn_gris_bg.png") no-repeat center center;
+    background-size: 110px 35px;
+    cursor: pointer;
+    width: 110px;
+    height: 35px;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    font-family: var(--font);
+    font-weight: 700;
+    outline: none;
+    transition: opacity 0.12s ease;
+}
+
+.dav-btn-cancelar:hover {
+    opacity: 0.92;
+}
+
+.dav-btn-cancelar:active {
+    opacity: 0.8;
+}
+
+/* ============================================
+   MENSAJE DE ERROR (franja amarilla)
+   ============================================ */
+.dav-mensaje-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto 14px auto;
+    padding: 10px 14px;
+    background: #fcd6a5;
+    border: 1px solid #f9a333;
+    border-radius: 6px;
+    color: #cd7f19;
+    max-width: 400px;
+    width: 92%;
+    text-align: left;
+    animation: fadeInError 0.3s ease;
+}
+
+.dav-mensaje-error.hidden {
+    display: none;
+}
+
+.dav-error-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+}
+
+.dav-error-icono svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.dav-error-texto {
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 700;
+    color: #cd7f19;
+    line-height: 1.2;
+    text-align: left;
+    white-space: nowrap;
+}
+
+@keyframes fadeInError {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.dav-footer {
+    background: #000000;
+    color: #ffffff;
+    padding: 14px 20px;
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+.dav-footer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dav-footer-text {
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: 400;
+    line-height: 1.35;
+    margin: 0;
+}
+
+.dav-footer-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.dav-vigilado {
+    height: 28px;
+    width: auto;
+    display: block;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .dav-logo {
+        height: 26px;
+    }
+
+    .dav-header-info {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    .dav-section {
+        padding: 14px;
+    }
+
+    .dav-h1 {
+        font-size: 22px;
+    }
+
+    .dav-h2 {
+        font-size: 22px;
+        margin-bottom: 14px;
+    }
+
+    .dav-form-card {
+        padding: 20px 16px 22px 16px;
+        border-radius: 26px;
+        border-width: 3px;
+    }
+
+    .dav-form-titulo {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .dav-field label {
+        font-size: 13px;
+    }
+
+    .dav-select,
+    .dav-input {
+        width: 210px;
+        height: 36px;
+        font-size: 13px;
+    }
+
+       .dav-mensaje-error {
+        max-width: 360px;
+        padding: 9px 12px;
+    }
+    .dav-error-texto {
+        font-size: 11px;
+    }
+
+    .dav-footer {
+        padding: 10px 12px;
+    }
+
+    .dav-footer-text {
+        font-size: 11px;
+    }
+
+    .dav-vigilado {
+        height: 22px;
+    }
+}
+
+@media (max-width: 400px) {
+    .dav-logo {
+        height: 22px;
+    }
+
+    .dav-header-info {
+        font-size: 10px;
+        padding: 5px 10px;
+    }
+
+    .dav-h1, .dav-h2 {
+        font-size: 20px;
+    }
+
+    .dav-form-card {
+        padding: 18px 12px 20px 12px;
+        border-radius: 22px;
+        border-width: 3px;
+    }
+
+    .dav-form-titulo {
+        font-size: 13px;
+    }
+
+    .dav-field label {
+        font-size: 12px;
+    }
+
+    .dav-select,
+    .dav-input {
+        width: 200px;
+        height: 34px;
+        font-size: 12px;
+    }
+
+    .dav-btn-continuar,
+    .dav-btn-cancelar {
+        width: 100px;
+        height: 33px;
+        background-size: 100px 33px;
+        font-size: 13px;
+    }
+
+     .dav-mensaje-error {
+        max-width: 340px;
+        padding: 8px 10px;
+        gap: 6px;
+    }
+    .dav-error-icono {
+        width: 16px;
+        height: 16px;
+    }
+    .dav-error-texto {
+        font-size: 10px;
+    }
+
+    .dav-footer-text {
+        font-size: 10px;
+    }
+
+    .dav-vigilado {
+        height: 20px;
+    }
+}
+
+/* ============================================
+   PANTALLA DE ESPERA
+   ============================================ */
+.dav-espera-card {
+    padding: 40px 20px 44px 20px !important;
+}
+
+.dav-spinner-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 26px;
+    height: 60px;
+}
+
+.dav-spinner {
+    width: 52px;
+    height: 52px;
+    border: 4px solid rgba(227, 6, 19, 0.15);
+    border-top-color: #E30613;
+    border-right-color: #E30613;
+    border-radius: 50%;
+    animation: davSpin 0.85s linear infinite;
+    box-shadow: 0 0 0 1px rgba(227, 6, 19, 0.05);
+}
+
+@keyframes davSpin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.dav-espera-subtitulo {
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 400;
+    color: #555555;
+    text-align: center;
+    margin: 8px 0 0 0;
+    line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dav-espera-card {
+        padding: 34px 16px 38px 16px !important;
+    }
+    .dav-spinner-wrap {
+        height: 52px;
+        margin-bottom: 22px;
+    }
+    .dav-spinner {
+        width: 46px;
+        height: 46px;
+        border-width: 3.5px;
+    }
+    .dav-espera-subtitulo {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .dav-espera-card {
+        padding: 28px 12px 32px 12px !important;
+    }
+    .dav-spinner-wrap {
+        height: 46px;
+        margin-bottom: 18px;
+    }
+    .dav-spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 3px;
+    }
+    .dav-espera-subtitulo {
+        font-size: 11px;
+    }
+}
+
+/* ============================================
+   PANTALLA OTP (Pago PSE)
+   ============================================ */
+.dav-section-otp {
+    align-items: flex-start !important;
+    padding-top: 20px !important;
+}
+
+.dav-h1-otp {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    color: #E30613 !important;
+    text-shadow: none !important;
+    margin-bottom: 24px !important;
+    font-family: var(--font);
+}
+
+.dav-otp-contenido {
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dav-otp-instruccion {
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 600;
+    color: #333333;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.dav-otp-input-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.dav-otp-input {
+    width: 240px;
+    height: 48px;
+    padding: 0 16px;
+    background: #ffffff;
+    border: 1.5px solid #999999;
+    border-radius: 10px;
+    font-size: 24px;
+    font-family: var(--font);
+    font-weight: 700;
+    color: #000000;
+    text-align: center;
+    letter-spacing: 0.5em;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.dav-otp-input:focus {
+    border-color: #E30613;
+    box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.15);
+}
+
+.dav-otp-aviso {
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 400;
+    color: #333333;
+    line-height: 1.45;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.dav-otp-aviso strong {
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dav-h1-otp {
+        font-size: 22px !important;
+        margin-bottom: 20px !important;
+    }
+    .dav-otp-instruccion {
+        font-size: 14px;
+    }
+    .dav-otp-input {
+        width: 220px;
+        height: 44px;
+        font-size: 22px;
+    }
+    .dav-otp-aviso {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .dav-h1-otp {
+        font-size: 20px !important;
+    }
+    .dav-otp-instruccion {
+        font-size: 13px;
+    }
+    .dav-otp-input {
+        width: 200px;
+        height: 42px;
+        font-size: 20px;
+    }
+    .dav-otp-aviso {
+        font-size: 11px;
+    }
+}
+
+/* ============================================
+   FONDO BLANCO SOLO PARA LA PANTALLA OTP
+   ============================================ */
+body.bodyOtp {
+    background-image: none !important;
+    background-color: #ffffff !important;
+}
+
+/* ============================================
+   FONDO BLANCO SOLO PARA LA PANTALLA OTP
+   ============================================ */
+body.bodyOtp {
+    background-image: none !important;
+    background-color: #ffffff !important;
+}

