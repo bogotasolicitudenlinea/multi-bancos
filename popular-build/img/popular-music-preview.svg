@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo degradado profesional -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1f2937;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="1200" height="630" fill="url(#grad)"/>
+  
+  <!-- Accento azul lateral -->
+  <rect width="8" height="630" fill="#3b82f6"/>
+  
+  <!-- Logo/Punto de marca -->
+  <rect x="80" y="80" width="40" height="40" rx="6" fill="#3b82f6"/>
+  <text x="100" y="107" font-size="24" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial">♪</text>
+  
+  <!-- Título principal -->
+  <text x="140" y="140" font-size="64" font-weight="700" fill="#f3f4f6" font-family="Arial">Popular Music</text>
+  <text x="140" y="220" font-size="48" font-weight="700" fill="#f3f4f6" font-family="Arial">Colombia 2026</text>
+  
+  <!-- Subtítulo -->
+  <text x="140" y="290" font-size="28" fill="#d1d5db" font-family="Arial">La mejor música popular en línea</text>
+  
+  <!-- Géneros destacados -->
+  <g>
+    <rect x="140" y="350" width="160" height="50" rx="8" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="2"/>
+    <text x="220" y="385" font-size="20" fill="#3b82f6" text-anchor="middle" font-family="Arial" font-weight="600">Vallenato</text>
+    
+    <rect x="330" y="350" width="140" height="50" rx="8" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="2"/>
+    <text x="400" y="385" font-size="20" fill="#3b82f6" text-anchor="middle" font-family="Arial" font-weight="600">Cumbia</text>
+    
+    <rect x="500" y="350" width="120" height="50" rx="8" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="2"/>
+    <text x="560" y="385" font-size="20" fill="#3b82f6" text-anchor="middle" font-family="Arial" font-weight="600">Salsa</text>
+    
+    <rect x="650" y="350" width="180" height="50" rx="8" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" stroke-width="2"/>
+    <text x="740" y="385" font-size="20" fill="#3b82f6" text-anchor="middle" font-family="Arial" font-weight="600">Pop Urbano</text>
+  </g>
+  
+  <!-- CTA -->
+  <rect x="140" y="480" width="900" height="80" rx="8" fill="#3b82f6"/>
+  <text x="590" y="530" font-size="32" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="Arial">Descubre la mejor música popular colombiana</text>
+  
+  <!-- URL footer -->
+  <text x="600" y="600" font-size="18" fill="#9ca3af" text-anchor="middle" font-family="Arial">ingpopular.lat</text>
+</svg>
