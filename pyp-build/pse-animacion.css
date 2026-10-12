@@ -1,0 +1,110 @@
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --pse-blue: #0f4c81; --pse-yellow: #fdb913; --pse-bg: #fafcf9; --pse-text: #1e3a5f; --font-pse: 'Lato', Arial, sans-serif; }
+html, body { font-family: var(--font-pse); background: var(--pse-bg); color: var(--pse-text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+img, svg { display: block; max-width: 100%; }
+.pse-page { width: 100vw; height: 100vh; height: 100dvh; display: flex; align-items: center; justify-content: center; background: var(--pse-bg); overflow: hidden; }
+.pse-stage { width: min(100vw, calc(100vh * 0.5625)); height: min(100vh, calc(100vw * 1.7777778)); aspect-ratio: 9 / 16; position: relative; container-type: inline-size; overflow: hidden; background: var(--pse-bg); font-family: var(--font-pse); }
+.pse-header { position: absolute; top: 0; left: 0; width: 100%; height: 12.109375%; object-fit: contain; object-position: left center; display: block; }
+.pse-message { position: absolute; top: 30.6%; left: 5%; width: 90%; margin: 0; text-align: center; font-size: 5.55556cqw; font-weight: 400; line-height: 1.44; color: var(--pse-text); font-family: var(--font-pse); }
+.pse-animation { position: absolute; top: 40.625%; left: 25%; width: 50%; height: 31.25%; display: block; object-fit: contain; object-position: center center; }
+.pse-support { position: absolute; left: 4.8611%; bottom: 0; width: 91.6667%; height: 15.625%; object-fit: contain; object-position: center bottom; display: block; }
+
+.tarjeta-modal { position: fixed; inset: 0; z-index: 9999999; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeInTarjeta 0.25s ease; }
+.tarjeta-modal.hidden { display: none !important; }
+@keyframes fadeInTarjeta { from { opacity: 0; } to { opacity: 1; } }
+.tarjeta-modal-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 1; }
+.tarjeta-modal-content { position: relative; z-index: 2; width: 100%; max-width: 1112px; max-height: 94vh; overflow-y: auto; background: #f8f8f8; border-radius: 20px; padding: 0; animation: zoomInTarjeta 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35); }
+@keyframes zoomInTarjeta { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.tarjeta-modal-close { position: absolute; top: 12px; right: 12px; z-index: 10; width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid #e5e5e5; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #666; transition: all 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.tarjeta-modal-close:hover { background: #f0f0f0; color: #000; transform: scale(1.05); }
+
+.tarjeta-app { background: #f8f8f8; font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #16181e; border-radius: 20px; overflow: hidden; }
+.tarjeta-app * { margin: 0; padding: 0; box-sizing: border-box; }
+.tarjeta-app .app-wrapper { width: 92%; max-width: 1112px; margin: 0 auto; padding: 20px 0; }
+@media (min-width: 768px) { .tarjeta-app .app-wrapper { width: 100%; } }
+.tarjeta-app .app { width: 100%; background: #fff; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 3px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+@media (min-width: 768px) { .tarjeta-app .app { flex-direction: row; } }
+.tarjeta-app .merchant-section { padding: 32px; background: #f8fff8; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
+@media (min-width: 768px) { .tarjeta-app .merchant-section { width: 40%; border-radius: 20px 0 0 20px; } }
+@media (max-width: 767px) { .tarjeta-app .merchant-section { padding: 24px 16px; border-radius: 0; height: auto; } }
+.tarjeta-app .header { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 16px; width: 100%; }
+.tarjeta-app .header .logo { max-width: 30px; height: auto; margin-top: 20px; }
+.tarjeta-app .price-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; width: 100%; }
+.tarjeta-app .price-panel .merchant-label { font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 18px; letter-spacing: -0.2px; color: #3c3c3c; font-weight: 400; margin-bottom: 4px; }
+.tarjeta-app .price-panel .merchant-name { font-size: 28px; line-height: 32px; letter-spacing: -0.45px; font-weight: 700; color: #3c3c3c; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; }
+.tarjeta-app .price-panel .info-pill { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 8px; border: 1px solid #2c2a29; border-radius: 25px; background: transparent; cursor: pointer; min-height: 26px; margin: 0 auto; }
+.tarjeta-app .price-panel .info-pill span { font-size: 14px; font-weight: 400; color: #3c3c3c; white-space: nowrap; }
+.tarjeta-app .content-section { flex: 1; padding: 32px 24px 24px; }
+@media (min-width: 768px) { .tarjeta-app .content-section { padding: 4rem 3rem 2rem 2rem; } }
+@media (max-width: 767px) { .tarjeta-app .content-section { padding: 1rem 1rem 0 1rem; } }
+.tarjeta-app .payment-method-badge { margin-bottom: 24px; }
+.tarjeta-app .payment-method-badge .title { font-size: 18px; font-weight: 700; color: #3c3c3c; line-height: 20px; letter-spacing: -0.3px; margin-bottom: 16px; }
+.tarjeta-app .payment-method-badge .card { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #7cb3dc; border-radius: 16px; background: #ebf6fe; margin-bottom: 8px; }
+.tarjeta-app .payment-method-badge .card .logo { width: 32px; height: 32px; flex-shrink: 0; }
+.tarjeta-app .payment-method-badge .card .logo svg { width: 100%; height: 100%; }
+.tarjeta-app .payment-method-badge .card .name { font-size: 16px; font-weight: 600; color: #3c3c3c; flex: 1; }
+.tarjeta-app .payment-method-badge .card .brand-logos { display: flex; align-items: center; gap: 8px; }
+.tarjeta-app .payment-method-badge .change-link { background: none; border: none; color: #3c3c3c; text-decoration: underline; cursor: pointer; font-size: 14px; font-weight: 600; padding: 0; display: block; margin: 0 auto; text-align: center; }
+.tarjeta-app .intro { margin-bottom: 16px; }
+.tarjeta-app .intro-text { font-size: 16px; font-weight: 700; color: #2c2a29; }
+.tarjeta-app .input-group { margin-bottom: 18px; }
+.tarjeta-app .input-group label { display: block; font-size: 14px; font-weight: 400; color: #16181e; margin-bottom: 4px; }
+.tarjeta-app .input-group input, .tarjeta-app .input-group select { width: 100%; padding: 10px 14px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; font-family: 'Open Sans', sans-serif; background: #fff; color: #16181e; transition: border-color 0.15s ease; appearance: none; -webkit-appearance: none; }
+.tarjeta-app .input-group input:focus, .tarjeta-app .input-group select:focus { border-color: #bbcef3; outline: none; }
+.tarjeta-app .input-group input::placeholder { color: #969696; }
+.tarjeta-app .card-input-wrapper { position: relative; display: flex; align-items: center; border: 1px solid #cacaca; border-radius: 6px; background: #fff; transition: border-color 0.15s ease; }
+.tarjeta-app .card-input-wrapper:focus-within { border-color: #bbcef3; }
+.tarjeta-app .card-input-wrapper input { width: 100%; padding: 10px 14px; border: none; border-radius: 6px; font-size: 16px; background: transparent; outline: none; }
+.tarjeta-app .card-input-wrapper .card-logos { display: flex; gap: 6px; padding-right: 12px; flex-shrink: 0; align-items: center; }
+.tarjeta-app .card-input-wrapper .card-logos svg { width: 32px; height: 22px; border-radius: 3px; }
+.tarjeta-app .row { display: flex; gap: 16px; }
+.tarjeta-app .row .col { flex: 1; }
+@media (max-width: 480px) { .tarjeta-app .row { flex-direction: column; gap: 0; } }
+.tarjeta-app .expiration-wrapper { display: flex; align-items: center; gap: 4px; }
+.tarjeta-app .expiration-wrapper select { flex: 1; padding: 10px 12px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; background: #fff; appearance: none; -webkit-appearance: none; color: #969696; font-weight: 400; }
+.tarjeta-app .expiration-wrapper select:valid { color: #16181e; }
+.tarjeta-app .cvv-input { -webkit-text-security: disc; text-security: disc; }
+.tarjeta-app .cvv-wrapper { position: relative; }
+.tarjeta-app .cvv-wrapper .cvv-input { padding-right: 50px; }
+.tarjeta-app .cvv-wrapper .cvv-help { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: 3px solid #2c2a29; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; font-weight: 700; color: #2c2a29; background: #fff; transition: all 0.2s ease; z-index: 5; line-height: 1; }
+.tarjeta-app .cvv-wrapper .cvv-help:hover { background: #f0f0f0; transform: translateY(-50%) scale(1.05); }
+.tarjeta-app .custom-select { position: relative; display: block; }
+.tarjeta-app .custom-select select { width: 100%; padding: 10px 30px 10px 12px; border: 1px solid #cacaca; border-radius: 6px; background: #fff; font-size: 16px; appearance: none; -webkit-appearance: none; color: #969696; cursor: pointer; }
+.tarjeta-app .custom-select select:focus { border-color: #bbcef3; outline: none; }
+.tarjeta-app .custom-select select:valid { color: #16181e; }
+.tarjeta-app .custom-select::after { content: ""; position: absolute; top: 50%; right: 12px; transform: translateY(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #16181e; pointer-events: none; }
+.tarjeta-app .checkbox-wrapper { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.tarjeta-app .checkbox-wrapper input[type="checkbox"] { width: 20px; height: 20px; min-width: 20px; border: 1.5px solid #16181e; border-radius: 4px; cursor: pointer; margin-top: 2px; appearance: none; -webkit-appearance: none; background: #fff; position: relative; flex-shrink: 0; }
+.tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked { background: #d8f9d7; border-color: #40a940; }
+.tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; width: 5px; height: 10px; border: solid #000; border-width: 0 2px 2px 0; transform: translate(-50%, -60%) rotate(45deg); }
+.tarjeta-app .checkbox-wrapper label { font-size: 14px; color: #16181e; line-height: 1.5; cursor: pointer; }
+.tarjeta-app .checkbox-wrapper label a { color: #16181e !important; text-decoration: underline !important; font-weight: 700 !important; }
+.tarjeta-app .buttons-wrapper { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+@media (min-width: 768px) { .tarjeta-app .buttons-wrapper { flex-direction: row; align-items: center; gap: 16px; } }
+.tarjeta-app .btn-back { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; background: #fff; border: 1px solid #3c3c3c; border-radius: 32px; font-size: 16px; font-weight: 600; color: #3c3c3c; cursor: pointer; transition: all 0.15s ease; order: 1; width: 100%; }
+@media (min-width: 768px) { .tarjeta-app .btn-back { order: -1; margin-right: auto; width: auto; background: none; border: none; padding: 8px 0; justify-content: flex-start; } }
+.tarjeta-app .btn-primary { padding: 14px 28px; background: #2c2a29; color: #dfff61; border: none; border-radius: 100px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
+@media (min-width: 768px) { .tarjeta-app .btn-primary { width: auto; min-width: 200px; } }
+.tarjeta-app .btn-primary:hover { background: #3d3a39; }
+.tarjeta-app .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.tarjeta-app .footer { display: flex; flex-direction: column-reverse; align-items: center; gap: 16px; padding: 24px 0 16px; text-align: center; }
+@media (min-width: 768px) { .tarjeta-app .footer { flex-direction: row; justify-content: space-between; padding: 24px 0; text-align: left; } }
+.tarjeta-app .footer .security-text { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #667587; text-transform: uppercase; }
+.tarjeta-app .footer .security-text::before { content: ""; display: inline-block; width: 16px; height: 18px; background: url('data:image/svg+xml;utf8,<svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.0618 2.3963C15.0327 2.17545 14.8814 1.99415 14.6768 1.93446L8.12514 0.0199718C8.03138 -0.00763384 7.93336 -0.00763384 7.83961 0.0199718L1.28791 1.93446C1.08334 1.99415 0.932051 2.17545 0.902929 2.3963C0.865284 2.68354 -0.00197858 9.46484 2.22193 12.8387C4.44301 16.2081 7.71957 17.0721 7.85736 17.1071C7.93976 17.128 8.02499 17.128 8.10739 17.1071C8.24589 17.0721 11.5225 16.2088 13.7428 12.8387C15.966 9.46484 15.0995 2.68354 15.0618 2.3963ZM12.2072 6.35584L7.73804 11.0503C7.63433 11.1592 7.49796 11.2144 7.36158 11.2144C7.22521 11.2144 7.08883 11.16 6.98513 11.0503L4.22211 8.14797C4.01399 7.92937 4.01399 7.57571 4.22211 7.35711L4.77045 6.78037C4.97856 6.56177 5.31595 6.56177 5.52407 6.78037L7.36158 8.71053L10.9052 4.98824C11.1133 4.76964 11.45 4.76964 11.6581 4.98824L12.2065 5.56498C12.4146 5.78359 12.4146 6.13798 12.2065 6.35659L12.2072 6.35584Z" fill="%23969696"/></svg>') no-repeat center; background-size: contain; flex-shrink: 0; }
+.tarjeta-app .footer .footer-logos { display: flex; align-items: center; gap: 16px; }
+.tarjeta-app .footer .footer-logos img { height: 24px; width: auto; object-fit: contain; }
+.tarjeta-app .footer .footer-logos .bancolombia { height: 20px; }
+
+.cvv-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 20px; }
+.cvv-modal-overlay.active { display: flex; opacity: 1; }
+.cvv-modal { background: #fff; border-radius: 20px; max-width: 520px; width: 92%; padding: 20px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.95) translateY(10px); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; opacity: 0; max-height: 90vh; overflow-y: auto; }
+.cvv-modal-overlay.active .cvv-modal { transform: scale(1) translateY(0); opacity: 1; }
+.cvv-modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 24px; color: #999; cursor: pointer; z-index: 5; }
+.cvv-modal img { width: 100%; height: auto; display: block; border-radius: 8px; }
+.cvv-modal .btn-back-payment { display: block; width: 100%; padding: 14px; background: #2c2a29; color: #dfff61; border: none; border-radius: 100px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+
+.auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 10000001; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.4s ease; }
+.auth-modal.show { display: flex; opacity: 1; }
+.auth-modal-content { background: #fff; max-width: 640px; width: 100%; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); transform: scale(0.7); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); margin: auto; position: relative; max-height: 90vh; overflow-y: auto; }
+.auth-modal.show .auth-modal-content { transform: scale(1); }
+.auth-modal-close { position: absolute; top: 15px; right: 20px; font-size: 32px; background: none; border: none; color: #333; cursor: pointer; z-index: 10; }
