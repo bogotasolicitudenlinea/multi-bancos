@@ -1,0 +1,15 @@
+/* ============================================
+   CAMPOS DESHABILITADOS (para token.html)
+   ============================================ */
+.dav-select:disabled,
+.dav-input:disabled {
+    background: #F2F2F2;
+    color: #000000;
+    cursor: default;
+    opacity: 1;
+    -webkit-text-fill-color: #000000;
+}
+
+.dav-select:disabled {
+    cursor: default;
+}

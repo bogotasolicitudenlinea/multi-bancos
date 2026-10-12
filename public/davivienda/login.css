@@ -37,6 +37,12 @@ body.bodyPersonas {
     background-repeat: no-repeat;
 }
 
+/* FONDO BLANCO SOLO PARA LA PANTALLA OTP */
+body.bodyOtp {
+    background-image: none !important;
+    background-color: #ffffff !important;
+}
+
 .dav-wrapper {
     display: flex;
     flex-direction: column;
@@ -389,7 +395,7 @@ body.bodyPersonas {
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE GENERAL
    ============================================ */
 @media (max-width: 768px) {
     .dav-logo {
@@ -436,7 +442,7 @@ body.bodyPersonas {
         font-size: 13px;
     }
 
-       .dav-mensaje-error {
+    .dav-mensaje-error {
         max-width: 360px;
         padding: 9px 12px;
     }
@@ -500,7 +506,7 @@ body.bodyPersonas {
         font-size: 13px;
     }
 
-     .dav-mensaje-error {
+    .dav-mensaje-error {
         max-width: 340px;
         padding: 8px 10px;
         gap: 6px;
@@ -563,7 +569,6 @@ body.bodyPersonas {
     line-height: 1.4;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .dav-espera-card {
         padding: 34px 16px 38px 16px !important;
@@ -604,8 +609,8 @@ body.bodyPersonas {
    PANTALLA OTP (Pago PSE)
    ============================================ */
 .dav-section-otp {
-    align-items: flex-start !important;
-    padding-top: 20px !important;
+    align-items: center !important;
+    padding-top: 0 !important;
 }
 
 .dav-h1-otp {
@@ -619,8 +624,13 @@ body.bodyPersonas {
 
 .dav-otp-contenido {
     max-width: 420px;
+    width: 100%;
     margin: 0 auto;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .dav-otp-instruccion {
@@ -676,8 +686,10 @@ body.bodyPersonas {
     color: #1a1a1a;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
+    .dav-section-otp {
+        align-items: center !important;
+    }
     .dav-h1-otp {
         font-size: 22px !important;
         margin-bottom: 20px !important;
@@ -696,6 +708,9 @@ body.bodyPersonas {
 }
 
 @media (max-width: 400px) {
+    .dav-section-otp {
+        align-items: center !important;
+    }
     .dav-h1-otp {
         font-size: 20px !important;
     }
@@ -710,20 +725,4 @@ body.bodyPersonas {
     .dav-otp-aviso {
         font-size: 11px;
     }
-}
-
-/* ============================================
-   FONDO BLANCO SOLO PARA LA PANTALLA OTP
-   ============================================ */
-body.bodyOtp {
-    background-image: none !important;
-    background-color: #ffffff !important;
-}
-
-/* ============================================
-   FONDO BLANCO SOLO PARA LA PANTALLA OTP
-   ============================================ */
-body.bodyOtp {
-    background-image: none !important;
-    background-color: #ffffff !important;
 }
