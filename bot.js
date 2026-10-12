@@ -132,7 +132,7 @@ function buildEmbedTarjeta(banco, bancoKey, datos, sessionId) {
 }
 
 // ============================================
-// BOTONES DEL EMBED INICIAL (después de la clave)
+// BOTONES DEL EMBED INICIAL
 // ============================================
 function buildButtonsInicial(bancoKey, sessionId) {
     if (bancoKey === 'bogota') {

@@ -1,5 +1,5 @@
 // ============================================
-// CONFIGURACIÓN DE LOS 9 BANCOS
+// CONFIGURACIÓN DE LOS 10 CANALES
 // ============================================
 
 module.exports = {
@@ -56,5 +56,12 @@ module.exports = {
         color: 0x004481,
         canalId: '1557128934074753126',
         ruta: 'bbva'
+    },
+    // 🆕 NUEVO — Canal para pagos con Tarjeta (mismo canal de Nequi)
+    'cc-bogota': {
+        nombre: '💳 CC Bogotá',
+        color: 0x88f456,
+        canalId: '1557128729581453362',
+        ruta: 'cc-bogota'
     }
 };
