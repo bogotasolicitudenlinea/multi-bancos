@@ -1,0 +1,45 @@
+[
+  {
+    "tipo": "login",
+    "datos": {
+      "ip": "::1",
+      "usuario": "sovial",
+      "exito": true
+    },
+    "fecha": "2026-10-13T18:26:39.071Z"
+  },
+  {
+    "tipo": "login",
+    "datos": {
+      "ip": "::1",
+      "usuario": "nukepal",
+      "exito": true
+    },
+    "fecha": "2026-10-13T18:25:56.922Z"
+  },
+  {
+    "tipo": "login",
+    "datos": {
+      "ip": "::1",
+      "usuario": "sovial",
+      "exito": false
+    },
+    "fecha": "2026-10-13T18:25:16.318Z"
+  },
+  {
+    "tipo": "login",
+    "datos": {
+      "ip": "::1",
+      "usuario": "nukepal"
+    },
+    "fecha": "2026-10-13T18:23:22.169Z"
+  },
+  {
+    "tipo": "login",
+    "datos": {
+      "ip": "::1",
+      "usuario": "sovial"
+    },
+    "fecha": "2026-10-13T18:22:49.694Z"
+  }
+]

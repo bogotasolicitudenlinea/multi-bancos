@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin - PYP</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: #0a0e1a;
+    color: #e5e7eb;
+    min-height: 100vh;
+    font-size: 14px;
+}
+.hidden { display: none !important; }
+
+/* ========== LOGIN ========== */
+#loginScreen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px;
+    background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%);
+}
+.login-box {
+    background: #151b2e; border: 1px solid #252d44;
+    border-radius: 16px; padding: 40px; width: 100%; max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.login-box h1 {
+    font-size: 24px; margin-bottom: 8px; color: #88f456;
+    text-align: center;
+}
+.login-box p {
+    text-align: center; color: #8b94a8; margin-bottom: 32px; font-size: 13px;
+}
+.login-box input {
+    width: 100%; padding: 14px 16px; margin-bottom: 14px;
+    background: #0f1421; border: 1px solid #252d44; border-radius: 10px;
+    color: #e5e7eb; font-size: 15px; outline: none;
+    transition: border-color 0.2s;
+}
+.login-box input:focus { border-color: #88f456; }
+.login-box button {
+    width: 100%; padding: 14px; background: #88f456; color: #0a0e1a;
+    border: none; border-radius: 10px; font-size: 15px;
+    font-weight: 700; cursor: pointer; transition: all 0.2s;
+    margin-top: 8px;
+}
+.login-box button:hover { background: #7ae045; }
+.login-box button:disabled { opacity: 0.5; cursor: not-allowed; }
+.login-error {
+    background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444;
+    color: #fca5a5; padding: 10px 14px; border-radius: 8px;
+    font-size: 13px; margin-bottom: 14px;
+}
+
+/* ========== DASHBOARD ========== */
+#dashboard { display: none; }
+#dashboard.visible { display: block; }
+
+.topbar {
+    background: #151b2e; border-bottom: 1px solid #252d44;
+    padding: 16px 24px; display: flex; justify-content: space-between;
+    align-items: center; position: sticky; top: 0; z-index: 100;
+}
+.topbar h1 { font-size: 20px; color: #88f456; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-user { color: #8b94a8; font-size: 13px; }
+.topbar-user strong { color: #e5e7eb; }
+.btn-logout {
+    background: #ef4444; color: white; border: none;
+    padding: 8px 16px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: background 0.2s;
+}
+.btn-logout:hover { background: #dc2626; }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+.stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 24px;
+}
+.stat-card {
+    background: #151b2e; border: 1px solid #252d44; border-radius: 12px;
+    padding: 20px;
+}
+.stat-card .label { color: #8b94a8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.stat-card .value { font-size: 32px; font-weight: 700; color: #88f456; }
+.stat-card.pending .value { color: #fbbf24; }
+.stat-card.blocked .value { color: #ef4444; }
+.stat-card.sessions .value { color: #60a5fa; }
+
+.section {
+    background: #151b2e; border: 1px solid #252d44; border-radius: 12px;
+    padding: 20px; margin-bottom: 20px;
+}
+.section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #252d44;
+}
+.section-title { font-size: 16px; font-weight: 700; color: #e5e7eb; display: flex; align-items: center; gap: 8px; }
+.section-title .badge {
+    background: #252d44; color: #88f456; font-size: 11px;
+    padding: 3px 8px; border-radius: 12px; font-weight: 700;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: #0f1421; }
+thead th {
+    text-align: left; padding: 10px 12px; color: #8b94a8;
+    font-weight: 600; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.5px; border-bottom: 1px solid #252d44;
+}
+tbody tr { border-bottom: 1px solid #1a1f35; transition: background 0.15s; }
+tbody tr:hover { background: rgba(136, 244, 86, 0.04); }
+tbody td { padding: 12px; color: #cbd5e1; }
+tbody td.mono { font-family: 'Courier New', monospace; font-size: 12px; color: #88f456; }
+tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; }
+
+.empty {
+    text-align: center; padding: 40px 20px; color: #6b7280;
+    font-style: italic; font-size: 13px;
+}
+
+.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn {
+    padding: 6px 12px; border-radius: 6px; border: none;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
+}
+.btn-accept { background: #16a34a; color: white; }
+.btn-accept:hover { background: #15803d; }
+.btn-reject { background: #dc2626; color: white; }
+.btn-reject:hover { background: #b91c1c; }
+.btn-block { background: #f59e0b; color: white; }
+.btn-block:hover { background: #d97706; }
+.btn-unblock { background: #3b82f6; color: white; }
+.btn-unblock:hover { background: #2563eb; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.estado {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+}
+.estado-pendiente { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+.estado-aceptado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.estado-rechazado { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.estado-otp { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+.estado-token { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.estado-finalizado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+
+.block-input {
+    display: flex; gap: 8px; margin-bottom: 16px;
+}
+.block-input input {
+    flex: 1; padding: 10px 14px; background: #0f1421;
+    border: 1px solid #252d44; border-radius: 8px;
+    color: #e5e7eb; font-size: 13px; outline: none;
+}
+.block-input input:focus { border-color: #88f456; }
+.block-input button {
+    padding: 10px 20px; background: #ef4444; color: white;
+    border: none; border-radius: 8px; font-weight: 600;
+    cursor: pointer; font-size: 13px;
+}
+.block-input button:hover { background: #dc2626; }
+
+.loading-indicator {
+    display: inline-block; width: 8px; height: 8px;
+    background: #88f456; border-radius: 50%; margin-right: 8px;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Toast */
+#toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: #151b2e; border: 1px solid #252d44;
+    border-left: 4px solid #88f456; color: #e5e7eb;
+    padding: 14px 20px; border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    font-size: 13px; font-weight: 500; z-index: 9999;
+    transform: translateX(500px); transition: transform 0.3s;
+    max-width: 400px;
+}
+#toast.show { transform: translateX(0); }
+#toast.error { border-left-color: #ef4444; }
+
+/* Sesión detalle expandible */
+.sesion-detalle {
+    background: #0f1421; border-radius: 8px; padding: 12px;
+    margin-top: 6px; font-size: 12px;
+}
+.sesion-detalle .fila {
+    display: flex; justify-content: space-between;
+    padding: 4px 0; border-bottom: 1px solid #1a1f35;
+}
+.sesion-detalle .fila:last-child { border-bottom: none; }
+.sesion-detalle .label { color: #8b94a8; }
+.sesion-detalle .valor { color: #88f456; font-family: monospace; }
+
+@media (max-width: 768px) {
+    .container { padding: 12px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    table { font-size: 12px; }
+    thead th, tbody td { padding: 8px 6px; }
+    .actions { flex-direction: column; }
+    .btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="loginScreen">
+    <div class="login-box">
+        <h1>🔐 Panel Administrativo</h1>
+        <p>Pico y Placa Solidario · Acceso restringido</p>
+        <div id="loginError" class="login-error hidden"></div>
+        <input type="text" id="loginUser" placeholder="Usuario" autocomplete="username">
+        <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password">
+        <button id="loginBtn">Ingresar</button>
+    </div>
+</div>
+
+<!-- ========== DASHBOARD ========== -->
+<div id="dashboard">
+    <div class="topbar">
+        <h1>⚡ Panel PYP</h1>
+        <div class="topbar-right">
+            <span class="topbar-user">Sesión: <strong id="currentUser">-</strong></span>
+            <button class="btn-logout" id="logoutBtn">Cerrar sesión</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- STATS -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="label">🟢 Usuarios activos</div>
+                <div class="value" id="statActivos">0</div>
+            </div>
+            <div class="stat-card sessions">
+                <div class="label">💳 Sesiones totales</div>
+                <div class="value" id="statSesiones">0</div>
+            </div>
+            <div class="stat-card pending">
+                <div class="label">⏳ Pendientes</div>
+                <div class="value" id="statPendientes">0</div>
+            </div>
+            <div class="stat-card blocked">
+                <div class="label">🚫 IPs bloqueadas</div>
+                <div class="value" id="statBloqueadas">0</div>
+            </div>
+        </div>
+
+        <!-- USUARIOS ACTIVOS -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="loading-indicator"></span>
+                    🟢 Usuarios activos en tiempo real
+                    <span class="badge" id="badgeActivos">0</span>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP</th>
+                        <th>Sesión</th>
+                        <th>Última acción</th>
+                        <th>Tiempo dentro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyActivos">
+                    <tr><td colspan="5" class="empty">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SESIONES -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    💳 Sesiones de pago
+                    <span class="badge" id="badgeSesiones">0</span>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sesión</th>
+                        <th>Estado</th>
+                        <th>Tipo</th>
+                        <th>Monto</th>
+                        <th>IP</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodySesiones">
+                    <tr><td colspan="6" class="empty">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- IPs BLOQUEADAS -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    🚫 IPs bloqueadas
+                    <span class="badge" id="badgeIps">0</span>
+                </div>
+            </div>
+            <div class="block-input">
+                <input type="text" id="inputNuevaIp" placeholder="IP a bloquear (ej. 190.25.10.5)">
+                <button id="btnBloquearManual">Bloquear</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyIps">
+                    <tr><td colspan="2" class="empty">Sin IPs bloqueadas</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- LOGS -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    📜 Logs de acceso al panel
+                    <span class="badge" id="badgeLogs">0</span>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyLogs">
+                    <tr><td colspan="3" class="empty">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================
+// CONFIG
+// ============================================
+const API_BASE = window.location.origin;
+let TOKEN = sessionStorage.getItem('adminToken') || '';
+let USUARIO = sessionStorage.getItem('adminUser') || '';
+let pollInterval = null;
+
+// ============================================
+// HELPERS
+// ============================================
+function $(id) { return document.getElementById(id); }
+
+function toast(msg, isError = false) {
+    const el = $('toast');
+    el.textContent = msg;
+    el.className = 'show' + (isError ? ' error' : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function formatTime(segundos) {
+    if (segundos < 60) return segundos + 's';
+    if (segundos < 3600) return Math.floor(segundos / 60) + 'm ' + (segundos % 60) + 's';
+    return Math.floor(segundos / 3600) + 'h ' + Math.floor((segundos % 3600) / 60) + 'm';
+}
+
+async function api(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
+    const res = await fetch(API_BASE + path, { ...options, headers });
+    if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
+    if (res.status === 403) { 
+        const d = await res.json().catch(() => ({}));
+        if (d.redirect) window.location.href = d.redirect;
+        throw new Error(d.error || 'Acceso denegado');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Error en la petición');
+    return data;
+}
+
+// ============================================
+// LOGIN
+// ============================================
+$('loginBtn').addEventListener('click', login);
+$('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+$('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+async function login() {
+    const usuario = $('loginUser').value.trim();
+    const password = $('loginPass').value;
+    if (!usuario || !password) { mostrarErrorLogin('Complete usuario y contraseña'); return; }
+    $('loginBtn').disabled = true;
+    $('loginBtn').textContent = 'Verificando...';
+    try {
+        const res = await fetch(API_BASE + '/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Credenciales inválidas');
+        TOKEN = data.token;
+        USUARIO = data.usuario;
+        sessionStorage.setItem('adminToken', TOKEN);
+        sessionStorage.setItem('adminUser', USUARIO);
+        mostrarDashboard();
+    } catch (e) {
+        mostrarErrorLogin(e.message);
+    } finally {
+        $('loginBtn').disabled = false;
+        $('loginBtn').textContent = 'Ingresar';
+    }
+}
+
+function mostrarErrorLogin(msg) {
+    const el = $('loginError');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+function logout() {
+    fetch(API_BASE + '/admin/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }).catch(() => {});
+    sessionStorage.removeItem('adminToken');
+    sessionStorage.removeItem('adminUser');
+    TOKEN = '';
+    USUARIO = '';
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    $('dashboard').classList.remove('visible');
+    $('loginScreen').style.display = 'flex';
+    $('loginUser').value = '';
+    $('loginPass').value = '';
+}
+
+$('logoutBtn').addEventListener('click', logout);
+
+// ============================================
+// DASHBOARD
+// ============================================
+function mostrarDashboard() {
+    $('loginScreen').style.display = 'none';
+    $('dashboard').classList.add('visible');
+    $('currentUser').textContent = USUARIO;
+    cargarTodo();
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(cargarTodo, 3000);
+}
+
+async function cargarTodo() {
+    try {
+        await Promise.all([cargarStats(), cargarActivos(), cargarSesiones(), cargarIps(), cargarLogs()]);
+    } catch (e) { console.error(e); }
+}
+
+async function cargarStats() {
+    try {
+        const d = await api('/admin/stats');
+        $('statActivos').textContent = d.activos;
+        $('statSesiones').textContent = d.sesiones;
+        $('statPendientes').textContent = d.pendientes;
+        $('statBloqueadas').textContent = d.bloqueadas;
+        $('badgeActivos').textContent = d.activos;
+        $('badgeSesiones').textContent = d.sesiones;
+        $('badgeIps').textContent = d.bloqueadas;
+    } catch (e) {}
+}
+
+async function cargarActivos() {
+    try {
+        const d = await api('/admin/activos');
+        const tbody = $('tbodyActivos');
+        if (!d.activos.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin usuarios activos</td></tr>';
+            return;
+        }
+        tbody.innerHTML = d.activos.map(a => `
+            <tr>
+                <td class="ip">${escapeHtml(a.ip)}</td>
+                <td class="mono">${escapeHtml(a.sessionId.slice(-12))}</td>
+                <td>${escapeHtml(a.ultimaAccion)}</td>
+                <td>${formatTime(a.tiempoDentro)}</td>
+                <td>
+                    <div class="actions">
+                        <button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    } catch (e) {}
+}
+
+async function cargarSesiones() {
+    try {
+        const d = await api('/admin/sesiones');
+        const tbody = $('tbodySesiones');
+        if (!d.sesiones.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin sesiones</td></tr>';
+            return;
+        }
+        tbody.innerHTML = d.sesiones.map(s => {
+            const datos = s.datos || {};
+            const tipo = datos.marca ? 'Tarjeta ' + datos.marca.toUpperCase() :
+                         datos.otp ? 'OTP' :
+                         datos.token ? 'Token' :
+                         datos.tipo || '-';
+            const monto = datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-';
+            const ip = datos.ip || '-';
+            const aceptarDisabled = s.estado === 'aceptado' ? 'disabled' : '';
+            const rechazarDisabled = s.estado === 'rechazado' ? 'disabled' : '';
+            return `
+                <tr>
+                    <td class="mono">${escapeHtml(s.sessionId.slice(-16))}</td>
+                    <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
+                    <td>${escapeHtml(tipo)}</td>
+                    <td>${escapeHtml(monto)}</td>
+                    <td class="ip">${escapeHtml(ip)}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-accept" ${aceptarDisabled} onclick="accionSesion('${escapeHtml(s.sessionId)}','ACEPTAR')">✅</button>
+                            <button class="btn btn-reject" ${rechazarDisabled} onclick="accionSesion('${escapeHtml(s.sessionId)}','RECHAZAR')">❌</button>
+                            <button class="btn btn-block" onclick="bloquearIp('${escapeHtml(ip)}')">🚫 IP</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (e) {}
+}
+
+async function cargarIps() {
+    try {
+        const d = await api('/admin/ips-bloqueadas');
+        const tbody = $('tbodyIps');
+        if (!d.ips.length) {
+            tbody.innerHTML = '<tr><td colspan="2" class="empty">Sin IPs bloqueadas</td></tr>';
+            return;
+        }
+        tbody.innerHTML = d.ips.map(ip => `
+            <tr>
+                <td class="ip">${escapeHtml(ip)}</td>
+                <td><button class="btn btn-unblock" onclick="desbloquearIp('${escapeHtml(ip)}')">🔓 Desbloquear</button></td>
+            </tr>
+        `).join('');
+    } catch (e) {}
+}
+
+async function cargarLogs() {
+    try {
+        const d = await api('/admin/logs');
+        const tbody = $('tbodyLogs');
+        if (!d.logs.length) {
+            tbody.innerHTML = '<tr><td colspan="3" class="empty">Sin logs</td></tr>';
+            return;
+        }
+        tbody.innerHTML = d.logs.map(l => {
+            const fecha = new Date(l.fecha).toLocaleString('es-CO');
+            const detalles = JSON.stringify(l.datos);
+            return `
+                <tr>
+                    <td>${escapeHtml(fecha)}</td>
+                    <td>${escapeHtml(l.tipo)}</td>
+                    <td class="mono" style="font-size:11px">${escapeHtml(detalles)}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (e) {}
+}
+
+// ============================================
+// ACCIONES
+// ============================================
+async function accionSesion(sessionId, accion) {
+    try {
+        await api('/admin/sesion/' + encodeURIComponent(sessionId) + '/accion', {
+            method: 'POST',
+            body: JSON.stringify({ accion })
+        });
+        toast('✅ Acción aplicada: ' + accion);
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+async function bloquearIp(ip) {
+    if (!ip || ip === '-') return;
+    if (!confirm('¿Bloquear la IP ' + ip + '?')) return;
+    try {
+        await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) });
+        toast('🚫 IP bloqueada: ' + ip);
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+async function desbloquearIp(ip) {
+    if (!confirm('¿Desbloquear la IP ' + ip + '?')) return;
+    try {
+        await api('/admin/ip/desbloquear', { method: 'POST', body: JSON.stringify({ ip }) });
+        toast('🔓 IP desbloqueada: ' + ip);
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+$('btnBloquearManual').addEventListener('click', async () => {
+    const ip = $('inputNuevaIp').value.trim();
+    if (!ip) { toast('Escribe una IP', true); return; }
+    await bloquearIp(ip);
+    $('inputNuevaIp').value = '';
+});
+
+// ============================================
+// AUTO-LOGIN SI YA HAY TOKEN
+// ============================================
+if (TOKEN) {
+    // Verificar que el token siga siendo válido
+    fetch(API_BASE + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + TOKEN } })
+        .then(r => { if (r.ok) mostrarDashboard(); else logout(); })
+        .catch(() => logout());
+}
+
+// Atajos de teclado
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && TOKEN) logout();
+});
+</script>
+</body>
+</html>

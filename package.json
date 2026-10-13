@@ -1,14 +1,16 @@
 {
   "name": "multi-bancos",
   "version": "1.0.0",
-  "description": "Bot unificado para 9 bancos",
+  "description": "Bot unificado para 10 bancos + panel admin",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
     "sharp": "^0.35.5"
   },
   "author": "Placas Bogota",
