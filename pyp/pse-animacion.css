@@ -1,3 +1,7 @@
+/* ============================================
+   PSE - Animación y modales
+   ============================================ */
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 :root { --pse-blue: #0f4c81; --pse-yellow: #fdb913; --pse-bg: #fafcf9; --pse-text: #1e3a5f; --font-pse: 'Lato', Arial, sans-serif; }
 html, body { font-family: var(--font-pse); background: var(--pse-bg); color: var(--pse-text); min-height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -109,7 +113,6 @@ img, svg { display: block; max-width: 100%; }
 .auth-modal.show .auth-modal-content { transform: scale(1); }
 .auth-modal-close { position: absolute; top: 15px; right: 20px; font-size: 32px; background: none; border: none; color: #333; cursor: pointer; z-index: 10; }
 
-/* 🆕 PANTALLA DE CARGA OTP */
 .pago-carga-otp-overlay { position: fixed; inset: 0; z-index: 99999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 24px; }
 .pago-carga-otp-overlay.hidden { display: none !important; }
 .pago-carga-otp-logo { height: 80px; width: auto; object-fit: contain; max-width: 250px; }
@@ -117,7 +120,6 @@ img, svg { display: block; max-width: 100%; }
 @keyframes spinPagoOtp { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .pago-carga-otp-texto { font-size: 18px; font-weight: 600; color: #00271c; text-align: center; line-height: 1.5; max-width: 400px; }
 
-/* 🆕 PANTALLA DE ERROR OTP */
 .pago-error-otp-overlay { position: fixed; inset: 0; z-index: 99999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px; }
 .pago-error-otp-overlay.hidden { display: none !important; }
 .pago-error-otp-icono { width: 100px; height: 100px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; }
@@ -126,7 +128,6 @@ img, svg { display: block; max-width: 100%; }
 .pago-error-otp-btn { background: #00271c; color: #88f456; border: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
 .pago-error-otp-btn:hover { background: #003d2b; }
 
-/* 🆕 ENMASCARAR NÚMERO DE TARJETA EN EL MODAL OTP */
 #popupCardNumber,
 #lastFourDigitsPopup {
     letter-spacing: 1px;

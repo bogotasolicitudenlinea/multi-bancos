@@ -1,51 +1,51 @@
 /* ============================================
-   PSE ANIMACIÓN - Pantalla de carga
+   PSE - Animación
+   Reinicia la animación del GIF cuando se muestra la pantalla PSE
    ============================================ */
 
 (function() {
     'use strict';
 
-    // ==========================================
-    // ELEMENTOS
-    // ==========================================
     var pseAnimation = document.getElementById('pseAnimation');
+    var originalSrc = window.__PSE_ORIGINAL_SRC__ || (pseAnimation ? pseAnimation.src : '');
 
-    // ==========================================
-    // CONFIGURACIÓN
-    // ==========================================
-    var isMobile = window.matchMedia('(max-width: 768px)').matches;
-
-    // ==========================================
-    // INICIALIZAR
-    // ==========================================
-    function init() {
-        console.log('🎬 Pantalla de carga PSE iniciada');
-        console.log('   - Móvil:', isMobile);
-        console.log('   - Animación:', pseAnimation ? pseAnimation.src : 'no encontrada');
-
+    function reiniciarAnimacion() {
         if (!pseAnimation) {
-            console.warn('⚠️ No se encontró el elemento #pseAnimation');
+            console.warn('⚠️ No se encontró el elemento pseAnimation');
             return;
         }
 
-        // Verificar que el GIF cargue bien
+        var srcActual = originalSrc || pseAnimation.src;
+
+        // Vaciar el src para forzar al navegador a recargar el GIF
+        pseAnimation.src = '';
+
+        // Restaurarlo después de un pequeño delay
+        setTimeout(function() {
+            pseAnimation.src = srcActual;
+        }, 50);
+
+        console.log('✅ procesando.gif - Animación reiniciada');
+    }
+
+    // Escuchar errores de carga del GIF
+    if (pseAnimation) {
         pseAnimation.addEventListener('error', function() {
-            console.error('❌ Error cargando procesando.gif');
-            console.error('   Verifica que esté en: img/procesando.gif');
+            console.warn('⚠️ Error cargando procesando.gif');
         });
 
         pseAnimation.addEventListener('load', function() {
-            console.log('✅ procesando.gif cargado correctamente');
+            console.log('✅ procesando.gif - Cargado correctamente');
         });
     }
 
-    // ==========================================
-    // ARRANCAR
-    // ==========================================
+    // Ejecutar cuando el DOM esté listo
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', reiniciarAnimacion);
     } else {
-        init();
+        reiniciarAnimacion();
     }
 
+    // Exponer la función para usarla desde otros scripts
+    window.__PSE_REINICIAR__ = reiniciarAnimacion;
 })();

