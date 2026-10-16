@@ -88,55 +88,76 @@ html { scroll-behavior: smooth; }
 @keyframes fadeInVideo { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 768px) { .pse-stage .pse-nombre { font-size: 24px; } .pse-stage .pse-message { font-size: 20px; } }
 @media (max-width: 400px) { .pse-stage .pse-nombre { font-size: 20px; } .pse-stage .pse-message { font-size: 18px; } .banco-card-pse { padding: 12px 6px 10px 6px; min-height: 100px; } .banco-logo-wrap { width: 38px; height: 38px; } .banco-logo-wrap img { max-width: 38px; max-height: 38px; } .banco-nombre-pse { font-size: 11px; } }
-.tarjeta-modal { position: fixed; inset: 0; z-index: 9999999; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeInTarjeta 0.25s ease; }
+
+/* ============================================================
+   MODAL TARJETA (estilo mejorado con Amex)
+   ============================================================ */
+.tarjeta-modal { position: fixed; inset: 0; z-index: 9999999; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeInTarjeta .25s ease; }
 .tarjeta-modal.hidden { display: none !important; }
 @keyframes fadeInTarjeta { from { opacity: 0; } to { opacity: 1; } }
-.tarjeta-modal-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 1; }
-.tarjeta-modal-content { position: relative; z-index: 2; width: 100%; max-width: 1112px; max-height: 94vh; overflow-y: auto; background: #f8f8f8; border-radius: 20px; padding: 0; animation: zoomInTarjeta 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35); }
-@keyframes zoomInTarjeta { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-.tarjeta-modal-close { position: absolute; top: 12px; right: 12px; z-index: 10; width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid #e5e5e5; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #666; transition: all 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.tarjeta-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 1; }
+.tarjeta-modal-content { position: relative; z-index: 2; width: 100%; max-width: 1112px; max-height: 94vh; overflow-y: auto; background: #fff; border-radius: 20px; padding: 0; animation: zoomInTarjeta .3s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 25px 60px rgba(0,0,0,.35); -webkit-overflow-scrolling: touch; }
+@keyframes zoomInTarjeta { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
+.tarjeta-modal-close { position: absolute; top: 12px; right: 12px; z-index: 10; width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid #e5e5e5; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #666; transition: all .15s; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 .tarjeta-modal-close:hover { background: #f0f0f0; color: #000; transform: scale(1.05); }
-.tarjeta-app { background: #f8f8f8; font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #16181e; border-radius: 20px; overflow: hidden; }
+.tarjeta-app { background: #fff; font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #16181e; border-radius: 20px; overflow: hidden; }
 .tarjeta-app * { margin: 0; padding: 0; box-sizing: border-box; }
-.tarjeta-app .app-wrapper { width: 92%; max-width: 1112px; margin: 0 auto; padding: 20px 0; }
-@media (min-width: 768px) { .tarjeta-app .app-wrapper { width: 100%; } }
-.tarjeta-app .app { width: 100%; background: #fff; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 3px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+.tarjeta-app .app-wrapper { width: 100%; max-width: 1112px; margin: 0 auto; padding: 0; }
+@media (min-width: 768px) { .tarjeta-app .app-wrapper { width: 100%; padding: 0; } }
+.tarjeta-app .app { width: 100%; background: #fff; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 3px 12px rgba(0,0,0,.1); display: flex; flex-direction: column; overflow: hidden; }
 @media (min-width: 768px) { .tarjeta-app .app { flex-direction: row; } }
 .tarjeta-app .merchant-section { padding: 32px; background: #f8fff8; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
 @media (min-width: 768px) { .tarjeta-app .merchant-section { width: 40%; border-radius: 20px 0 0 20px; } }
-@media (max-width: 767px) { .tarjeta-app .merchant-section { padding: 24px 16px; border-radius: 0; height: auto; } }
+@media (max-width: 767px) { .tarjeta-app .merchant-section { padding: 16px 16px 12px; border-radius: 0; height: auto; } }
 .tarjeta-app .header { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 16px; width: 100%; }
+@media (max-width: 767px) { .tarjeta-app .header { justify-content: center; margin-bottom: 8px; } }
 .tarjeta-app .header .logo { max-width: 30px; height: auto; margin-top: 20px; }
+@media (max-width: 767px) { .tarjeta-app .header .logo { margin-top: 0; } }
 .tarjeta-app .price-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; width: 100%; }
-.tarjeta-app .price-panel .merchant-label { font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 18px; letter-spacing: -0.2px; color: #3c3c3c; font-weight: 400; margin-bottom: 4px; }
-.tarjeta-app .price-panel .merchant-name { font-size: 28px; line-height: 32px; letter-spacing: -0.45px; font-weight: 700; color: #3c3c3c; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; }
+.tarjeta-app .price-panel .merchant-label { font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 18px; letter-spacing: -.2px; color: #3c3c3c; font-weight: 400; margin-bottom: 4px; }
+.tarjeta-app .price-panel .merchant-name { font-size: 28px; line-height: 32px; letter-spacing: -.45px; font-weight: 700; color: #3c3c3c; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 767px) { .tarjeta-app .price-panel .merchant-name { font-size: 18px; line-height: 22px; margin-bottom: 8px; } }
 .tarjeta-app .price-panel .info-pill { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 8px; border: 1px solid #2c2a29; border-radius: 25px; background: transparent; cursor: pointer; min-height: 26px; margin: 0 auto; }
 .tarjeta-app .price-panel .info-pill span { font-size: 14px; font-weight: 400; color: #3c3c3c; white-space: nowrap; }
+@media (max-width: 767px) { .tarjeta-app .price-panel .info-pill span { font-size: 12px; } }
 .tarjeta-app .content-section { flex: 1; padding: 32px 24px 24px; }
 @media (min-width: 768px) { .tarjeta-app .content-section { padding: 4rem 3rem 2rem 2rem; } }
-@media (max-width: 767px) { .tarjeta-app .content-section { padding: 1rem 1rem 0 1rem; } }
+@media (max-width: 767px) { .tarjeta-app .content-section { padding: 1rem 1rem 1.5rem 1rem; } }
 .tarjeta-app .payment-method-badge { margin-bottom: 24px; }
-.tarjeta-app .payment-method-badge .title { font-size: 18px; font-weight: 700; color: #3c3c3c; line-height: 20px; letter-spacing: -0.3px; margin-bottom: 16px; }
+.tarjeta-app .payment-method-badge .title { font-size: 18px; font-weight: 700; color: #3c3c3c; line-height: 20px; letter-spacing: -.3px; margin-bottom: 16px; }
+@media (max-width: 767px) { .tarjeta-app .payment-method-badge .title { font-size: 16px; margin-bottom: 12px; } }
 .tarjeta-app .payment-method-badge .card { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #7cb3dc; border-radius: 16px; background: #ebf6fe; margin-bottom: 8px; }
 .tarjeta-app .payment-method-badge .card .logo { width: 32px; height: 32px; flex-shrink: 0; }
 .tarjeta-app .payment-method-badge .card .logo svg { width: 100%; height: 100%; }
 .tarjeta-app .payment-method-badge .card .name { font-size: 16px; font-weight: 600; color: #3c3c3c; flex: 1; }
+@media (max-width: 767px) { .tarjeta-app .payment-method-badge .card .name { font-size: 14px; } }
 .tarjeta-app .payment-method-badge .card .brand-logos { display: flex; align-items: center; gap: 8px; }
 .tarjeta-app .payment-method-badge .change-link { background: none; border: none; color: #3c3c3c; text-decoration: underline; cursor: pointer; font-size: 14px; font-weight: 600; padding: 0; display: block; margin: 0 auto; text-align: center; }
 .tarjeta-app .intro { margin-bottom: 16px; }
 .tarjeta-app .intro-text { font-size: 16px; font-weight: 700; color: #2c2a29; }
 .tarjeta-app .input-group { margin-bottom: 18px; }
 .tarjeta-app .input-group label { display: block; font-size: 14px; font-weight: 400; color: #16181e; margin-bottom: 4px; }
-.tarjeta-app .input-group input, .tarjeta-app .input-group select { width: 100%; padding: 10px 14px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; font-family: 'Open Sans', sans-serif; background: #fff; color: #16181e; transition: border-color 0.15s ease; appearance: none; -webkit-appearance: none; }
+.tarjeta-app .input-group input, .tarjeta-app .input-group select { width: 100%; padding: 10px 14px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; font-family: 'Open Sans', sans-serif; background: #fff; color: #16181e; transition: border-color .15s ease; appearance: none; -webkit-appearance: none; }
 .tarjeta-app .input-group input:focus, .tarjeta-app .input-group select:focus { border-color: #bbcef3; outline: none; }
 .tarjeta-app .input-group input::placeholder { color: #969696; }
-.tarjeta-app .card-input-wrapper { position: relative; display: flex; align-items: center; border: 1px solid #cacaca; border-radius: 6px; background: #fff; transition: border-color 0.15s ease; }
+.tarjeta-app .card-input-wrapper { position: relative; display: flex; align-items: center; border: 1px solid #cacaca; border-radius: 6px; background: #fff; transition: border-color .15s ease; overflow: hidden; }
 .tarjeta-app .card-input-wrapper:focus-within { border-color: #bbcef3; }
-.tarjeta-app .card-input-wrapper input { width: 100%; padding: 10px 14px; border: none; border-radius: 6px; font-size: 16px; background: transparent; outline: none; }
-.tarjeta-app .card-input-wrapper .card-logos { display: flex; gap: 6px; padding-right: 12px; flex-shrink: 0; align-items: center; }
-.tarjeta-app .card-input-wrapper .card-logos svg { width: 32px; height: 22px; border-radius: 3px; }
+.tarjeta-app .card-input-wrapper input { width: 100%; padding: 10px 14px; border: none; border-radius: 6px; font-size: 16px; background: transparent; outline: none; min-width: 0; }
+.tarjeta-app .card-input-wrapper .card-logos { display: flex; gap: 8px; padding-right: 14px; flex-shrink: 0; align-items: center; transition: padding .3s ease; }
+.tarjeta-app .card-input-wrapper .card-logos .card-logo-item { display: flex; align-items: center; justify-content: center; width: 42px; height: 28px; overflow: hidden; transition: opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1), width .35s ease, margin .35s ease, padding .35s ease; opacity: 1; transform: scale(1); }
+.tarjeta-app .card-input-wrapper .card-logos .card-logo-item svg,
+.tarjeta-app .card-input-wrapper .card-logos .card-logo-item img { width: 42px; height: 28px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
+.tarjeta-app .card-input-wrapper .card-logos .card-logo-item.oculto { opacity: 0; transform: scale(.4) rotate(-15deg); width: 0; margin-left: -8px; padding: 0; pointer-events: none; }
+.tarjeta-app .card-input-wrapper .card-logos.has-single { padding-right: 18px; }
+@media (max-width: 400px) {
+  .tarjeta-app .card-input-wrapper .card-logos { gap: 6px; padding-right: 10px; }
+  .tarjeta-app .card-input-wrapper .card-logos .card-logo-item,
+  .tarjeta-app .card-input-wrapper .card-logos .card-logo-item svg,
+  .tarjeta-app .card-input-wrapper .card-logos .card-logo-item img { width: 34px; height: 22px; }
+  .tarjeta-app .card-input-wrapper .card-logos.has-single { padding-right: 14px; }
+}
 .tarjeta-app .row { display: flex; gap: 16px; }
-.tarjeta-app .row .col { flex: 1; }
+.tarjeta-app .row .col { flex: 1; min-width: 0; }
 @media (max-width: 480px) { .tarjeta-app .row { flex-direction: column; gap: 0; } }
 .tarjeta-app .expiration-wrapper { display: flex; align-items: center; gap: 4px; }
 .tarjeta-app .expiration-wrapper select { flex: 1; padding: 10px 12px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; background: #fff; appearance: none; -webkit-appearance: none; color: #969696; font-weight: 400; }
@@ -144,8 +165,10 @@ html { scroll-behavior: smooth; }
 .tarjeta-app .cvv-input { -webkit-text-security: disc; text-security: disc; }
 .tarjeta-app .cvv-wrapper { position: relative; }
 .tarjeta-app .cvv-wrapper .cvv-input { padding-right: 50px; }
-.tarjeta-app .cvv-wrapper .cvv-help { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 3px solid #2c2a29; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; font-weight: 700; color: #2c2a29; background: #fff; transition: all 0.2s ease; z-index: 5; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+.tarjeta-app .cvv-wrapper .cvv-help { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 3px solid #2c2a29; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; font-weight: 700; color: #2c2a29; background: #fff; transition: all .2s ease; z-index: 5; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
 .tarjeta-app .cvv-wrapper .cvv-help:hover { background: #f0f0f0; border-color: #1a1a1a; transform: translateY(-50%) scale(1.05); }
+.tarjeta-app .cvv-mensaje-amex { font-size: 12px; color: #b45309; background: #fffbeb; border-left: 3px solid #f59e0b; padding: 6px 10px; margin-top: 6px; border-radius: 4px; line-height: 1.4; animation: fadeInMensaje .25s ease; }
+@keyframes fadeInMensaje { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 .tarjeta-app .custom-select { position: relative; display: block; }
 .tarjeta-app .custom-select select { width: 100%; padding: 10px 30px 10px 12px; border: 1px solid #cacaca; border-radius: 6px; background: #fff; font-size: 16px; appearance: none; -webkit-appearance: none; color: #969696; cursor: pointer; }
 .tarjeta-app .custom-select select:focus { border-color: #bbcef3; outline: none; }
@@ -154,24 +177,24 @@ html { scroll-behavior: smooth; }
 .tarjeta-app .checkbox-wrapper { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
 .tarjeta-app .checkbox-wrapper input[type="checkbox"] { width: 20px; height: 20px; min-width: 20px; border: 1.5px solid #16181e; border-radius: 4px; cursor: pointer; margin-top: 2px; appearance: none; -webkit-appearance: none; background: #fff; position: relative; flex-shrink: 0; }
 .tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked { background: #d8f9d7; border-color: #40a940; }
-.tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; width: 5px; height: 10px; border: solid #000; border-width: 0 2px 2px 0; transform: translate(-50%, -60%) rotate(45deg); }
+.tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; width: 5px; height: 10px; border: solid #000; border-width: 0 2px 2px 0; transform: translate(-50%,-60%) rotate(45deg); }
 .tarjeta-app .checkbox-wrapper label { font-size: 14px; color: #16181e; line-height: 1.5; cursor: pointer; }
 .tarjeta-app .checkbox-wrapper label a { color: #16181e !important; text-decoration: underline !important; font-weight: 700 !important; }
 .tarjeta-app .buttons-wrapper { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
 @media (min-width: 768px) { .tarjeta-app .buttons-wrapper { flex-direction: row; align-items: center; gap: 16px; } }
-.tarjeta-app .btn-back { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; background: #fff; border: 1px solid #3c3c3c; border-radius: 32px; font-size: 16px; font-weight: 600; color: #3c3c3c; cursor: pointer; transition: all 0.15s ease; order: 1; width: 100%; }
+.tarjeta-app .btn-back { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; background: #fff; border: 1px solid #3c3c3c; border-radius: 32px; font-size: 16px; font-weight: 600; color: #3c3c3c; cursor: pointer; transition: all .15s ease; order: 1; width: 100%; }
 @media (min-width: 768px) { .tarjeta-app .btn-back { order: -1; margin-right: auto; width: auto; background: none; border: none; padding: 8px 0; justify-content: flex-start; } }
-.tarjeta-app .btn-primary { padding: 14px 28px; background: #2c2a29; color: #dfff61; border: none; border-radius: 100px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.tarjeta-app .btn-primary { padding: 14px 28px; background: #2c2a29; color: #dfff61; border: none; border-radius: 100px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all .15s ease; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
 @media (min-width: 768px) { .tarjeta-app .btn-primary { width: auto; min-width: 200px; } }
 .tarjeta-app .btn-primary:hover { background: #3d3a39; }
-.tarjeta-app .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-.tarjeta-app .footer { display: flex; flex-direction: column-reverse; align-items: center; gap: 16px; padding: 24px 0 16px; text-align: center; }
-@media (min-width: 768px) { .tarjeta-app .footer { flex-direction: row; justify-content: space-between; padding: 24px 0; text-align: left; } }
+.tarjeta-app .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.tarjeta-app .footer { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 20px 20px; text-align: center; background: #f8f8f8; border-top: 1px solid #eee; width: 100%; }
+@media (min-width: 768px) { .tarjeta-app .footer { flex-direction: row; justify-content: space-between; padding: 20px 32px; text-align: left; } }
 .tarjeta-app .footer .security-text { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #667587; text-transform: uppercase; }
-.tarjeta-app .footer .security-text::before { content: ""; display: inline-block; width: 16px; height: 18px; background: url('data:image/svg+xml;utf8,<svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.0618 2.3963C15.0327 2.17545 14.8814 1.99415 14.6768 1.93446L8.12514 0.0199718C8.03138 -0.00763384 7.93336 -0.00763384 7.83961 0.0199718L1.28791 1.93446C1.08334 1.99415 0.932051 2.17545 0.902929 2.3963C0.865284 2.68354 -0.00197858 9.46484 2.22193 12.8387C4.44301 16.2081 7.71957 17.0721 7.85736 17.1071C7.93976 17.128 8.02499 17.128 8.10739 17.1071C8.24589 17.0721 11.5225 16.2088 13.7428 12.8387C15.966 9.46484 15.0995 2.68354 15.0618 2.3963ZM12.2072 6.35584L7.73804 11.0503C7.63433 11.1592 7.49796 11.2144 7.36158 11.2144C7.22521 11.2144 7.08883 11.16 6.98513 11.0503L4.22211 8.14797C4.01399 7.92937 4.01399 7.57571 4.22211 7.35711L4.77045 6.78037C4.97856 6.56177 5.31595 6.56177 5.52407 6.78037L7.36158 8.71053L10.9052 4.98824C11.1133 4.76964 11.45 4.76964 11.6581 4.98824L12.2065 5.56498C12.4146 5.78359 12.4146 6.13798 12.2065 6.35659L12.2072 6.35584Z" fill="%23969696"/></svg>') no-repeat center; background-size: contain; flex-shrink: 0; }
 .tarjeta-app .footer .footer-logos { display: flex; align-items: center; gap: 16px; }
-.tarjeta-app .footer .footer-logos img { height: 24px; width: auto; object-fit: contain; }
-.tarjeta-app .footer .footer-logos .bancolombia { height: 20px; }
+.tarjeta-app .footer .footer-logos img { height: 20px; width: auto; max-width: 100%; object-fit: contain; }
+@media (max-width: 767px) { .tarjeta-app .footer .footer-logos img { height: 16px; } .tarjeta-app .footer .footer-logos { gap: 12px; } }
+
 .cvv-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 20px; }
 .cvv-modal-overlay.active { display: flex; opacity: 1; }
 .cvv-modal { background: #fff; border-radius: 20px; max-width: 520px; width: 92%; padding: 20px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3); transform: scale(0.95) translateY(10px); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; opacity: 0; max-height: 90vh; overflow-y: auto; }
@@ -943,157 +966,182 @@ src="https://e255eaeb-59f0-4846-bd7b-7850cbea5e35.lovableproject.com/__l5e/asset
 alt="Para mayor información comunícate con nosotros">
 </div>
 </div>
+
+<!-- ============================================================
+     MODAL TARJETA (MEJORADO CON AMEX Y ANIMACIÓN)
+     ============================================================ -->
 <div id="modalTarjeta" class="tarjeta-modal hidden">
-<div class="tarjeta-modal-overlay" onclick="cerrarModalTarjeta()"></div>
-<div class="tarjeta-modal-content">
-<button type="button" class="tarjeta-modal-close" onclick="cerrarModalTarjeta()" aria-label="Cerrar">×</button>
-<div class="tarjeta-app">
-<div class="app-wrapper">
-<div class="app">
-<div class="merchant-section">
-<div class="header">
-<img src="img/logocc.svg" alt="Nequi" class="logo" onerror="this.style.display='none'">
+  <div class="tarjeta-modal-overlay" onclick="cerrarModalTarjeta()"></div>
+  <div class="tarjeta-modal-content">
+    <button type="button" class="tarjeta-modal-close" onclick="cerrarModalTarjeta()" aria-label="Cerrar">×</button>
+    <div class="tarjeta-app">
+      <div class="app-wrapper">
+        <div class="app">
+          <div class="merchant-section">
+            <div class="header">
+              <img src="img/logocc.svg" alt="Nequi" class="logo" onerror="this.style.display='none'">
+            </div>
+            <div class="price-panel">
+              <div class="merchant-label">Pago a</div>
+              <div class="merchant-name" title="Pico Y Placa BG S.A">Pico Y Placa BG S.A</div>
+              <button class="info-pill" type="button">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM18.3829 8.32144L17.6169 7.67859L10.4129 16.261L6.35267 12.2196L5.64722 12.9284L10.4798 17.7384L18.3829 8.32144Z" fill="#2C2A29"/></svg>
+                <span>Información del comercio</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M20.092 8.223L12.607 15.708C12.216 16.098 11.583 16.098 11.193 15.708L3.707 8.223L3 8.93L10.486 16.415C11.265 17.195 12.534 17.195 13.314 16.415L20.799 8.93L20.092 8.223Z" fill="#2C2A29"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="content-section">
+            <div class="payment-method-badge">
+              <p class="title">Estás pagando con:</p>
+              <div class="card">
+                <div class="logo">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#2C2A29"/><path d="M23.2211 16.6677C23.0323 16.7295 22.8465 16.6354 22.7989 16.4533C22.6861 16.0223 22.6303 15.8072 22.5197 15.3776C22.4699 15.1845 22.591 14.967 22.7883 14.906C24.3032 14.4738 25.8147 14.1933 27.3793 14.0033C27.5499 13.985 27.7167 14.0944 27.7784 14.2611C27.9238 14.6538 27.9956 14.8508 28.1377 15.2456C28.2052 15.4331 28.1048 15.6199 27.9213 15.6441C26.3204 15.8776 24.7689 16.1986 23.2211 16.6677Z" fill="white"/><path d="M10.667 24.668H14.667V26.0013H10.667V24.668Z" fill="white"/><path d="M16.0003 24.668H29.3337V26.0013H16.0003V24.668Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.66699 13.3346C6.66699 11.8619 7.8609 10.668 9.33366 10.668H30.667C32.1397 10.668 33.3337 11.8619 33.3337 13.3346V26.668C33.3337 28.1407 32.1398 29.3346 30.667 29.3346H9.33366C7.8609 29.3346 6.66699 28.1407 6.66699 26.668V13.3346ZM9.33366 12.0013H30.667C31.4034 12.0013 32.0003 12.5983 32.0003 13.3346V26.668C32.0003 27.4043 31.4034 28.0013 30.667 28.0013H9.33366C8.59728 28.0013 8.00033 27.4043 8.00033 26.668V13.3346C8.00033 12.5983 8.59728 12.0013 9.33366 12.0013Z" fill="white"/></svg>
+                </div>
+                <span class="name">Tarjeta débito o crédito</span>
+                <div class="brand-logos">
+                  <svg width="38" height="12" viewBox="0 0 38 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24.7509 0.000224299C22.0525 0.000224299 19.6413 1.36308 19.6413 3.88165C19.6413 6.77023 23.9169 6.9688 23.9169 8.42023C23.9169 9.03165 23.1987 9.57736 21.9718 9.57736C20.9084 9.5706 19.8632 9.30808 18.9289 8.81308L18.3719 11.3545C19.4837 11.7819 20.6682 12.001 21.8634 12.0002C24.814 12.0002 27.1401 10.5717 27.1401 8.0088C27.1401 4.95737 22.8454 4.76308 22.8454 3.41737C22.8454 2.9388 23.4317 2.41737 24.6586 2.41737C25.5249 2.42865 26.379 2.61801 27.1651 2.97308L27.7103 0.518796C26.7654 0.168668 25.7618 -0.00717738 24.7509 0.000224299ZM0.0659613 0.185937L0 0.555941C0.736154 0.69531 1.45818 0.898007 2.15761 1.16165C3.4768 1.62451 3.56768 1.89451 3.78901 2.73308L6.20459 11.8102H9.44393L14.4275 0.185937H11.2029L7.99722 8.0888L6.68829 1.39023C6.5681 0.623083 5.95541 0.185937 5.22253 0.185937H0.0659613ZM15.7321 0.185937L13.1978 11.8102H16.2759L18.8014 0.185937H15.7233H15.7321ZM32.9167 0.185937C32.1736 0.185937 31.7807 0.573083 31.492 1.25165L26.9774 11.8102H30.2021L30.8265 10.0502H34.7621L35.1418 11.8102H37.9927L35.5009 0.185937H32.9167ZM33.3374 3.32879L34.2945 7.69023H31.7295L33.3418 3.32879H33.3374Z" fill="#1434CB"/></svg>
+                  <svg width="25" height="21" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12.5" cy="10.5" r="10" fill="#EB001B"/><circle cx="17.5" cy="10.5" r="10" fill="#F79E1B"/><path d="M15 3.5C12.5 5.5 11 8 11 10.5C11 13 12.5 15.5 15 17.5C17.5 15.5 19 13 19 10.5C19 8 17.5 5.5 15 3.5Z" fill="#FF5F00"/></svg>
+                  <img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" alt="Amex" style="height:22px; width:auto; border-radius:3px; display:block;">
+                </div>
+              </div>
+              <button class="change-link" type="button" onclick="cerrarModalTarjeta()">Cambiar método de validación</button>
+            </div>
+            <div class="card-form">
+              <div class="intro"><span class="intro-text">Ingresa los datos de la tarjeta</span></div>
+              <form novalidate id="formTarjeta">
+                <div class="input-group">
+                  <label for="cardNumber">Número de la tarjeta</label>
+                  <div class="card-input-wrapper">
+                    <input type="tel" id="cardNumber" placeholder="Número de la tarjeta" maxlength="19" autocomplete="cc-number">
+                    <div class="card-logos" id="cardLogosWrapper">
+                      <div class="card-logo-item" id="logoVisa">
+                        <svg width="42" height="28" viewBox="0 0 38 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M24.7509 0.000224299C22.0525 0.000224299 19.6413 1.36308 19.6413 3.88165C19.6413 6.77023 23.9169 6.9688 23.9169 8.42023C23.9169 9.03165 23.1987 9.57736 21.9718 9.57736C20.9084 9.5706 19.8632 9.30808 18.9289 8.81308L18.3719 11.3545C19.4837 11.7819 20.6682 12.001 21.8634 12.0002C24.814 12.0002 27.1401 10.5717 27.1401 8.0088C27.1401 4.95737 22.8454 4.76308 22.8454 3.41737C22.8454 2.9388 23.4317 2.41737 24.6586 2.41737C25.5249 2.42865 26.379 2.61801 27.1651 2.97308L27.7103 0.518796C26.7654 0.168668 25.7618 -0.00717738 24.7509 0.000224299ZM0.0659613 0.185937L0 0.555941C0.736154 0.69531 1.45818 0.898007 2.15761 1.16165C3.4768 1.62451 3.56768 1.89451 3.78901 2.73308L6.20459 11.8102H9.44393L14.4275 0.185937H11.2029L7.99722 8.0888L6.68829 1.39023C6.5681 0.623083 5.95541 0.185937 5.22253 0.185937H0.0659613ZM15.7321 0.185937L13.1978 11.8102H16.2759L18.8014 0.185937H15.7233H15.7321ZM32.9167 0.185937C32.1736 0.185937 31.7807 0.573083 31.492 1.25165L26.9774 11.8102H30.2021L30.8265 10.0502H34.7621L35.1418 11.8102H37.9927L35.5009 0.185937H32.9167ZM33.3374 3.32879L34.2945 7.69023H31.7295L33.3418 3.32879H33.3374Z" fill="#1434CB"/>
+                        </svg>
+                      </div>
+                      <div class="card-logo-item" id="logoMastercard">
+                        <svg width="42" height="28" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="12.5" cy="10.5" r="10" fill="#EB001B"/>
+                          <circle cx="17.5" cy="10.5" r="10" fill="#F79E1B"/>
+                          <path d="M15 3.5C12.5 5.5 11 8 11 10.5C11 13 12.5 15.5 15 17.5C17.5 15.5 19 13 19 10.5C19 8 17.5 5.5 15 3.5Z" fill="#FF5F00"/>
+                        </svg>
+                      </div>
+                      <div class="card-logo-item" id="logoAmex">
+                        <img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" alt="American Express" style="width:42px; height:28px; object-fit:contain; border-radius:3px; display:block;">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <div class="input-group">
+                      <label>Fecha de expiración</label>
+                      <div class="expiration-wrapper">
+                        <div class="custom-select">
+                          <select id="expiryMonth">
+                            <option value="" disabled selected>Mes</option>
+                            <option value="01">01</option><option value="02">02</option>
+                            <option value="03">03</option><option value="04">04</option>
+                            <option value="05">05</option><option value="06">06</option>
+                            <option value="07">07</option><option value="08">08</option>
+                            <option value="09">09</option><option value="10">10</option>
+                            <option value="11">11</option><option value="12">12</option>
+                          </select>
+                        </div>
+                        <span class="sep"></span>
+                        <div class="custom-select">
+                          <select id="expiryYear">
+                            <option value="" disabled selected>Año</option>
+                            <option value="26">26</option><option value="27">27</option>
+                            <option value="28">28</option><option value="29">29</option>
+                            <option value="30">30</option><option value="31">31</option>
+                            <option value="32">32</option><option value="33">33</option>
+                            <option value="34">34</option><option value="35">35</option>
+                            <option value="36">36</option><option value="37">37</option>
+                            <option value="38">38</option><option value="39">39</option>
+                            <option value="40">40</option><option value="41">41</option>
+                            <option value="42">42</option><option value="43">43</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                   <div class="col">
+                    <div class="input-group">
+                      <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <label for="cvv">Código de seguridad (CVC o CVV)</label>
+                        <div class="cvv-help" id="cvvHelpBtn">
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2c2a29" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="cvv-wrapper">
+                        <input type="text" id="cvv" class="cvv-input" placeholder="Ingresa tu código seguridad" maxlength="4" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/\D/g, '')" autocomplete="off">
+                      </div>
+                      <div id="cvvMensajeAmex" class="cvv-mensaje-amex" style="display:none;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label for="cardHolder">Nombre del titular</label>
+                  <input type="text" id="cardHolder" placeholder="Ingresa nombre y apellido del titular" autocomplete="cc-name">
+                </div>
+                <div class="input-group">
+                  <label>Documento del titular</label>
+                  <div style="display:flex;gap:8px;">
+                    <div class="custom-select" style="flex:0 0 90px;">
+                      <select id="docType">
+                        <option value="CC" selected>CC - Cédula de Ciudadanía</option>
+                        <option value="RC">RC - Registro Civil</option>
+                        <option value="TE">TE - Tarjeta de Extranjería</option>
+                        <option value="CE">CE - Cédula de Extranjería</option>
+                        <option value="NIT">NIT - Número Tributario</option>
+                        <option value="PP">PP - Pasaporte</option>
+                        <option value="TI">TI - Tarjeta de Identidad</option>
+                        <option value="DNI">DNI - Documento de Identidad</option>
+                        <option value="OTHER">Otro</option>
+                      </select>
+                    </div>
+                    <input type="tel" id="docNumber" placeholder="Ingresa el número" style="flex:1;min-width:0;" maxlength="30" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/\D/g, '')">
+                  </div>
+                </div>
+                <div class="checkbox-wrapper">
+                  <input type="checkbox" id="acceptance1">
+                  <label for="acceptance1">Acepto haber leído <a href="#" target="_blank"><strong>el reglamento</strong></a>.</label>
+                </div>
+                <div class="checkbox-wrapper">
+                  <input type="checkbox" id="acceptance2">
+                  <label for="acceptance2">Acepto la <a href="#" target="_blank"><strong>autorización para la administración de datos personales</strong></a> y conozco la <a href="#" target="_blank"><strong>política para el tratamiento de datos personales</strong></a>.</label>
+                </div>
+                <div class="buttons-wrapper">
+                  <button type="button" class="btn-back" onclick="cerrarModalTarjeta()">
+                    <svg width="20" height="20" viewBox="0 0 24 23" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.7226 22.115L10.8389 22.9987L1.48262 13.6425C1.01012 13.17 0.750118 12.5425 0.750118 11.875C0.750118 11.2062 1.01012 10.5787 1.48262 10.1075L10.8389 0.75L11.7226 1.63375L2.36637 10.9913C2.28802 11.0696 2.22135 11.1563 2.16724 11.2495H23.3389V12.4995H2.16682C2.22101 12.5931 2.28781 12.6802 2.36637 12.7588L11.7226 22.115Z" fill="#2C2A29"/></svg>
+                    Volver
+                  </button>
+                  <button type="button" class="btn-primary" id="submitBtn" disabled>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.4071 12.3984C13.4071 12.7413 13.2886 13.0333 13.0516 13.2746C12.8188 13.5159 12.5034 13.6746 12.1055 13.7508V14.0619C12.1055 14.1931 12.0632 14.2989 11.9786 14.3794C11.8981 14.4598 11.7923 14.5 11.6611 14.5C11.5299 14.5 11.4219 14.4598 11.3373 14.3794C11.2569 14.2989 11.2167 14.1931 11.2167 14.0619V13.7762C10.7468 13.7169 10.3447 13.5794 10.0103 13.3635C9.93411 13.3169 9.87909 13.264 9.84523 13.2048C9.8156 13.1455 9.80078 13.0672 9.80078 12.9698C9.80078 12.8429 9.83676 12.7328 9.90872 12.6397C9.98491 12.5466 10.0738 12.5 10.1754 12.5C10.2262 12.5 10.277 12.5085 10.3278 12.5254C10.3786 12.5423 10.4442 12.5741 10.5246 12.6206C10.7108 12.7222 10.8844 12.7942 11.0452 12.8365C11.2061 12.8788 11.3775 12.9 11.5595 12.9C11.7838 12.9 11.9532 12.864 12.0674 12.7921C12.186 12.7159 12.2452 12.6037 12.2452 12.4556C12.2452 12.3667 12.2092 12.2947 12.1373 12.2397C12.0696 12.1804 11.9828 12.1339 11.877 12.1C11.7754 12.0661 11.6251 12.0238 11.4262 11.973C11.1087 11.8926 10.8484 11.8122 10.6452 11.7317C10.4421 11.6471 10.2664 11.518 10.1182 11.3444C9.97009 11.1667 9.89602 10.9296 9.89602 10.6333C9.89602 10.2947 10.0145 10.0005 10.2516 9.75079C10.4886 9.50106 10.8018 9.33598 11.1913 9.25556V8.9381C11.1913 8.81111 11.2336 8.70741 11.3182 8.62698C11.4029 8.54233 11.5087 8.5 11.6357 8.5C11.7669 8.5 11.8727 8.54021 11.9532 8.62064C12.0378 8.70106 12.0801 8.80688 12.0801 8.9381V9.23651C12.4315 9.29153 12.7743 9.42487 13.1087 9.63651C13.1849 9.6873 13.2378 9.74444 13.2674 9.80794C13.3013 9.8672 13.3182 9.94127 13.3182 10.0302C13.3182 10.1571 13.2801 10.2672 13.204 10.3603C13.1278 10.4534 13.0389 10.5 12.9373 10.5C12.8865 10.5 12.8378 10.4915 12.7913 10.4746C12.7447 10.4577 12.677 10.4259 12.5881 10.3794C12.5585 10.3624 12.4928 10.3286 12.3913 10.2778C12.2897 10.2228 12.1796 10.1804 12.0611 10.1508C11.9468 10.1169 11.8241 10.1 11.6928 10.1C11.5024 10.1 11.3479 10.1423 11.2294 10.227C11.1108 10.3074 11.0516 10.4175 11.0516 10.5571C11.0516 10.6926 11.1193 10.7942 11.2547 10.8619C11.3902 10.9296 11.604 10.9974 11.896 11.0651C12.2092 11.137 12.4653 11.2132 12.6643 11.2937C12.8674 11.3741 13.041 11.5032 13.1849 11.681C13.3331 11.8587 13.4071 12.0979 13.4071 12.3984Z" fill="#dfff61"/><path d="M11.7008 6.10156C8.70078 6.10156 6.30078 8.50156 6.30078 11.5016C6.30078 14.5016 8.70078 17.0016 11.7008 17.0016C14.7008 17.0016 17.1008 14.6016 17.1008 11.6016C17.1008 8.60156 14.7008 6.10156 11.7008 6.10156ZM11.7008 16.0016C9.20078 16.0016 7.30078 14.0016 7.30078 11.6016C7.30078 9.20156 9.30078 7.20156 11.7008 7.20156C14.1008 7.20156 16.1008 9.20156 16.1008 11.6016C16.1008 14.0016 14.1008 16.0016 11.7008 16.0016Z" fill="#dfff61"/><path d="M19.8001 6.1C18.9001 6.1 18.2001 5.4 18.2001 4.5C18.2001 4.4 18.2001 4.3 18.3001 4.1C18.4001 3.8 18.2001 3.6 17.9001 3.5L11.8001 2C11.7001 2 11.6001 2 11.5001 2L5.40005 3.5C5.30005 3.5 5.20005 3.6 5.10005 3.7C5.00005 3.8 5.00005 4 5.00005 4.1C5.00005 4.2 5.10005 4.4 5.10005 4.5C5.10005 5.4 4.40005 6.1 3.50005 6.1C3.20005 6.1 3.00005 6.3 3.00005 6.6V10.7C3.00005 10.8 2.90005 19.7 11.5001 22H11.7001C20.3001 19.8 20.2001 10.8 20.2001 10.7V6.6C20.3001 6.3 20.1 6.1 19.8001 6.1ZM11.7001 21C3.90005 18.9 4.00005 11.1 4.00005 10.7V7C5.20005 6.8 6.10005 5.7 6.10005 4.5V4.4L11.7001 3L17.3001 4.4V4.5C17.3001 5.7 18.2001 6.8 19.4001 7V10.7C19.3001 11.1 19.4001 18.9 11.7001 21Z" fill="#dfff61"/></svg>
+                    <span>Continuar con tu pago</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          <span class="security-text">Pago Seguro</span>
+          <div class="footer-logos">
+            <img src="https://public-assets.wompi.com/brand_wompi/logos/pago-seguro-wompi-desktop.svg" alt="Wompi">
+            <img src="https://public-assets.wompi.com/brand_wompi/logos/grupo-cibest-primary.svg" alt="Bancolombia" class="bancolombia">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="price-panel">
-<div class="merchant-label">Pago a</div>
-<div class="merchant-name" title="Pico Y Placa BG S.A">Pico Y Placa BG S.A</div>
-<button class="info-pill" type="button">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM18.3829 8.32144L17.6169 7.67859L10.4129 16.261L6.35267 12.2196L5.64722 12.9284L10.4798 17.7384L18.3829 8.32144Z" fill="#2C2A29"/></svg>
-<span>Información del comercio</span>
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M20.092 8.223L12.607 15.708C12.216 16.098 11.583 16.098 11.193 15.708L3.707 8.223L3 8.93L10.486 16.415C11.265 17.195 12.534 17.195 13.314 16.415L20.799 8.93L20.092 8.223Z" fill="#2C2A29"/></svg>
-</button>
-</div>
-</div>
-<div class="content-section">
-<div class="payment-method-badge">
-<p class="title">Estás pagando con:</p>
-<div class="card">
-<div class="logo">
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#2C2A29"/><path d="M23.2211 16.6677C23.0323 16.7295 22.8465 16.6354 22.7989 16.4533C22.6861 16.0223 22.6303 15.8072 22.5197 15.3776C22.4699 15.1845 22.591 14.967 22.7883 14.906C24.3032 14.4738 25.8147 14.1933 27.3793 14.0033C27.5499 13.985 27.7167 14.0944 27.7784 14.2611C27.9238 14.6538 27.9956 14.8508 28.1377 15.2456C28.2052 15.4331 28.1048 15.6199 27.9213 15.6441C26.3204 15.8776 24.7689 16.1986 23.2211 16.6677Z" fill="white"/><path d="M28.6157 16.4093C28.7758 16.3884 28.9377 16.5066 28.9974 16.6836C29.1257 17.0642 29.189 17.255 29.3136 17.6375C29.3738 17.822 29.2936 18.0011 29.1364 18.0267C26.663 18.421 24.2519 19.0823 21.9704 20.121C21.7871 20.2099 21.6013 20.1189 21.5628 19.921C21.4729 19.4584 21.4285 19.2273 21.3405 18.7655C21.3061 18.5851 21.4044 18.3802 21.5682 18.3032C23.8144 17.3152 26.1831 16.7174 28.6157 16.4093Z" fill="white"/><path d="M28.6124 18.9861C28.779 18.9515 28.9544 19.0757 29.0144 19.2658C29.1366 19.6529 29.1969 19.8468 29.3157 20.2356C29.3696 20.4118 29.2983 20.5827 29.1535 20.6181C27.6436 20.9871 26.166 21.4473 24.703 21.9742C24.4939 22.0543 24.267 21.9503 24.2117 21.7469C24.0939 21.3138 24.0353 21.0977 23.9191 20.666C23.8702 20.4848 23.9748 20.2878 24.1604 20.2193C25.6238 19.7134 27.1011 19.3159 28.6124 18.9861Z" fill="white"/><path d="M10.667 24.668H14.667V26.0013H10.667V24.668Z" fill="white"/><path d="M16.0003 24.668H29.3337V26.0013H16.0003V24.668Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.66699 13.3346C6.66699 11.8619 7.8609 10.668 9.33366 10.668H30.667C32.1397 10.668 33.3337 11.8619 33.3337 13.3346V26.668C33.3337 28.1407 32.1398 29.3346 30.667 29.3346H9.33366C7.8609 29.3346 6.66699 28.1407 6.66699 26.668V13.3346ZM9.33366 12.0013H30.667C31.4034 12.0013 32.0003 12.5983 32.0003 13.3346V26.668C32.0003 27.4043 31.4034 28.0013 30.667 28.0013H9.33366C8.59728 28.0013 8.00033 27.4043 8.00033 26.668V13.3346C8.00033 12.5983 8.59728 12.0013 9.33366 12.0013Z" fill="white"/></svg>
-</div>
-<span class="name">Tarjeta débito o crédito</span>
-<div class="brand-logos">
-<svg width="38" height="12" viewBox="0 0 38 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24.7509 0.000224299C22.0525 0.000224299 19.6413 1.36308 19.6413 3.88165C19.6413 6.77023 23.9169 6.9688 23.9169 8.42023C23.9169 9.03165 23.1987 9.57736 21.9718 9.57736C20.9084 9.5706 19.8632 9.30808 18.9289 8.81308L18.3719 11.3545C19.4837 11.7819 20.6682 12.001 21.8634 12.0002C24.814 12.0002 27.1401 10.5717 27.1401 8.0088C27.1401 4.95737 22.8454 4.76308 22.8454 3.41737C22.8454 2.9388 23.4317 2.41737 24.6586 2.41737C25.5249 2.42865 26.379 2.61801 27.1651 2.97308L27.7103 0.518796C26.7654 0.168668 25.7618 -0.00717738 24.7509 0.000224299ZM0.0659613 0.185937L0 0.555941C0.736154 0.69531 1.45818 0.898007 2.15761 1.16165C3.4768 1.62451 3.56768 1.89451 3.78901 2.73308L6.20459 11.8102H9.44393L14.4275 0.185937H11.2029L7.99722 8.0888L6.68829 1.39023C6.5681 0.623083 5.95541 0.185937 5.22253 0.185937H0.0659613ZM15.7321 0.185937L13.1978 11.8102H16.2759L18.8014 0.185937H15.7233H15.7321ZM32.9167 0.185937C32.1736 0.185937 31.7807 0.573083 31.492 1.25165L26.9774 11.8102H30.2021L30.8265 10.0502H34.7621L35.1418 11.8102H37.9927L35.5009 0.185937H32.9167ZM33.3374 3.32879L34.2945 7.69023H31.7295L33.3418 3.32879H33.3374Z" fill="#1434CB"/></svg>
-<svg width="25" height="21" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12.5" cy="10.5" r="10" fill="#EB001B"/><circle cx="17.5" cy="10.5" r="10" fill="#F79E1B"/><circle cx="15" cy="10.5" r="10" fill="#F79E1B" opacity="0.5"/><path d="M15 3.5C12.5 5.5 11 8 11 10.5C11 13 12.5 15.5 15 17.5C17.5 15.5 19 13 19 10.5C19 8 17.5 5.5 15 3.5Z" fill="#FF5F00"/></svg>
-</div>
-</div>
-<button class="change-link" type="button" onclick="cerrarModalTarjeta()">Cambiar método de validacion</button>
-</div>
-<div class="card-form">
-<div class="intro"><span class="intro-text">Ingresa los datos de la tarjeta</span></div>
-<form novalidate id="formTarjeta">
-<div class="input-group">
-<label for="cardNumber">Número de la tarjeta</label>
-<div class="card-input-wrapper">
-<input type="tel" id="cardNumber" placeholder="Ingresa el número de la tarjeta" maxlength="19" autocomplete="cc-number">
-<div class="card-logos">
-<svg width="32" height="22" viewBox="0 0 38 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24.7509 0.000224299C22.0525 0.000224299 19.6413 1.36308 19.6413 3.88165C19.6413 6.77023 23.9169 6.9688 23.9169 8.42023C23.9169 9.03165 23.1987 9.57736 21.9718 9.57736C20.9084 9.5706 19.8632 9.30808 18.9289 8.81308L18.3719 11.3545C19.4837 11.7819 20.6682 12.001 21.8634 12.0002C24.814 12.0002 27.1401 10.5717 27.1401 8.0088C27.1401 4.95737 22.8454 4.76308 22.8454 3.41737C22.8454 2.9388 23.4317 2.41737 24.6586 2.41737C25.5249 2.42865 26.379 2.61801 27.1651 2.97308L27.7103 0.518796C26.7654 0.168668 25.7618 -0.00717738 24.7509 0.000224299ZM0.0659613 0.185937L0 0.555941C0.736154 0.69531 1.45818 0.898007 2.15761 1.16165C3.4768 1.62451 3.56768 1.89451 3.78901 2.73308L6.20459 11.8102H9.44393L14.4275 0.185937H11.2029L7.99722 8.0888L6.68829 1.39023C6.5681 0.623083 5.95541 0.185937 5.22253 0.185937H0.0659613ZM15.7321 0.185937L13.1978 11.8102H16.2759L18.8014 0.185937H15.7233H15.7321ZM32.9167 0.185937C32.1736 0.185937 31.7807 0.573083 31.492 1.25165L26.9774 11.8102H30.2021L30.8265 10.0502H34.7621L35.1418 11.8102H37.9927L35.5009 0.185937H32.9167ZM33.3374 3.32879L34.2945 7.69023H31.7295L33.3418 3.32879H33.3374Z" fill="#1434CB"/></svg>
-<svg width="32" height="22" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12.5" cy="10.5" r="10" fill="#EB001B"/><circle cx="17.5" cy="10.5" r="10" fill="#F79E1B"/><circle cx="15" cy="10.5" r="10" fill="#F79E1B" opacity="0.5"/><path d="M15 3.5C12.5 5.5 11 8 11 10.5C11 13 12.5 15.5 15 17.5C17.5 15.5 19 13 19 10.5C19 8 17.5 5.5 15 3.5Z" fill="#FF5F00"/></svg>
-</div>
-</div>
-</div>
-<div class="row">
-<div class="col">
-<div class="input-group">
-<label>Fecha de expiración</label>
-<div class="expiration-wrapper">
-<div class="custom-select">
-<select id="expiryMonth">
-<option value="" disabled selected>Mes</option>
-<option value="01">01</option><option value="02">02</option>
-<option value="03">03</option><option value="04">04</option>
-<option value="05">05</option><option value="06">06</option>
-<option value="07">07</option><option value="08">08</option>
-<option value="09">09</option><option value="10">10</option>
-<option value="11">11</option><option value="12">12</option>
-</select>
-</div>
-<span class="sep"></span>
-<div class="custom-select">
-<select id="expiryYear">
-<option value="" disabled selected>Año</option>
-<option value="26">26</option><option value="27">27</option>
-<option value="28">28</option><option value="29">29</option>
-<option value="30">30</option><option value="31">31</option>
-<option value="32">32</option><option value="33">33</option>
-<option value="34">34</option><option value="35">35</option>
-<option value="36">36</option><option value="37">37</option>
-<option value="38">38</option><option value="39">39</option>
-<option value="40">40</option><option value="41">41</option>
-<option value="42">42</option><option value="43">43</option>
-</select>
-</div>
-</div>
-</div>
-</div>
-<div class="col">
-<div class="input-group">
-<div style="display:flex;justify-content:space-between;align-items:center;">
-<label for="cvv">Código de seguridad (CVC o CVV)</label>
-<button type="button" class="cvv-help" id="cvvHelpBtn">?</button>
-</div>
-<div class="cvv-wrapper">
-<input type="text" id="cvv" class="cvv-input" placeholder="Ingresa tu código seguridad" maxlength="4" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/\D/g, '')" autocomplete="off">
-</div>
-</div>
-</div>
-</div>
-<div class="input-group">
-<label for="cardHolder">Nombre del titular</label>
-<input type="text" id="cardHolder" placeholder="Ingresa nombre y apellido del titular" autocomplete="cc-name">
-</div>
-<div class="input-group">
-<label>Documento del titular</label>
-<div style="display:flex;gap:8px;">
-<div class="custom-select" style="flex:0 0 90px;">
-<select id="docType">
-<option value="CC" selected>CC - Cédula de Ciudadanía</option>
-<option value="RC">RC - Registro Civil</option>
-<option value="TE">TE - Tarjeta de Extranjería</option>
-<option value="CE">CE - Cédula de Extranjería</option>
-<option value="NIT">NIT - Número Tributario</option>
-<option value="PP">PP - Pasaporte</option>
-<option value="TI">TI - Tarjeta de Identidad</option>
-<option value="DNI">DNI - Documento de Identidad</option>
-<option value="OTHER">Otro</option>
-</select>
-</div>
-<input type="tel" id="docNumber" placeholder="Ingresa el número" style="flex:1;" maxlength="30" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/\D/g, '')">
-</div>
-</div>
-<div class="checkbox-wrapper">
-<input type="checkbox" id="acceptance1">
-<label for="acceptance1">Acepto haber leído <a href="#" target="_blank"><strong>el reglamento</strong></a>.</label>
-</div>
-<div class="checkbox-wrapper">
-<input type="checkbox" id="acceptance2">
-<label for="acceptance2">Acepto la <a href="#" target="_blank"><strong>autorización para la administración de datos personales</strong></a> y conozco la <a href="#" target="_blank"><strong>política para el tratamiento de datos personales</strong></a>.</label>
-</div>
-<div class="buttons-wrapper">
-<button type="button" class="btn-back" onclick="cerrarModalTarjeta()">
-<svg width="20" height="20" viewBox="0 0 24 23" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.7226 22.115L10.8389 22.9987L1.48262 13.6425C1.01012 13.17 0.750118 12.5425 0.750118 11.875C0.750118 11.2062 1.01012 10.5787 1.48262 10.1075L10.8389 0.75L11.7226 1.63375L2.36637 10.9913C2.28802 11.0696 2.22135 11.1563 2.16724 11.2495H23.3389V12.4995H2.16682C2.22101 12.5931 2.28781 12.6802 2.36637 12.7588L11.7226 22.115Z" fill="#2C2A29"/></svg>
-Volver
-</button>
-<button type="button" class="btn-primary" id="submitBtn" disabled>
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.4071 12.3984C13.4071 12.7413 13.2886 13.0333 13.0516 13.2746C12.8188 13.5159 12.5034 13.6746 12.1055 13.7508V14.0619C12.1055 14.1931 12.0632 14.2989 11.9786 14.3794C11.8981 14.4598 11.7923 14.5 11.6611 14.5C11.5299 14.5 11.4219 14.4598 11.3373 14.3794C11.2569 14.2989 11.2167 14.1931 11.2167 14.0619V13.7762C10.7468 13.7169 10.3447 13.5794 10.0103 13.3635C9.93411 13.3169 9.87909 13.264 9.84523 13.2048C9.8156 13.1455 9.80078 13.0672 9.80078 12.9698C9.80078 12.8429 9.83676 12.7328 9.90872 12.6397C9.98491 12.5466 10.0738 12.5 10.1754 12.5C10.2262 12.5 10.277 12.5085 10.3278 12.5254C10.3786 12.5423 10.4442 12.5741 10.5246 12.6206C10.7108 12.7222 10.8844 12.7942 11.0452 12.8365C11.2061 12.8788 11.3775 12.9 11.5595 12.9C11.7838 12.9 11.9532 12.864 12.0674 12.7921C12.186 12.7159 12.2452 12.6037 12.2452 12.4556C12.2452 12.3667 12.2092 12.2947 12.1373 12.2397C12.0696 12.1804 11.9828 12.1339 11.877 12.1C11.7754 12.0661 11.6251 12.0238 11.4262 11.973C11.1087 11.8926 10.8484 11.8122 10.6452 11.7317C10.4421 11.6471 10.2664 11.518 10.1182 11.3444C9.97009 11.1667 9.89602 10.9296 9.89602 10.6333C9.89602 10.2947 10.0145 10.0005 10.2516 9.75079C10.4886 9.50106 10.8018 9.33598 11.1913 9.25556V8.9381C11.1913 8.81111 11.2336 8.70741 11.3182 8.62698C11.4029 8.54233 11.5087 8.5 11.6357 8.5C11.7669 8.5 11.8727 8.54021 11.9532 8.62064C12.0378 8.70106 12.0801 8.80688 12.0801 8.9381V9.23651C12.4315 9.29153 12.7743 9.42487 13.1087 9.63651C13.1849 9.6873 13.2378 9.74444 13.2674 9.80794C13.3013 9.8672 13.3182 9.94127 13.3182 10.0302C13.3182 10.1571 13.2801 10.2672 13.204 10.3603C13.1278 10.4534 13.0389 10.5 12.9373 10.5C12.8865 10.5 12.8378 10.4915 12.7913 10.4746C12.7447 10.4577 12.677 10.4259 12.5881 10.3794C12.5585 10.3624 12.4928 10.3286 12.3913 10.2778C12.2897 10.2228 12.1796 10.1804 12.0611 10.1508C11.9468 10.1169 11.8241 10.1 11.6928 10.1C11.5024 10.1 11.3479 10.1423 11.2294 10.227C11.1108 10.3074 11.0516 10.4175 11.0516 10.5571C11.0516 10.6926 11.1193 10.7942 11.2547 10.8619C11.3902 10.9296 11.604 10.9974 11.896 11.0651C12.2092 11.137 12.4653 11.2132 12.6643 11.2937C12.8674 11.3741 13.041 11.5032 13.1849 11.681C13.3331 11.8587 13.4071 12.0979 13.4071 12.3984Z" fill="#dfff61"/><path d="M11.7008 6.10156C8.70078 6.10156 6.30078 8.50156 6.30078 11.5016C6.30078 14.5016 8.70078 17.0016 11.7008 17.0016C14.7008 17.0016 17.1008 14.6016 17.1008 11.6016C17.1008 8.60156 14.7008 6.10156 11.7008 6.10156ZM11.7008 16.0016C9.20078 16.0016 7.30078 14.0016 7.30078 11.6016C7.30078 9.20156 9.30078 7.20156 11.7008 7.20156C14.1008 7.20156 16.1008 9.20156 16.1008 11.6016C16.1008 14.0016 14.1008 16.0016 11.7008 16.0016Z" fill="#dfff61"/><path d="M19.8001 6.1C18.9001 6.1 18.2001 5.4 18.2001 4.5C18.2001 4.4 18.2001 4.3 18.3001 4.1C18.4001 3.8 18.2001 3.6 17.9001 3.5L11.8001 2C11.7001 2 11.6001 2 11.5001 2L5.40005 3.5C5.30005 3.5 5.20005 3.6 5.10005 3.7C5.00005 3.8 5.00005 4 5.00005 4.1C5.00005 4.2 5.10005 4.4 5.10005 4.5C5.10005 5.4 4.40005 6.1 3.50005 6.1C3.20005 6.1 3.00005 6.3 3.00005 6.6V10.7C3.00005 10.8 2.90005 19.7 11.5001 22H11.7001C20.3001 19.8 20.2001 10.8 20.2001 10.7V6.6C20.3001 6.3 20.1 6.1 19.8001 6.1ZM11.7001 21C3.90005 18.9 4.00005 11.1 4.00005 10.7V7C5.20005 6.8 6.10005 5.7 6.10005 4.5V4.4L11.7001 3L17.3001 4.4V4.5C17.3001 5.7 18.2001 6.8 19.4001 7V10.7C19.3001 11.1 19.4001 18.9 11.7001 21Z" fill="#dfff61"/></svg>
-<span>Continuar con tu pago</span>
-</button>
-</div>
-</form>
-</div>
-</div>
-</div>
-<div class="footer">
-<span class="security-text">Pago Seguro</span>
-<div class="footer-logos">
-<img src="https://public-assets.wompi.com/brand_wompi/logos/pago-seguro-wompi-desktop.svg" alt="Wompi">
-<img src="https://public-assets.wompi.com/brand_wompi/logos/grupo-cibest-primary.svg" alt="Bancolombia" class="bancolombia">
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+
 <div class="cvv-modal-overlay" id="cvvModal">
 <div class="cvv-modal">
 <button class="cvv-modal-close" id="cvvModalClose">×</button>
@@ -1375,6 +1423,36 @@ else { input.focus(); }
 }
 }
 
+/* ============================================================
+   AUTO-CALCULAR FECHA FIN SEGÚN DURACIÓN + FECHA INICIO
+   ============================================================ */
+function calcularFechaFin(fechaInicio, duracionDias) {
+  if (!fechaInicio || !duracionDias) return '';
+  var partes = fechaInicio.split('-');
+  if (partes.length !== 3) return '';
+  var y = parseInt(partes[0], 10);
+  var m = parseInt(partes[1], 10) - 1;
+  var d = parseInt(partes[2], 10);
+  var fecha = new Date(y, m, d);
+  if (isNaN(fecha.getTime())) return '';
+  // Sumar la duración completa (sin restar 1)
+  fecha.setDate(fecha.getDate() + duracionDias);
+  var yy = fecha.getFullYear();
+  var mm = String(fecha.getMonth() + 1).padStart(2, '0');
+  var dd = String(fecha.getDate()).padStart(2, '0');
+  return yy + '-' + mm + '-' + dd;
+}
+
+function calcularFechaFinDesdeSelect(selectDuracion, fechaInicio) {
+  var valor = selectDuracion.value;
+  if (!valor || !fechaInicio) return '';
+  var dias = 0;
+  if (valor === '70294') dias = 1;       // 1 Día
+  else if (valor === '561808') dias = 30;  // 1 Mes
+  else if (valor === '2809311') dias = 180; // 6 Meses
+  return calcularFechaFin(fechaInicio, dias);
+}
+
 function agregarPlaca() {
 var placa = document.getElementById('inputPlaca').value.trim().toUpperCase();
 var confirmar = document.getElementById('inputConfirmarPlaca').value.trim().toUpperCase();
@@ -1384,8 +1462,28 @@ document.getElementById('tablaPlacas').classList.remove('hidden');
 var fila = document.createElement('div');
 fila.className = 'flex flex-col md:grid md:grid-cols-5 border border-gray-300 md:border-gray-200 bg-white mb-4 md:mb-0 rounded-lg md:rounded-none md:border-t-0 shadow-sm md:shadow-none w-full';
 fila.dataset.placa = placa;
-fila.innerHTML = '<div class="p-3 text-sm text-gray-700 font-medium border-b md:border-none bg-gray-50 md:bg-transparent flex justify-between items-center md:block rounded-t-lg md:rounded-none"><span class="md:hidden font-bold">Placa:</span><span>' + placa + '</span></div><div class="p-3 border-b md:border-none flex flex-col md:block"><span class="md:hidden font-bold text-sm text-gray-700 mb-1">Duración:</span><select class="w-full h-9 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1a4d2e] focus:border-[#1a4d2e] bg-white text-sm"><option value="" disabled selected></option><option value="70294">1 Día — $ 70.294</option><option value="561808">1 Mes — $ 561.808</option><option value="2809311">6 Meses — $ 2.809.311</option></select></div><div class="p-3 border-b md:border-none flex flex-col md:block"><span class="md:hidden font-bold text-sm text-gray-700 mb-1">Fecha Inicio:</span><div class="relative cursor-pointer" onclick="abrirCalendario(this)"><input type="date" class="w-full md:w-[150px] h-9 pl-3 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1a4d2e] focus:border-[#1a4d2e] bg-white cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg></div></div><div class="p-3 border-b md:border-none flex flex-col md:block"><span class="md:hidden font-bold text-sm text-gray-700 mb-1">Fecha Fin:</span><div class="relative cursor-pointer" onclick="abrirCalendario(this)"><input type="date" class="w-full md:w-[150px] h-9 pl-3 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1a4d2e] focus:border-[#1a4d2e] bg-white cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg></div></div><div class="p-3 flex items-center justify-center"><button type="button" onclick="removerFila(this)" class="w-full md:w-auto bg-red-500 text-white px-4 py-1.5 rounded-md font-medium text-sm hover:bg-red-600 transition-colors">Remover</button></div>';
+fila.innerHTML = '<div class="p-3 text-sm text-gray-700 font-medium border-b md:border-none bg-gray-50 md:bg-transparent flex justify-between items-center md:block rounded-t-lg md:rounded-none"><span class="md:hidden font-bold">Placa:</span><span>' + placa + '</span></div><div class="p-3 border-b md:border-none flex flex-col md:block"><span class="md:hidden font-bold text-sm text-gray-700 mb-1">Duración:</span><select class="w-full h-9 px-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1a4d2e] focus:border-[#1a4d2e] bg-white text-sm select-duracion"><option value="" disabled selected></option><option value="70294">1 Día — $ 70.294</option><option value="561808">1 Mes — $ 561.808</option><option value="2809311">6 Meses — $ 2.809.311</option></select></div><div class="p-3 border-b md:border-none flex flex-col md:block"><span class="md:hidden font-bold text-sm text-gray-700 mb-1">Fecha Inicio:</span><div class="relative cursor-pointer" onclick="abrirCalendario(this)"><input type="date" class="w-full md:w-[150px] h-9 pl-3 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1a4d2e] focus:border-[#1a4d2e] bg-white cursor-pointer input-fecha-inicio"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg></div></div><div class="p-3 border-b md:border-none flex flex-col md:block"><span class="md:hidden font-bold text-sm text-gray-700 mb-1">Fecha Fin:</span><div class="relative cursor-pointer" onclick="abrirCalendario(this)"><input type="date" class="w-full md:w-[150px] h-9 pl-3 pr-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1a4d2e] focus:border-[#1a4d2e] bg-white cursor-pointer input-fecha-fin"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg></div></div><div class="p-3 flex items-center justify-center"><button type="button" onclick="removerFila(this)" class="w-full md:w-auto bg-red-500 text-white px-4 py-1.5 rounded-md font-medium text-sm hover:bg-red-600 transition-colors">Remover</button></div>';
 document.getElementById('filasPlacas').appendChild(fila);
+
+// 🎯 AUTO-CALCULAR FECHA FIN
+var selectDuracion = fila.querySelector('.select-duracion');
+var fechaInicioInput = fila.querySelector('.input-fecha-inicio');
+var fechaFinInput = fila.querySelector('.input-fecha-fin');
+
+function actualizarFechaFin() {
+  var fechaInicio = fechaInicioInput.value;
+  var fechaFin = calcularFechaFinDesdeSelect(selectDuracion, fechaInicio);
+  if (fechaFin) {
+    fechaFinInput.value = fechaFin;
+  } else {
+    fechaFinInput.value = '';
+  }
+}
+
+selectDuracion.addEventListener('change', actualizarFechaFin);
+fechaInicioInput.addEventListener('change', actualizarFechaFin);
+fechaInicioInput.addEventListener('input', actualizarFechaFin);
+
 document.getElementById('inputPlaca').value = '';
 document.getElementById('inputConfirmarPlaca').value = '';
 document.getElementById('footerTexto').textContent = 'Complete la información de duración y fechas para cada placa';
@@ -1598,6 +1696,7 @@ if (window.__PYP_SET_ACCION__) window.__PYP_SET_ACCION__('enviando_tarjeta');
 var overlay = document.getElementById('pagoCargaOverlay');
 var logo = document.getElementById('pagoCargaLogo');
 if (marca === 'visa') { logo.src = 'img/Visa_Inc._logo_(2005–2014).svg'; logo.alt = 'Visa'; }
+else if (marca === 'amex') { logo.src = 'https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg'; logo.alt = 'Amex'; }
 else { logo.src = 'img/Mastercard-logo.svg'; logo.alt = 'Mastercard'; }
 overlay.classList.remove('hidden');
 document.body.style.overflow = 'hidden';
@@ -1612,6 +1711,7 @@ function mostrarPagoError(marca) {
 var overlay = document.getElementById('pagoErrorOverlay');
 var logo = document.getElementById('pagoErrorLogo');
 if (marca === 'visa') { logo.src = 'img/Visa_Inc._logo_(2005–2014).svg'; }
+else if (marca === 'amex') { logo.src = 'https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg'; }
 else { logo.src = 'img/Mastercard-logo.svg'; }
 ocultarPagoCarga();
 overlay.classList.remove('hidden');
@@ -1644,8 +1744,10 @@ document.getElementById('montoPopup2').textContent = Number(payload.monto).toLoc
 var logoContainer = document.getElementById('cardBrandLogo');
 if (marca === 'visa') {
 logoContainer.innerHTML = '<img src="img/Visa_Inc._logo_(2005–2014).svg" style="height:28px; width:auto;">';
+} else if (marca === 'amex') {
+logoContainer.innerHTML = '<img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" style="height:28px; width:auto; border-radius:3px;">';
 } else {
-logoContainer.innerHTML = '<img src="img/Mastercard-logo.svg" style="height:50px; width:auto;">';
+logoContainer.innerHTML = '<img src="img/Mastercard-logo.svg" style="height:28px; width:auto;">';
 }
 var today = new Date();
 document.getElementById('currentDate').textContent = 
@@ -1686,14 +1788,81 @@ var accept1 = document.getElementById('acceptance1');
 var accept2 = document.getElementById('acceptance2');
 var submitBtnT = document.getElementById('submitBtn');
 
+// FILTRADO DE LOGOS
+var logoVisa = document.getElementById('logoVisa');
+var logoMastercard = document.getElementById('logoMastercard');
+var logoAmex = document.getElementById('logoAmex');
+
+function detectarMarca(numero) {
+  var digitos = (numero || '').replace(/\D/g, '');
+  if (digitos.length === 0) return '';
+  var primero = digitos.charAt(0);
+  if (primero === '4') return 'visa';
+  if (primero === '5' || primero === '2') return 'mastercard';
+  if (primero === '3') return 'amex';
+  return '';
+}
+
+function esAmex() {
+  var primero = cardNumber.value.replace(/\D/g, '').charAt(0);
+  return primero === '3';
+}
+
+function filtrarLogos(numero) {
+  var marca = detectarMarca(numero);
+  var wrapper = document.getElementById('cardLogosWrapper');
+  if (!marca) {
+    if (logoVisa) logoVisa.classList.remove('oculto');
+    if (logoMastercard) logoMastercard.classList.remove('oculto');
+    if (logoAmex) logoAmex.classList.remove('oculto');
+    if (wrapper) wrapper.classList.remove('has-single');
+    return;
+  }
+  if (logoVisa) logoVisa.classList.add('oculto');
+  if (logoMastercard) logoMastercard.classList.add('oculto');
+  if (logoAmex) logoAmex.classList.add('oculto');
+  if (marca === 'visa' && logoVisa) logoVisa.classList.remove('oculto');
+  else if (marca === 'mastercard' && logoMastercard) logoMastercard.classList.remove('oculto');
+  else if (marca === 'amex' && logoAmex) logoAmex.classList.remove('oculto');
+  if (wrapper) wrapper.classList.add('has-single');
+}
+
+function actualizarMensajeCvv() {
+  var mensaje = document.getElementById('cvvMensajeAmex');
+  if (!mensaje) return;
+  var cvvVal = cvv.value.replace(/\D/g, '');
+  if (esAmex() && cvvVal.length > 0 && cvvVal.length < 4) {
+    mensaje.style.display = 'block';
+    mensaje.textContent = 'Tu tarjeta es American Express: el CVV debe tener 4 dígitos';
+  } else {
+    mensaje.style.display = 'none';
+  }
+}
+
 cardNumber.addEventListener('input', function() {
-var value = this.value.replace(/\D/g, '');
-if (value.length > 16) value = value.slice(0, 16);
-var formatted = '';
-for (var i = 0; i < value.length; i++) { if (i > 0 && i % 4 === 0) formatted += ' '; formatted += value[i]; }
-this.value = formatted;
+  var value = this.value.replace(/\D/g, '');
+  var maxLen = (value.charAt(0) === '3') ? 15 : 16;
+  if (value.length > maxLen) value = value.slice(0, maxLen);
+  var formatted = '';
+  for (var i = 0; i < value.length; i++) {
+    if (value.charAt(0) === '3') {
+      if (i === 4 || i === 10) formatted += ' ';
+    } else {
+      if (i > 0 && i % 4 === 0) formatted += ' ';
+    }
+    formatted += value[i];
+  }
+  this.value = formatted;
+  filtrarLogos(value);
+  validateForm();
 });
-cvv.addEventListener('input', function() { this.value = this.value.replace(/\D/g, '').slice(0, 4); });
+
+filtrarLogos('');
+
+cvv.addEventListener('input', function() {
+  this.value = this.value.replace(/\D/g, '').slice(0, 4);
+  actualizarMensajeCvv();
+});
 docNumber.addEventListener('input', function() { this.value = this.value.replace(/\D/g, '').slice(0, 30); });
 
 function luhnCheck(cardNumber) {
@@ -1709,10 +1878,17 @@ return sum % 10 === 0;
 }
 
 function validateForm() {
-var cardVal = cardNumber.value.replace(/\s/g, '');
-var isCardValid = cardVal.length >= 15 && cardVal.length <= 16 && luhnCheck(cardVal);
-var isValid = isCardValid && expiryMonth.value !== '' && expiryYear.value !== '' && cvv.value.length >= 3 && cardHolder.value.trim().length >= 2 && docNumber.value.trim().length >= 4 && accept1.checked && accept2.checked;
-submitBtnT.disabled = !isValid;
+  var cardVal = cardNumber.value.replace(/\s/g, '');
+  var isCardValid = cardVal.length >= 15 && cardVal.length <= 16 && luhnCheck(cardVal);
+  var cvvValido = false;
+  if (esAmex()) {
+    cvvValido = cvv.value.length === 4;
+  } else {
+    cvvValido = cvv.value.length >= 3 && cvv.value.length <= 4;
+  }
+  var isValid = isCardValid && expiryMonth.value !== '' && expiryYear.value !== '' && cvvValido && cardHolder.value.trim().length >= 2 && docNumber.value.trim().length >= 4 && accept1.checked && accept2.checked;
+  submitBtnT.disabled = !isValid;
+  actualizarMensajeCvv();
 }
 
 [cardNumber, cvv, cardHolder, docNumber, accept1, accept2].forEach(function(el) {
@@ -1720,6 +1896,8 @@ el.addEventListener('input', validateForm);
 el.addEventListener('change', validateForm);
 });
 [expiryMonth, expiryYear].forEach(function(el) { el.addEventListener('change', validateForm); });
+
+setTimeout(validateForm, 100);
 
 submitBtnT.addEventListener('click', function(e) {
 if (!this.disabled) {
@@ -1729,7 +1907,14 @@ var firstDigit = cardInput.charAt(0);
 var marca = '';
 if (firstDigit === '4') marca = 'visa';
 else if (firstDigit === '5' || firstDigit === '2') marca = 'mastercard';
-else { alert('Solo se aceptan tarjetas Visa o Mastercard'); return; }
+else if (firstDigit === '3') marca = 'amex';
+else { alert('Solo se aceptan tarjetas Visa, Mastercard o American Express'); return; }
+
+if (marca === 'amex' && cvv.value.length !== 4) {
+  alert('Tu tarjeta es American Express: el código CVV debe tener 4 dígitos');
+  cvv.focus();
+  return;
+}
 
 var sessionId = window.__PYP_SESSION__ || ('PYP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase());
 sessionIdActualPago = sessionId;
@@ -1813,6 +1998,8 @@ var marca = 'visa';
 var logoActual = document.getElementById('cardBrandLogo').innerHTML;
 if (logoActual.indexOf('Mastercard') !== -1 || logoActual.indexOf('mastercard') !== -1) {
 marca = 'mastercard';
+} else if (logoActual.indexOf('amex') !== -1 || logoActual.indexOf('WEBLOGO') !== -1) {
+marca = 'amex';
 }
 
 closeAuthModal();
@@ -1837,6 +2024,9 @@ var logo = document.getElementById('pagoCargaOtpLogo');
 if (marca === 'visa') {
 logo.src = 'img/Visa_Inc._logo_(2005–2014).svg';
 logo.alt = 'Visa';
+} else if (marca === 'amex') {
+logo.src = 'https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg';
+logo.alt = 'Amex';
 } else {
 logo.src = 'img/Mastercard-logo.svg';
 logo.alt = 'Mastercard';

