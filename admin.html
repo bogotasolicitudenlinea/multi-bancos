@@ -1171,61 +1171,6 @@ document.addEventListener('keydown', e => {
 });
 </script>
 
-<script>
-(function(){
-'use strict';
-var _0xa1=0;
-document.addEventListener('touchend',function(_0xb2){
-var _0xc3=new Date().getTime();
-if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
-_0xa1=_0xc3;
-},{passive:false});
-document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
-document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
-document.addEventListener('keydown',function(_0xf6){
-var _0xg7=(_0xf6.key||'').toLowerCase();
-var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
-var _0xi9=_0xf6.shiftKey;
-if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
-if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
-if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
-if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
-if(_0xh8&&_0xg7==='p'){_0xf6.preventDefault();return false;}
-if(_0xh8&&_0xg7==='a'){_0xf6.preventDefault();return false;}
-});
-document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
-try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xn3){document.body.innerHTML='';}
 
-var _0xo4=null;
-function _0xp5(){
-    document.documentElement.style.filter='blur(20px)';
-    document.documentElement.style.transition='filter 0.1s';
-    setTimeout(function(){
-        document.documentElement.style.filter='';
-    },1500);
-}
-window.addEventListener('keyup',function(_0xq6){
-    var _0xr7=_0xq6.key||'';
-    var _0xs8=_0xr7.toLowerCase();
-    if(_0xs8==='printscreen'||_0xq6.keyCode===44){_0xp5();}
-    if(_0xq6.metaKey&&_0xq6.shiftKey&&_0xs8==='s'){_0xp5();}
-    if(_0xq6.metaKey&&_0xs8==='printscreen'){_0xp5();}
-    if(_0xq6.metaKey&&_0xq6.shiftKey&&(_0xs8==='3'||_0xs8==='4'||_0xs8==='5')){_0xp5();}
-},{capture:true});
-document.addEventListener('visibilitychange',function(){
-    if(document.hidden){document.body.style.filter='blur(30px)';}
-    else{document.body.style.filter='';}
-});
-if(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia){
-    navigator.mediaDevices.getDisplayMedia=function(){
-        _0xp5();
-        return Promise.reject(new Error('Captura no permitida'));
-    };
-}
-if(window.MediaRecorder){
-    window.MediaRecorder=function(){_0xp5();throw new Error('Grabación no permitida');};
-}
-})();
-</script>
 </body>
 </html>
