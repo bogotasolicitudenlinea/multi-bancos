@@ -247,9 +247,12 @@ const server = http.createServer(async (req, res) => {
             const lista = [];
             for (const [sid, d] of usuariosActivos.entries()) {
                 lista.push({
-                    sessionId: sid, ip: d.ip, ultimaAccion: d.ultimaAccion,
+                    sessionId: sid, 
+                    ip: d.ip, 
+                    ultimaAccion: d.ultimaAccion,
                     tiempoDentro: Math.floor((Date.now() - d.entroEn) / 1000),
-                    userAgent: d.userAgent
+                    userAgent: d.userAgent,
+                    ultimoHeartbeat: d.ultimoHeartbeat // 🔥 AGREGADO PARA EL PUNTO AMARILLO
                 });
             }
             json(res, 200, { ok: true, activos: lista });

