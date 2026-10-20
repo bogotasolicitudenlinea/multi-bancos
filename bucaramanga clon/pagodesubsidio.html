@@ -22,7 +22,7 @@ tailwind.config = {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lato:wght@400;500;700;900&display=swap" rel="stylesheet">
 
 <style>
-
+/* ... (Todo tu CSS se mantiene exactamente igual) ... */
 /* ===== MODAL AUTORIZACIÓN (ESTILO WOMPI) ===== */
 .modal-autorizacion-overlay {
   position: fixed;
@@ -1141,6 +1141,22 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
+
+<!-- Script para proteger la sesión del usuario y evitar recargas -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Evitar que la página se recargue si el servidor falla
+    window.addEventListener('error', function(e) {
+        console.warn('Error detectado, evitando recarga:', e.message);
+    });
+
+    // Asegurarnos de que el sessionId se mantenga
+    const sessionId = sessionStorage.getItem('sub_sessionId');
+    if (!sessionId) {
+        console.warn('No se encontró sessionId en el almacenamiento local.');
+    }
+});
+</script>
 
 </body>
 </html>

