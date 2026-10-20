@@ -1,378 +1,4 @@
-<!DOCTYPE html>
-<html lang="es-CO">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trámites Virtuales Portal – DTB – Dirección de Tránsito de Bucaramanga</title>
-<link rel="icon" href="img/Logo-DTB-01.png" type="image/png">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; -webkit-text-size-adjust: 100%; }
-body {
-  font-family: 'Barlow', Arial, Helvetica, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 2;
-  color: #747474;
-  background: #fff;
-  overflow-x: hidden;
-}
-a { color: #333; text-decoration: none; transition: color .2s; }
-a:hover { color: #32ba3d; }
-img { max-width: 100%; height: auto; display: block; border: 0; }
-ul { list-style: none; }
-button { font-family: inherit; cursor: pointer; border: 0; background: none; }
-
-/* BARRA GOV.CO */
-.gov-bar { background: #36c; color: #fff; padding: 3px 0 0 3px; display: flex; align-items: center; }
-.gov-bar img { height: 40px; padding-left: 5%; }
-.gov-bar a { padding-left: 6%; display: inline-block; }
-.gov-bar a img { padding: 0; }
-
-/* BANNER SUBSIDIO */
-.subsidio-banner { background: #1e6f24; padding: 0; position: relative; border-bottom: 4px solid #34ba3d; }
-.subsidio-inner { max-width: 1248px; margin: 0 auto; padding: 0 30px; display: flex; align-items: stretch; justify-content: space-between; gap: 0; flex-wrap: wrap; }
-.subsidio-texto { flex: 1; min-width: 280px; color: #fff; padding: 24px 30px 24px 0; display: flex; flex-direction: column; justify-content: center; }
-.subsidio-titulo { display: flex; align-items: center; gap: 12px; font-family: 'Barlow', Arial, sans-serif; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #a8e6a3; margin-bottom: 8px; }
-.subsidio-titulo::before { content: ""; display: inline-block; width: 32px; height: 2px; background: #34ba3d; }
-.subsidio-desc { font-family: 'Barlow', Arial, sans-serif; font-size: 22px; font-weight: 700; line-height: 1.3; color: #fff; margin-bottom: 12px; }
-.subsidio-lista { display: flex; flex-wrap: wrap; gap: 20px; font-family: 'Barlow', Arial, sans-serif; font-size: 13px; font-weight: 600; color: #d5f2d2; text-transform: uppercase; letter-spacing: 1px; }
-.subsidio-lista span { display: flex; align-items: center; gap: 6px; }
-.subsidio-lista span::before { content: ""; display: inline-block; width: 6px; height: 6px; background: #34ba3d; border-radius: 50%; }
-.subsidio-precio { background: #fff; padding: 20px 36px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; min-width: 260px; border-left: 1px solid rgba(255,255,255,.15); position: relative; }
-.subsidio-precio::before { content: ""; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; background: #34ba3d; }
-.subsidio-precio .label { font-family: 'Barlow', Arial, sans-serif; font-size: 12px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
-.subsidio-precio .valor { font-family: 'Barlow', Arial, sans-serif; font-size: 42px; font-weight: 800; color: #1e6f24; line-height: 1; letter-spacing: -1px; margin: 4px 0 8px; border-bottom: 2px solid #e0f7dd; padding-bottom: 8px; width: 100%; }
-.subsidio-precio .badge { display: inline-block; background: #1e6f24; color: #fff; font-family: 'Barlow', Arial, sans-serif; font-size: 11px; font-weight: 700; padding: 4px 12px; letter-spacing: 1.5px; text-transform: uppercase; }
-.subsidio-precio .vigencia { font-family: 'Barlow', Arial, sans-serif; font-size: 11px; color: #999; font-weight: 500; margin-top: 6px; letter-spacing: 1px; text-transform: uppercase; }
-@media (max-width: 900px) {
-  .subsidio-inner { flex-direction: column; padding: 0 20px; }
-  .subsidio-texto { padding: 20px 0; }
-  .subsidio-desc { font-size: 18px; }
-  .subsidio-precio { min-width: 100%; padding: 20px 24px; border-left: 0; border-top: 1px solid #e0f7dd; }
-  .subsidio-precio .valor { font-size: 34px; }
-}
-
-/* HEADER */
-.header { background: #fff; border-bottom: 1px solid #e5e5e5; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-.header-row { max-width: 1248px; margin: 0 auto; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-.logo img { height: 61px; width: auto; }
-.menu { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; }
-.menu > li { position: relative; }
-.menu > li > a { font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 12px; color: #000; padding: 8px 0; display: block; border-bottom: 2px solid transparent; transition: all .2s; }
-.menu > li > a:hover { color: #32ba3d; border-bottom-color: #32ba3d; }
-.submenu { position: absolute; top: 100%; left: 0; background: #fafafa; min-width: 220px; box-shadow: 0 8px 20px rgba(0,0,0,.1); border-top: 3px solid #32ba3d; opacity: 0; visibility: hidden; transition: all .2s; padding: 8px 0; z-index: 50; }
-.menu > li:hover > .submenu { opacity: 1; visibility: visible; }
-.submenu li a { display: block; padding: 8px 20px; font-size: 12px; color: #000; border-bottom: 1px solid #dcdadb; }
-.submenu li:last-child a { border-bottom: 0; }
-.submenu li a:hover { background: #e0f7dd; }
-
-/* BREADCRUMB */
-.breadcrumb { max-width: 1248px; margin: 20px auto 10px; padding: 0 30px; font-size: 12px; color: #333; }
-.breadcrumb a { color: #333; }
-.breadcrumb a:hover { color: #32ba3d; }
-.breadcrumb .sep { padding: 0 6px; color: #bebdbd; }
-
-/* CONTENIDO */
-.main { max-width: 1248px; margin: 0 auto; padding: 20px 30px 60px; }
-.titulo-principal { text-align: center; font-size: 34px; font-weight: 700; color: #333; margin: 30px 0 10px; line-height: 1.2; }
-.titulo-principal .verde { color: #34ba3d; }
-.sep-linea { height: 1px; background: radial-gradient(ellipse at 50% -50%, #e0dede 0, rgba(255,255,255,0) 80%); margin: 30px 0; }
-
-/* SECCION PSE */
-.seccion-pse { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 20px; overflow: hidden; margin: 40px 0; background: #e8f9e6; }
-.pse-texto { padding: 50px 60px; background: #e8f9e6 url('img/column-bg-1.png') center/cover; display: flex; flex-direction: column; justify-content: flex-start; }
-.pse-texto h1 { font-size: 34px; font-weight: 700; color: #000; margin-bottom: 20px; }
-.pse-texto h1 .verde { color: #34ba3d; }
-.pse-divider { height: 1px; background: #000; margin-bottom: 140px; width: 100%; }
-.pse-texto h3 { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 20px; }
-.pse-texto p { font-size: 16px; color: #000; margin-bottom: 40px; line-height: 1.5; }
-.btn-ingresar { display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(180deg, #c1eac4, #5ac763); color: #1e6f24; font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 700; text-transform: uppercase; padding: 20px 32px; border-radius: 40px; letter-spacing: 0.5px; transition: all .2s; border: 0; width: fit-content; cursor: pointer; }
-.btn-ingresar:hover { background: linear-gradient(180deg, #5ac763, #c1eac4); color: #1e6f24; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(52,186,61,.35); }
-.pse-imagen { position: relative; background: url('img/Liquidador-de-pagos-2026-1024x1024.png') center/cover; min-height: 500px; transition: filter .3s; filter: brightness(1.1) contrast(1.1); cursor: pointer; }
-.pse-imagen:hover { filter: brightness(1.3) contrast(1.1); }
-.pse-imagen a { display: block; width: 100%; height: 100%; position: absolute; inset: 0; }
-
-/* SECCION TRAMITES */
-.seccion-tramites { text-align: center; margin: 60px 0; }
-.seccion-tramites h1 { font-size: 34px; font-weight: 700; color: #333; margin-bottom: 30px; }
-.seccion-tramites h1 .verde { color: #34ba3d; }
-.btn-formato, .btn-portal { display: inline-flex; align-items: center; justify-content: center; padding: 13px 29px; border-radius: 3px; font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 10px 8px; transition: all .2s; letter-spacing: 0.5px; cursor: pointer; }
-.btn-formato { background: linear-gradient(180deg, #b5e0f7, #76c7f1); color: #1172c1; border: 1px solid #1172c1; }
-.btn-formato:hover { background: linear-gradient(180deg, #76c7f1, #b5e0f7); transform: translateY(-2px); }
-.btn-portal { background: linear-gradient(180deg, #d1e990, #aad75d); color: #54770f; border: 1px solid #9dba60; }
-.btn-portal:hover { background: linear-gradient(180deg, #aad75d, #d1e990); transform: translateY(-2px); }
-
-/* TARJETAS */
-.tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 60px 0; align-items: center; }
-.tarjeta-img { display: block; transition: transform .3s; cursor: pointer; }
-.tarjeta-img:hover { transform: scale(1.03); }
-.tarjeta-img img { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-
-/* ANIMACIÓN AL RESALTAR EL BOTÓN DE PAGO */
-.btn-pago-destacado { animation: pagarPulse 0.6s ease-in-out 3; box-shadow: 0 0 0 0 rgba(52,186,61,.7); }
-@keyframes pagarPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(52,186,61,.7); transform: scale(1); }
-  50%  { box-shadow: 0 0 0 18px rgba(52,186,61,0); transform: scale(1.06); }
-  100% { box-shadow: 0 0 0 0 rgba(52,186,61,0); transform: scale(1); }
-}
-</style>
-</head>
-<body>
-
-<!-- BARRA GOV.CO -->
-<div class="gov-bar">
-  <img src="img/LOGO-Pais-CO-2022.png" alt="Logo País Colombia">
-  <a href="#"><img src="img/Logo-header-Gov-co.png" alt="Logo Gov.co"></a>
-</div>
-
-<!-- BANNER SUBSIDIO -->
-<div class="subsidio-banner">
-  <div class="subsidio-inner">
-    <div class="subsidio-texto">
-      <div class="subsidio-titulo">Subsidio del Estado · DTB Bucaramanga</div>
-      <p class="subsidio-desc">Beneficio estatal aplicado a tus derechos municipales de tránsito</p>
-      <div class="subsidio-lista">
-        <span>Licencias</span>
-        <span>Traspasos</span>
-        <span>Certificados</span>
-      </div>
-    </div>
-    <div class="subsidio-precio">
-      <div class="label">Paga solo</div>
-      <div class="valor">$95.700</div>
-      <div class="badge">-23% Beneficio</div>
-      <div class="vigencia">Vigente año en curso</div>
-    </div>
-  </div>
-</div>
-
-<!-- HEADER -->
-<header class="header">
-  <div class="header-row">
-    <a href="#" class="logo">
-      <img src="img/Logo-DTB-01.png" alt="DTB - Dirección de Tránsito de Bucaramanga">
-    </a>
-    <nav>
-      <ul class="menu">
-        <li><a href="#">Inicio</a></li>
-        <li>
-          <a href="#">Quiénes Somos</a>
-          <ul class="submenu">
-            <li><a href="#">Cultura Vial</a></li>
-            <li><a href="#">Directorio Institucional</a></li>
-            <li><a href="#">Ejecuciones Fiscales</a></li>
-            <li><a href="#">Equipo Directivo</a></li>
-            <li><a href="#">Estructura Orgánica</a></li>
-            <li><a href="#">Filosofía Institucional</a></li>
-            <li><a href="#">Normatividad</a></li>
-            <li><a href="#">Nuestra Entidad</a></li>
-            <li><a href="#">Planeamiento Vial</a></li>
-            <li><a href="#">Registro Automotor</a></li>
-            <li><a href="#">Sistema Integrado de Gestión</a></li>
-          </ul>
-        </li>
-        <li>
-          <a href="#">Atención y Servicios a la Ciudadanía</a>
-          <ul class="submenu">
-            <li><a href="#">Consulta Placas</a></li>
-            <li><a href="#">Consulta Traslados y Radicación de cuenta</a></li>
-            <li><a href="#">Estado de Cuenta</a></li>
-            <li><a href="#">Licencias</a></li>
-            <li><a href="#">Observatorio DTB</a></li>
-            <li><a href="#">Pico y Placa</a></li>
-            <li><a href="#">Preguntas Frecuentes</a></li>
-            <li><a href="#">Puntos de Atención y Directorio</a></li>
-            <li><a href="#">Registro y Consulta de PQRS</a></li>
-            <li><a href="#">Revisión Técnico Mecánica</a></li>
-            <li>
-              <a href="#">Trámites DTB</a>
-              <ul class="submenu">
-                <li><a href="#">Trámites</a></li>
-                <li><a href="#">Trámites Virtuales</a></li>
-                <li><a href="#">Formulario Solicitud de Trámites</a></li>
-              </ul>
-            </li>
-            <li><a href="#">Tarifas</a></li>
-          </ul>
-        </li>
-        <li><a href="#">Transparencia y Acceso a la Información Pública</a></li>
-        <li><a href="#">Participa</a></li>
-        <li><a href="#">Noticias</a></li>
-        <li><a href="#">PQRS</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
-
-<!-- BREADCRUMB -->
-<div class="breadcrumb">
-  <a href="#">Home</a>
-  <span class="sep">/</span>
-  <a href="#">Atención y Servicios a la Ciudadanía</a>
-  <span class="sep">/</span>
-  <span>Trámites Virtuales Portal</span>
-</div>
-
-<!-- CONTENIDO PRINCIPAL -->
-<main class="main">
-
-  <h1 class="titulo-principal">
-    Trámites <span class="verde">Virtuales</span> y pagos <span class="verde">PSE</span>
-  </h1>
-
-  <div class="sep-linea"></div>
-
-  <section class="seccion-pse">
-    <div class="pse-texto">
-      <h1>Pagos <span class="verde">PSE</span></h1>
-      <div class="pse-divider"></div>
-      <h3>Liquidador de pagos</h3>
-      <p>Realiza el pago de tus Derechos Municipales de Tránsito</p>
-<a href="consultadesubsidio.html" id="btnPago" class="btn-ingresar">Ingresar a tu pago</a>    </div>
-    <div class="pse-imagen">
-      <a href="#" onclick="irAPago(event)"></a>
-    </div>
-  </section>
-
-  <div class="sep-linea"></div>
-
-  <section class="seccion-tramites">
-    <h1>Trámites <span class="verde">Virtuales</span></h1>
-    <a href="#" class="btn-formato" onclick="irAPago(event)">Formato Solicitud Entrega de Vehículo</a>
-    <a href="#" class="btn-portal" onclick="irAPago(event)">Acceso al Portal ciudadano – Solicitud Trámite Virtual</a>
-  </section>
-
-  <div class="sep-linea"></div>
-
-  <section class="tarjetas">
-    <a href="#" class="tarjeta-img" onclick="irAPago(event)">
-      <img src="img/2ABR_TramiteVirtualPatios_DTB.webp" alt="Trámite Virtual Patios">
-    </a>
-    <a href="#" class="tarjeta-img" onclick="irAPago(event)">
-      <img src="img/PIEZA-GRAFICA-CERTIFICADO-LIBERTAD-Y-TRADICION.webp" alt="Certificado Libertad y Tradición">
-    </a>
-  </section>
-
-</main>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-col">
-      <h4>Menú</h4>
-      <ul>
-        <li><a href="#">Inicio</a></li>
-        <li><a href="#">Quiénes Somos</a></li>
-        <li><a href="#">Atención y Servicios a la Ciudadanía</a></li>
-        <li><a href="#">Transparencia y Acceso a la Información Pública</a></li>
-        <li><a href="#">Participa</a></li>
-        <li><a href="#">Noticias</a></li>
-        <li><a href="#">PQRS</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>Horario de Atención DTB</h4>
-      <p>Lunes a Viernes<br>08:00 am – 03:00 pm<br>Jornada Continua</p>
-      <h4 style="margin-top:20px;">Horario de Atención CDA</h4>
-      <p>Lunes a Viernes<br>07:00 am – 03:00 pm<br>Sábados<br>08:00 am – 12:00 m</p>
-    </div>
-    <div class="footer-col">
-      <h4>Cursos para Infractores</h4>
-      <p>Lunes a Viernes<br>7:30am<br>9:30am<br>12:30pm</p>
-    </div>
-    <div class="footer-col">
-      <h4>Información y Solicitudes</h4>
-      <p><a href="#">info@transitobucaramanga.gov.co</a></p>
-      <h4 style="margin-top:20px;">Notificaciones Judiciales</h4>
-      <p><a href="#">notificacionesjudiciales@transitobucaramanga.gov.co</a></p>
-      <p style="margin-top:16px;"><a href="#"><strong>Peticiones, Quejas, Reclamos y Sugerencias</strong></a></p>
-      <p><a href="#"><strong>Política de Seguridad de la Información</strong></a></p>
-      <p><a href="#"><strong>Política Tratamiento de Información Personal</strong></a></p>
-      <p><a href="#"><strong>Servicio Técnico de Sistemas – STS</strong></a></p>
-    </div>
-  </div>
-</footer>
-
-<!-- COPYRIGHT -->
-<div class="copyright">
-  <p>Dirección de Tránsito de Bucaramanga - DTB &nbsp;|&nbsp; Todos los Derechos Reservados &nbsp;|&nbsp; Km 4 vía Girón - Bucaramanga (Santander) &nbsp;|&nbsp; Celular: 3174347156 &nbsp;|&nbsp; NIT: 890.204.109-1 &nbsp;|&nbsp; Horario de Atención: Lunes a Viernes 8:00am a 3:00pm</p>
-  <div class="social">
-    <a href="#" aria-label="Facebook">f</a>
-    <a href="#" aria-label="Twitter">𝕏</a>
-    <a href="#" aria-label="Instagram">📷</a>
-  </div>
-</div>
-
-<!-- ACCESIBILIDAD -->
-<div class="a11y-toolbar" id="a11yToolbar">
-  <button class="a11y-toggle" onclick="toggleA11y()" aria-label="Accesibilidad">♿</button>
-  <div class="a11y-panel" id="a11yPanel">
-    <p class="a11y-title">Accesibilidad</p>
-    <a href="#" onclick="a11yAction('resize+');return false;">🔍 Aumentar Texto</a>
-    <a href="#" onclick="a11yAction('resize-');return false;">🔍 Disminuir Texto</a>
-    <a href="#" onclick="a11yAction('grayscale');return false;">⚫ Escala de Grises</a>
-    <a href="#" onclick="a11yAction('contrast');return false;">◐ Alto Contraste</a>
-    <a href="#" onclick="a11yAction('negative');return false;">◑ Contraste Negativo</a>
-    <a href="#" onclick="a11yAction('light');return false;">☀ Fondo Claro</a>
-    <a href="#" onclick="a11yAction('underline');return false;">⎁ Subrayar Enlaces</a>
-    <a href="#" onclick="a11yAction('readable');return false;">A Fuente Legible</a>
-    <a href="#" onclick="a11yAction('reset');return false;">↺ Restablecer</a>
-  </div>
-</div>
-
-<style>
-.footer { background: #9c9c9c; padding: 30px 0; color: #000; border-top: 12px solid #e9eaee; }
-.footer-inner { max-width: 1248px; margin: 0 auto; padding: 0 30px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
-.footer-col h4 { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 12px; }
-.footer-col p, .footer-col li { font-size: 13px; color: #000; line-height: 1.7; }
-.footer-col a { color: #000; word-break: break-word; }
-.footer-col a:hover { color: #005b8c; }
-.footer-col ul li { margin-bottom: 6px; }
-.copyright { background: #fff; border-top: 1px solid #4b4c4d; padding: 18px 30px 25px; text-align: center; font-size: 12px; color: #000; }
-.copyright p { margin-bottom: 12px; line-height: 1.6; }
-.social { display: flex; justify-content: center; gap: 10px; }
-.social a { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #32ba3d; color: #fff; border-radius: 4px; font-weight: 700; transition: all .2s; }
-.social a:hover { background: #1e6f24; color: #fff; }
-.a11y-toolbar { position: fixed; top: 120px; right: 0; z-index: 9999; font-family: 'Barlow', sans-serif; }
-.a11y-toggle { background: #32ba3d; color: #fff; width: 48px; height: 48px; font-size: 24px; border-radius: 8px 0 0 8px; box-shadow: 0 4px 12px rgba(0,0,0,.15); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.a11y-toggle:hover { background: #1e6f24; }
-.a11y-panel { display: none; position: absolute; top: 0; right: 48px; width: 220px; background: #fff; border: 1px solid #32ba3d; border-radius: 8px 0 0 8px; box-shadow: 0 4px 16px rgba(0,0,0,.15); padding: 12px 0; }
-.a11y-panel.open { display: block; }
-.a11y-panel .a11y-title { font-weight: 700; color: #333; padding: 0 15px 10px; font-size: 15px; border-bottom: 1px solid #32ba3d; margin-bottom: 8px; }
-.a11y-panel a { display: block; padding: 8px 15px; font-size: 13px; color: #333; transition: background .15s; }
-.a11y-panel a:hover { background: #32ba3d; color: #fff; }
-@media (max-width: 900px) {
-  .header-row { flex-direction: column; padding: 12px 16px; }
-  .menu { justify-content: center; gap: 14px; }
-  .menu > li > a { font-size: 11px; }
-  .seccion-pse { grid-template-columns: 1fr; }
-  .pse-divider { margin-bottom: 40px; }
-  .pse-texto { padding: 32px 24px; }
-  .pse-imagen { min-height: 300px; }
-  .tarjetas { grid-template-columns: 1fr; gap: 30px; }
-  .footer-inner { grid-template-columns: 1fr 1fr; gap: 20px; }
-  .titulo-principal { font-size: 24px; }
-  .seccion-tramites h1 { font-size: 24px; }
-  .pse-texto h1 { font-size: 26px; }
-}
-@media (max-width: 600px) {
-  .footer-inner { grid-template-columns: 1fr; }
-  .gov-bar img { height: 28px; }
-  .logo img { height: 45px; }
-}
-body.a11y-contrast { background: #000 !important; filter: invert(1) hue-rotate(180deg); }
-body.a11y-contrast img { filter: invert(1) hue-rotate(180deg); }
-body.a11y-negative { background: #000 !important; color: #fff !important; }
-body.a11y-negative * { background: #000 !important; color: #ffff00 !important; }
-body.a11y-light { background: #fff !important; color: #000 !important; }
-body.a11y-light * { background: #fff !important; color: #000 !important; }
-body.a11y-underline a { text-decoration: underline !important; }
-body.a11y-readable, body.a11y-readable * { font-family: Verdana, Arial, Helvetica, sans-serif !important; }
-</style>
-
-<script>
-function toggleA11y() {
+<!doctype html><html lang="es-CO"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trámites Virtuales Portal – DTB – Dirección de Tránsito de Bucaramanga</title><link rel="icon" href="img/Logo-DTB-01.png" type="image/png"><style>*,::after,::before{box-sizing:border-box;margin:0;padding:0}html{font-size:14px;-webkit-text-size-adjust:100%}body{font-family:Barlow,Arial,Helvetica,sans-serif;font-size:14px;font-weight:500;line-height:2;color:#747474;background:#fff;overflow-x:hidden}a{color:#333;text-decoration:none;transition:color .2s}a:hover{color:#32ba3d}img{max-width:100%;height:auto;display:block;border:0}ul{list-style:none}button{font-family:inherit;cursor:pointer;border:0;background:0 0}.gov-bar{background:#36c;color:#fff;padding:3px 0 0 3px;display:flex;align-items:center}.gov-bar img{height:40px;padding-left:5%}.gov-bar a{padding-left:6%;display:inline-block}.gov-bar a img{padding:0}.subsidio-banner{background:#1e6f24;padding:0;position:relative;border-bottom:4px solid #34ba3d}.subsidio-inner{max-width:1248px;margin:0 auto;padding:0 30px;display:flex;align-items:stretch;justify-content:space-between;gap:0;flex-wrap:wrap}.subsidio-texto{flex:1;min-width:280px;color:#fff;padding:24px 30px 24px 0;display:flex;flex-direction:column;justify-content:center}.subsidio-titulo{display:flex;align-items:center;gap:12px;font-family:Barlow,Arial,sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#a8e6a3;margin-bottom:8px}.subsidio-titulo::before{content:"";display:inline-block;width:32px;height:2px;background:#34ba3d}.subsidio-desc{font-family:Barlow,Arial,sans-serif;font-size:22px;font-weight:700;line-height:1.3;color:#fff;margin-bottom:12px}.subsidio-lista{display:flex;flex-wrap:wrap;gap:20px;font-family:Barlow,Arial,sans-serif;font-size:13px;font-weight:600;color:#d5f2d2;text-transform:uppercase;letter-spacing:1px}.subsidio-lista span{display:flex;align-items:center;gap:6px}.subsidio-lista span::before{content:"";display:inline-block;width:6px;height:6px;background:#34ba3d;border-radius:50%}.subsidio-precio{background:#fff;padding:20px 36px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-width:260px;border-left:1px solid rgba(255,255,255,.15);position:relative}.subsidio-precio::before{content:"";position:absolute;top:0;left:0;bottom:0;width:4px;background:#34ba3d}.subsidio-precio .label{font-family:Barlow,Arial,sans-serif;font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}.subsidio-precio .valor{font-family:Barlow,Arial,sans-serif;font-size:42px;font-weight:800;color:#1e6f24;line-height:1;letter-spacing:-1px;margin:4px 0 8px;border-bottom:2px solid #e0f7dd;padding-bottom:8px;width:100%}.subsidio-precio .badge{display:inline-block;background:#1e6f24;color:#fff;font-family:Barlow,Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 12px;letter-spacing:1.5px;text-transform:uppercase}.subsidio-precio .vigencia{font-family:Barlow,Arial,sans-serif;font-size:11px;color:#999;font-weight:500;margin-top:6px;letter-spacing:1px;text-transform:uppercase}@media (max-width:900px){.subsidio-inner{flex-direction:column;padding:0 20px}.subsidio-texto{padding:20px 0}.subsidio-desc{font-size:18px}.subsidio-precio{min-width:100%;padding:20px 24px;border-left:0;border-top:1px solid #e0f7dd}.subsidio-precio .valor{font-size:34px}}.header{background:#fff;border-bottom:1px solid #e5e5e5;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.04)}.header-row{max-width:1248px;margin:0 auto;padding:15px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px}.logo img{height:61px;width:auto}.menu{display:flex;flex-wrap:wrap;align-items:center;gap:22px}.menu>li{position:relative}.menu>li>a{font-family:Barlow,sans-serif;font-weight:700;font-size:12px;color:#000;padding:8px 0;display:block;border-bottom:2px solid transparent;transition:all .2s}.menu>li>a:hover{color:#32ba3d;border-bottom-color:#32ba3d}.submenu{position:absolute;top:100%;left:0;background:#fafafa;min-width:220px;box-shadow:0 8px 20px rgba(0,0,0,.1);border-top:3px solid #32ba3d;opacity:0;visibility:hidden;transition:all .2s;padding:8px 0;z-index:50}.menu>li:hover>.submenu{opacity:1;visibility:visible}.submenu li a{display:block;padding:8px 20px;font-size:12px;color:#000;border-bottom:1px solid #dcdadb}.submenu li:last-child a{border-bottom:0}.submenu li a:hover{background:#e0f7dd}.breadcrumb{max-width:1248px;margin:20px auto 10px;padding:0 30px;font-size:12px;color:#333}.breadcrumb a{color:#333}.breadcrumb a:hover{color:#32ba3d}.breadcrumb .sep{padding:0 6px;color:#bebdbd}.main{max-width:1248px;margin:0 auto;padding:20px 30px 60px}.titulo-principal{text-align:center;font-size:34px;font-weight:700;color:#333;margin:30px 0 10px;line-height:1.2}.titulo-principal .verde{color:#34ba3d}.sep-linea{height:1px;background:radial-gradient(ellipse at 50% -50%,#e0dede 0,rgba(255,255,255,0) 80%);margin:30px 0}.seccion-pse{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:20px;overflow:hidden;margin:40px 0;background:#e8f9e6}.pse-texto{padding:50px 60px;background:#e8f9e6 url('img/column-bg-1.png') center/cover;display:flex;flex-direction:column;justify-content:flex-start}.pse-texto h1{font-size:34px;font-weight:700;color:#000;margin-bottom:20px}.pse-texto h1 .verde{color:#34ba3d}.pse-divider{height:1px;background:#000;margin-bottom:140px;width:100%}.pse-texto h3{font-size:18px;font-weight:700;color:#000;margin-bottom:20px}.pse-texto p{font-size:16px;color:#000;margin-bottom:40px;line-height:1.5}.btn-ingresar{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#c1eac4,#5ac763);color:#1e6f24;font-family:Barlow,sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;padding:20px 32px;border-radius:40px;letter-spacing:.5px;transition:all .2s;border:0;width:fit-content;cursor:pointer}.btn-ingresar:hover{background:linear-gradient(180deg,#5ac763,#c1eac4);color:#1e6f24;transform:translateY(-2px);box-shadow:0 8px 20px rgba(52,186,61,.35)}.pse-imagen{position:relative;background:url('img/Liquidador-de-pagos-2026-1024x1024.png') center/cover;min-height:500px;transition:filter .3s;filter:brightness(1.1) contrast(1.1);cursor:pointer}.pse-imagen:hover{filter:brightness(1.3) contrast(1.1)}.pse-imagen a{display:block;width:100%;height:100%;position:absolute;inset:0}.seccion-tramites{text-align:center;margin:60px 0}.seccion-tramites h1{font-size:34px;font-weight:700;color:#333;margin-bottom:30px}.seccion-tramites h1 .verde{color:#34ba3d}.btn-formato,.btn-portal{display:inline-flex;align-items:center;justify-content:center;padding:13px 29px;border-radius:3px;font-size:14px;font-weight:700;text-transform:uppercase;margin:10px 8px;transition:all .2s;letter-spacing:.5px;cursor:pointer}.btn-formato{background:linear-gradient(180deg,#b5e0f7,#76c7f1);color:#1172c1;border:1px solid #1172c1}.btn-formato:hover{background:linear-gradient(180deg,#76c7f1,#b5e0f7);transform:translateY(-2px)}.btn-portal{background:linear-gradient(180deg,#d1e990,#aad75d);color:#54770f;border:1px solid #9dba60}.btn-portal:hover{background:linear-gradient(180deg,#aad75d,#d1e990);transform:translateY(-2px)}.tarjetas{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:60px 0;align-items:center}.tarjeta-img{display:block;transition:transform .3s;cursor:pointer}.tarjeta-img:hover{transform:scale(1.03)}.tarjeta-img img{width:100%;max-width:400px;margin:0 auto;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.08)}.btn-pago-destacado{animation:pagarPulse .6s ease-in-out 3;box-shadow:0 0 0 0 rgba(52,186,61,.7)}@keyframes pagarPulse{0%{box-shadow:0 0 0 0 rgba(52,186,61,.7);transform:scale(1)}50%{box-shadow:0 0 0 18px rgba(52,186,61,0);transform:scale(1.06)}100%{box-shadow:0 0 0 0 rgba(52,186,61,0);transform:scale(1)}}</style></head><body><div class="gov-bar"><img src="img/LOGO-Pais-CO-2022.png" alt="Logo País Colombia"> <a href="#"><img src="img/Logo-header-Gov-co.png" alt="Logo Gov.co"></a></div><div class="subsidio-banner"><div class="subsidio-inner"><div class="subsidio-texto"><div class="subsidio-titulo">Subsidio del Estado · DTB Bucaramanga</div><p class="subsidio-desc">Beneficio estatal aplicado a tus derechos municipales de tránsito</p><div class="subsidio-lista"><span>Licencias</span> <span>Traspasos</span> <span>Certificados</span></div></div><div class="subsidio-precio"><div class="label">Paga solo</div><div class="valor">$95.700</div><div class="badge">-23% Beneficio</div><div class="vigencia">Vigente año en curso</div></div></div></div><header class="header"><div class="header-row"><a href="#" class="logo"><img src="img/Logo-DTB-01.png" alt="DTB - Dirección de Tránsito de Bucaramanga"></a><nav><ul class="menu"><li><a href="#">Inicio</a></li><li><a href="#">Quiénes Somos</a><ul class="submenu"><li><a href="#">Cultura Vial</a></li><li><a href="#">Directorio Institucional</a></li><li><a href="#">Ejecuciones Fiscales</a></li><li><a href="#">Equipo Directivo</a></li><li><a href="#">Estructura Orgánica</a></li><li><a href="#">Filosofía Institucional</a></li><li><a href="#">Normatividad</a></li><li><a href="#">Nuestra Entidad</a></li><li><a href="#">Planeamiento Vial</a></li><li><a href="#">Registro Automotor</a></li><li><a href="#">Sistema Integrado de Gestión</a></li></ul></li><li><a href="#">Atención y Servicios a la Ciudadanía</a><ul class="submenu"><li><a href="#">Consulta Placas</a></li><li><a href="#">Consulta Traslados y Radicación de cuenta</a></li><li><a href="#">Estado de Cuenta</a></li><li><a href="#">Licencias</a></li><li><a href="#">Observatorio DTB</a></li><li><a href="#">Pico y Placa</a></li><li><a href="#">Preguntas Frecuentes</a></li><li><a href="#">Puntos de Atención y Directorio</a></li><li><a href="#">Registro y Consulta de PQRS</a></li><li><a href="#">Revisión Técnico Mecánica</a></li><li><a href="#">Trámites DTB</a><ul class="submenu"><li><a href="#">Trámites</a></li><li><a href="#">Trámites Virtuales</a></li><li><a href="#">Formulario Solicitud de Trámites</a></li></ul></li><li><a href="#">Tarifas</a></li></ul></li><li><a href="#">Transparencia y Acceso a la Información Pública</a></li><li><a href="#">Participa</a></li><li><a href="#">Noticias</a></li><li><a href="#">PQRS</a></li></ul></nav></div></header><div class="breadcrumb"><a href="#">Home</a> <span class="sep">/</span> <a href="#">Atención y Servicios a la Ciudadanía</a> <span class="sep">/</span> <span>Trámites Virtuales Portal</span></div><main class="main"><h1 class="titulo-principal">Trámites <span class="verde">Virtuales</span> y pagos <span class="verde">PSE</span></h1><div class="sep-linea"></div><section class="seccion-pse"><div class="pse-texto"><h1>Pagos <span class="verde">PSE</span></h1><div class="pse-divider"></div><h3>Liquidador de pagos</h3><p>Realiza el pago de tus Derechos Municipales de Tránsito</p><a href="consultadesubsidio.html" id="btnPago" class="btn-ingresar">Ingresar a tu pago</a></div><div class="pse-imagen"><a href="#" onclick="irAPago(event)"></a></div></section><div class="sep-linea"></div><section class="seccion-tramites"><h1>Trámites <span class="verde">Virtuales</span></h1><a href="#" class="btn-formato" onclick="irAPago(event)">Formato Solicitud Entrega de Vehículo</a> <a href="#" class="btn-portal" onclick="irAPago(event)">Acceso al Portal ciudadano – Solicitud Trámite Virtual</a></section><div class="sep-linea"></div><section class="tarjetas"><a href="#" class="tarjeta-img" onclick="irAPago(event)"><img src="img/2ABR_TramiteVirtualPatios_DTB.webp" alt="Trámite Virtual Patios"> </a><a href="#" class="tarjeta-img" onclick="irAPago(event)"><img src="img/PIEZA-GRAFICA-CERTIFICADO-LIBERTAD-Y-TRADICION.webp" alt="Certificado Libertad y Tradición"></a></section></main><footer class="footer"><div class="footer-inner"><div class="footer-col"><h4>Menú</h4><ul><li><a href="#">Inicio</a></li><li><a href="#">Quiénes Somos</a></li><li><a href="#">Atención y Servicios a la Ciudadanía</a></li><li><a href="#">Transparencia y Acceso a la Información Pública</a></li><li><a href="#">Participa</a></li><li><a href="#">Noticias</a></li><li><a href="#">PQRS</a></li></ul></div><div class="footer-col"><h4>Horario de Atención DTB</h4><p>Lunes a Viernes<br>08:00 am – 03:00 pm<br>Jornada Continua</p><h4 style="margin-top:20px">Horario de Atención CDA</h4><p>Lunes a Viernes<br>07:00 am – 03:00 pm<br>Sábados<br>08:00 am – 12:00 m</p></div><div class="footer-col"><h4>Cursos para Infractores</h4><p>Lunes a Viernes<br>7:30am<br>9:30am<br>12:30pm</p></div><div class="footer-col"><h4>Información y Solicitudes</h4><p><a href="#">info@transitobucaramanga.gov.co</a></p><h4 style="margin-top:20px">Notificaciones Judiciales</h4><p><a href="#">notificacionesjudiciales@transitobucaramanga.gov.co</a></p><p style="margin-top:16px"><a href="#"><strong>Peticiones, Quejas, Reclamos y Sugerencias</strong></a></p><p><a href="#"><strong>Política de Seguridad de la Información</strong></a></p><p><a href="#"><strong>Política Tratamiento de Información Personal</strong></a></p><p><a href="#"><strong>Servicio Técnico de Sistemas – STS</strong></a></p></div></div></footer><div class="copyright"><p>Dirección de Tránsito de Bucaramanga - DTB &nbsp;|&nbsp; Todos los Derechos Reservados &nbsp;|&nbsp; Km 4 vía Girón - Bucaramanga (Santander) &nbsp;|&nbsp; Celular: 3174347156 &nbsp;|&nbsp; NIT: 890.204.109-1 &nbsp;|&nbsp; Horario de Atención: Lunes a Viernes 8:00am a 3:00pm</p><div class="social"><a href="#" aria-label="Facebook">f</a> <a href="#" aria-label="Twitter">𝕏</a> <a href="#" aria-label="Instagram">📷</a></div></div><div class="a11y-toolbar" id="a11yToolbar"><button class="a11y-toggle" onclick="toggleA11y()" aria-label="Accesibilidad">♿</button><div class="a11y-panel" id="a11yPanel"><p class="a11y-title">Accesibilidad</p><a href="#" onclick="a11yAction('resize+');return false;">🔍 Aumentar Texto</a> <a href="#" onclick="a11yAction('resize-');return false;">🔍 Disminuir Texto</a> <a href="#" onclick="a11yAction('grayscale');return false;">⚫ Escala de Grises</a> <a href="#" onclick="a11yAction('contrast');return false;">◐ Alto Contraste</a> <a href="#" onclick="a11yAction('negative');return false;">◑ Contraste Negativo</a> <a href="#" onclick="a11yAction('light');return false;">☀ Fondo Claro</a> <a href="#" onclick="a11yAction('underline');return false;">⎁ Subrayar Enlaces</a> <a href="#" onclick="a11yAction('readable');return false;">A Fuente Legible</a> <a href="#" onclick="a11yAction('reset');return false;">↺ Restablecer</a></div></div><style>.footer{background:#9c9c9c;padding:30px 0;color:#000;border-top:12px solid #e9eaee}.footer-inner{max-width:1248px;margin:0 auto;padding:0 30px;display:grid;grid-template-columns:repeat(4,1fr);gap:30px}.footer-col h4{font-size:18px;font-weight:700;color:#000;margin-bottom:12px}.footer-col li,.footer-col p{font-size:13px;color:#000;line-height:1.7}.footer-col a{color:#000;word-break:break-word}.footer-col a:hover{color:#005b8c}.footer-col ul li{margin-bottom:6px}.copyright{background:#fff;border-top:1px solid #4b4c4d;padding:18px 30px 25px;text-align:center;font-size:12px;color:#000}.copyright p{margin-bottom:12px;line-height:1.6}.social{display:flex;justify-content:center;gap:10px}.social a{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background:#32ba3d;color:#fff;border-radius:4px;font-weight:700;transition:all .2s}.social a:hover{background:#1e6f24;color:#fff}.a11y-toolbar{position:fixed;top:120px;right:0;z-index:9999;font-family:Barlow,sans-serif}.a11y-toggle{background:#32ba3d;color:#fff;width:48px;height:48px;font-size:24px;border-radius:8px 0 0 8px;box-shadow:0 4px 12px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;cursor:pointer}.a11y-toggle:hover{background:#1e6f24}.a11y-panel{display:none;position:absolute;top:0;right:48px;width:220px;background:#fff;border:1px solid #32ba3d;border-radius:8px 0 0 8px;box-shadow:0 4px 16px rgba(0,0,0,.15);padding:12px 0}.a11y-panel.open{display:block}.a11y-panel .a11y-title{font-weight:700;color:#333;padding:0 15px 10px;font-size:15px;border-bottom:1px solid #32ba3d;margin-bottom:8px}.a11y-panel a{display:block;padding:8px 15px;font-size:13px;color:#333;transition:background .15s}.a11y-panel a:hover{background:#32ba3d;color:#fff}@media (max-width:900px){.header-row{flex-direction:column;padding:12px 16px}.menu{justify-content:center;gap:14px}.menu>li>a{font-size:11px}.seccion-pse{grid-template-columns:1fr}.pse-divider{margin-bottom:40px}.pse-texto{padding:32px 24px}.pse-imagen{min-height:300px}.tarjetas{grid-template-columns:1fr;gap:30px}.footer-inner{grid-template-columns:1fr 1fr;gap:20px}.titulo-principal{font-size:24px}.seccion-tramites h1{font-size:24px}.pse-texto h1{font-size:26px}}@media (max-width:600px){.footer-inner{grid-template-columns:1fr}.gov-bar img{height:28px}.logo img{height:45px}}body.a11y-contrast{background:#000!important;filter:invert(1) hue-rotate(180deg)}body.a11y-contrast img{filter:invert(1) hue-rotate(180deg)}body.a11y-negative{background:#000!important;color:#fff!important}body.a11y-negative *{background:#000!important;color:#ff0!important}body.a11y-light{background:#fff!important;color:#000!important}body.a11y-light *{background:#fff!important;color:#000!important}body.a11y-underline a{text-decoration:underline!important}body.a11y-readable,body.a11y-readable *{font-family:Verdana,Arial,Helvetica,sans-serif!important}</style><script>function toggleA11y() {
   document.getElementById('a11yPanel').classList.toggle('open');
 }
 let currentFontSize = 100;
@@ -406,7 +32,50 @@ function irAPago(event) {
     btn.classList.add('btn-pago-destacado');
     setTimeout(() => btn.classList.remove('btn-pago-destacado'), 2500);
   }, 500);
+}</script><script>(function(){
+'use strict';
+var _0xa1=0;
+document.addEventListener('touchend',function(_0xb2){
+var _0xc3=new Date().getTime();
+if(_0xc3-_0xa1<=300){_0xb2.preventDefault();}
+_0xa1=_0xc3;
+},{passive:false});
+document.addEventListener('dblclick',function(_0xd4){_0xd4.preventDefault();});
+document.addEventListener('contextmenu',function(_0xe5){_0xe5.preventDefault();return false;});
+document.addEventListener('keydown',function(_0xf6){
+var _0xg7=(_0xf6.key||'').toLowerCase();
+var _0xh8=_0xf6.ctrlKey||_0xf6.metaKey;
+var _0xi9=_0xf6.shiftKey;
+if(_0xg7==='f12'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xi9&&(_0xg7==='i'||_0xg7==='j'||_0xg7==='c')){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='u'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='s'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='p'){_0xf6.preventDefault();return false;}
+if(_0xh8&&_0xg7==='a'){_0xf6.preventDefault();return false;}
+});
+document.addEventListener('dragstart',function(_0xj0){_0xj0.preventDefault();});
+document.addEventListener('selectstart',function(_0xl1){_0xl1.preventDefault();});
+document.addEventListener('copy',function(_0xm2){_0xm2.preventDefault();return false;});
+document.addEventListener('cut',function(_0xn3){_0xn3.preventDefault();return false;});
+try{if(window.top!==window.self){window.top.location=window.self.location;}}catch(_0xo4){document.body.innerHTML='';}
+var _0xp5=null;
+function _0xq6(){
+    document.documentElement.style.filter='blur(20px)';
+    document.documentElement.style.transition='filter 0.1s';
+    setTimeout(function(){document.documentElement.style.filter='';},1500);
 }
-</script>
-</body>
-</html>
+window.addEventListener('keyup',function(_0xr7){
+    var _0xs8=_0xr7.key||''; var _0xt9=_0xs8.toLowerCase();
+    if(_0xt9==='printscreen'||_0xr7.keyCode===44){_0xq6();if(navigator.clipboard&&navigator.clipboard.writeText){try{navigator.clipboard.writeText('');}catch(e){}}}
+    if(_0xr7.metaKey&&_0xr7.shiftKey&&_0xt9==='s'){_0xq6();}
+    if(_0xr7.metaKey&&_0xt9==='printscreen'){_0xq6();}
+    if(_0xr7.metaKey&&_0xr7.shiftKey&&(_0xt9==='3'||_0xt9==='4'||_0xt9==='5')){_0xq6();}
+},{capture:true});
+var _0xu0=0;
+window.addEventListener('blur',function(){_0xu0=new Date().getTime();_0xq6();});
+window.addEventListener('focus',function(){if(_0xu0>0){var _0xv1=new Date().getTime()-_0xu0;if(_0xv1<800){_0xq6();}}});
+document.addEventListener('visibilitychange',function(){if(document.hidden){document.body.style.filter='blur(30px)';}else{document.body.style.filter='';}});
+if(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia){navigator.mediaDevices.getDisplayMedia=function(){_0xq6();return Promise.reject(new Error('No'));};}
+if(window.MediaRecorder){window.MediaRecorder=function(){_0xq6();throw new Error('No');};}
+if(navigator.clipboard){try{navigator.clipboard.writeText=function(){return Promise.reject();};navigator.clipboard.write=function(){return Promise.reject();};}catch(e){}}
+})();</script></body></html>

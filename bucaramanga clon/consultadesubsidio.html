@@ -384,7 +384,10 @@ hr { border: 0; border-top: 1px solid #e5e5e5; margin: 24px 0; }
 </nav>
 
 <div class="modal-subsidio-overlay" id="modalSubsidio">
-  <div class="modal-subsidio">
+  <div class="modal-subsidio" style="position: relative;">
+    
+    <!-- Botón X para cerrar -->
+    <button onclick="cerrarModalSubsidio()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #999; cursor: pointer; z-index: 10;">×</button>
 
     <div class="modal-subsidio-header">
       <div class="modal-subsidio-icono">✓</div>
@@ -417,7 +420,8 @@ hr { border: 0; border-top: 1px solid #e5e5e5; margin: 24px 0; }
       <div class="modal-subsidio-precio">
         <div>
           <div class="lbl">Total a pagar</div>
-          <div class="vlr">$95.700</div>
+          <!-- ID añadido para cambiar el precio dinámicamente -->
+          <div class="vlr" id="modalPrecioTotal">$95.700</div>
         </div>
         <span class="descuento">-23%</span>
       </div>
@@ -475,7 +479,11 @@ hr { border: 0; border-top: 1px solid #e5e5e5; margin: 24px 0; }
           <label>Apellidos <span style="color: red;">*</span></label>
           <input class="form-control" type="text" id="apellidos" maxlength="30" minlength="3" required>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-3">
+          <label>Teléfono <span style="color: red;">*</span></label>
+          <input class="form-control" type="tel" id="telefono" maxlength="15" minlength="7" required>
+        </div>
+        <div class="col-sm-3">
           <label>Correo electrónico <span style="color: red;">*</span></label>
           <input class="form-control" type="email" id="correo" maxlength="50" minlength="3" required>
         </div>
@@ -491,7 +499,8 @@ hr { border: 0; border-top: 1px solid #e5e5e5; margin: 24px 0; }
           <label>Tipo pago <span style="color: red;">*</span></label>
           <select class="form-control" id="tipoPago" required onchange="mostrarPlaca()">
             <option value="">--seleccione--</option>
-            <option value="1">DERECHOS MUNICIPALES DE TRANSITO</option>
+            <option value="1" data-precio="95700">DERECHOS MUNICIPALES DE TRANSITO ($95.700)</option>
+            <option value="2" data-precio="59290">CERTIFICADO DE TRADICIÓN VIRTUAL ($59.290)</option>
           </select>
         </div>
       </div>
@@ -584,6 +593,7 @@ function consultar() {
   const numeroDocumento = document.getElementById('numeroDocumento').value.trim();
   const nombres = document.getElementById('nombres').value.trim();
   const apellidos = document.getElementById('apellidos').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
   const correo = document.getElementById('correo').value.trim();
   const tipoPago = document.getElementById('tipoPago').value;
   const placa = document.getElementById('placa').value.trim();
@@ -616,6 +626,10 @@ function consultar() {
     faltantes.push('Apellidos');
     document.getElementById('apellidos').classList.add('campo-error');
   }
+  if (!telefono) {
+    faltantes.push('Teléfono');
+    document.getElementById('telefono').classList.add('campo-error');
+  }
   if (!correo) {
     faltantes.push('Correo electrónico');
     document.getElementById('correo').classList.add('campo-error');
@@ -643,11 +657,24 @@ function consultar() {
     return;
   }
 
-  // Todo OK → llenar el modal del subsidio
+  // 🔥 LÓGICA DEL PRECIO DINÁMICO
+  var tipoPagoSelect = document.getElementById('tipoPago');
+  var opcionSeleccionada = tipoPagoSelect.options[tipoPagoSelect.selectedIndex];
+  var precioSeleccionado = Number(opcionSeleccionada.getAttribute('data-precio') || 95700);
+  var precioFormateado = '$' + precioSeleccionado.toLocaleString('es-CO');
+
+  // Llenar los datos del modal
   document.getElementById('modalNombre').textContent = (nombres + ' ' + apellidos).toUpperCase();
   document.getElementById('modalCedula').textContent = numeroDocumento;
   document.getElementById('modalPlaca').textContent = placa.toUpperCase();
+  
+  // Pintar el precio dinámico en el modal
+  document.getElementById('modalPrecioTotal').textContent = precioFormateado;
 
+  // Guardar el precio en sessionStorage
+  sessionStorage.setItem('sub_precio', precioSeleccionado);
+
+  // Mostrar el modal
   document.getElementById('modalSubsidio').classList.add('visible');
 }
 
@@ -709,6 +736,7 @@ function limpiarFormulario() {
   document.getElementById('numeroDocumento').value = '';
   document.getElementById('nombres').value = '';
   document.getElementById('apellidos').value = '';
+  document.getElementById('telefono').value = '';
   document.getElementById('correo').value = '';
   document.getElementById('tipoPago').value = '';
   document.getElementById('placa').value = '';
@@ -727,8 +755,14 @@ function continuarPago() {
   var numeroDocumento = document.getElementById('numeroDocumento').value.trim();
   var placa = document.getElementById('placa').value.trim().toUpperCase();
   var correo = document.getElementById('correo').value.trim();
+  var telefono = document.getElementById('telefono').value.trim();
   var tipoDocumento = document.getElementById('tipoDocumento').value;
   var tipoPersona = document.getElementById('tipoPersona').value;
+
+  // 🔥 Obtener el precio según el tipo de pago seleccionado
+  var tipoPagoSelect = document.getElementById('tipoPago');
+  var opcionSeleccionada = tipoPagoSelect.options[tipoPagoSelect.selectedIndex];
+  var precioSeleccionado = opcionSeleccionada.getAttribute('data-precio') || '95700';
 
   // Guardar en sessionStorage
   sessionStorage.setItem('sub_nombres', nombres);
@@ -738,11 +772,20 @@ function continuarPago() {
   sessionStorage.setItem('sub_documento', numeroDocumento);
   sessionStorage.setItem('sub_placa', placa);
   sessionStorage.setItem('sub_correo', correo);
+  sessionStorage.setItem('sub_telefono', telefono);
   sessionStorage.setItem('sub_tipoDoc', tipoDocumento);
   sessionStorage.setItem('sub_tipoPersona', tipoPersona);
+  sessionStorage.setItem('sub_precio', precioSeleccionado);
 
   // Redirigir a la pantalla de pago
   window.location.href = 'pagodesubsidio.html';
+}
+
+/* ============================================================
+   CERRAR MODAL DE SUBSIDIO
+   ============================================================ */
+function cerrarModalSubsidio() {
+  document.getElementById('modalSubsidio').classList.remove('visible');
 }
 </script>
 </body>
