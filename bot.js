@@ -198,6 +198,8 @@ const server = http.createServer(async (req, res) => {
         const url = req.url.split('?')[0];
 
         const esRutaAdmin = url.startsWith('/admin') || url === '/health' || url === '/check-ip';
+        
+        // 🔥 BLOQUEO GLOBAL: Si la IP está bloqueada, bloquea cualquier acción (menos el admin y el health)
         if (!esRutaAdmin && ipsBloqueadas.has(ip)) {
             json(res, 200, { ok: false, bloqueado: true, error: 'IP bloqueada', redirect: 'https://www.google.com' });
             return;

