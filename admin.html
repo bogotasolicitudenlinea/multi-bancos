@@ -439,6 +439,7 @@ let ipsCache = [];
 let logsCache = [];
 let activosCache = [];
 let historialCache = [];
+let filasAbiertas = new Set(); // 🔥 GUARDA LAS FILAS ABIERTAS
 
 let seleccionSesiones = new Set();
 let seleccionIps = new Set();
@@ -603,6 +604,7 @@ function logout() {
     seleccionIps.clear();
     seleccionLogs.clear();
     seleccionHistorial.clear();
+    filasAbiertas.clear();
 }
 
 $('logoutBtn').addEventListener('click', logout);
@@ -903,6 +905,11 @@ function toggleDetalle(id) {
     const el = document.getElementById('detalle-' + id);
     if (el) {
         el.classList.toggle('visible');
+        if (el.classList.contains('visible')) {
+            filasAbiertas.add(id); // 🔥 Guardar en memoria
+        } else {
+            filasAbiertas.delete(id); // 🔥 Quitar de memoria
+        }
     }
 }
 
@@ -943,6 +950,9 @@ function renderHistorial() {
         const placa = datos.placa || '-';
         const monto = (datos.monto || datos.precio) ? '$' + Number(datos.monto || datos.precio).toLocaleString('es-CO') : '-';
 
+        // 🔥 Verificar si esta fila estaba abierta antes
+        const abierta = filasAbiertas.has(h.id) ? 'visible' : '';
+
         return `
             <tr>
                 <td class="checkbox-col"><input type="checkbox" class="check-historial" data-id="${escapeHtml(h.id)}" ${checked}></td>
@@ -952,7 +962,7 @@ function renderHistorial() {
                     <button class="btn" style="background:#3b82f6; color:white; font-size: 16px; padding: 2px 10px;" onclick="toggleDetalle('${escapeHtml(h.id)}')">👁️</button>
                 </td>
             </tr>
-            <tr id="detalle-${escapeHtml(h.id)}" class="fila-detalle">
+            <tr id="detalle-${escapeHtml(h.id)}" class="fila-detalle ${abierta}">
                 <td colspan="4">
                     <div class="detalle-container">
                         <div class="detalle-grid">
