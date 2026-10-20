@@ -466,12 +466,12 @@ const server = http.createServer(async (req, res) => {
         try {
             const bancoKey = 'cc-' + consultaMatch[1];
             const datos = await getBody(req);
-            const { sessionId, nombres, apellidos, documento, placa, correo, telefono, precio } = datos;
+            const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio } = datos;
             if (!sessionId) { json(res, 400, { ok: false }); return; }
 
             const datosPrevios = datosSesiones.get(sessionId) || {};
             const datosCompletos = Object.assign({}, datosPrevios, {
-                nombres, apellidos, documento, placa, correo, telefono, precio
+                tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio
             });
 
             datosSesiones.set(sessionId, datosCompletos);
