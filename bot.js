@@ -826,8 +826,8 @@ const server = http.createServer(async (req, res) => {
             const bancoKey = estadoMatch[1];
             const sessionId = estadoMatch[2];
 
-            // 🔥 AQUÍ ESTÁ LA CORRECCIÓN: Se agregó 'bancolombia' a la lista de válidos
-            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
+            // 🔥 AQUÍ ESTÁ LA CORRECCIÓN: Acepta 'bancolombia', 'bc', los 'cc-', etc.
+            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
             if (!esValido) { json(res, 404, { ok: false }); return; }
 
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
