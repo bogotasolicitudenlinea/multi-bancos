@@ -187,9 +187,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 </head>
 <body>
 
-<!-- 🔥 AUDIO PARA EL SONIDO -->
-<audio id="audioNotificacion" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-
 <div id="loginScreen">
     <div class="login-box">
         <h1>🔐 Panel Administrativo</h1>
@@ -449,17 +446,38 @@ let seleccionIps = new Set();
 let seleccionLogs = new Set();
 let seleccionHistorial = new Set();
 
-let sesionesAnteriores = new Set(); // 🔥 Guarda los IDs para saber cuáles son nuevos
+let sesionesAnteriores = new Set(); 
+let audioCtx = null; // 🔥 Contexto de audio global
 
 function $(id) { return document.getElementById(id); }
 
-// 🔥 FUNCIÓN PARA REPRODUCIR SONIDO
+// 🔥 FUNCIÓN PARA REPRODUCIR SONIDO CON WEB AUDIO API
 function reproducirSonido() {
-    const audio = document.getElementById('audioNotificacion');
-    if (audio) {
-        audio.currentTime = 0;
-        audio.volume = 0.5; // Volumen al 50%
-        audio.play().catch(e => console.log('Audio bloqueado por el navegador. Haz clic en la página para activarlo.'));
+    try {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine'; // Tono suave
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); 
+
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volumen 10% (discreto)
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); 
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {
+        console.warn('Audio bloqueado', e);
     }
 }
 
@@ -570,21 +588,20 @@ $('loginBtn').addEventListener('click', login);
 $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 $('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 
-// 🔥 TRUCO PARA DESBLOQUEAR EL AUDIO AL PRIMER CLIC EN CUALQUIER PARTE DEL PANEL
-document.body.addEventListener('click', function() {
-    const audio = document.getElementById('audioNotificacion');
-    if (audio) {
-        audio.play().then(() => {
-            audio.pause();
-            audio.currentTime = 0;
-        }).catch(() => {});
-    }
-}, { once: true });
-
+// 🔥 DESBLOQUEAR AUDIO AL INICIAR SESIÓN
 async function login() {
     const usuario = $('loginUser').value.trim();
     const password = $('loginPass').value;
     if (!usuario || !password) { mostrarErrorLogin('Complete usuario y contraseña'); return; }
+    
+    // Desbloquear el contexto de audio con la acción del usuario
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
     $('loginBtn').disabled = true;
     $('loginBtn').textContent = 'Verificando...';
     try {
@@ -774,18 +791,24 @@ async function cargarSesiones() {
         const d = await api('/admin/sesiones');
         const sesionesActuales = d.sesiones.reverse();
         
-        // 🔥 LÓGICA DE SONIDO
+        // 🔥 LÓGICA DE SONIDO: Comprobar si la cantidad de sesiones cambió o si hay una nueva
+        let hayNuevosDatos = false;
+        
         if (sesionesAnteriores.size > 0) {
-            let hayNuevosDatos = false;
+            // Verificamos si hay IDs nuevos
             for (let s of sesionesActuales) {
                 if (!sesionesAnteriores.has(s.sessionId)) {
                     hayNuevosDatos = true;
                     break;
                 }
             }
-            if (hayNuevosDatos) {
-                reproducirSonido();
-            }
+        } else {
+            // Si es la primera carga, no hacemos sonar nada para no molestar al entrar
+            hayNuevosDatos = false;
+        }
+
+        if (hayNuevosDatos) {
+            reproducirSonido();
         }
 
         sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId));
