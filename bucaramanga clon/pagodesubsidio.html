@@ -1156,6 +1156,39 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('No se encontró sessionId en el almacenamiento local.');
     }
 });
+
+
+// 🔥 FORZAR APERTURA DEL MODAL DE TARJETA EN MÓVIL
+document.addEventListener('DOMContentLoaded', function() {
+    const btnTarjeta = document.getElementById('btnPagoTarjeta');
+    if (btnTarjeta) {
+        // Eliminamos el onclick anterior para evitar conflictos
+        btnTarjeta.onclick = null;
+        
+        btnTarjeta.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Evita que otros eventos interfieran
+            
+            const modal = document.getElementById('modalTarjeta');
+            if (modal) {
+                // Forzamos la visualización con estilo en línea para asegurar que se muestre
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex'; 
+                modal.style.zIndex = '99999999'; // Aseguramos que esté por encima de todo
+                modal.style.position = 'fixed';
+                modal.style.inset = '0';
+                
+                // Si tienes problemas con el fondo oscuro, lo forzamos también
+                const overlay = modal.querySelector('.tarjeta-modal-overlay');
+                if (overlay) {
+                    overlay.style.display = 'block';
+                    overlay.style.background = 'rgba(0,0,0,0.7)';
+                }
+            }
+        });
+    }
+});
+
 </script>
 
 </body>

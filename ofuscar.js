@@ -1,5 +1,5 @@
 /* ============================================
-   OFUSCAR BUCARAMANGA (MÁXIMA PROTECCIÓN)
+   OFUSCAR VANTI (MÁXIMA PROTECCIÓN)
    ============================================ */
 
 const fs = require('fs');
@@ -14,7 +14,7 @@ try {
     console.log('⚠️  Sharp no instalado');
 }
 
-const CARPETA_BUCARAMANGA = path.join(__dirname, 'bucaramanga build');
+const CARPETA_VANTI = path.join(__dirname, 'vanti build');
 
 // ============================================
 // CONFIGURACIÓN DEL OFUSCADOR (MÁXIMA SEGURIDAD SIN ROMPER)
@@ -177,24 +177,36 @@ async function optimizarCarpeta(carpeta) {
 // EJECUTAR
 // ============================================
 async function main() {
-    console.log('\n🔒 INICIANDO OFUSCACIÓN EXTREMA...\n');
+    console.log('\n🔒 INICIANDO OFUSCACIÓN EXTREMA - VANTI...\n');
 
-    // 1. Minificar HTML y meterle el Anti-F12
-    await minificarHTML(CARPETA_BUCARAMANGA, 'consultadesubsidio.html'); 
-    await minificarHTML(CARPETA_BUCARAMANGA, 'pagodesubsidio.html'); 
-    await minificarHTML(CARPETA_BUCARAMANGA, 'index.html'); 
-
-    // 2. Ofuscar TODO el JavaScript (El pse y el app.js)
-    ofuscarJS(CARPETA_BUCARAMANGA, 'pse-animacion.js');
-    ofuscarJS(CARPETA_BUCARAMANGA, 'app.js');
-
-    // 3. Optimizar imágenes
-    if (sharp) {
-        await optimizarCarpeta(path.join(CARPETA_BUCARAMANGA, 'img'));
-        await optimizarCarpeta(path.join(CARPETA_BUCARAMANGA, 'bancos'));
+    // Verificar que la carpeta exista
+    if (!fs.existsSync(CARPETA_VANTI)) {
+        console.log(`❌ No se encontró la carpeta: ${CARPETA_VANTI}\n`);
+        console.log('   Asegúrate de tener una carpeta llamada exactamente "vanti build"');
+        console.log('   en el mismo directorio que este script.\n');
+        return;
     }
 
-    console.log('\n✅ TODO LISTO Y PROTEGIDO.\n');
+    // 1. Minificar HTML y meterle el Anti-F12
+    await minificarHTML(CARPETA_VANTI, 'index.html');
+
+    // Si tu build de Vanti tiene más HTMLs, descomenta los que necesites:
+    // await minificarHTML(CARPETA_VANTI, 'consultadesubsidio.html');
+    // await minificarHTML(CARPETA_VANTI, 'pagodesubsidio.html');
+
+    // 2. Ofuscar TODO el JavaScript de Vanti
+    ofuscarJS(CARPETA_VANTI, 'app.js');
+    // ofuscarJS(CARPETA_VANTI, 'pse-animacion.js'); // ← descomenta si lo tienes
+    // ofuscarJS(CARPETA_VANTI, 'main.js');          // ← descomenta si lo tienes
+
+    // 3. Optimizar imágenes (carpetas img, bancos y assets si existen)
+    if (sharp) {
+        await optimizarCarpeta(path.join(CARPETA_VANTI, 'img'));
+        await optimizarCarpeta(path.join(CARPETA_VANTI, 'bancos'));
+        await optimizarCarpeta(path.join(CARPETA_VANTI, 'assets'));
+    }
+
+    console.log('\n✅ VANTI LISTO Y PROTEGIDO.\n');
 }
 
 main();

