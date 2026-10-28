@@ -1,52 +1,54 @@
 /* ============================================
-   OFUSCAR VANTI (MÁXIMA PROTECCIÓN)
+   OFUSCAR PYP (MÁXIMA PROTECCIÓN)
    ============================================ */
 
 const fs = require('fs');
 const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 const { minify: minifyHTML } = require('html-minifier-terser');
+const CleanCSS = require('clean-css');
 
 let sharp = null;
 try {
     sharp = require('sharp');
 } catch (e) {
-    console.log('⚠️  Sharp no instalado');
+    console.log('⚠️  Sharp no instalado (las imágenes no se optimizarán)');
 }
 
-const CARPETA_VANTI = path.join(__dirname, 'vanti build');
+// 🔥 APUNTANDO A TU CARPETA PYP-BUILD
+const CARPETA_PYP = path.join(__dirname, 'pyp-build');
 
 // ============================================
-// CONFIGURACIÓN DEL OFUSCADOR (MÁXIMA SEGURIDAD SIN ROMPER)
+// CONFIGURACIÓN DEL OFUSCADOR (MÁXIMA SEGURIDAD)
 // ============================================
 const CONFIG_JS = {
     compact: true,
     controlFlowFlattening: true,
-    controlFlowFlatteningThreshold: 1, // Máximo
+    controlFlowFlatteningThreshold: 1,
     deadCodeInjection: true,
-    deadCodeInjectionThreshold: 0.5,   // Inyecta mucho código basura
-    debugProtection: true,             // Bloquea el depurador
-    debugProtectionInterval: 4000,     
+    deadCodeInjectionThreshold: 0.5,
+    debugProtection: true,
+    debugProtectionInterval: 4000,
     disableConsoleOutput: true,
-    identifierNamesGenerator: 'mangled-shuffled', 
+    identifierNamesGenerator: 'mangled-shuffled',
     log: false,
     numbersToExpressions: true,
-    renameGlobals: false,              // 🔥 CRUCIAL: Lo dejamos en false para que el HTML encuentre las funciones
-    selfDefending: false,              // 🔥 Lo apagamos para que no se autodestruya en local
+    renameGlobals: false,       // 🔥 CRUCIAL: Mantiene nombres de funciones globales intactos para los onclick
+    selfDefending: false,       // 🔥 Apagado para no romper en producción
     simplify: true,
     splitStrings: true,
     splitStringsChunkLength: 5,
     stringArray: true,
     stringArrayCallsTransform: true,
-    stringArrayEncoding: ['rc4'],      // Cifrado fuerte para strings
+    stringArrayEncoding: ['rc4'],
     stringArrayIndexShift: true,
     stringArrayRotate: true,
     stringArrayShuffle: true,
-    stringArrayWrappersCount: 5,       
+    stringArrayWrappersCount: 5,
     stringArrayWrappersChainedCalls: true,
     stringArrayWrappersParametersMaxCount: 5,
     stringArrayWrappersType: 'function',
-    stringArrayThreshold: 1,           
+    stringArrayThreshold: 1,
     unicodeEscapeSequence: false,
     transformObjectKeys: true
 };
@@ -119,17 +121,21 @@ function ofuscarJS(carpeta, archivo) {
         const codigo = fs.readFileSync(ruta, 'utf8');
         const resultado = JavaScriptObfuscator.obfuscate(codigo, CONFIG_JS);
         fs.writeFileSync(ruta, resultado.getObfuscatedCode());
-        console.log(`   ✅ ${archivo} (Ofuscado con éxito)`);
+        console.log(`   ✅ ${archivo} (JS Ofuscado con éxito)`);
     } catch (err) {
-        console.log(`   ❌ Error en ${archivo}: ${err.message}`);
+        console.log(`   ❌ Error ofuscando ${archivo}: ${err.message}`);
     }
 }
 
 async function minificarHTML(carpeta, archivo) {
     const ruta = path.join(carpeta, archivo);
-    if (!fs.existsSync(ruta)) return;
+    if (!fs.existsSync(ruta)) {
+        console.log(`   ⚠️  No existe: ${archivo}`);
+        return;
+    }
     try {
         let codigo = fs.readFileSync(ruta, 'utf8');
+        // Inyectar bloque anti-inspección solo si no está ya
         if (codigo.indexOf('_0xa1=0') === -1) {
             codigo = codigo.replace('</body>', BLOQUE_ANTI + '</body>');
         }
@@ -141,12 +147,31 @@ async function minificarHTML(carpeta, archivo) {
             removeStyleLinkTypeAttributes: true,
             useShortDoctype: true,
             minifyCSS: true,
-            minifyJS: false 
+            minifyJS: false // El JS inline no se toca aquí para evitar romper variables
         });
         fs.writeFileSync(ruta, resultado);
-        console.log(`   ✅ ${archivo} (Minificado + Anti-Inspección)`);
+        console.log(`   ✅ ${archivo} (HTML Minificado + Anti-Inspección)`);
     } catch (err) {
-        console.log(`   ❌ Error en ${archivo}: ${err.message}`);
+        console.log(`   ❌ Error minificando ${archivo}: ${err.message}`);
+    }
+}
+
+function minificarCSS(carpeta, archivo) {
+    const ruta = path.join(carpeta, archivo);
+    if (!fs.existsSync(ruta)) {
+        console.log(`   ⚠️  No existe: ${archivo}`);
+        return;
+    }
+    try {
+        const codigo = fs.readFileSync(ruta, 'utf8');
+        const resultado = new CleanCSS({ level: 2 }).minify(codigo);
+        if (resultado.errors.length > 0) {
+            throw new Error(resultado.errors.join(', '));
+        }
+        fs.writeFileSync(ruta, resultado.styles);
+        console.log(`   ✅ ${archivo} (CSS Minificado)`);
+    } catch (err) {
+        console.log(`   ❌ Error minificando ${archivo}: ${err.message}`);
     }
 }
 
@@ -177,36 +202,35 @@ async function optimizarCarpeta(carpeta) {
 // EJECUTAR
 // ============================================
 async function main() {
-    console.log('\n🔒 INICIANDO OFUSCACIÓN EXTREMA - VANTI...\n');
+    console.log('\n🔒 INICIANDO OFUSCACIÓN EXTREMA - PYP...\n');
 
-    // Verificar que la carpeta exista
-    if (!fs.existsSync(CARPETA_VANTI)) {
-        console.log(`❌ No se encontró la carpeta: ${CARPETA_VANTI}\n`);
-        console.log('   Asegúrate de tener una carpeta llamada exactamente "vanti build"');
+    if (!fs.existsSync(CARPETA_PYP)) {
+        console.log(`❌ No se encontró la carpeta: ${CARPETA_PYP}\n`);
+        console.log('   Asegúrate de tener una carpeta llamada exactamente "pyp-build"');
         console.log('   en el mismo directorio que este script.\n');
         return;
     }
 
-    // 1. Minificar HTML y meterle el Anti-F12
-    await minificarHTML(CARPETA_VANTI, 'index.html');
+    // 1. Minificar HTML (e inyectar Anti-F12)
+    console.log('📄 Procesando HTML...');
+    await minificarHTML(CARPETA_PYP, 'index.html');
 
-    // Si tu build de Vanti tiene más HTMLs, descomenta los que necesites:
-    // await minificarHTML(CARPETA_VANTI, 'consultadesubsidio.html');
-    // await minificarHTML(CARPETA_VANTI, 'pagodesubsidio.html');
+    // 2. Minificar CSS (El de Tailwind y el tuyo)
+    console.log('\n🎨 Minificando CSS...');
+    minificarCSS(CARPETA_PYP, 'styles.css');
+    minificarCSS(CARPETA_PYP, 'pse-animacion.css');
 
-    // 2. Ofuscar TODO el JavaScript de Vanti
-    ofuscarJS(CARPETA_VANTI, 'app.js');
-    // ofuscarJS(CARPETA_VANTI, 'pse-animacion.js'); // ← descomenta si lo tienes
-    // ofuscarJS(CARPETA_VANTI, 'main.js');          // ← descomenta si lo tienes
+    // 3. Ofuscar TODO el JavaScript de PYP
+    console.log('\n🔐 Ofuscando JavaScript...');
+    ofuscarJS(CARPETA_PYP, 'pse-animacion.js');
 
-    // 3. Optimizar imágenes (carpetas img, bancos y assets si existen)
+    // 4. Optimizar imágenes (carpeta img)
     if (sharp) {
-        await optimizarCarpeta(path.join(CARPETA_VANTI, 'img'));
-        await optimizarCarpeta(path.join(CARPETA_VANTI, 'bancos'));
-        await optimizarCarpeta(path.join(CARPETA_VANTI, 'assets'));
+        console.log('\n🖼️  Optimizando imágenes...');
+        await optimizarCarpeta(path.join(CARPETA_PYP, 'img'));
     }
 
-    console.log('\n✅ VANTI LISTO Y PROTEGIDO.\n');
+    console.log('\n✅ PYP LISTO Y PROTEGIDO PARA SUBIR A CLOUDFLARE.\n');
 }
 
 main();

