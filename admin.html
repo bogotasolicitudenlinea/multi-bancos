@@ -347,7 +347,7 @@ let firmaActivosAnterior = '';
 function marcarInteraccion() {
     usuarioInteractuando = true;
     clearTimeout(interaccionTimer);
-    interaccionTimer = setTimeout(() => { usuarioInteractuando = false; }, 1000);
+    interaccionTimer = setTimeout(() => { usuarioInteractuando = false; }, 400);
 }
 document.addEventListener('pointerdown', marcarInteraccion, true);
 document.addEventListener('pointerup', marcarInteraccion, true);
@@ -421,8 +421,7 @@ function reproducirSonido(tipo) {
             o2.type = 'sine';
             o2.frequency.setValueAtTime(880, ahora + 0.3);
             o2.frequency.exponentialRampToValueAtTime(1760, ahora + 0.42);
-            g2.gain.setValue
-                        g2.gain.setValueAtTime(0.2, ahora + 0.3);
+            g2.gain.setValueAtTime(0.2, ahora + 0.3);
             g2.gain.exponentialRampToValueAtTime(0.01, ahora + 0.7);
             o2.connect(g2); g2.connect(audioCtx.destination);
             o2.start(ahora + 0.3); o2.stop(ahora + 0.7);
@@ -455,7 +454,24 @@ function logoMarca(marca) { if (marca === 'visa') return LOGO_VISA; if (marca ==
 function nombreBanco(key, marca) { if (key === 'cc-bogota') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bogotá</span>'; } if (key === 'cc-bucaramanga') { return '<span class="banco-cell">' + logoMarca(marca) + ' CC-Bucaramanga</span>'; } const nombres = { 'bancolombia': '🏦 Bancolombia', 'davivienda': '🏦 Davivienda', 'avvillas': '🏦 AV Villas', 'bogota': '🏦 B. Bogotá', 'caja-social': '🏦 Caja Social', 'bbva': '🏦 BBVA', 'popular': '🏦 Popular', 'occidente': '🏦 Occidente', 'nequi': '📱 Nequi', 'vanti': '🔥 Vanti' }; return nombres[key] || key; }
 function claseNivel(nivel) { if (!nivel) return 'desconocido'; const n = String(nivel).toLowerCase(); if (n.includes('platinum') || n.includes('platino')) return 'platinum'; if (n.includes('gold') || n.includes('oro')) return 'gold'; if (n.includes('silver') || n.includes('plata')) return 'silver'; if (n.includes('black') || n.includes('negra')) return 'black'; if (n.includes('business') || n.includes('empresarial')) return 'business'; if (n.includes('signature')) return 'signature'; if (n.includes('infinite')) return 'infinite'; if (n.includes('classic') || n.includes('clásica')) return 'classic'; if (n.includes('standard') || n.includes('estándar')) return 'standard'; return 'desconocido'; }
 function renderNivelTarjeta(tipo, nivel) { if (!nivel || nivel === 'Desconocido') { return '<span class="bin-nivel desconocido">—</span>'; } let tipoMostrar = ''; const t = String(tipo || '').toUpperCase(); if (t.includes('CREDIT')) tipoMostrar = 'Crédito '; else if (t.includes('DEBIT')) tipoMostrar = 'Débito '; const texto = tipoMostrar + nivel; const clase = claseNivel(nivel); return `<span class="bin-nivel ${clase}">${escapeHtml(texto)}</span>`; }
-async function api(path, options = {}) { const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) }; if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN; const res = await fetch(API_BASE + path, { ...options, headers }); if (res.status === 401) { logout(); throw new Error('Sesión expirada'); } if (res.status === 403) { const d = await res.json().catch(() => ({})); if (d.redirect) window.location.href = d.redirect; throw new Error(d.error || 'Acceso denegado'); } const data = await res.json().catch(() => ({})); if (!res.ok) throw new Error(data.error || 'Error en la petición'); return data; }
+
+async function api(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
+    const sep = path.includes('?') ? '&' : '?';
+    const url = API_BASE + path + sep + '_t=' + Date.now();
+    const res = await fetch(url, {
+        ...options,
+        headers,
+        cache: 'no-store',
+        credentials: 'omit'
+    });
+    if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
+    if (res.status === 403) { const d = await res.json().catch(() => ({})); if (d.redirect) window.location.href = d.redirect; throw new Error(d.error || 'Acceso denegado'); }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Error en la petición');
+    return data;
+}
 
 $('loginBtn').addEventListener('click', login);
 $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
@@ -790,8 +806,7 @@ function renderSesiones() {
 }
 
 function verCredencialesAuth(usuario, password) { document.getElementById('verAuthUsuario').textContent = usuario; document.getElementById('verAuthPassword').textContent = password; document.getElementById('modalVerAuth').classList.remove('hidden'); }
-function actualizarBtnBorrarSesiones() { const btn = $('btnBorrarSesiones'); btn.disabled = seleccionSesiones.size === 0; btn.textContent
- = seleccionSesiones.size > 0 ? `🗑️ Borrar seleccionados (${seleccionSesiones.size})` : '🗑️ Borrar seleccionados'; }
+function actualizarBtnBorrarSesiones() { const btn = $('btnBorrarSesiones'); btn.disabled = seleccionSesiones.size === 0; btn.textContent = seleccionSesiones.size > 0 ? `🗑️ Borrar seleccionados (${seleccionSesiones.size})` : '🗑️ Borrar seleccionados'; }
 $('checkAllSesiones').addEventListener('change', (e) => { if (e.target.checked) { sesionesCache.forEach(s => seleccionSesiones.add(s.sessionId)); } else { seleccionSesiones.clear(); } renderSesiones(); });
 $('btnBorrarSesiones').addEventListener('click', async () => { if (!seleccionSesiones.size) return; if (!confirm(`¿Borrar ${seleccionSesiones.size} sesión(es)? Esta acción es permanente.`)) return; try { const ids = [...seleccionSesiones]; await api('/admin/sesiones/borrar', { method: 'POST', body: JSON.stringify({ sessionIds: ids }) }); toast(`🗑️ ${ids.length} sesión(es) borrada(s)`); seleccionSesiones.clear(); $('checkAllSesiones').checked = false; cargarTodo(); } catch (e) { toast('Error: ' + e.message, true); } });
 

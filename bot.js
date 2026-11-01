@@ -199,8 +199,14 @@ function getBody(req, maxSize = 100 * 1024) {
     });
 }
 
+/* 🔥 FIX: headers anti-cache para que el panel admin se actualice en vivo */
 function json(res, code, obj) {
-    res.writeHead(code, { 'Content-Type': 'application/json' });
+    res.writeHead(code, {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
     res.end(JSON.stringify(obj));
 }
 
