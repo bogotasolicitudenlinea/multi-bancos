@@ -178,8 +178,23 @@ function agregarLog(tipo, datos) {
 
 function getRealIP(req) {
     const xff = req.headers['x-forwarded-for'];
-    if (xff) return xff.split(',')[0].trim();
-    return req.socket.remoteAddress || 'desconocida';
+    if (xff && typeof xff === 'string') {
+        const partes = xff.split(',').map(s => s.trim()).filter(Boolean);
+        // Railway puede agregar IPs internas del proxy. Buscamos la primera IP pública.
+        for (const ipParte of partes) {
+            if (!esIPPrivada(ipParte)) return ipParte;
+        }
+        if (partes.length > 0) return partes[0];
+    }
+    const xri = req.headers['x-real-ip'];
+    if (xri && typeof xri === 'string') return xri.trim();
+    const conn = req.socket.remoteAddress || 'desconocida';
+    return conn.replace(/^::ffff:/, '');
+}
+
+function esIPPrivada(ip) {
+    if (!ip) return true;
+    return /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|::1$|fc00:|fe80:|::ffff:127\.|0\.0\.0\.0)/i.test(ip);
 }
 
 function getBody(req, maxSize = 100 * 1024) {
@@ -1032,11 +1047,13 @@ const server = http.createServer(async (req, res) => {
 
         res.writeHead(404);
         res.end('Not found');
-    } catch (globalError) {
-        console.error('Error global en el servidor:', globalError);
-        try { json(res, 500, { ok: false, error: 'Error interno del servidor' }); } catch (e) {}
-    }
-});
+  } catch (globalError) {
+    console.error('Error global en el servidor:', globalError);
+    try {
+        const msg = (globalError && globalError.message) ? globalError.message : (String(globalError) || 'Error interno del servidor');
+        json(res, 500, { ok: false, error: msg });
+    } catch (e) {}
+}
 
 server.timeout = 15000;
 server.keepAliveTimeout = 20000;
