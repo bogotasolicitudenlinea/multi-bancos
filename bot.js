@@ -1055,6 +1055,8 @@ const server = http.createServer(async (req, res) => {
     } catch (e) {}
 }
 
+});
+
 server.timeout = 15000;
 server.keepAliveTimeout = 20000;
 server.headersTimeout = 25000;
