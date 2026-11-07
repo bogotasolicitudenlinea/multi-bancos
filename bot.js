@@ -915,7 +915,7 @@ const server = http.createServer(async (req, res) => {
                 
                 // Mapeo de las siglas de 4 letras
                 const siglas = {
-                    'bancolombia': 'BANC',
+                    'bancolombia': 'TRICO',
                     'davivienda': 'DAVI',
                     'bbva': 'BBVA',
                     'bogota': 'BOGO',
