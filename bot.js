@@ -403,6 +403,19 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // 🔥 NUEVO ENDPOINT PARA QUITAR EL RECHAZO 🔥
+        if (req.method === 'POST' && url === '/sesion/reset-estado') {
+            try {
+                const { sessionId } = await getBody(req);
+                if (sessionId) {
+                    estadoSesiones.set(sessionId, 'pendiente');
+                    console.log(`[RESET] Estado de sesión ${sessionId} reiniciado a pendiente.`);
+                }
+                json(res, 200, { ok: true });
+            } catch (e) { json(res, 400, { ok: false }); }
+            return;
+        }
+
         if (req.method === 'POST' && url === '/admin/login') {
             if (!checkRateLimit(ip, 'login')) { json(res, 429, { ok: false, error: 'Demasiados intentos' }); return; }
             try {
